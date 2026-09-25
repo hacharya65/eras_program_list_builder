@@ -4,12 +4,12 @@
 
 **Blocked by:** 01: Greenfield App Scaffold, Multi-Tenant Domain Core, & Dev Persona Switcher
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Support for all 5 official AAMC Scholarly Work types: Journal Articles (peer-reviewed), Book Chapters, Journal Abstracts, Oral Presentations, and Poster Presentations.
-- [ ] Strict author formatting assistant following AAMC `Lastname FirstInitial MiddleInitial` format (e.g. `Smith CB`), first-author flag, and bolding indicator for applicant's name.
-- [ ] Publication status workflows: `Submitted` (with date), `Accepted/In-Press` (with pre-print URL), and `Published` (with volume, issue, pages, PMID).
-- [ ] Multiple event recorder for Oral and Poster Presentations (event name, date, location, URL).
-- [ ] Star indicator allowing students to mark up to 3 entries as their "Most Meaningful Scholarly Works".
-- [ ] Scholarly Collections manager allowing students to group entries by thematic topic with a 100-character title limit.
-- [ ] Automated tests asserting author formatting validation, 3-star limit enforcement, and collection title length limits.
+- [x] Support for all 5 official AAMC Scholarly Work types: Journal Articles (peer-reviewed), Book Chapters, Journal Abstracts, Oral Presentations, and Poster Presentations.
+- [x] Strict author formatting assistant following AAMC `Lastname FirstInitial MiddleInitial` format (e.g. `Smith CB`), first-author flag, and bolding indicator for applicant's name.
+- [x] Publication status workflows: `Submitted` (with date), `Accepted/In-Press` (with pre-print URL), and `Published` (with volume, issue, pages, PMID).
+- [x] Multiple event recorder for Oral and Poster Presentations (event name, date, location, URL).
+- [x] Star indicator allowing students to mark up to 3 entries as their "Most Meaningful Scholarly Works".
+- [x] Scholarly Collections manager allowing students to group entries by thematic topic with a 100-character title limit.
+- [x] Automated tests asserting author formatting validation, 3-star limit enforcement, and collection title length limits.
