@@ -91,9 +91,80 @@ export class InMemoryStorageAdapter {
   }
 
   updatePersonalStatement(content: string): PersonalStatementDraft {
+    const isLockedOrSubmitted = this.personalStatement.stage !== 'drafting';
+    const hasExistingSnapshotForCurrentVersion = this.snapshots.some(
+      s => s.documentType === 'personal_statement' && s.versionNumber === this.personalStatement.currentVersionNumber
+    );
+
+    if ((isLockedOrSubmitted || hasExistingSnapshotForCurrentVersion) && content !== this.personalStatement.content) {
+      // Automatically fork into an active Vn+1 draft
+      this.personalStatement.currentVersionNumber += 1;
+      this.personalStatement.stage = 'drafting';
+    }
+
     this.personalStatement.content = content;
     this.personalStatement.updatedAt = new Date().toISOString();
     return this.personalStatement;
+  }
+
+  forkPersonalStatementRevision(): PersonalStatementDraft {
+    this.personalStatement.currentVersionNumber += 1;
+    this.personalStatement.stage = 'drafting';
+    this.personalStatement.updatedAt = new Date().toISOString();
+    return this.personalStatement;
+  }
+
+  getPersonalStatementVersionHistory(): {
+    versionNumber: number;
+    snapshotId?: string;
+    content: string;
+    stage: ReviewStage | 'locked';
+    submittedAt?: string;
+    changelogNote?: string;
+    isCurrentActiveDraft: boolean;
+  }[] {
+    const history: {
+      versionNumber: number;
+      snapshotId?: string;
+      content: string;
+      stage: ReviewStage | 'locked';
+      submittedAt?: string;
+      changelogNote?: string;
+      isCurrentActiveDraft: boolean;
+    }[] = [];
+
+    const psSnapshots = this.snapshots
+      .filter(s => s.documentType === 'personal_statement' && s.documentId === this.personalStatement.id)
+      .sort((a, b) => a.versionNumber - b.versionNumber);
+
+    for (const snap of psSnapshots) {
+      const rev = this.reviewRequests.find(r => r.snapshotId === snap.id);
+      history.push({
+        versionNumber: snap.versionNumber,
+        snapshotId: snap.id,
+        content: snap.content,
+        stage: rev ? rev.stage : 'submitted',
+        submittedAt: snap.submittedAt,
+        changelogNote: snap.changelogNote,
+        isCurrentActiveDraft: false,
+      });
+    }
+
+    const latestSnapshot = psSnapshots[psSnapshots.length - 1];
+    if (
+      !latestSnapshot ||
+      latestSnapshot.versionNumber < this.personalStatement.currentVersionNumber ||
+      this.personalStatement.stage === 'drafting'
+    ) {
+      history.push({
+        versionNumber: this.personalStatement.currentVersionNumber,
+        content: this.personalStatement.content,
+        stage: this.personalStatement.stage,
+        isCurrentActiveDraft: true,
+      });
+    }
+
+    return history.sort((a, b) => a.versionNumber - b.versionNumber);
   }
 
   updateExperience(id: string, updates: Partial<ExperienceDraft>): ExperienceDraft {

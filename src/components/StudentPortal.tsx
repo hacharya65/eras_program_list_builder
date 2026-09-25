@@ -60,6 +60,7 @@ export function StudentPortal({
       <PersonalStatementEditor
         draft={personalStatement}
         assignedAdvisor={assignedAdvisors[0]}
+        snapshots={context.snapshots}
         onSave={(newContent) => onUpdatePersonalStatement?.(newContent)}
         onSubmitForReview={(changelog) => {
           onSubmitPersonalStatement?.(changelog);

@@ -97,6 +97,7 @@ export interface StudentDashboardContext {
   personalStatement: PersonalStatementDraft;
   experiences: ExperienceDraft[];
   activeReviewRequests: ReviewRequest[];
+  snapshots?: DocumentSnapshot[];
 }
 
 export interface AdvisorDashboardContext {

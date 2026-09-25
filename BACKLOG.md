@@ -8,7 +8,7 @@ This backlog tracks the next cycle of feature requests, enhancements, and bugfix
 
 | Ticket # | Title | Category | Complexity | Dependencies | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **[#11](.scratch/eras-advising/issues/11-personal-statement-version-forking.md)** | Personal Statement Dynamic Version Forking (V1 through V_n) | Workflow / Data Integrity | Medium | None | `Pending` |
+| **[#11](.scratch/eras-advising/issues/11-personal-statement-version-forking.md)** | Personal Statement Dynamic Version Forking (V1 through V_n) | Workflow / Data Integrity | Medium | None | `Completed` |
 | **[#12](.scratch/eras-advising/issues/12-experiences-advisor-review-submission.md)** | Faculty Advisor Review Submission for Experiences | Workflow / Advising | Medium | None | `Pending` |
 | **[#13](.scratch/eras-advising/issues/13-scholarly-works-persistence-bugfix.md)** | Scholarly Works State Persistence Bugfix | Bugfix / UX | Low | None | `Completed` |
 | **[#14](.scratch/eras-advising/issues/14-universal-residency-database-matrix.md)** | Universal Residency Program Database & Row Matrix | Data / UI Redesign | High | None | `Pending` |

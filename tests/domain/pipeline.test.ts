@@ -103,4 +103,88 @@ describe('Ticket 04: Forked Snapshot Versioning & 5-Stage Order Pipeline', () =>
       expect(unchangedChunks.some(c => c.text.includes('I cared for Mr. K in the'))).toBe(true);
     });
   });
+
+  describe('Ticket 11: Dynamic Version Forking (V1 through V_n)', () => {
+    it('automatically forks to next version (v2, v3, ... vn) on edit when current version is locked/submitted', () => {
+      const studentId = 'usr-student-1';
+      const advisorId = 'usr-advisor-1';
+
+      // 1. Initial draft at v1
+      storage.personalStatement.content = 'First version content of personal statement.';
+      expect(storage.personalStatement.currentVersionNumber).toBe(1);
+      expect(storage.personalStatement.stage).toBe('drafting');
+
+      // 2. Submit v1 for review -> freezes snapshot v1
+      service.submitPersonalStatementForReview({
+        studentId,
+        advisorId,
+        changelogNote: 'Submitting V1 for initial advisor feedback',
+      });
+      expect(storage.personalStatement.stage).toBe('submitted');
+      expect(storage.snapshots).toHaveLength(1);
+      expect(storage.snapshots[0].versionNumber).toBe(1);
+      expect(storage.snapshots[0].content).toBe('First version content of personal statement.');
+
+      // 3. Student makes an edit post-submission -> must automatically fork into active V2 draft
+      const v2Text = 'Second version content with clinical updates.';
+      const updatedDraft = service.updatePersonalStatement(v2Text);
+
+      expect(updatedDraft.currentVersionNumber).toBe(2);
+      expect(updatedDraft.stage).toBe('drafting');
+      expect(updatedDraft.content).toBe(v2Text);
+      // V1 snapshot must remain completely immutable
+      expect(storage.snapshots[0].content).toBe('First version content of personal statement.');
+      expect(storage.snapshots[0].versionNumber).toBe(1);
+
+      // 4. Submit v2 for review -> freezes snapshot v2
+      service.submitPersonalStatementForReview({
+        studentId,
+        advisorId,
+        changelogNote: 'Revised clinical section based on attending advice',
+      });
+      expect(storage.personalStatement.stage).toBe('submitted');
+      expect(storage.snapshots).toHaveLength(2);
+      expect(storage.snapshots[1].versionNumber).toBe(2);
+      expect(storage.snapshots[1].content).toBe(v2Text);
+
+      // 5. Student makes another edit -> must automatically fork into active V3 draft (scaling to Vn)
+      const v3Text = 'Third version content ready for final dean endorsement.';
+      const v3Draft = service.updatePersonalStatement(v3Text);
+
+      expect(v3Draft.currentVersionNumber).toBe(3);
+      expect(v3Draft.stage).toBe('drafting');
+      expect(v3Draft.content).toBe(v3Text);
+      expect(storage.snapshots).toHaveLength(2); // V1 and V2 locked
+    });
+
+    it('retrieves comprehensive version history across all snapshots and the active draft', () => {
+      const studentId = 'usr-student-1';
+      const advisorId = 'usr-advisor-1';
+
+      storage.personalStatement.content = 'Version 1 body';
+      service.submitPersonalStatementForReview({ studentId, advisorId, changelogNote: 'V1 init' });
+
+      service.updatePersonalStatement('Version 2 body');
+      service.submitPersonalStatementForReview({ studentId, advisorId, changelogNote: 'V2 rev' });
+
+      service.updatePersonalStatement('Version 3 in-progress draft');
+
+      const history = service.getPersonalStatementVersionHistory();
+      expect(history.length).toBe(3);
+
+      expect(history[0].versionNumber).toBe(1);
+      expect(history[0].stage).toBe('submitted');
+      expect(history[0].isCurrentActiveDraft).toBe(false);
+
+      expect(history[1].versionNumber).toBe(2);
+      expect(history[1].stage).toBe('submitted');
+      expect(history[1].isCurrentActiveDraft).toBe(false);
+
+      expect(history[2].versionNumber).toBe(3);
+      expect(history[2].stage).toBe('drafting');
+      expect(history[2].isCurrentActiveDraft).toBe(true);
+      expect(history[2].content).toBe('Version 3 in-progress draft');
+    });
+  });
 });
+

@@ -42,6 +42,14 @@ export class AdvisingPlatformService {
     return this.storage.updatePersonalStatement(content);
   }
 
+  forkPersonalStatementRevision() {
+    return this.storage.forkPersonalStatementRevision();
+  }
+
+  getPersonalStatementVersionHistory() {
+    return this.storage.getPersonalStatementVersionHistory();
+  }
+
   submitPersonalStatementForReview(params: {
     studentId: string;
     advisorId: string;
@@ -117,6 +125,7 @@ export class AdvisingPlatformService {
       personalStatement: this.storage.personalStatement,
       experiences: this.storage.experiences,
       activeReviewRequests: this.storage.reviewRequests.filter(r => r.studentId === student.id),
+      snapshots: this.storage.snapshots.filter(s => s.documentType === 'personal_statement'),
     };
   }
 
