@@ -8,6 +8,7 @@ import { OrderTracker } from './OrderTracker';
 import { StudentFeedbackViewer } from './StudentFeedbackViewer';
 import { SchoolListMatrix } from './SchoolListMatrix';
 import { CompetitivenessCalculator } from './CompetitivenessCalculator';
+import { ApplicantBaselineIntake } from './ApplicantBaselineIntake';
 import { AlumniResidentDirectory } from './AlumniResidentDirectory';
 import { ErasTransferKit } from './ErasTransferKit';
 import {
@@ -226,6 +227,13 @@ export function StudentPortal({
           </div>
         </div>
       </div>
+
+      {/* Primary Intake: Multimodal Competitiveness Engine (Ticket Candidate 8) */}
+      <ApplicantBaselineIntake
+        specialty={student.specialty}
+        onOpenFullCompetitiveness={() => setActiveView('competitiveness')}
+        onOpenSchoolList={() => setActiveView('school_list')}
+      />
 
       {/* 5-Stage Clinical Order Pipeline Tracker with Multi-Part Application Progress */}
       {(() => {

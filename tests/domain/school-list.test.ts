@@ -174,5 +174,65 @@ describe('Ticket 07: Strategic School List Matrix & Dynamic Specialty Signaling'
       expect(result.goldMultiplier).toBe('14.5x');
     });
   });
+
+  describe('Item 13 & 14 / Ticket Candidate 8: Step 2 CK Intake & Automated Tiering Engine', () => {
+    it('evaluates Safety tier when applicant Step 2 CK exceeds program 75th percentile', async () => {
+      const { evaluateProgramTier } = await import('@/domain/school-list-models');
+      // Applicant 254 vs program range 230 - 245 -> Safety
+      const tier = evaluateProgramTier(254, 230, 245);
+      expect(tier).toBe('safety');
+    });
+
+    it('evaluates Target tier when applicant Step 2 CK falls within program 25th–75th percentile', async () => {
+      const { evaluateProgramTier } = await import('@/domain/school-list-models');
+      // Applicant 254 vs program range 250 - 259 -> Target
+      const tier = evaluateProgramTier(254, 250, 259);
+      expect(tier).toBe('target');
+
+      // Exact lower bound match
+      expect(evaluateProgramTier(250, 250, 259)).toBe('target');
+      // Exact upper bound match
+      expect(evaluateProgramTier(259, 250, 259)).toBe('target');
+    });
+
+    it('evaluates Reach tier when applicant Step 2 CK is below program 25th percentile', async () => {
+      const { evaluateProgramTier } = await import('@/domain/school-list-models');
+      // Applicant 254 vs program range 260 - 270 -> Reach
+      const tier = evaluateProgramTier(254, 260, 270);
+      expect(tier).toBe('reach');
+    });
+
+    it('returns null when range is incomplete or invalid', async () => {
+      const { evaluateProgramTier } = await import('@/domain/school-list-models');
+      expect(evaluateProgramTier(254, undefined, 260)).toBeNull();
+      expect(evaluateProgramTier(254, 240, undefined)).toBeNull();
+      expect(evaluateProgramTier(NaN, 240, 260)).toBeNull();
+    });
+
+    it('parses numeric 25th and 75th percentiles from diverse range strings', async () => {
+      const { parseScoreRange } = await import('@/domain/school-list-models');
+      expect(parseScoreRange('250 - 259')).toEqual({ min: 250, max: 259 });
+      expect(parseScoreRange('240-249')).toEqual({ min: 240, max: 249 });
+      expect(parseScoreRange('< 220')).toEqual({ min: 200, max: 219 });
+      expect(parseScoreRange('270+')).toEqual({ min: 270, max: 300 });
+      expect(parseScoreRange('')).toEqual({});
+    });
+
+    it('persists and retrieves applicant Step 2 CK baseline score', async () => {
+      const {
+        getStoredApplicantStep2Ck,
+        setStoredApplicantStep2Ck,
+        DEFAULT_APPLICANT_STEP2_CK,
+      } = await import('@/domain/school-list-models');
+
+      expect(getStoredApplicantStep2Ck()).toBe(DEFAULT_APPLICANT_STEP2_CK);
+      setStoredApplicantStep2Ck(261);
+      expect(getStoredApplicantStep2Ck()).toBe(261);
+
+      // Clean up
+      setStoredApplicantStep2Ck(DEFAULT_APPLICANT_STEP2_CK);
+    });
+  });
 });
+
 

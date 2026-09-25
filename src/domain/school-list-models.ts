@@ -110,6 +110,8 @@ export interface SchoolListItem {
   signal: SignalType;
   track?: ApplicationTrack;
   step2ScoreRange?: string; // Program Step 2 CK range as reported on Residency Explorer
+  step2Min?: number; // 25th percentile
+  step2Max?: number; // 75th percentile
   yieldNoSignal?: number;
   yieldSilver?: number;
   yieldGold?: number;
@@ -166,3 +168,103 @@ export function validateSignalAllocation(
     errors,
   };
 }
+
+/**
+ * Automatically evaluates whether a residency program is Safety, Target, or Reach
+ * by comparing the applicant's baseline Step 2 CK score against the program's
+ * 25th–75th percentile range (manually entered from Residency Explorer).
+ *
+ * Rules:
+ * - Safety: Applicant Step 2 CK > Program 75th percentile (upper bound)
+ * - Target: Applicant Step 2 CK is within [25th percentile, 75th percentile]
+ * - Reach: Applicant Step 2 CK < Program 25th percentile (lower bound)
+ */
+export function evaluateProgramTier(
+  applicantScore: number,
+  minScore?: number,
+  maxScore?: number
+): ProgramTier | null {
+  if (
+    applicantScore === undefined ||
+    applicantScore === null ||
+    isNaN(applicantScore) ||
+    minScore === undefined ||
+    minScore === null ||
+    isNaN(minScore) ||
+    maxScore === undefined ||
+    maxScore === null ||
+    isNaN(maxScore)
+  ) {
+    return null;
+  }
+
+  if (applicantScore > maxScore) {
+    return 'safety';
+  }
+  if (applicantScore < minScore) {
+    return 'reach';
+  }
+  return 'target';
+}
+
+/**
+ * Parses numeric lower and upper bounds from common score range strings
+ * (e.g., "250 - 259", "240-249", "< 220", "270+").
+ */
+export function parseScoreRange(rangeStr?: string): { min?: number; max?: number } {
+  if (!rangeStr) return {};
+  const cleaned = rangeStr.trim();
+  const dashMatch = cleaned.match(/^(\d{3})\s*[-–—]\s*(\d{3})$/);
+  if (dashMatch) {
+    return { min: parseInt(dashMatch[1], 10), max: parseInt(dashMatch[2], 10) };
+  }
+  const ltMatch = cleaned.match(/^<\s*(\d{3})$/);
+  if (ltMatch) {
+    return { min: 200, max: parseInt(ltMatch[1], 10) - 1 };
+  }
+  const gtMatch = cleaned.match(/^(\d{3})\+$/);
+  if (gtMatch) {
+    return { min: parseInt(gtMatch[1], 10), max: 300 };
+  }
+  return {};
+}
+
+export const DEFAULT_APPLICANT_STEP2_CK = 254;
+export const APPLICANT_STEP2_CK_STORAGE_KEY = 'eras_applicant_step2_ck';
+export const APPLICANT_PROFILE_STORAGE_KEY = 'eras_applicant_profile';
+
+let inMemoryStep2Ck = DEFAULT_APPLICANT_STEP2_CK;
+
+export function getStoredApplicantStep2Ck(): number {
+  if (typeof localStorage !== 'undefined') {
+    try {
+      const stored = localStorage.getItem(APPLICANT_STEP2_CK_STORAGE_KEY);
+      if (stored) {
+        const parsed = parseInt(stored, 10);
+        if (!isNaN(parsed) && parsed > 0) return parsed;
+      }
+    } catch {
+      // fallback
+    }
+  }
+  return inMemoryStep2Ck;
+}
+
+export function setStoredApplicantStep2Ck(score: number): void {
+  inMemoryStep2Ck = score;
+  if (typeof localStorage !== 'undefined') {
+    try {
+      localStorage.setItem(APPLICANT_STEP2_CK_STORAGE_KEY, score.toString());
+    } catch {
+      // fallback
+    }
+  }
+  if (typeof window !== 'undefined' && typeof window.dispatchEvent === 'function') {
+    try {
+      window.dispatchEvent(new CustomEvent('applicant_step2_ck_updated', { detail: score }));
+    } catch {
+      // fallback
+    }
+  }
+}
+

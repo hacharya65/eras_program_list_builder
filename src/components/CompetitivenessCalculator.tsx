@@ -10,6 +10,11 @@ import {
   CompetitivenessAssessment,
 } from '@/domain/competitiveness-engine';
 import {
+  getStoredApplicantStep2Ck,
+  setStoredApplicantStep2Ck,
+  APPLICANT_PROFILE_STORAGE_KEY,
+} from '@/domain/school-list-models';
+import {
   BarChart3,
   TrendingUp,
   Award,
@@ -38,13 +43,18 @@ export function CompetitivenessCalculator({
   const [specialty, setSpecialty] = useState(initialSpecialty);
 
   // Student metrics state
-  const [step2Ck, setStep2Ck] = useState<number>(254);
+  const [step2Ck, setStep2CkState] = useState<number>(() => getStoredApplicantStep2Ck());
   const [researchExperiences, setResearchExperiences] = useState<number>(4);
   const [abstracts, setAbstracts] = useState<number>(2);
   const [presentations, setPresentations] = useState<number>(4);
   const [publications, setPublications] = useState<number>(2);
   const [volunteerExperiences, setVolunteerExperiences] = useState<number>(5);
   const [isAoaMember, setIsAoaMember] = useState<boolean>(false);
+
+  const handleStep2Change = (newVal: number) => {
+    setStep2CkState(newVal);
+    setStoredApplicantStep2Ck(newVal);
+  };
 
   const profile: StudentMetricProfile = {
     step2Ck: Number(step2Ck) || 0,
@@ -139,7 +149,7 @@ export function CompetitivenessCalculator({
                 max="285"
                 step="1"
                 value={step2Ck}
-                onChange={(e) => setStep2Ck(Number(e.target.value))}
+                onChange={(e) => handleStep2Change(Number(e.target.value))}
                 className="w-full accent-emerald-600 cursor-pointer"
               />
               <div className="flex justify-between text-[10px] text-slate-400">

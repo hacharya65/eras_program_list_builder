@@ -8,6 +8,9 @@ import {
   ProgramTier,
   SignalType,
   ApplicationTrack,
+  evaluateProgramTier,
+  parseScoreRange,
+  getStoredApplicantStep2Ck,
 } from '@/domain/school-list-models';
 import {
   computeSignalingRecommendation,
@@ -64,13 +67,15 @@ const DEFAULT_ITEMS: SchoolListItem[] = [
     address: '55 Fruit Street, Bulfinch 120, Boston, MA 02114',
     programDirector: 'J. Kevin Tucker, MD',
     step2ScoreRange: '250 - 259',
-    tier: 'reach',
+    step2Min: 250,
+    step2Max: 259,
+    tier: 'target',
     signal: 'gold',
     yieldNoSignal: undefined,
     yieldSilver: undefined,
     yieldGold: undefined,
     advisorNotes: 'Strong research emphasis; Gold signal essential for out-of-region consideration.',
-    residencyExplorerUrl: 'https://www.residencyexplorer.org',
+    residencyExplorerUrl: 'https://www.residencyexplorer.org/?utm_source=gemini',
     doximityUrl: 'https://www.doximity.com/residency/programs/1402421162',
   },
   {
@@ -85,13 +90,15 @@ const DEFAULT_ITEMS: SchoolListItem[] = [
     address: '75 Francis Street, Boston, MA 02115',
     programDirector: 'Maria A. Yialamas, MD',
     step2ScoreRange: '250 - 259',
-    tier: 'reach',
+    step2Min: 250,
+    step2Max: 259,
+    tier: 'target',
     signal: 'gold',
     yieldNoSignal: undefined,
     yieldSilver: undefined,
     yieldGold: undefined,
     advisorNotes: 'Strong applicant pool; Gold token yields +25% jump over Silver.',
-    residencyExplorerUrl: 'https://www.residencyexplorer.org',
+    residencyExplorerUrl: 'https://www.residencyexplorer.org/?utm_source=gemini',
     doximityUrl: 'https://www.doximity.com/residency/programs/1402421160',
   },
   {
@@ -106,13 +113,15 @@ const DEFAULT_ITEMS: SchoolListItem[] = [
     address: '1959 NE Pacific Street, Box 356420, Seattle, WA 98195',
     programDirector: 'Ken Steinberg, MD',
     step2ScoreRange: '240 - 249',
-    tier: 'target',
+    step2Min: 240,
+    step2Max: 249,
+    tier: 'safety',
     signal: 'silver',
     yieldNoSignal: undefined,
     yieldSilver: undefined,
     yieldGold: undefined,
     advisorNotes: 'Silver signal captures bulk of yield (+30%); reserve Gold for top reach.',
-    residencyExplorerUrl: 'https://www.residencyexplorer.org',
+    residencyExplorerUrl: 'https://www.residencyexplorer.org/?utm_source=gemini',
     doximityUrl: 'https://www.doximity.com/residency/programs/1405421430',
   },
   {
@@ -127,13 +136,15 @@ const DEFAULT_ITEMS: SchoolListItem[] = [
     address: '100 Woodruff Circle, Suite 400, Atlanta, GA 30322',
     programDirector: 'Wendy Armstrong, MD',
     step2ScoreRange: '240 - 249',
-    tier: 'target',
+    step2Min: 240,
+    step2Max: 249,
+    tier: 'safety',
     signal: 'silver',
     yieldNoSignal: undefined,
     yieldSilver: undefined,
     yieldGold: undefined,
     advisorNotes: 'Solid clinical training; Silver optimal allocation.',
-    residencyExplorerUrl: 'https://www.residencyexplorer.org',
+    residencyExplorerUrl: 'https://www.residencyexplorer.org/?utm_source=gemini',
     doximityUrl: 'https://www.doximity.com/residency/programs/1401221105',
   },
   {
@@ -148,13 +159,15 @@ const DEFAULT_ITEMS: SchoolListItem[] = [
     address: '800 Washington Street, Box 243, Boston, MA 02111',
     programDirector: 'Laura K. Snydman, MD',
     step2ScoreRange: '230 - 239',
+    step2Min: 230,
+    step2Max: 239,
     tier: 'safety',
     signal: 'none',
     yieldNoSignal: undefined,
     yieldSilver: undefined,
     yieldGold: undefined,
     advisorNotes: 'Excellent home-region anchor; high baseline interview yield.',
-    residencyExplorerUrl: 'https://www.residencyexplorer.org',
+    residencyExplorerUrl: 'https://www.residencyexplorer.org/?utm_source=gemini',
     doximityUrl: 'https://www.doximity.com/residency/programs/1402421175',
   },
 ];
@@ -167,6 +180,19 @@ export function SchoolListMatrix({
 }: SchoolListMatrixProps) {
   const [selectedSpecialty, setSelectedSpecialty] = useState(specialty);
 
+  // Applicant baseline Step 2 CK score (Ticket Candidate 8)
+  const [applicantStep2Ck, setApplicantStep2Ck] = useState<number>(() => getStoredApplicantStep2Ck());
+
+  useEffect(() => {
+    const handleScoreUpdate = (e: any) => {
+      if (e.detail && !isNaN(Number(e.detail))) {
+        setApplicantStep2Ck(Number(e.detail));
+      }
+    };
+    window.addEventListener('applicant_step2_ck_updated', handleScoreUpdate);
+    return () => window.removeEventListener('applicant_step2_ck_updated', handleScoreUpdate);
+  }, []);
+
   // Rehydrate state safely from local storage
   const [items, setItems] = useState<SchoolListItem[]>(() => {
     if (typeof window !== 'undefined') {
@@ -174,12 +200,61 @@ export function SchoolListMatrix({
       if (cached) {
         try {
           const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            return parsed.map((item: SchoolListItem) => {
+              let min = item.step2Min;
+              let max = item.step2Max;
+              if ((min === undefined || max === undefined) && item.step2ScoreRange) {
+                const p = parseScoreRange(item.step2ScoreRange);
+                if (p.min !== undefined && p.max !== undefined) {
+                  min = p.min;
+                  max = p.max;
+                }
+              }
+              const baseline = getStoredApplicantStep2Ck();
+              const autoTier = evaluateProgramTier(baseline, min, max);
+              return {
+                ...item,
+                step2Min: min,
+                step2Max: max,
+                ...(autoTier ? { tier: autoTier } : {}),
+              };
+            });
+          }
         } catch {}
       }
     }
     return DEFAULT_ITEMS;
   });
+
+  // Re-evaluate tier dynamically whenever applicant Step 2 CK score changes (Ticket Candidate 8)
+  useEffect(() => {
+    setItems((prevItems) => {
+      let changed = false;
+      const updated = prevItems.map((item) => {
+        let min = item.step2Min;
+        let max = item.step2Max;
+        if ((min === undefined || max === undefined) && item.step2ScoreRange) {
+          const p = parseScoreRange(item.step2ScoreRange);
+          if (p.min !== undefined && p.max !== undefined) {
+            min = p.min;
+            max = p.max;
+          }
+        }
+        const dynamicTier = evaluateProgramTier(applicantStep2Ck, min, max);
+        if (dynamicTier && dynamicTier !== item.tier) {
+          changed = true;
+          return { ...item, step2Min: min, step2Max: max, tier: dynamicTier };
+        }
+        if (min !== item.step2Min || max !== item.step2Max) {
+          changed = true;
+          return { ...item, step2Min: min, step2Max: max };
+        }
+        return item;
+      });
+      return changed ? updated : prevItems;
+    });
+  }, [applicantStep2Ck]);
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -212,6 +287,24 @@ export function SchoolListMatrix({
     setItems((prev) => prev.map((item) => (item.id === id ? { ...item, ...updates } : item)));
   };
 
+  const handleStep2RangeChange = (id: string, newMin?: number, newMax?: number) => {
+    const autoTier = evaluateProgramTier(applicantStep2Ck, newMin, newMax);
+    const rangeStr = newMin !== undefined && newMax !== undefined
+      ? `${newMin} - ${newMax}`
+      : newMin !== undefined
+      ? `${newMin}+`
+      : newMax !== undefined
+      ? `< ${newMax}`
+      : '';
+
+    handleUpdateItem(id, {
+      step2Min: newMin,
+      step2Max: newMax,
+      step2ScoreRange: rangeStr,
+      ...(autoTier ? { tier: autoTier } : {}),
+    });
+  };
+
   const handleDeleteItem = (id: string) => {
     setItems((prev) => prev.filter((item) => item.id !== id));
   };
@@ -222,6 +315,10 @@ export function SchoolListMatrix({
       alert(`"${prog.name}" is already in your School List.`);
       return;
     }
+
+    const defaultMin = 240;
+    const defaultMax = 249;
+    const initialTier = evaluateProgramTier(applicantStep2Ck, defaultMin, defaultMax) || 'target';
 
     const newItem: SchoolListItem = {
       id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
@@ -234,13 +331,15 @@ export function SchoolListMatrix({
       region: prog.region,
       address: prog.address,
       programDirector: prog.programDirector,
-      step2ScoreRange: '240 - 249',
-      tier: 'target',
+      step2ScoreRange: `${defaultMin} - ${defaultMax}`,
+      step2Min: defaultMin,
+      step2Max: defaultMax,
+      tier: initialTier,
       signal: 'none',
       yieldNoSignal: undefined,
       yieldSilver: undefined,
       yieldGold: undefined,
-      residencyExplorerUrl: prog.residencyExplorerUrl || 'https://www.residencyexplorer.org',
+      residencyExplorerUrl: prog.residencyExplorerUrl || 'https://www.residencyexplorer.org/?utm_source=gemini',
       doximityUrl: prog.doximityUrl || 'https://www.doximity.com/residency',
     };
 
@@ -570,6 +669,42 @@ export function SchoolListMatrix({
         </div>
       </div>
 
+      {/* Pinned Visual Key & Real-Time Tier Balance Summary Bar (Item 14) */}
+      <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-xs flex flex-wrap items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+            <SlidersHorizontal className="w-4 h-4 text-sky-600" />
+            Tier Balance Key:
+          </span>
+          <div className="flex items-center gap-2">
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-50 text-purple-800 border border-purple-200 shadow-2xs">
+              <Compass className="w-3.5 h-3.5 text-purple-600" />
+              <span>Reach: <strong className="font-mono text-purple-900">{reachCount}</strong></span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-50 text-sky-800 border border-sky-200 shadow-2xs">
+              <Target className="w-3.5 h-3.5 text-sky-600" />
+              <span>Target: <strong className="font-mono text-sky-900">{targetCount}</strong></span>
+            </div>
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+              <Shield className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Safety: <strong className="font-mono text-emerald-900">{safetyCount}</strong></span>
+            </div>
+          </div>
+        </div>
+
+        {/* Real-time Applicant Baseline Score and Dynamic Tiering Indicator */}
+        <div className="flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1 rounded-lg">
+            <span className="text-slate-500 font-medium">Applicant Step 2 CK:</span>
+            <span className="font-mono font-bold text-slate-900 text-sm">{applicantStep2Ck}</span>
+            <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">(Baseline)</span>
+          </div>
+          <span className="hidden lg:inline text-[11px] text-slate-500 italic">
+            Automated Tiering: Reach (&lt;25th) &bull; Target (25th–75th) &bull; Safety (&gt;75th)
+          </span>
+        </div>
+      </div>
+
       {/* Row-Based Table Matrix View */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
         <div className="overflow-x-auto">
@@ -578,18 +713,17 @@ export function SchoolListMatrix({
               <tr className="border-b border-slate-200 bg-slate-50/75 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
                 <th className="py-3 px-3 w-10 text-center">#</th>
                 <th className="py-3 px-4 min-w-[280px]">Program &amp; Metadata</th>
-                <th className="py-3 px-3 w-28">Tier</th>
                 <th className="py-3 px-3 w-32">ERAS Signal</th>
-                <th className="py-3 px-3 w-36">
+                <th className="py-3 px-3 min-w-[270px]">
                   <a
-                    href="https://www.residencyexplorer.org/"
+                    href="https://www.residencyexplorer.org/?utm_source=gemini"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-slate-700 hover:text-sky-700 font-bold hover:underline"
-                    title="Search on Residency Explorer"
+                    className="inline-flex items-center gap-1.5 text-slate-700 hover:text-sky-700 font-bold hover:underline"
+                    title="Lookup 25th–75th Percentiles on Residency Explorer"
                   >
-                    <span>Step 2 CK Range</span>
-                    <ExternalLink className="w-3 h-3 text-sky-600" />
+                    <span>Step 2 CK Range (25th–75th) &amp; Tier</span>
+                    <ExternalLink className="w-3.5 h-3.5 text-sky-600" />
                   </a>
                 </th>
                 <th className="py-3 px-4 min-w-[230px]">Yield Rates &amp; Multipliers</th>
@@ -600,7 +734,7 @@ export function SchoolListMatrix({
             <tbody className="divide-y divide-slate-100">
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="py-12 text-center text-slate-400 text-sm">
+                  <td colSpan={7} className="py-12 text-center text-slate-400 text-sm">
                     No residency programs match your search/filter criteria.
                   </td>
                 </tr>
@@ -622,23 +756,25 @@ export function SchoolListMatrix({
                         {index + 1}
                       </td>
 
-                      {/* Program Name & Metadata (Item 11) */}
+                      {/* Program Name & Metadata (Item 11 & Item 13) */}
                       <td className="py-3 px-4">
                         <div className="flex items-start justify-between gap-2">
                           <div className="font-bold text-slate-900 group-hover:text-sky-700 transition-colors">
                             {item.programName}
                           </div>
-                          <span className="font-mono text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">
-                            #{item.programNumber || item.programId}
+                          <span className="font-mono text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 shrink-0">
+                            ACGME ID: {item.programNumber || item.programId}
                           </span>
                         </div>
                         <div className="text-[11px] text-slate-500 mt-1 space-y-0.5">
                           <div
                             className="flex items-center gap-1.5 text-slate-600 truncate max-w-[340px]"
-                            title={item.address || `${item.city}, ${item.state}`}
+                            title={item.city && item.state ? `${item.city}, ${item.state}` : (item.city || item.state || 'Location Unknown')}
                           >
                             <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span className="truncate">{item.address || `${item.city}, ${item.state}`}</span>
+                            <span className="truncate">
+                              {item.city && item.state ? `${item.city}, ${item.state}` : (item.city || item.state || 'Location Unknown')}
+                            </span>
                           </div>
                           <div className="flex items-center gap-2 pt-0.5">
                             {item.region && (
@@ -653,25 +789,6 @@ export function SchoolListMatrix({
                             )}
                           </div>
                         </div>
-                      </td>
-
-                      {/* Tier Selector */}
-                      <td className="py-3 px-3">
-                        <select
-                          value={item.tier}
-                          onChange={(e) => handleUpdateItem(item.id, { tier: e.target.value as ProgramTier })}
-                          className={`w-full p-1.5 rounded-lg text-xs font-bold border focus:outline-none focus:ring-1 focus:ring-sky-500 ${
-                            item.tier === 'reach'
-                              ? 'bg-purple-50 text-purple-900 border-purple-200'
-                              : item.tier === 'target'
-                              ? 'bg-sky-50 text-sky-900 border-sky-200'
-                              : 'bg-emerald-50 text-emerald-900 border-emerald-200'
-                          }`}
-                        >
-                          <option value="reach">Reach</option>
-                          <option value="target">Target</option>
-                          <option value="safety">Safety</option>
-                        </select>
                       </td>
 
                       {/* Signal Button Toggles */}
@@ -716,22 +833,81 @@ export function SchoolListMatrix({
                         </div>
                       </td>
 
-                      {/* Step 2 CK Range (Item 12) */}
+                      {/* Step 2 CK Dual Input, Automated Tier Icon (Item 14 & Ticket Candidate 8) */}
                       <td className="py-3 px-3">
-                        <select
-                          value={item.step2ScoreRange || ''}
-                          onChange={(e) => handleUpdateItem(item.id, { step2ScoreRange: e.target.value })}
-                          className="w-full p-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-1 focus:ring-sky-500 shadow-2xs"
-                        >
-                          <option value="">Not Recorded</option>
-                          <option value="< 220">&lt; 220</option>
-                          <option value="220 - 229">220 - 229</option>
-                          <option value="230 - 239">230 - 239</option>
-                          <option value="240 - 249">240 - 249</option>
-                          <option value="250 - 259">250 - 259</option>
-                          <option value="260 - 269">260 - 269</option>
-                          <option value="270+">270+</option>
-                        </select>
+                        <div className="flex items-center gap-2">
+                          <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-2xs">
+                            <input
+                              type="number"
+                              min={180}
+                              max={300}
+                              placeholder="25th"
+                              value={item.step2Min !== undefined ? item.step2Min : ''}
+                              onChange={(e) => {
+                                const val = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
+                                const newMin = isNaN(val as number) ? undefined : val;
+                                handleStep2RangeChange(item.id, newMin, item.step2Max);
+                              }}
+                              className="w-14 px-1.5 py-1 text-xs text-center font-mono font-bold rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-slate-50/50"
+                              title="25th Percentile Step 2 CK Score"
+                            />
+                            <span className="text-slate-400 font-mono text-xs">–</span>
+                            <input
+                              type="number"
+                              min={180}
+                              max={300}
+                              placeholder="75th"
+                              value={item.step2Max !== undefined ? item.step2Max : ''}
+                              onChange={(e) => {
+                                const val = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
+                                const newMax = isNaN(val as number) ? undefined : val;
+                                handleStep2RangeChange(item.id, item.step2Min, newMax);
+                              }}
+                              className="w-14 px-1.5 py-1 text-xs text-center font-mono font-bold rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-slate-50/50"
+                              title="75th Percentile Step 2 CK Score"
+                            />
+                          </div>
+
+                          {/* Dynamic Compact Tier Icon */}
+                          {item.step2Min !== undefined && item.step2Max !== undefined ? (
+                            item.tier === 'safety' ? (
+                              <span
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs shrink-0"
+                                title={`Safety: Applicant score (${applicantStep2Ck}) > Program 75th percentile (${item.step2Max})`}
+                              >
+                                <Shield className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>Safety</span>
+                              </span>
+                            ) : item.tier === 'target' ? (
+                              <span
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-bold bg-sky-100 text-sky-800 border border-sky-300 shadow-2xs shrink-0"
+                                title={`Target: Applicant score (${applicantStep2Ck}) is within 25th–75th range (${item.step2Min}–${item.step2Max})`}
+                              >
+                                <Target className="w-3.5 h-3.5 text-sky-600" />
+                                <span>Target</span>
+                              </span>
+                            ) : (
+                              <span
+                                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-300 shadow-2xs shrink-0"
+                                title={`Reach: Applicant score (${applicantStep2Ck}) < Program 25th percentile (${item.step2Min})`}
+                              >
+                                <Compass className="w-3.5 h-3.5 text-purple-600" />
+                                <span>Reach</span>
+                              </span>
+                            )
+                          ) : (
+                            <a
+                              href="https://www.residencyexplorer.org/?utm_source=gemini"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-[10px] text-sky-600 hover:text-sky-800 italic hover:underline inline-flex items-center gap-0.5 shrink-0"
+                              title="Enter 25th–75th percentiles from Residency Explorer"
+                            >
+                              <span>Enter Range</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </a>
+                          )}
+                        </div>
                       </td>
 
                       {/* Yield Rates & Multipliers (Item 9) */}
