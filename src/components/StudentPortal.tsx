@@ -5,6 +5,7 @@ import { ExperiencesManager } from './ExperiencesManager';
 import { ScholarlyWorksManager } from './ScholarlyWorksManager';
 import { OrderTracker } from './OrderTracker';
 import { StudentFeedbackViewer } from './StudentFeedbackViewer';
+import { SchoolListMatrix } from './SchoolListMatrix';
 import {
   FileText,
   Briefcase,
@@ -35,7 +36,7 @@ export function StudentPortal({
   getAdvisorFeedback,
   onCreateRevision,
 }: StudentPortalProps) {
-  const [activeView, setActiveView] = useState<'overview' | 'personal_statement' | 'experiences' | 'scholarly_works'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'personal_statement' | 'experiences' | 'scholarly_works' | 'school_list'>('overview');
   const { student, personalStatement, experiences, assignedAdvisors } = context;
 
   const stageLabels = {
@@ -77,6 +78,15 @@ export function StudentPortal({
   if (activeView === 'scholarly_works') {
     return (
       <ScholarlyWorksManager
+        onBack={() => setActiveView('overview')}
+      />
+    );
+  }
+
+  if (activeView === 'school_list') {
+    return (
+      <SchoolListMatrix
+        specialty={student.specialty}
         onBack={() => setActiveView('overview')}
       />
     );
@@ -236,7 +246,10 @@ export function StudentPortal({
               <span>Tokens Remaining: <strong className="text-amber-700 font-bold">15 total</strong></span>
             </div>
           </div>
-          <button className="mt-5 w-full py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+          <button
+            onClick={() => setActiveView('school_list')}
+            className="mt-5 w-full py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+          >
             Open School List Strategy <ChevronRight className="w-4 h-4" />
           </button>
         </div>

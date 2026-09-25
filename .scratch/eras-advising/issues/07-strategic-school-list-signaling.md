@@ -4,11 +4,11 @@
 
 **Blocked by:** 01: Greenfield App Scaffold, Multi-Tenant Domain Core, & Dev Persona Switcher
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Program search and filter directory across ACGME specialties and geographical regions.
-- [ ] School list management interface organizing programs by tier: **Reach**, **Target**, and **Safety**, and by track (Categorical, Preliminary, PSTP).
-- [ ] Dynamic specialty rule selector: choosing a specialty automatically sets the official Gold and Silver signal caps (e.g. Ortho: 30 signals; Internal Medicine: 3 Gold, 12 Silver; OB/GYN: 3 Gold, 15 Silver).
-- [ ] Live signal allocation budget meter showing remaining Gold and Silver tokens and preventing over-allocation.
-- [ ] Advisor review mode enabling faculty to inspect program distribution ratios and leave program-specific strategic flags.
-- [ ] Automated tests validating tier assignments, track selection, and strict signal quota enforcement.
+- [x] Program search and filter directory across ACGME specialties and geographical regions.
+- [x] School list management interface organizing programs by tier: **Reach**, **Target**, and **Safety**, and by track (Categorical, Preliminary, PSTP).
+- [x] Dynamic specialty rule selector: choosing a specialty automatically sets the official Gold and Silver signal caps (e.g. Ortho: 30 signals; Internal Medicine: 3 Gold, 12 Silver; OB/GYN: 3 Gold, 15 Silver).
+- [x] Live signal allocation budget meter showing remaining Gold and Silver tokens and preventing over-allocation.
+- [x] Advisor review mode enabling faculty to inspect program distribution ratios and leave program-specific strategic flags.
+- [x] Automated tests validating tier assignments, track selection, and strict signal quota enforcement.
