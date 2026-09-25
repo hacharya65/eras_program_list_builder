@@ -28,8 +28,22 @@ export default function HomePage() {
     setRefreshKey((k) => k + 1);
   };
 
+  const handleSubmitPS = (changelog: string) => {
+    service.submitPersonalStatementForReview({
+      studentId: studentContext.student.id,
+      advisorId: studentContext.assignedAdvisors[0].id,
+      changelogNote: changelog,
+    });
+    setRefreshKey((k) => k + 1);
+  };
+
   const handleUpdateExp = (id: string, updates: any) => {
     service.updateExperience(id, updates);
+    setRefreshKey((k) => k + 1);
+  };
+
+  const handleOpenReview = (reviewId: string) => {
+    service.openReviewAsAdvisor(reviewId, advisorContext.advisor.id);
     setRefreshKey((k) => k + 1);
   };
 
@@ -52,10 +66,17 @@ export default function HomePage() {
           <StudentPortal
             context={studentContext}
             onUpdatePersonalStatement={handleUpdatePS}
+            onSubmitPersonalStatement={handleSubmitPS}
             onUpdateExperience={handleUpdateExp}
           />
         )}
-        {currentRole === 'advisor' && <AdvisorPortal context={advisorContext} />}
+        {currentRole === 'advisor' && (
+          <AdvisorPortal
+            context={advisorContext}
+            onOpenReview={handleOpenReview}
+            getSnapshotContent={(id) => service.getSnapshot(id)}
+          />
+        )}
         {currentRole === 'admin' && <AdminPortal context={adminContext} />}
       </main>
 

@@ -4,11 +4,11 @@
 
 **Blocked by:** 02: Strict ERAS Plain-Text Drafting Sandbox & Content Sanitizer
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Immutable snapshot creation on draft submission; student local draft continues in parallel without modifying the submitted version.
-- [ ] Mandatory changelog summary prompt on submission for `v2` or later drafts.
-- [ ] Interactive 5-stage clinical order tracker displayed on student dashboard showing timestamps for each stage.
-- [ ] Faculty review inbox listing pending reviews sorted by submission date; opening a review updates state to `In Review` and notifies the student.
-- [ ] Side-by-side visual diff component showing previous version on the left and new version on the right with additions in green and deletions in red.
-- [ ] Automated tests verifying state transitions, snapshot immutability, and mandatory changelog enforcement.
+- [x] Immutable snapshot creation on draft submission; student local draft continues in parallel without modifying the submitted version.
+- [x] Mandatory changelog summary prompt on submission for `v2` or later drafts.
+- [x] Interactive 5-stage clinical order tracker displayed on student dashboard showing timestamps for each stage.
+- [x] Faculty review inbox listing pending reviews sorted by submission date; opening a review updates state to `In Review` and notifies the student.
+- [x] Side-by-side visual diff component showing previous version on the left and new version on the right with additions in green and deletions in red.
+- [x] Automated tests verifying state transitions, snapshot immutability, and mandatory changelog enforcement.

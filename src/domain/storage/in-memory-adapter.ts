@@ -5,6 +5,7 @@ import {
   ExperienceDraft,
   DocumentSnapshot,
   ReviewRequest,
+  ReviewStage,
   CohortSummary
 } from '../types';
 
@@ -137,6 +138,61 @@ export class InMemoryStorageAdapter {
     // If not found, create a stub with that id
     this.updateExperience(id, { isMostMeaningful: isMeaningful });
     return true;
+  }
+
+  createPersonalStatementSnapshot(changelogNote?: string): DocumentSnapshot {
+    const snapshot: DocumentSnapshot = {
+      id: `snap-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      documentType: 'personal_statement',
+      documentId: this.personalStatement.id,
+      versionNumber: this.personalStatement.currentVersionNumber,
+      content: this.personalStatement.content,
+      changelogNote,
+      submittedAt: new Date().toISOString(),
+    };
+    this.snapshots.push(snapshot);
+    return snapshot;
+  }
+
+  createReviewRequest(params: {
+    snapshotId: string;
+    studentId: string;
+    studentName: string;
+    advisorId: string;
+    documentType: 'personal_statement' | 'experience_portfolio';
+  }): ReviewRequest {
+    const now = new Date();
+    const slaDue = new Date(now.getTime() + this.institution.defaultSlaDays * 24 * 60 * 60 * 1000);
+
+    const request: ReviewRequest = {
+      id: `rev-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      snapshotId: params.snapshotId,
+      studentId: params.studentId,
+      studentName: params.studentName,
+      advisorId: params.advisorId,
+      documentType: params.documentType,
+      stage: 'submitted',
+      submittedAt: now.toISOString(),
+      slaDueAt: slaDue.toISOString(),
+    };
+    this.reviewRequests.push(request);
+    this.personalStatement.stage = 'submitted';
+    return request;
+  }
+
+  updateReviewStage(reviewRequestId: string, stage: ReviewStage, extra?: { inReviewAt?: string; completedAt?: string }): ReviewRequest {
+    const rev = this.reviewRequests.find(r => r.id === reviewRequestId);
+    if (!rev) {
+      throw new Error(`Review request not found: ${reviewRequestId}`);
+    }
+    rev.stage = stage;
+    if (extra?.inReviewAt) rev.inReviewAt = extra.inReviewAt;
+    if (extra?.completedAt) rev.completedAt = extra.completedAt;
+
+    if (rev.documentType === 'personal_statement') {
+      this.personalStatement.stage = stage;
+    }
+    return rev;
   }
 
   getCohortSummary(): CohortSummary {

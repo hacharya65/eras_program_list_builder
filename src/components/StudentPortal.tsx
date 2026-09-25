@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { StudentDashboardContext, ExperienceDraft } from '@/domain/types';
 import { PersonalStatementEditor } from './PersonalStatementEditor';
 import { ExperiencesManager } from './ExperiencesManager';
+import { OrderTracker } from './OrderTracker';
 import {
   FileText,
   Briefcase,
@@ -18,12 +19,14 @@ import {
 interface StudentPortalProps {
   context: StudentDashboardContext;
   onUpdatePersonalStatement?: (content: string) => void;
+  onSubmitPersonalStatement?: (changelog: string) => void;
   onUpdateExperience?: (id: string, updates: Partial<ExperienceDraft>) => void;
 }
 
 export function StudentPortal({
   context,
   onUpdatePersonalStatement,
+  onSubmitPersonalStatement,
   onUpdateExperience,
 }: StudentPortalProps) {
   const [activeView, setActiveView] = useState<'overview' | 'personal_statement' | 'experiences'>('overview');
@@ -46,7 +49,7 @@ export function StudentPortal({
         assignedAdvisor={assignedAdvisors[0]}
         onSave={(newContent) => onUpdatePersonalStatement?.(newContent)}
         onSubmitForReview={(changelog) => {
-          alert(`Submitted v${personalStatement.currentVersionNumber} to ${assignedAdvisors[0]?.name}! Changelog recorded.`);
+          onSubmitPersonalStatement?.(changelog);
           setActiveView('overview');
         }}
         onBack={() => setActiveView('overview')}
@@ -96,6 +99,9 @@ export function StudentPortal({
           </div>
         </div>
       </div>
+
+      {/* 5-Stage Clinical Order Pipeline Tracker */}
+      <OrderTracker currentStage={personalStatement.stage} />
 
       {/* Main Grid: Pre-Season Modules */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

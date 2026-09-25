@@ -12,13 +12,59 @@ import {
   FileCheck,
   Stethoscope
 } from 'lucide-react';
+import { VisualDiffViewer } from './VisualDiffViewer';
 
 interface AdvisorPortalProps {
   context: AdvisorDashboardContext;
+  onOpenReview?: (reviewId: string) => void;
+  getSnapshotContent?: (snapshotId: string) => any;
 }
 
-export function AdvisorPortal({ context }: AdvisorPortalProps) {
+export function AdvisorPortal({
+  context,
+  onOpenReview,
+  getSnapshotContent,
+}: AdvisorPortalProps) {
   const { advisor, advisees, pendingReviews } = context;
+  const [selectedReviewId, setSelectedReviewId] = React.useState<string | null>(null);
+
+  const selectedReview = pendingReviews.find(r => r.id === selectedReviewId);
+  const snapshot = selectedReview ? getSnapshotContent?.(selectedReview.snapshotId) : null;
+
+  if (selectedReview && snapshot) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setSelectedReviewId(null)}
+              className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg text-xs font-semibold"
+            >
+              &larr; Back to Queue
+            </button>
+            <div>
+              <h2 className="text-base font-bold text-slate-900">
+                Reviewing: {selectedReview.studentName}'s Personal Statement v{snapshot.versionNumber}
+              </h2>
+              <span className="text-xs text-slate-500">
+                Stage: <strong className="text-blue-700 capitalize">{selectedReview.stage.replace('_', ' ')}</strong> &bull; Submitted on {new Date(selectedReview.submittedAt).toLocaleDateString()}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        {/* Visual Diff & Snapshot View */}
+        <VisualDiffViewer
+          previousVersionTitle="Baseline Template / v0"
+          previousContent="Standing in the clinic, I observed the team treat patients..."
+          newVersionTitle={`v${snapshot.versionNumber} Submitted Draft`}
+          newContent={snapshot.content}
+          changelogNote={snapshot.changelogNote || 'Initial submission for faculty review.'}
+          studentName={selectedReview.studentName}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -78,11 +124,24 @@ export function AdvisorPortal({ context }: AdvisorPortalProps) {
                 {pendingReviews.map((rev) => (
                   <div key={rev.id} className="py-3 flex items-center justify-between">
                     <div>
-                      <div className="font-semibold text-slate-900 text-sm">{rev.studentName}</div>
-                      <div className="text-xs text-slate-500">{rev.documentType}</div>
+                      <div className="font-semibold text-slate-900 text-sm flex items-center gap-2">
+                        {rev.studentName}
+                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 uppercase">
+                          {rev.stage.replace('_', ' ')}
+                        </span>
+                      </div>
+                      <div className="text-xs text-slate-500 mt-0.5">
+                        Document: Personal Statement &bull; Submitted on {new Date(rev.submittedAt).toLocaleDateString()}
+                      </div>
                     </div>
-                    <button className="px-3 py-1.5 bg-sky-600 text-white text-xs rounded-lg font-medium">
-                      Review Draft
+                    <button
+                      onClick={() => {
+                        onOpenReview?.(rev.id);
+                        setSelectedReviewId(rev.id);
+                      }}
+                      className="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs rounded-lg font-medium shadow-sm transition-colors"
+                    >
+                      Open Review &amp; Diff
                     </button>
                   </div>
                 ))}

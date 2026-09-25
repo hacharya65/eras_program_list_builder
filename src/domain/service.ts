@@ -40,6 +40,38 @@ export class AdvisingPlatformService {
     return this.storage.updatePersonalStatement(content);
   }
 
+  submitPersonalStatementForReview(params: {
+    studentId: string;
+    advisorId: string;
+    changelogNote?: string;
+  }) {
+    if (this.storage.personalStatement.currentVersionNumber > 1 && (!params.changelogNote || !params.changelogNote.trim())) {
+      throw new Error('A student revision changelog note is required for submitting revisions');
+    }
+
+    const snapshot = this.storage.createPersonalStatementSnapshot(params.changelogNote);
+    const student = this.storage.personas.student;
+    const request = this.storage.createReviewRequest({
+      snapshotId: snapshot.id,
+      studentId: params.studentId,
+      studentName: student.name,
+      advisorId: params.advisorId,
+      documentType: 'personal_statement',
+    });
+
+    return request;
+  }
+
+  openReviewAsAdvisor(reviewRequestId: string, advisorId: string) {
+    return this.storage.updateReviewStage(reviewRequestId, 'in_review', {
+      inReviewAt: new Date().toISOString(),
+    });
+  }
+
+  getSnapshot(snapshotId: string) {
+    return this.storage.snapshots.find(s => s.id === snapshotId);
+  }
+
   updateExperience(id: string, updates: any) {
     return this.storage.updateExperience(id, updates);
   }
