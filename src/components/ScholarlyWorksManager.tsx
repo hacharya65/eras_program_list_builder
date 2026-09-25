@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   AAMC_SCHOLARLY_TYPES,
   AamcScholarlyType,
@@ -8,6 +8,13 @@ import {
   ScholarlyCollection,
   formatAamcAuthor,
   validateScholarlyCollectionTitle,
+  createDefaultScholarlyWork,
+  upsertScholarlyWork,
+  deleteScholarlyWork,
+  upsertScholarlyCollection,
+  deleteScholarlyCollection,
+  serializeScholarlyPortfolio,
+  deserializeScholarlyPortfolio,
 } from '@/domain/scholarly-models';
 import {
   BookOpen,
@@ -20,62 +27,98 @@ import {
   Trash2,
   Calendar,
   Layers,
-  Sparkles
+  Sparkles,
+  Save,
+  Check
 } from 'lucide-react';
 
 interface ScholarlyWorksManagerProps {
   onBack: () => void;
 }
 
-export function ScholarlyWorksManager({ onBack }: ScholarlyWorksManagerProps) {
-  const [works, setWorks] = useState<ScholarlyWork[]>([
-    {
-      id: 'sw-1',
-      studentId: 'student-1',
-      type: 'Journal Articles (peer reviewed)',
-      title: 'Longitudinal Pulmonary Function Trends Following ARDS in ICU Survivors',
-      authors: 'Rivera A, Chen M, Vance S',
-      isFirstAuthor: true,
-      publicationStatus: 'Published',
-      statusDate: '2024-05-12',
-      journalName: 'American Journal of Respiratory and Critical Care Medicine',
-      volume: '198',
-      pages: '412-420',
-      pmid: '38721904',
-      collectionId: 'col-1',
-      isMeaningful: true,
-    },
-    {
-      id: 'sw-2',
-      studentId: 'student-1',
-      type: 'Poster Presentation',
-      title: 'Community Health Worker Intervention for Uncontrolled Type 2 Diabetes',
-      authors: 'Patel P, Rivera A, Hayes R',
-      isFirstAuthor: false,
-      publicationStatus: 'Accepted/In-Press',
-      statusDate: '2023-11-18',
-      collectionId: 'col-2',
-      isMeaningful: true,
-      events: [
-        {
-          eventName: 'Society of General Internal Medicine Annual Meeting',
-          presentationDate: '2024-04-15',
-          city: 'Boston',
-          country: 'United States',
-          stateProvince: 'MA',
-        },
-      ],
-    },
-  ]);
+const DEFAULT_WORKS: ScholarlyWork[] = [
+  {
+    id: 'sw-1',
+    studentId: 'student-1',
+    type: 'Journal Articles (peer reviewed)',
+    title: 'Longitudinal Pulmonary Function Trends Following ARDS in ICU Survivors',
+    authors: 'Rivera A, Chen M, Vance S',
+    isFirstAuthor: true,
+    publicationStatus: 'Published',
+    statusDate: '2024-05-12',
+    journalName: 'American Journal of Respiratory and Critical Care Medicine',
+    volume: '198',
+    pages: '412-420',
+    pmid: '38721904',
+    collectionId: 'col-1',
+    isMeaningful: true,
+  },
+  {
+    id: 'sw-2',
+    studentId: 'student-1',
+    type: 'Poster Presentation',
+    title: 'Community Health Worker Intervention for Uncontrolled Type 2 Diabetes',
+    authors: 'Patel P, Rivera A, Hayes R',
+    isFirstAuthor: false,
+    publicationStatus: 'Accepted/In-Press',
+    statusDate: '2023-11-18',
+    collectionId: 'col-2',
+    isMeaningful: true,
+    events: [
+      {
+        eventName: 'Society of General Internal Medicine Annual Meeting',
+        presentationDate: '2024-04-15',
+        city: 'Boston',
+        country: 'United States',
+        stateProvince: 'MA',
+      },
+    ],
+  },
+];
 
-  const [collections, setCollections] = useState<ScholarlyCollection[]>([
-    { id: 'col-1', studentId: 'student-1', title: 'Critical Care & Pulmonary Outcomes' },
-    { id: 'col-2', studentId: 'student-1', title: 'Community Health Interventions' },
-  ]);
+const DEFAULT_COLLECTIONS: ScholarlyCollection[] = [
+  { id: 'col-1', studentId: 'student-1', title: 'Critical Care & Pulmonary Outcomes' },
+  { id: 'col-2', studentId: 'student-1', title: 'Community Health Interventions' },
+];
+
+const STORAGE_KEY = 'eras_scholarly_portfolio';
+
+export function ScholarlyWorksManager({ onBack }: ScholarlyWorksManagerProps) {
+  // Rehydrate initial state safely from localStorage
+  const [works, setWorks] = useState<ScholarlyWork[]>(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem(STORAGE_KEY);
+      const restored = deserializeScholarlyPortfolio(cached);
+      if (restored && restored.works.length > 0) {
+        return restored.works;
+      }
+    }
+    return DEFAULT_WORKS;
+  });
+
+  const [collections, setCollections] = useState<ScholarlyCollection[]>(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem(STORAGE_KEY);
+      const restored = deserializeScholarlyPortfolio(cached);
+      if (restored && restored.collections.length > 0) {
+        return restored.collections;
+      }
+    }
+    return DEFAULT_COLLECTIONS;
+  });
 
   const [newCollectionTitle, setNewCollectionTitle] = useState('');
   const [showAddCollection, setShowAddCollection] = useState(false);
-  const [editingWork, setEditingWork] = useState<ScholarlyWork | null>(works[0] || null);
+  const [editingWork, setEditingWork] = useState<ScholarlyWork | null>(() => works[0] || null);
+  const [lastSavedTime, setLastSavedTime] = useState<string>('Saved');
+
+  // Keep localStorage continuously synchronized
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem(STORAGE_KEY, serializeScholarlyPortfolio(works, collections));
+      setLastSavedTime('Saved');
+    }
+  }, [works, collections]);
 
   const meaningfulCount = works.filter((w) => w.isMeaningful).length;
 
@@ -87,7 +130,11 @@ export function ScholarlyWorksManager({ onBack }: ScholarlyWorksManagerProps) {
             alert('AAMC Guideline: You can indicate up to 3 Most Meaningful Scholarly Works.');
             return w;
           }
-          return { ...w, isMeaningful: !w.isMeaningful };
+          const updated = { ...w, isMeaningful: !w.isMeaningful };
+          if (editingWork?.id === workId) {
+            setEditingWork(updated);
+          }
+          return updated;
         }
         return w;
       })
@@ -101,28 +148,34 @@ export function ScholarlyWorksManager({ onBack }: ScholarlyWorksManagerProps) {
       return;
     }
     const newCol: ScholarlyCollection = {
-      id: `col-${Date.now()}`,
+      id: `col-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       studentId: 'student-1',
       title: newCollectionTitle.trim(),
     };
-    setCollections((prev) => [...prev, newCol]);
+    setCollections((prev) => upsertScholarlyCollection(prev, newCol));
     setNewCollectionTitle('');
     setShowAddCollection(false);
   };
 
+  const handleDeleteCollection = (collectionId: string) => {
+    setCollections((prev) => deleteScholarlyCollection(prev, collectionId));
+    setWorks((prev) =>
+      prev.map((w) => (w.collectionId === collectionId ? { ...w, collectionId: undefined } : w))
+    );
+  };
+
   const handleCreateNewWork = () => {
-    const newWork: ScholarlyWork = {
-      id: `sw-${Date.now()}`,
-      studentId: 'student-1',
-      type: 'Journal Articles (peer reviewed)',
-      title: 'New Scholarly Output',
-      authors: 'Rivera A',
-      isFirstAuthor: true,
-      publicationStatus: 'Submitted',
-      isMeaningful: false,
-    };
-    setWorks((prev) => [newWork, ...prev]);
+    const newWork = createDefaultScholarlyWork('student-1');
+    setWorks((prev) => upsertScholarlyWork(prev, newWork));
     setEditingWork(newWork);
+  };
+
+  const handleDeleteWork = (workId: string) => {
+    const updated = deleteScholarlyWork(works, workId);
+    setWorks(updated);
+    if (editingWork?.id === workId) {
+      setEditingWork(updated[0] || null);
+    }
   };
 
   const handleUpdateCurrentWork = (field: keyof ScholarlyWork, value: any) => {
@@ -131,6 +184,7 @@ export function ScholarlyWorksManager({ onBack }: ScholarlyWorksManagerProps) {
     setEditingWork(updated);
     setWorks((prev) => prev.map((w) => (w.id === updated.id ? updated : w)));
   };
+
 
   return (
     <div className="space-y-6">
@@ -152,6 +206,10 @@ export function ScholarlyWorksManager({ onBack }: ScholarlyWorksManagerProps) {
               </span>
               <span className="px-2 py-0.5 text-xs font-semibold rounded bg-amber-100 text-amber-800">
                 {meaningfulCount} / 3 Starred
+              </span>
+              <span className="inline-flex items-center gap-1 px-2 py-0.5 text-[11px] font-medium rounded bg-emerald-50 text-emerald-700 border border-emerald-200">
+                <CheckCircle2 className="w-3 h-3 text-emerald-600" />
+                Auto-saved
               </span>
             </div>
             <p className="text-xs text-slate-500">
@@ -213,10 +271,17 @@ export function ScholarlyWorksManager({ onBack }: ScholarlyWorksManagerProps) {
               {collections.map((c) => (
                 <span
                   key={c.id}
-                  className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1"
+                  className="px-2.5 py-1 rounded-md text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200 flex items-center gap-1.5 group"
                 >
                   <Tag className="w-3 h-3 text-slate-400" />
-                  {c.title}
+                  <span>{c.title}</span>
+                  <button
+                    onClick={() => handleDeleteCollection(c.id)}
+                    className="text-slate-400 hover:text-red-500 transition-colors p-0.5"
+                    title={`Remove collection "${c.title}"`}
+                  >
+                    ×
+                  </button>
                 </span>
               ))}
             </div>
@@ -296,18 +361,29 @@ export function ScholarlyWorksManager({ onBack }: ScholarlyWorksManagerProps) {
           <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <h2 className="text-base font-bold text-slate-900">Edit Scholarly Work Details</h2>
-              <button
-                type="button"
-                onClick={() => handleToggleMeaningful(editingWork.id)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
-                  editingWork.isMeaningful
-                    ? 'bg-amber-50 text-amber-900 border-amber-300 ring-2 ring-amber-400/30'
-                    : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                }`}
-              >
-                <Star className={`w-4 h-4 ${editingWork.isMeaningful ? 'fill-amber-500 text-amber-500' : 'text-slate-400'}`} />
-                {editingWork.isMeaningful ? 'Starred as Most Meaningful' : 'Star as Most Meaningful (Max 3)'}
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleToggleMeaningful(editingWork.id)}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+                    editingWork.isMeaningful
+                      ? 'bg-amber-50 text-amber-900 border-amber-300 ring-2 ring-amber-400/30'
+                      : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
+                  }`}
+                >
+                  <Star className={`w-4 h-4 ${editingWork.isMeaningful ? 'fill-amber-500 text-amber-500' : 'text-slate-400'}`} />
+                  {editingWork.isMeaningful ? 'Starred as Most Meaningful' : 'Star as Most Meaningful (Max 3)'}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleDeleteWork(editingWork.id)}
+                  className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg border border-red-200 text-red-600 hover:bg-red-50 text-xs font-semibold transition-colors"
+                  title="Delete this scholarly work entry"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  <span>Delete</span>
+                </button>
+              </div>
             </div>
 
             {/* Type & Title */}

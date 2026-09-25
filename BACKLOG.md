@@ -10,7 +10,7 @@ This backlog tracks the next cycle of feature requests, enhancements, and bugfix
 | :--- | :--- | :--- | :--- | :--- | :--- |
 | **[#11](.scratch/eras-advising/issues/11-personal-statement-version-forking.md)** | Personal Statement Dynamic Version Forking (V1 through V_n) | Workflow / Data Integrity | Medium | None | `Pending` |
 | **[#12](.scratch/eras-advising/issues/12-experiences-advisor-review-submission.md)** | Faculty Advisor Review Submission for Experiences | Workflow / Advising | Medium | None | `Pending` |
-| **[#13](.scratch/eras-advising/issues/13-scholarly-works-persistence-bugfix.md)** | Scholarly Works State Persistence Bugfix | Bugfix / UX | Low | None | `Pending` |
+| **[#13](.scratch/eras-advising/issues/13-scholarly-works-persistence-bugfix.md)** | Scholarly Works State Persistence Bugfix | Bugfix / UX | Low | None | `Completed` |
 | **[#14](.scratch/eras-advising/issues/14-universal-residency-database-matrix.md)** | Universal Residency Program Database & Row Matrix | Data / UI Redesign | High | None | `Pending` |
 | **[#15](.scratch/eras-advising/issues/15-signaling-strategy-recommendation-engine.md)** | Program Signaling Strategy Recommendation Engine | Algorithm / Decision Support | Medium | #14 recommended | `Pending` |
 | **[#16](.scratch/eras-advising/issues/16-advisor-live-editing-annotations-comments.md)** | Advisor Live Document Editing, Annotations & Anchored Comments | Collaborative Review | High | #11, #12 | `Pending` |

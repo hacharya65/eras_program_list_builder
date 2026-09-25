@@ -4,9 +4,9 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** pending
+**Status:** completed
 
-- [ ] Form state preservation: Ensure draft entry inputs do not get cleared when new entries are appended or validated.
-- [ ] Local storage sync & rehydration: Back student scholarly works records (peer-reviewed articles, abstracts, presentations, collections) with browser local storage cache so refreshes and tab switches preserve draft content.
-- [ ] Idempotent record creation: Prevent duplicate keys or lost entries during list mutations.
-- [ ] Regression tests ensuring full test coverage for addition, editing, deletion, and rehydration of scholarly entries.
+- [x] Form state preservation: Ensure draft entry inputs do not get cleared when new entries are appended or validated.
+- [x] Local storage sync & rehydration: Back student scholarly works records (peer-reviewed articles, abstracts, presentations, collections) with browser local storage cache so refreshes and tab switches preserve draft content.
+- [x] Idempotent record creation: Prevent duplicate keys or lost entries during list mutations.
+- [x] Regression tests ensuring full test coverage for addition, editing, deletion, and rehydration of scholarly entries.

@@ -83,3 +83,82 @@ export function validateScholarlyWorkDraft(work: Partial<ScholarlyWork>): { vali
     errors,
   };
 }
+
+export function createDefaultScholarlyWork(studentId: string): ScholarlyWork {
+  const uniqueId = `sw-${Date.now()}-${Math.random().toString(36).substr(2, 6)}`;
+  return {
+    id: uniqueId,
+    studentId,
+    type: 'Journal Articles (peer reviewed)',
+    title: 'New Scholarly Output',
+    authors: 'Rivera A',
+    isFirstAuthor: true,
+    publicationStatus: 'Submitted',
+    isMeaningful: false,
+  };
+}
+
+export function upsertScholarlyWork(works: ScholarlyWork[], work: ScholarlyWork): ScholarlyWork[] {
+  const idx = works.findIndex(w => w.id === work.id);
+  if (idx !== -1) {
+    const copy = [...works];
+    copy[idx] = { ...work };
+    return copy;
+  }
+  return [work, ...works];
+}
+
+export function deleteScholarlyWork(works: ScholarlyWork[], workId: string): ScholarlyWork[] {
+  return works.filter(w => w.id !== workId);
+}
+
+export function upsertScholarlyCollection(
+  collections: ScholarlyCollection[],
+  collection: ScholarlyCollection
+): ScholarlyCollection[] {
+  const idx = collections.findIndex(c => c.id === collection.id);
+  if (idx !== -1) {
+    const copy = [...collections];
+    copy[idx] = { ...collection };
+    return copy;
+  }
+  return [...collections, collection];
+}
+
+export function deleteScholarlyCollection(
+  collections: ScholarlyCollection[],
+  collectionId: string
+): ScholarlyCollection[] {
+  return collections.filter(c => c.id !== collectionId);
+}
+
+export function serializeScholarlyPortfolio(
+  works: ScholarlyWork[],
+  collections: ScholarlyCollection[]
+): string {
+  return JSON.stringify({
+    version: 1,
+    savedAt: new Date().toISOString(),
+    works,
+    collections,
+  });
+}
+
+export function deserializeScholarlyPortfolio(
+  json: string | null
+): { works: ScholarlyWork[]; collections: ScholarlyCollection[] } | null {
+  if (!json) return null;
+  try {
+    const parsed = JSON.parse(json);
+    if (parsed && Array.isArray(parsed.works) && Array.isArray(parsed.collections)) {
+      return {
+        works: parsed.works,
+        collections: parsed.collections,
+      };
+    }
+    return null;
+  } catch {
+    return null;
+  }
+}
+
