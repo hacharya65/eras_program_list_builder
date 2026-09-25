@@ -9,6 +9,7 @@ import {
   SignalType,
   ApplicationTrack,
 } from '@/domain/school-list-models';
+import { getAlumniByProgram } from '@/domain/alumni-models';
 import {
   Sparkles,
   Plus,
@@ -21,7 +22,8 @@ import {
   Target,
   Compass,
   Building,
-  CheckCircle2
+  CheckCircle2,
+  Users
 } from 'lucide-react';
 
 interface SchoolListMatrixProps {
@@ -391,6 +393,23 @@ export function SchoolListMatrix({
                             </a>
                           </div>
                         </div>
+
+                        {/* Verified Apex Alumni Banner */}
+                        {(() => {
+                          const alums = getAlumniByProgram(prog.programName, prog.specialty);
+                          if (alums.length === 0) return null;
+                          return (
+                            <div className="text-[11px] bg-violet-50 text-violet-800 p-2 rounded border border-violet-200 flex items-center justify-between">
+                              <span className="flex items-center gap-1.5 font-medium">
+                                <Users className="w-3.5 h-3.5 text-violet-600" />
+                                {alums.length} Apex Alumni Match{alums.length > 1 ? 'es' : ''} ({alums.map(a => a.currentPgy).join(', ')})
+                              </span>
+                              <span className="text-[10px] font-bold bg-violet-200 text-violet-900 px-1.5 py-0.2 rounded">
+                                Mentors Active
+                              </span>
+                            </div>
+                          );
+                        })()}
 
                         {/* Advisor Strategic Notes */}
                         {prog.advisorNotes && (

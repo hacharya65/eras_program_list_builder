@@ -4,11 +4,11 @@
 
 **Blocked by:** 07: Strategic School List Matrix with Dynamic Specialty Signaling
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Match roster data model and institutional match history view displaying where school alumni have matched over the past 3-5 years.
-- [ ] Program card integration highlighting verified alumni residents currently training at that institution.
-- [ ] Opt-in mentorship toggle allowing alumni to specify preferred contact preferences.
-- [ ] Direct links to Doximity Residency Reviews on each program card for unvarnished resident culture and satisfaction metrics.
-- [ ] Non-robotic outreach guidelines offering advice on professional, personalized communication.
-- [ ] Automated tests validating alumni record linking and program-level aggregation.
+- [x] Match roster data model and institutional match history view displaying where school alumni have matched over the past 3-5 years.
+- [x] Program card integration highlighting verified alumni residents currently training at that institution.
+- [x] Opt-in mentorship toggle allowing alumni to specify preferred contact preferences.
+- [x] Direct links to Doximity Residency Reviews on each program card for unvarnished resident culture and satisfaction metrics.
+- [x] Non-robotic outreach guidelines offering advice on professional, personalized communication.
+- [x] Automated tests validating alumni record linking and program-level aggregation.

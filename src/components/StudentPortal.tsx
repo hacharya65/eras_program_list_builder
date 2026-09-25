@@ -7,6 +7,7 @@ import { OrderTracker } from './OrderTracker';
 import { StudentFeedbackViewer } from './StudentFeedbackViewer';
 import { SchoolListMatrix } from './SchoolListMatrix';
 import { CompetitivenessCalculator } from './CompetitivenessCalculator';
+import { AlumniResidentDirectory } from './AlumniResidentDirectory';
 import {
   FileText,
   Briefcase,
@@ -18,7 +19,8 @@ import {
   ChevronRight,
   ExternalLink,
   Sparkles,
-  BarChart3
+  BarChart3,
+  Users
 } from 'lucide-react';
 
 interface StudentPortalProps {
@@ -38,7 +40,7 @@ export function StudentPortal({
   getAdvisorFeedback,
   onCreateRevision,
 }: StudentPortalProps) {
-  const [activeView, setActiveView] = useState<'overview' | 'personal_statement' | 'experiences' | 'scholarly_works' | 'school_list' | 'competitiveness'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'personal_statement' | 'experiences' | 'scholarly_works' | 'school_list' | 'competitiveness' | 'alumni_directory'>('overview');
   const { student, personalStatement, experiences, assignedAdvisors } = context;
 
   const stageLabels = {
@@ -97,6 +99,16 @@ export function StudentPortal({
   if (activeView === 'competitiveness') {
     return (
       <CompetitivenessCalculator
+        initialSpecialty={student.specialty}
+        onBack={() => setActiveView('overview')}
+      />
+    );
+  }
+
+  if (activeView === 'alumni_directory') {
+    return (
+      <AlumniResidentDirectory
+        studentName={student.name}
         initialSpecialty={student.specialty}
         onBack={() => setActiveView('overview')}
       />
@@ -290,6 +302,34 @@ export function StudentPortal({
             className="mt-5 w-full py-2 px-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
             Assess Specialty Profile <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Module 6: Alumni Resident Network */}
+        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:border-slate-300 transition-all flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <div className="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center">
+                <Users className="w-5 h-5" />
+              </div>
+              <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-violet-50 text-violet-700 border border-violet-200">
+                88% Mentors Opted-In
+              </span>
+            </div>
+            <h2 className="text-lg font-bold text-slate-900 mt-4">Alumni Resident Roster</h2>
+            <p className="text-xs text-slate-600 mt-1">
+              Connect with Apex graduates training at target hospitals, browse match history, and launch outreach emails.
+            </p>
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+              <span>Match History: <strong className="text-slate-700">2022–2025</strong></span>
+              <span>Doximity Reviews: <strong className="text-violet-700 font-bold">Linked</strong></span>
+            </div>
+          </div>
+          <button
+            onClick={() => setActiveView('alumni_directory')}
+            className="mt-5 w-full py-2 px-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+          >
+            Explore Alumni Network <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>
