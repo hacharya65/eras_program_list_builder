@@ -9,13 +9,15 @@ import {
   Star,
   Plus,
   Trash2,
+  Edit3,
   CheckCircle2,
   AlertTriangle,
   ArrowLeft,
   Sparkles,
-  Heart,
-  HelpCircle,
-  Info
+  Info,
+  ChevronDown,
+  ChevronUp,
+  X
 } from 'lucide-react';
 
 interface ExperiencesManagerProps {
@@ -31,25 +33,22 @@ export function ExperiencesManager({
   onDeleteExperience,
   onBack,
 }: ExperiencesManagerProps) {
-  const [editingId, setEditingId] = useState<string | null>(experiences[0]?.id || null);
+  const [editingId, setEditingId] = useState<string | null>(null);
   const [hobbiesText, setHobbiesText] = useState('');
   const [impactfulText, setImpactfulText] = useState('');
 
-  const currentExp = experiences.find((e) => e.id === editingId) || experiences[0];
   const meaningfulCount = experiences.filter((e) => e.isMostMeaningful).length;
 
-  const handleUpdate = (field: keyof ExperienceDraft, value: any) => {
-    if (!currentExp) return;
-    onSaveExperience(currentExp.id, { [field]: value });
+  const handleUpdate = (expId: string, field: keyof ExperienceDraft, value: any) => {
+    onSaveExperience(expId, { [field]: value });
   };
 
-  const handleToggleMeaningful = () => {
-    if (!currentExp) return;
-    if (!currentExp.isMostMeaningful && meaningfulCount >= 3) {
+  const handleToggleMeaningful = (exp: ExperienceDraft) => {
+    if (!exp.isMostMeaningful && meaningfulCount >= 3) {
       alert('Official AAMC ERAS Limit: You can designate up to 3 experiences as Most Meaningful.');
       return;
     }
-    handleUpdate('isMostMeaningful', !currentExp.isMostMeaningful);
+    handleUpdate(exp.id, 'isMostMeaningful', !exp.isMostMeaningful);
   };
 
   const handleCreateNew = () => {
@@ -76,11 +75,8 @@ export function ExperiencesManager({
     setEditingId(newId);
   };
 
-  const descLength = currentExp?.descriptionText?.length || 0;
-  const reflLength = currentExp?.reflectionText?.length || 0;
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Top Header Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
         <div className="flex items-center gap-3">
@@ -117,7 +113,343 @@ export function ExperiencesManager({
         </button>
       </div>
 
-      {/* SECTION 1: Additional ERAS Experiences (Impactful Experiences & Hobbies) Prominently at Top */}
+      {/* SECTION 1: Selected Experiences (Up to 10) in Structured Row Table View */}
+      <div className="space-y-4">
+        {/* Word-for-Word AAMC Guidance Banner */}
+        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3">
+          <Info className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
+          <div className="text-xs text-slate-700 leading-relaxed">
+            <div className="font-bold text-slate-900 text-sm mb-0.5">Selected Experiences (Up to 10)</div>
+            &ldquo;Please identify and describe up to 10 experiences that communicate who you are, what you are passionate about, and what is most important to you.&rdquo;
+          </div>
+        </div>
+
+        {/* Structured Row List / Table View */}
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+          <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+            <div>
+              <h2 className="text-sm font-bold text-slate-900">Your 10 Selected Experiences</h2>
+              <p className="text-xs text-slate-500 mt-0.5">
+                Organize your top clinical, research, leadership, and volunteer roles.
+              </p>
+            </div>
+            <span className="text-xs font-semibold text-slate-600">
+              {experiences.length} of 10 slots filled
+            </span>
+          </div>
+
+          {experiences.length === 0 ? (
+            <div className="p-12 text-center space-y-3">
+              <Briefcase className="w-10 h-10 text-slate-300 mx-auto" />
+              <h3 className="text-sm font-bold text-slate-800">No experiences entered yet</h3>
+              <p className="text-xs text-slate-500 max-w-sm mx-auto">
+                Begin building your ERAS application by adding your first experience row.
+              </p>
+              <button
+                onClick={handleCreateNew}
+                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 shadow-sm"
+              >
+                <Plus className="w-4 h-4" /> Add Experience
+              </button>
+            </div>
+          ) : (
+            <div className="divide-y divide-slate-200">
+              {experiences.map((exp, index) => {
+                const isEditing = editingId === exp.id;
+                const descLen = exp.descriptionText?.length || 0;
+                const reflLen = exp.reflectionText?.length || 0;
+
+                return (
+                  <div key={exp.id} className="transition-colors">
+                    {/* Summary Row */}
+                    <div
+                      className={`p-4 flex flex-col md:flex-row md:items-center justify-between gap-4 ${
+                        isEditing ? 'bg-emerald-50/40 border-l-4 border-emerald-600' : 'hover:bg-slate-50/70'
+                      }`}
+                    >
+                      {/* Left: Number, Title, Org */}
+                      <div className="flex items-start md:items-center gap-3 flex-1 min-w-0">
+                        <span className="w-7 h-7 rounded-full bg-slate-100 text-slate-600 font-bold text-xs flex items-center justify-center shrink-0">
+                          #{index + 1}
+                        </span>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <h3 className="text-sm font-bold text-slate-900 truncate">
+                              {exp.title || <span className="text-slate-400 italic">Untitled Experience (Click Edit to enter)</span>}
+                            </h3>
+                            {exp.isMostMeaningful && (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1 shrink-0">
+                                <Star className="w-3 h-3 fill-amber-500 text-amber-500" />
+                                Most Meaningful
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-xs text-slate-500 truncate mt-0.5">
+                            {exp.orgName ? exp.orgName : 'Organization not set'} &bull;{' '}
+                            {exp.experienceType ? exp.experienceType : 'Type not selected'}
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Middle: Frequency & Character Progress */}
+                      <div className="flex items-center gap-6 text-xs text-slate-600 shrink-0">
+                        <div className="hidden sm:block">
+                          <span className="text-slate-400 block text-[10px] uppercase font-semibold">Frequency</span>
+                          <span className="font-medium text-slate-700">{exp.frequency || 'Not set'}</span>
+                        </div>
+
+                        <div>
+                          <span className="text-slate-400 block text-[10px] uppercase font-semibold">Description</span>
+                          <span
+                            className={`font-mono font-bold ${
+                              descLen > 750 ? 'text-red-600' : descLen > 0 ? 'text-slate-800' : 'text-slate-400'
+                            }`}
+                          >
+                            {descLen} / 750 chars
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Right: Dedicated Edit and Delete Buttons */}
+                      <div className="flex items-center gap-2 shrink-0 justify-end">
+                        <button
+                          onClick={() => setEditingId(isEditing ? null : exp.id)}
+                          className={`px-3 py-1.5 rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors ${
+                            isEditing
+                              ? 'bg-slate-800 hover:bg-slate-900 text-white'
+                              : 'bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-200'
+                          }`}
+                        >
+                          <Edit3 className="w-3.5 h-3.5" />
+                          {isEditing ? 'Close Editor' : 'Edit'}
+                        </button>
+
+                        <button
+                          onClick={() => {
+                            if (confirm('Are you sure you want to remove this experience?')) {
+                              onDeleteExperience(exp.id);
+                              if (editingId === exp.id) setEditingId(null);
+                            }
+                          }}
+                          className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                          title="Delete Experience"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {/* Expandable "Experience Details" Input Panel */}
+                    {isEditing && (
+                      <div className="bg-slate-50/70 p-6 border-t border-slate-200 space-y-5 animate-fade-in">
+                        {/* Header with Meaningful Star Toggle */}
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-200">
+                          <div>
+                            <h4 className="text-sm font-bold text-slate-900">
+                              Experience Details &bull; Entry #{index + 1}
+                            </h4>
+                            <p className="text-xs text-slate-500">
+                              Configure role title, setting, AAMC taxonomy dropdowns, and description.
+                            </p>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={() => handleToggleMeaningful(exp)}
+                            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
+                              exp.isMostMeaningful
+                                ? 'bg-amber-50 text-amber-900 border-amber-300 ring-2 ring-amber-400/30'
+                                : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-100'
+                            }`}
+                          >
+                            <Star className={`w-4 h-4 ${exp.isMostMeaningful ? 'fill-amber-500 text-amber-500' : 'text-slate-400'}`} />
+                            {exp.isMostMeaningful ? 'Designated as Most Meaningful' : 'Mark as Most Meaningful (Max 3)'}
+                          </button>
+                        </div>
+
+                        {/* Title & Organization */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">
+                              Position / Experience Title *
+                            </label>
+                            <input
+                              type="text"
+                              value={exp.title || ''}
+                              onChange={(e) => handleUpdate(exp.id, 'title', e.target.value)}
+                              className="w-full p-2.5 text-xs rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                              placeholder="e.g. Sub-Intern in Inpatient Medicine"
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">
+                              Organization Name *
+                            </label>
+                            <input
+                              type="text"
+                              value={exp.orgName || ''}
+                              onChange={(e) => handleUpdate(exp.id, 'orgName', e.target.value)}
+                              className="w-full p-2.5 text-xs rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                              placeholder="e.g. Apex University Hospital"
+                            />
+                          </div>
+                        </div>
+
+                        {/* AAMC Taxonomy Dropdowns */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">
+                              AAMC Experience Type (Required) *
+                            </label>
+                            <select
+                              value={exp.experienceType || ''}
+                              onChange={(e) => handleUpdate(exp.id, 'experienceType', e.target.value)}
+                              className="w-full p-2.5 text-xs rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            >
+                              <option value="">Select Experience Type...</option>
+                              {AAMC_TAXONOMY.experienceTypes.map((t) => (
+                                <option key={t} value={t}>{t}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">
+                              Participation Frequency *
+                            </label>
+                            <select
+                              value={exp.frequency || ''}
+                              onChange={(e) => handleUpdate(exp.id, 'frequency', e.target.value)}
+                              className="w-full p-2.5 text-xs rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            >
+                              <option value="">Select Frequency...</option>
+                              {AAMC_TAXONOMY.frequencyTypes.map((f) => (
+                                <option key={f} value={f}>{f}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">
+                              Primary Focus Area (Optional)
+                            </label>
+                            <select
+                              value={exp.primaryFocusArea || ''}
+                              onChange={(e) => handleUpdate(exp.id, 'primaryFocusArea', e.target.value)}
+                              className="w-full p-2.5 text-xs rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            >
+                              <option value="">None / Leave Blank</option>
+                              {AAMC_TAXONOMY.primaryFocusAreas.map((fa) => (
+                                <option key={fa} value={fa}>{fa}</option>
+                              ))}
+                            </select>
+                          </div>
+                          <div>
+                            <label className="block text-xs font-bold text-slate-700 mb-1">
+                              Key Characteristic (Optional)
+                            </label>
+                            <select
+                              value={exp.keyCharacteristic || ''}
+                              onChange={(e) => handleUpdate(exp.id, 'keyCharacteristic', e.target.value)}
+                              className="w-full p-2.5 text-xs rounded-lg border border-slate-300 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
+                            >
+                              <option value="">None / Leave Blank</option>
+                              {AAMC_TAXONOMY.keyCharacteristics.map((kc) => (
+                                <option key={kc} value={kc}>{kc}</option>
+                              ))}
+                            </select>
+                          </div>
+                        </div>
+
+                        {/* 750-Character Description */}
+                        <div>
+                          <div className="flex items-center justify-between mb-1">
+                            <label className="block text-xs font-bold text-slate-700">
+                              Context, Roles, and Responsibilities: 750-character limit
+                            </label>
+                            <span className={`text-xs font-mono font-bold ${descLen > 750 ? 'text-red-600' : 'text-slate-500'}`}>
+                              {descLen} / 750 characters
+                            </span>
+                          </div>
+                          <textarea
+                            value={exp.descriptionText || ''}
+                            onChange={(e) => handleUpdate(exp.id, 'descriptionText', sanitizeErasText(e.target.value))}
+                            rows={5}
+                            className={`w-full p-3 rounded-lg border text-xs font-mono leading-relaxed focus:outline-none focus:ring-2 ${
+                              descLen > 750
+                                ? 'border-red-400 bg-red-50 focus:ring-red-400'
+                                : 'border-slate-300 bg-white focus:ring-emerald-500'
+                            }`}
+                            placeholder="Describe your context, roles, and responsibilities (750-character limit)..."
+                          />
+                          {descLen > 750 && (
+                            <p className="text-[11px] text-red-600 font-medium mt-1 flex items-center gap-1">
+                              <AlertTriangle className="w-3.5 h-3.5" />
+                              Exceeds official ERAS limit by {descLen - 750} characters. Text will be cut off upon ERAS import!
+                            </p>
+                          )}
+                        </div>
+
+                        {/* 300-Character Most Meaningful Reflection (if starred) */}
+                        {exp.isMostMeaningful && (
+                          <div className="pt-3 border-t border-amber-200 bg-amber-50/60 p-4 rounded-xl border space-y-2">
+                            <div className="flex items-center justify-between mb-1">
+                              <label className="block text-xs font-bold text-amber-950 flex items-center gap-1.5">
+                                <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
+                                Selected Experiences | What made this experience meaningful?
+                              </label>
+                              <span className={`text-xs font-mono font-bold ${reflLen > 300 ? 'text-red-600' : 'text-amber-800'}`}>
+                                {reflLen} / 300 characters
+                              </span>
+                            </div>
+
+                            {/* Word-for-Word AAMC Prompt Guidance */}
+                            <div className="text-[11px] text-amber-900 leading-relaxed bg-white/80 p-3 rounded border border-amber-200">
+                              <p className="font-semibold mb-1">
+                                Identify and describe up to 3 of the 10 experiences that you found the most meaningful.
+                              </p>
+                              <p>
+                                Reflect on the experience, why it was meaningful, and how it influenced you. Weave in the focus area or key characteristic you tagged. This should not describe what you did in the experience or list a set of skills that you developed or demonstrated during the experience.
+                              </p>
+                            </div>
+
+                            <textarea
+                              value={exp.reflectionText || ''}
+                              onChange={(e) => handleUpdate(exp.id, 'reflectionText', sanitizeErasText(e.target.value))}
+                              rows={3}
+                              className={`w-full p-3 rounded-lg border text-xs font-mono leading-relaxed focus:outline-none focus:ring-2 ${
+                                reflLen > 300
+                                  ? 'border-red-400 bg-red-50 focus:ring-red-400'
+                                  : 'border-amber-200 bg-white focus:ring-amber-500'
+                              }`}
+                              placeholder="Reflect on why this experience was meaningful and how it influenced you (300-character limit)..."
+                            />
+                            {reflLen > 300 && (
+                              <p className="text-[11px] text-red-600 font-medium mt-1 flex items-center gap-1">
+                                <AlertTriangle className="w-3.5 h-3.5" />
+                                Exceeds reflection limit by {reflLen - 300} characters.
+                              </p>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="flex justify-end pt-2">
+                          <button
+                            onClick={() => setEditingId(null)}
+                            className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold shadow-sm"
+                          >
+                            Done Editing Entry #{index + 1}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* SECTION 2: Additional ERAS Experiences (Anchored at Bottom Beneath 10 Selected Experiences) */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-6">
         <div className="border-b border-slate-100 pb-3 flex items-center justify-between">
           <div>
@@ -224,279 +556,6 @@ export function ExperiencesManager({
               <AlertTriangle className="w-3.5 h-3.5" />
               Exceeds hobbies limit by {hobbiesText.length - 300} characters.
             </p>
-          )}
-        </div>
-      </div>
-
-      {/* SECTION 2: 10 Selected Experiences */}
-      <div className="space-y-4">
-        {/* Word-for-Word AAMC Section Header */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3">
-          <Info className="w-5 h-5 text-emerald-600 shrink-0 mt-0.5" />
-          <div className="text-xs text-slate-700 leading-relaxed">
-            <div className="font-bold text-slate-900 text-sm mb-0.5">Selected Experiences (Up to 10)</div>
-            &ldquo;Please identify and describe up to 10 experiences that communicate who you are, what you are passionate about, and what is most important to you.&rdquo;
-          </div>
-        </div>
-
-        {/* Main Grid: Experience List (Left) + Active Form (Right) */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Left Column: Experience Selector */}
-          <div className="space-y-3">
-            <div className="text-xs font-bold text-slate-500 uppercase tracking-wider px-1">
-              Your 10 Selected Experiences
-            </div>
-
-            {experiences.length === 0 ? (
-              <div className="bg-white rounded-xl border border-dashed border-slate-300 p-6 text-center space-y-3">
-                <Briefcase className="w-8 h-8 text-slate-300 mx-auto" />
-                <p className="text-xs text-slate-500">
-                  No experiences entered yet. Click below to add your first experience.
-                </p>
-                <button
-                  onClick={handleCreateNew}
-                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1 shadow-sm"
-                >
-                  <Plus className="w-3.5 h-3.5" /> Add Experience
-                </button>
-              </div>
-            ) : (
-              experiences.map((exp, index) => {
-                const isSelected = exp.id === currentExp?.id;
-                return (
-                  <div
-                    key={exp.id}
-                    onClick={() => setEditingId(exp.id)}
-                    className={`p-3.5 rounded-xl border transition-all cursor-pointer ${
-                      isSelected
-                        ? 'bg-emerald-50/70 border-emerald-400 ring-2 ring-emerald-500/20 shadow-sm'
-                        : 'bg-white border-slate-200 hover:border-slate-300'
-                    }`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs font-bold text-slate-400">#{index + 1}</span>
-                          <h2 className="text-sm font-bold text-slate-900 truncate">
-                            {exp.title || 'Untitled Experience'}
-                          </h2>
-                        </div>
-                        <p className="text-xs text-slate-500 truncate mt-0.5">
-                          {exp.orgName || 'Organization not set'}
-                        </p>
-                      </div>
-
-                      {exp.isMostMeaningful && (
-                        <span className="p-1 rounded-md bg-amber-100 text-amber-700 shrink-0" title="Most Meaningful Experience">
-                          <Star className="w-3.5 h-3.5 fill-amber-500 text-amber-500" />
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="mt-2.5 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-500">
-                      <span className="truncate max-w-[140px]">{exp.experienceType || 'Type not set'}</span>
-                      <span className={exp.descriptionText?.length > 750 ? 'text-red-600 font-bold' : ''}>
-                        {exp.descriptionText?.length || 0} / 750
-                      </span>
-                    </div>
-                  </div>
-                );
-              })
-            )}
-          </div>
-
-          {/* Right Column: Active Experience Editor (2 cols) */}
-          {currentExp ? (
-            <div className="lg:col-span-2 space-y-6">
-              <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
-                {/* Header with Meaningful Star Toggle */}
-                <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                  <div>
-                    <h2 className="text-base font-bold text-slate-900">Experience Details</h2>
-                    <p className="text-xs text-slate-500">Configure role, setting, and AAMC tags</p>
-                  </div>
-
-                  <button
-                    type="button"
-                    onClick={handleToggleMeaningful}
-                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-xs font-semibold transition-all ${
-                      currentExp.isMostMeaningful
-                        ? 'bg-amber-50 text-amber-900 border-amber-300 ring-2 ring-amber-400/30'
-                        : 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100'
-                    }`}
-                  >
-                    <Star className={`w-4 h-4 ${currentExp.isMostMeaningful ? 'fill-amber-500 text-amber-500' : 'text-slate-400'}`} />
-                    {currentExp.isMostMeaningful ? 'Designated as Most Meaningful' : 'Mark as Most Meaningful (Max 3)'}
-                  </button>
-                </div>
-
-                {/* Title & Organization */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Position / Experience Title</label>
-                    <input
-                      type="text"
-                      value={currentExp.title}
-                      onChange={(e) => handleUpdate('title', e.target.value)}
-                      className="w-full p-2.5 text-xs rounded-lg border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                      placeholder="e.g. Free Clinic Triage Coordinator"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Organization Name</label>
-                    <input
-                      type="text"
-                      value={currentExp.orgName}
-                      onChange={(e) => handleUpdate('orgName', e.target.value)}
-                      className="w-full p-2.5 text-xs rounded-lg border border-slate-200 focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                      placeholder="e.g. Hope Community Health"
-                    />
-                  </div>
-                </div>
-
-                {/* AAMC Taxonomy Dropdowns */}
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">AAMC Experience Type (Required)</label>
-                    <select
-                      value={currentExp.experienceType}
-                      onChange={(e) => handleUpdate('experienceType', e.target.value)}
-                      className="w-full p-2.5 text-xs rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    >
-                      <option value="">Select Experience Type...</option>
-                      {AAMC_TAXONOMY.experienceTypes.map((t) => (
-                        <option key={t} value={t}>{t}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Participation Frequency</label>
-                    <select
-                      value={currentExp.frequency}
-                      onChange={(e) => handleUpdate('frequency', e.target.value)}
-                      className="w-full p-2.5 text-xs rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    >
-                      <option value="">Select Frequency...</option>
-                      {AAMC_TAXONOMY.frequencyTypes.map((f) => (
-                        <option key={f} value={f}>{f}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Primary Focus Area (Optional)</label>
-                    <select
-                      value={currentExp.primaryFocusArea || ''}
-                      onChange={(e) => handleUpdate('primaryFocusArea', e.target.value)}
-                      className="w-full p-2.5 text-xs rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    >
-                      <option value="">None / Leave Blank</option>
-                      {AAMC_TAXONOMY.primaryFocusAreas.map((fa) => (
-                        <option key={fa} value={fa}>{fa}</option>
-                      ))}
-                    </select>
-                  </div>
-                  <div>
-                    <label className="block text-xs font-bold text-slate-700 mb-1">Key Characteristic (Optional)</label>
-                    <select
-                      value={currentExp.keyCharacteristic || ''}
-                      onChange={(e) => handleUpdate('keyCharacteristic', e.target.value)}
-                      className="w-full p-2.5 text-xs rounded-lg border border-slate-200 bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-                    >
-                      <option value="">None / Leave Blank</option>
-                      {AAMC_TAXONOMY.keyCharacteristics.map((kc) => (
-                        <option key={kc} value={kc}>{kc}</option>
-                      ))}
-                    </select>
-                  </div>
-                </div>
-
-                {/* 750-Character Description */}
-                <div className="pt-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <label className="block text-xs font-bold text-slate-700">
-                      Context, Roles, and Responsibilities: 750-character limit
-                    </label>
-                    <span className={`text-xs font-mono font-bold ${descLength > 750 ? 'text-red-600' : 'text-slate-500'}`}>
-                      {descLength} / 750 characters
-                    </span>
-                  </div>
-                  <textarea
-                    value={currentExp.descriptionText || ''}
-                    onChange={(e) => handleUpdate('descriptionText', sanitizeErasText(e.target.value))}
-                    rows={6}
-                    className={`w-full p-3 rounded-lg border text-xs font-mono leading-relaxed focus:outline-none focus:ring-2 ${
-                      descLength > 750
-                        ? 'border-red-400 bg-red-50 focus:ring-red-400'
-                        : 'border-slate-300 bg-white focus:ring-emerald-500'
-                    }`}
-                    placeholder="Describe your context, roles, and responsibilities (750-character limit)..."
-                  />
-                  {descLength > 750 && (
-                    <p className="text-[11px] text-red-600 font-medium mt-1 flex items-center gap-1">
-                      <AlertTriangle className="w-3.5 h-3.5" />
-                      Exceeds official ERAS limit by {descLength - 750} characters. Text will be cut off upon ERAS import!
-                    </p>
-                  )}
-                </div>
-
-                {/* 300-Character Most Meaningful Reflection (if starred) */}
-                {currentExp.isMostMeaningful && (
-                  <div className="pt-3 border-t border-amber-100 bg-amber-50/50 p-4 rounded-xl border space-y-2">
-                    <div className="flex items-center justify-between mb-1">
-                      <label className="block text-xs font-bold text-amber-950 flex items-center gap-1.5">
-                        <Star className="w-4 h-4 text-amber-500 fill-amber-500" />
-                        Selected Experiences | What made this experience meaningful?
-                      </label>
-                      <span className={`text-xs font-mono font-bold ${reflLength > 300 ? 'text-red-600' : 'text-amber-800'}`}>
-                        {reflLength} / 300 characters
-                      </span>
-                    </div>
-
-                    {/* Word-for-Word AAMC Prompt Guidance */}
-                    <div className="text-[11px] text-amber-900 leading-relaxed bg-white/80 p-3 rounded border border-amber-200">
-                      <p className="font-semibold mb-1">
-                        Identify and describe up to 3 of the 10 experiences that you found the most meaningful.
-                      </p>
-                      <p>
-                        Reflect on the experience, why it was meaningful, and how it influenced you. Weave in the focus area or key characteristic you tagged. This should not describe what you did in the experience or list a set of skills that you developed or demonstrated during the experience.
-                      </p>
-                    </div>
-
-                    <textarea
-                      value={currentExp.reflectionText || ''}
-                      onChange={(e) => handleUpdate('reflectionText', sanitizeErasText(e.target.value))}
-                      rows={3}
-                      className={`w-full p-3 rounded-lg border text-xs font-mono leading-relaxed focus:outline-none focus:ring-2 ${
-                        reflLength > 300
-                          ? 'border-red-400 bg-red-50 focus:ring-red-400'
-                          : 'border-amber-200 bg-white focus:ring-amber-500'
-                      }`}
-                      placeholder="Reflect on why this experience was meaningful and how it influenced you (300-character limit)..."
-                    />
-                    {reflLength > 300 && (
-                      <p className="text-[11px] text-red-600 font-medium mt-1 flex items-center gap-1">
-                        <AlertTriangle className="w-3.5 h-3.5" />
-                        Exceeds reflection limit by {reflLength - 300} characters.
-                      </p>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-          ) : (
-            <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-12 text-center space-y-3">
-              <Briefcase className="w-12 h-12 text-slate-300 mx-auto" />
-              <h3 className="text-base font-bold text-slate-800">No Experience Selected</h3>
-              <p className="text-xs text-slate-500 max-w-sm mx-auto">
-                Select an experience from the left to edit its details, or click below to create a new entry.
-              </p>
-              <button
-                onClick={handleCreateNew}
-                className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 shadow-sm"
-              >
-                <Plus className="w-4 h-4" /> Add Experience
-              </button>
-            </div>
           )}
         </div>
       </div>

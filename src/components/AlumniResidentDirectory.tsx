@@ -138,7 +138,7 @@ export function AlumniResidentDirectory({
       </div>
 
       {/* Institutional Match Stats Overview */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-violet-50 text-violet-600 flex items-center justify-center font-bold">
             <GraduationCap className="w-5 h-5" />
@@ -156,16 +156,6 @@ export function AlumniResidentDirectory({
           <div>
             <div className="text-xl font-bold text-slate-900">88%</div>
             <div className="text-xs text-slate-500">Available for Mentorship</div>
-          </div>
-        </div>
-
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-            <Award className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="text-xl font-bold text-slate-900">75%</div>
-            <div className="text-xs text-slate-500">Matched via Signal Token</div>
           </div>
         </div>
 
@@ -203,7 +193,6 @@ export function AlumniResidentDirectory({
                 <th className="px-4 py-3">Specialty</th>
                 <th className="px-4 py-3">Residency Program / Hospital</th>
                 <th className="px-4 py-3">Location</th>
-                <th className="px-4 py-3">Match Strategy</th>
                 <th className="px-4 py-3">Mentorship</th>
                 <th className="px-4 py-3 text-right">Action</th>
               </tr>
@@ -248,25 +237,6 @@ export function AlumniResidentDirectory({
                       <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
                       {alum.programCity}, {alum.programState}
                     </div>
-                  </td>
-
-                  {/* Signal Strategy */}
-                  <td className="px-4 py-3 whitespace-nowrap">
-                    {alum.signalStrategyUsed ? (
-                      <span
-                        className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                          alum.signalStrategyUsed === 'Gold'
-                            ? 'bg-amber-100 text-amber-900 border border-amber-300'
-                            : alum.signalStrategyUsed === 'Silver'
-                            ? 'bg-slate-200 text-slate-800 border border-slate-300'
-                            : 'bg-slate-100 text-slate-600'
-                        }`}
-                      >
-                        {alum.signalStrategyUsed} Signal
-                      </span>
-                    ) : (
-                      <span className="text-[11px] text-slate-400">Standard</span>
-                    )}
                   </td>
 
                   {/* Mentorship Status */}
