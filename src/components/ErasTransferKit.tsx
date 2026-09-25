@@ -9,6 +9,8 @@ import {
   TransferField,
   CompiledApplicationPacket,
 } from '@/domain/transfer-kit-models';
+import { deserializeScholarlyPortfolio, ScholarlyWork } from '@/domain/scholarly-models';
+import { SchoolListItem } from '@/domain/school-list-models';
 import {
   ClipboardCopy,
   CheckCircle2,
@@ -23,7 +25,9 @@ import {
   Award,
   AlertCircle,
   Building,
-  GraduationCap
+  GraduationCap,
+  Download,
+  Loader2,
 } from 'lucide-react';
 
 interface ErasTransferKitProps {
@@ -32,17 +36,79 @@ interface ErasTransferKitProps {
 }
 
 export function ErasTransferKit({ context, onBack }: ErasTransferKitProps) {
-  const [fields, setFields] = useState<TransferField[]>(() => generateTransferFields(context));
+  // Rehydrate full portfolio state for comprehensive export
+  const [scholarlyWorks] = useState<ScholarlyWork[]>(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem('eras_scholarly_portfolio');
+      const restored = deserializeScholarlyPortfolio(cached);
+      if (restored) return restored.works;
+    }
+    return [];
+  });
+
+  const [schoolList] = useState<SchoolListItem[]>(() => {
+    if (typeof window !== 'undefined') {
+      const cached = localStorage.getItem('eras_school_list_matrix');
+      if (cached) {
+        try {
+          const parsed = JSON.parse(cached);
+          if (Array.isArray(parsed)) return parsed;
+        } catch {}
+      }
+    }
+    return [];
+  });
+
+  const [fields, setFields] = useState<TransferField[]>(() =>
+    generateTransferFields(context, scholarlyWorks, schoolList)
+  );
   const [copiedId, setCopiedId] = useState<string | null>(null);
   const [activeFilter, setActiveFilter] = useState<'all' | 'personal_statement' | 'experiences' | 'reflections' | 'hobbies' | 'scholarly_works'>('all');
   const [showPacketModal, setShowPacketModal] = useState<boolean>(false);
+  const [isGeneratingPdf, setIsGeneratingPdf] = useState<boolean>(false);
 
   const validation = validateTransferPayloads(fields);
   const totalCount = fields.length;
   const copiedCount = fields.filter((f) => f.isCopied).length;
   const progressPercent = Math.round((copiedCount / totalCount) * 100);
 
-  const packet: CompiledApplicationPacket = compileInstitutionalPacket(context);
+  const packet: CompiledApplicationPacket = compileInstitutionalPacket(
+    context,
+    scholarlyWorks,
+    schoolList
+  );
+
+  const handleDownloadPdf = async () => {
+    setIsGeneratingPdf(true);
+    try {
+      const res = await fetch('/api/export-packet-pdf', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(packet),
+      });
+
+      if (!res.ok) {
+        throw new Error(`Server returned status ${res.status}: ${res.statusText}`);
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      const sanitizedName = (packet.student.name || 'Applicant').replace(/\s+/g, '_');
+      link.download = `Apex_ERAS_Dossier_${sanitizedName}_2027.pdf`;
+      document.body.appendChild(link);
+      link.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(link);
+    } catch (err) {
+      console.error('PDF export failed:', err);
+      alert('Unable to generate high-resolution PDF dossier. Opening print fallback view.');
+      window.print();
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
 
   const handleCopy = (field: TransferField) => {
     navigator.clipboard.writeText(field.content);
@@ -257,10 +323,27 @@ export function ErasTransferKit({ context, onBack }: ErasTransferKitProps) {
               </div>
               <div className="flex items-center gap-3">
                 <button
-                  onClick={() => window.print()}
-                  className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5"
+                  onClick={handleDownloadPdf}
+                  disabled={isGeneratingPdf}
+                  className="px-3.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 disabled:bg-emerald-400 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all"
+                  title="Generate high-resolution backend-rendered PDF document"
                 >
-                  <Printer className="w-3.5 h-3.5" /> Print / Save as PDF
+                  {isGeneratingPdf ? (
+                    <>
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Rendering PDF Dossier...
+                    </>
+                  ) : (
+                    <>
+                      <Download className="w-3.5 h-3.5" /> Download Official PDF Dossier
+                    </>
+                  )}
+                </button>
+                <button
+                  onClick={() => window.print()}
+                  className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium flex items-center gap-1 border border-slate-200"
+                  title="Quick browser print view"
+                >
+                  <Printer className="w-3.5 h-3.5 text-slate-500" /> Quick Print
                 </button>
                 <button
                   onClick={() => setShowPacketModal(false)}
@@ -364,11 +447,95 @@ export function ErasTransferKit({ context, onBack }: ErasTransferKitProps) {
                 </div>
               </div>
 
+              {/* Scholarly Works */}
+              <div className="space-y-2">
+                <div className="border-b border-slate-200 pb-1">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800">
+                    III. Scholarly Works & Publications ({packet.scholarlyWorks.length} Recorded)
+                  </h3>
+                </div>
+                {packet.scholarlyWorks.length === 0 ? (
+                  <p className="text-xs text-slate-500 italic">No scholarly works recorded.</p>
+                ) : (
+                  <div className="space-y-2">
+                    {packet.scholarlyWorks.map((work, idx) => (
+                      <div key={idx} className="bg-slate-50 p-2.5 rounded border border-slate-200 text-xs">
+                        <div className="font-semibold text-slate-900 flex items-center justify-between">
+                          <span>{idx + 1}. {work.title}</span>
+                          {work.isMostMeaningful && (
+                            <span className="text-[10px] text-amber-800 bg-amber-100 px-1.5 py-0.5 rounded font-bold">
+                              ★ Meaningful
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-[11px] text-slate-500 mt-0.5">Type: {work.type}</div>
+                        <p className="text-slate-700 font-serif text-[11px] mt-1">{work.citation}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              {/* Strategic School List & Signals */}
+              <div className="space-y-2">
+                <div className="border-b border-slate-200 pb-1">
+                  <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800">
+                    IV. Strategic School List & Signals ({packet.schoolList.length} Programs)
+                  </h3>
+                </div>
+                {packet.schoolList.length === 0 ? (
+                  <p className="text-xs text-slate-500 italic">No programs added to the strategic matrix.</p>
+                ) : (
+                  <div className="border border-slate-200 rounded-lg overflow-hidden text-xs">
+                    <table className="w-full text-left">
+                      <thead className="bg-slate-100 text-slate-700 font-semibold text-[11px]">
+                        <tr>
+                          <th className="p-2">Program</th>
+                          <th className="p-2">Location</th>
+                          <th className="p-2">Tier</th>
+                          <th className="p-2">Signal Allocation</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {packet.schoolList.map((school, i) => (
+                          <tr key={i} className="hover:bg-slate-50">
+                            <td className="p-2 font-medium text-slate-900">{school.programName}</td>
+                            <td className="p-2 text-slate-600">{school.city}, {school.state}</td>
+                            <td className="p-2">
+                              <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                                school.tier === 'reach'
+                                  ? 'bg-rose-50 text-rose-700'
+                                  : school.tier === 'target'
+                                  ? 'bg-sky-50 text-sky-700'
+                                  : 'bg-emerald-50 text-emerald-700'
+                              }`}>
+                                {school.tier}
+                              </span>
+                            </td>
+                            <td className="p-2">
+                              {school.signal === 'gold' && (
+                                <span className="font-bold text-amber-700 text-[11px]">● Gold Signal</span>
+                              )}
+                              {school.signal === 'silver' && (
+                                <span className="font-semibold text-slate-600 text-[11px]">● Silver Signal</span>
+                              )}
+                              {school.signal !== 'gold' && school.signal !== 'silver' && (
+                                <span className="text-slate-400 text-[11px]">No Signal</span>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+
               {/* Hobbies & Interests */}
               <div className="space-y-1.5">
                 <div className="border-b border-slate-200 pb-1">
                   <h3 className="text-sm font-bold uppercase tracking-wider text-slate-800">
-                    III. Hobbies & Outside Interests
+                    V. Hobbies & Outside Interests
                   </h3>
                 </div>
                 <p className="text-xs text-slate-800 bg-slate-50 p-3 rounded border border-slate-200">

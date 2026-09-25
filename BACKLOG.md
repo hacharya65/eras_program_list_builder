@@ -62,6 +62,14 @@ This backlog tracks the next cycle of feature requests, enhancements, and bugfix
   - Margin-anchored comment cards with active thread tracking and resolution states.
   - Role-based permissions (applicant sees read-only suggestions and comments; advisor has active markup controls).
 
+### [Ticket 7: Compiled Institutional PDF Packet Generator](.scratch/eras-advising/issues/10-eras-transfer-kit-pdf-export.md)
+* **Summary:** Replace the client-side `window.print()` screen dump with a robust, backend-rendered PDF generation pipeline (`/api/export-packet-pdf`) using PDFKit.
+* **Key Scope:**
+  - Aggregates all 4 core application sections: Personal Statement, 10 Selected Experiences & Reflections, Scholarly Works Portfolio, and Strategic School List & Signals.
+  - Institutional cover header, clinical endorsement verdict, running page numbers (`Page X of Y`), and confidentiality notice.
+  - Generates downloadable `Apex_ERAS_Dossier_[Name]_2027.pdf` directly from the server.
+  - Maintains optional Quick Print fallback.
+
 ---
 
 ## Recommended Execution Order
