@@ -1,7 +1,7 @@
-'use client';
-
-import React from 'react';
-import { StudentDashboardContext } from '@/domain/types';
+import React, { useState } from 'react';
+import { StudentDashboardContext, ExperienceDraft } from '@/domain/types';
+import { PersonalStatementEditor } from './PersonalStatementEditor';
+import { ExperiencesManager } from './ExperiencesManager';
 import {
   FileText,
   Briefcase,
@@ -17,9 +17,16 @@ import {
 
 interface StudentPortalProps {
   context: StudentDashboardContext;
+  onUpdatePersonalStatement?: (content: string) => void;
+  onUpdateExperience?: (id: string, updates: Partial<ExperienceDraft>) => void;
 }
 
-export function StudentPortal({ context }: StudentPortalProps) {
+export function StudentPortal({
+  context,
+  onUpdatePersonalStatement,
+  onUpdateExperience,
+}: StudentPortalProps) {
+  const [activeView, setActiveView] = useState<'overview' | 'personal_statement' | 'experiences'>('overview');
   const { student, personalStatement, experiences, assignedAdvisors } = context;
 
   const stageLabels = {
@@ -31,6 +38,32 @@ export function StudentPortal({ context }: StudentPortalProps) {
   };
 
   const psStage = stageLabels[personalStatement.stage];
+
+  if (activeView === 'personal_statement') {
+    return (
+      <PersonalStatementEditor
+        draft={personalStatement}
+        assignedAdvisor={assignedAdvisors[0]}
+        onSave={(newContent) => onUpdatePersonalStatement?.(newContent)}
+        onSubmitForReview={(changelog) => {
+          alert(`Submitted v${personalStatement.currentVersionNumber} to ${assignedAdvisors[0]?.name}! Changelog recorded.`);
+          setActiveView('overview');
+        }}
+        onBack={() => setActiveView('overview')}
+      />
+    );
+  }
+
+  if (activeView === 'experiences') {
+    return (
+      <ExperiencesManager
+        experiences={experiences}
+        onSaveExperience={(id, updates) => onUpdateExperience?.(id, updates)}
+        onDeleteExperience={(id) => {}}
+        onBack={() => setActiveView('overview')}
+      />
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -86,7 +119,10 @@ export function StudentPortal({ context }: StudentPortalProps) {
               <span>Characters: <strong className="text-slate-700">{personalStatement.content.length}</strong> (~800 words)</span>
             </div>
           </div>
-          <button className="mt-5 w-full py-2 px-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+          <button
+            onClick={() => setActiveView('personal_statement')}
+            className="mt-5 w-full py-2 px-3 bg-sky-600 hover:bg-sky-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+          >
             Open Drafting Sandbox <ChevronRight className="w-4 h-4" />
           </button>
         </div>
@@ -107,11 +143,14 @@ export function StudentPortal({ context }: StudentPortalProps) {
               Curate your top 10 experiences with official 750-character limits and up to 3 Most Meaningful reflections.
             </p>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
-              <span>Meaningful: <strong className="text-slate-700">1 / 3 Starred</strong></span>
+              <span>Meaningful: <strong className="text-slate-700">{experiences.filter(e => e.isMostMeaningful).length} / 3 Starred</strong></span>
               <span>Max Description: <strong className="text-slate-700">750 chars</strong></span>
             </div>
           </div>
-          <button className="mt-5 w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors">
+          <button
+            onClick={() => setActiveView('experiences')}
+            className="mt-5 w-full py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+          >
             Manage Experiences Portfolio <ChevronRight className="w-4 h-4" />
           </button>
         </div>

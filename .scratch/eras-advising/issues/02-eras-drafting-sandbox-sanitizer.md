@@ -4,13 +4,13 @@
 
 **Blocked by:** 01: Greenfield App Scaffold, Multi-Tenant Domain Core, & Dev Persona Switcher
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Plain-text drafting editor for Personal Statement with live character counting, estimated AAMC page count, and warning when approaching limits.
-- [ ] Paste sanitizer that automatically converts curly/smart quotes to straight quotes, em-dashes to double hyphens, and strips non-standard bullets.
-- [ ] 10 Selected Experiences interface enforcing the official hard limit of **750 characters** per description.
-- [ ] Official AAMC taxonomy dropdowns implemented for experiences: Experience Type (8 types), Frequency (6 types), Primary Focus Area (13 areas), and Key Characteristics (10 characteristics).
-- [ ] Most Meaningful Experiences module allowing up to 3 selections with an additional **300-character** reflection prompt.
-- [ ] Hobbies & Interests section enforcing the official **300-character** limit.
-- [ ] Impactful Experiences narrative section for applicants who have overcome major obstacles.
-- [ ] Automated tests asserting that descriptions >750 chars or reflections >300 chars are rejected, and paste sanitization functions correctly.
+- [x] Plain-text drafting editor for Personal Statement with live character counting, estimated AAMC page count, and warning when approaching limits.
+- [x] Paste sanitizer that automatically converts curly/smart quotes to straight quotes, em-dashes to double hyphens, and strips non-standard bullets.
+- [x] 10 Selected Experiences interface enforcing the official hard limit of **750 characters** per description.
+- [x] Official AAMC taxonomy dropdowns implemented for experiences: Experience Type (8 types), Frequency (6 types), Primary Focus Area (13 areas), and Key Characteristics (10 characteristics).
+- [x] Most Meaningful Experiences module allowing up to 3 selections with an additional **300-character** reflection prompt.
+- [x] Hobbies & Interests section enforcing the official **300-character** limit.
+- [x] Impactful Experiences narrative section for applicants who have overcome major obstacles.
+- [x] Automated tests asserting that descriptions >750 chars or reflections >300 chars are rejected, and paste sanitization functions correctly.

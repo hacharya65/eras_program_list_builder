@@ -4,10 +4,10 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Next.js App Router application initialized with Tailwind CSS, Lucide icons, and TypeScript support in the workspace.
-- [ ] High-level domain application service seam (`AdvisingPlatformService`) established with an in-memory storage adapter for deterministic, millisecond automated testing.
-- [ ] Global Dev Persona Switcher bar present across all views, allowing 1-click toggling between Student, Advisor, and Dean roles without authentication friction.
-- [ ] Role-based portal navigation rendered for each persona (Student view, Advisor inbox view, Dean cohort overview).
-- [ ] Automated tests verify that switching personas loads the correct permissions and initial data context.
+- [x] Next.js App Router application initialized with Tailwind CSS, Lucide icons, and TypeScript support in the workspace.
+- [x] High-level domain application service seam (`AdvisingPlatformService`) established with an in-memory storage adapter for deterministic, millisecond automated testing.
+- [x] Global Dev Persona Switcher bar present across all views, allowing 1-click toggling between Student, Advisor, and Dean roles without authentication friction.
+- [x] Role-based portal navigation rendered for each persona (Student view, Advisor inbox view, Dean cohort overview).
+- [x] Automated tests verify that switching personas loads the correct permissions and initial data context.

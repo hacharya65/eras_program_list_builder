@@ -92,6 +92,53 @@ export class InMemoryStorageAdapter {
     return this.getCurrentPersona();
   }
 
+  getMeaningfulCount(): number {
+    return this.experiences.filter(e => e.isMostMeaningful).length;
+  }
+
+  updatePersonalStatement(content: string): PersonalStatementDraft {
+    this.personalStatement.content = content;
+    this.personalStatement.updatedAt = new Date().toISOString();
+    return this.personalStatement;
+  }
+
+  updateExperience(id: string, updates: Partial<ExperienceDraft>): ExperienceDraft {
+    const index = this.experiences.findIndex(e => e.id === id);
+    if (index !== -1) {
+      this.experiences[index] = { ...this.experiences[index], ...updates };
+      return this.experiences[index];
+    }
+    const newExp: ExperienceDraft = {
+      id,
+      studentId: this.personas.student.id,
+      title: updates.title || '',
+      orgName: updates.orgName || '',
+      roleName: updates.roleName || '',
+      experienceType: updates.experienceType || 'Education/training',
+      frequency: updates.frequency || 'Weekly (recurring)',
+      startDate: updates.startDate || '2024-01-01',
+      isCurrent: updates.isCurrent ?? false,
+      descriptionText: updates.descriptionText || '',
+      isMostMeaningful: updates.isMostMeaningful ?? false,
+      reflectionText: updates.reflectionText,
+      primaryFocusArea: updates.primaryFocusArea,
+      keyCharacteristic: updates.keyCharacteristic,
+    };
+    this.experiences.push(newExp);
+    return newExp;
+  }
+
+  setExperienceMeaningful(id: string, isMeaningful: boolean): boolean {
+    const exp = this.experiences.find(e => e.id === id);
+    if (exp) {
+      exp.isMostMeaningful = isMeaningful;
+      return true;
+    }
+    // If not found, create a stub with that id
+    this.updateExperience(id, { isMostMeaningful: isMeaningful });
+    return true;
+  }
+
   getCohortSummary(): CohortSummary {
     return {
       totalStudents: 142,

@@ -21,6 +21,18 @@ export default function HomePage() {
     setCurrentRole(role);
   };
 
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handleUpdatePS = (content: string) => {
+    service.updatePersonalStatement(content);
+    setRefreshKey((k) => k + 1);
+  };
+
+  const handleUpdateExp = (id: string, updates: any) => {
+    service.updateExperience(id, updates);
+    setRefreshKey((k) => k + 1);
+  };
+
   const studentContext = service.getStudentDashboardContext();
   const advisorContext = service.getAdvisorDashboardContext();
   const adminContext = service.getAdminCohortContext();
@@ -36,7 +48,13 @@ export default function HomePage() {
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {currentRole === 'student' && <StudentPortal context={studentContext} />}
+        {currentRole === 'student' && (
+          <StudentPortal
+            context={studentContext}
+            onUpdatePersonalStatement={handleUpdatePS}
+            onUpdateExperience={handleUpdateExp}
+          />
+        )}
         {currentRole === 'advisor' && <AdvisorPortal context={advisorContext} />}
         {currentRole === 'admin' && <AdminPortal context={adminContext} />}
       </main>

@@ -21,6 +21,29 @@ export class AdvisingPlatformService {
     return this.storage.setPersona(roleKey);
   }
 
+  canDesignateMeaningfulExperience(targetExperienceId: string): boolean {
+    const currentExp = this.storage.experiences.find(e => e.id === targetExperienceId);
+    if (currentExp && currentExp.isMostMeaningful) {
+      return true; // already meaningful
+    }
+    return this.storage.getMeaningfulCount() < 3;
+  }
+
+  setExperienceMeaningful(id: string, isMeaningful: boolean): boolean {
+    if (isMeaningful && !this.canDesignateMeaningfulExperience(id)) {
+      return false;
+    }
+    return this.storage.setExperienceMeaningful(id, isMeaningful);
+  }
+
+  updatePersonalStatement(content: string) {
+    return this.storage.updatePersonalStatement(content);
+  }
+
+  updateExperience(id: string, updates: any) {
+    return this.storage.updateExperience(id, updates);
+  }
+
   getStudentDashboardContext(): StudentDashboardContext {
     const student = this.storage.personas.student;
     const advisor = this.storage.personas.advisor;
