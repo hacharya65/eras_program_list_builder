@@ -15,6 +15,7 @@ import {
 import { VisualDiffViewer } from './VisualDiffViewer';
 import { ClinicalRubricForm } from './ClinicalRubricForm';
 import { RubricEvaluation } from '@/domain/types';
+import { calculateSlaStatus } from '@/domain/sla-engine';
 
 interface AdvisorPortalProps {
   context: AdvisorDashboardContext;
@@ -136,30 +137,42 @@ export function AdvisorPortal({
               </div>
             ) : (
               <div className="divide-y divide-slate-100">
-                {pendingReviews.map((rev) => (
-                  <div key={rev.id} className="py-3 flex items-center justify-between">
-                    <div>
-                      <div className="font-semibold text-slate-900 text-sm flex items-center gap-2">
-                        {rev.studentName}
-                        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-800 uppercase">
-                          {rev.stage.replace('_', ' ')}
-                        </span>
+                {pendingReviews.map((rev) => {
+                  const sla = calculateSlaStatus(rev, 14);
+                  return (
+                    <div key={rev.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <div className="font-semibold text-slate-900 text-sm flex items-center gap-2">
+                          {rev.studentName}
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800 uppercase">
+                            {rev.stage.replace('_', ' ')}
+                          </span>
+                          <span className={`px-2 py-0.5 rounded text-[10px] border ${sla.badgeClass}`}>
+                            {sla.label}
+                          </span>
+                        </div>
+                        <div className="text-xs text-slate-500 mt-1">
+                          Document: Personal Statement &bull; Submitted on {new Date(rev.submittedAt).toLocaleDateString()}
+                        </div>
+                        {sla.shouldNudgeAdvisor && (
+                          <div className="mt-2 text-[11px] text-amber-800 bg-amber-50 p-2 rounded-md border border-amber-200 flex items-center gap-1.5">
+                            <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                            <span>System Nudge: This review has been in queue for {sla.daysElapsed} days (SLA target: 14 days).</span>
+                          </div>
+                        )}
                       </div>
-                      <div className="text-xs text-slate-500 mt-0.5">
-                        Document: Personal Statement &bull; Submitted on {new Date(rev.submittedAt).toLocaleDateString()}
-                      </div>
+                      <button
+                        onClick={() => {
+                          onOpenReview?.(rev.id);
+                          setSelectedReviewId(rev.id);
+                        }}
+                        className="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs rounded-lg font-medium shadow-sm transition-colors shrink-0"
+                      >
+                        Open Review &amp; Diff
+                      </button>
                     </div>
-                    <button
-                      onClick={() => {
-                        onOpenReview?.(rev.id);
-                        setSelectedReviewId(rev.id);
-                      }}
-                      className="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs rounded-lg font-medium shadow-sm transition-colors"
-                    >
-                      Open Review &amp; Diff
-                    </button>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>

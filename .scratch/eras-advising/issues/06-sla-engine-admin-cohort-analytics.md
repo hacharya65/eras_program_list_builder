@@ -4,11 +4,11 @@
 
 **Blocked by:** 05: 4-Pillar Clinical Rubric & Faculty Review Studio
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Institutional SLA calculation engine measuring turnaround elapsed days against the 14-day target.
-- [ ] Day 10 approaching-deadline badge and automated nudge indicator on advisor dashboard.
-- [ ] Day 14 SLA breach detector that flags overdue items with a red indicator and surfaces them in the Dean's Alert Queue.
-- [ ] Dean's Cohort Funnel Dashboard showing aggregate progress (% drafted, % submitted, % endorsed, % school list finalized).
-- [ ] Privacy safeguards ensuring administrators view only status metadata and turnaround metrics without access to confidential student essay text.
-- [ ] Automated tests asserting SLA deadline calculations and overdue queue filtering.
+- [x] Institutional SLA calculation engine measuring turnaround elapsed days against the 14-day target.
+- [x] Day 10 approaching-deadline badge and automated nudge indicator on advisor dashboard.
+- [x] Day 14 SLA breach detector that flags overdue items with a red indicator and surfaces them in the Dean's Alert Queue.
+- [x] Dean's Cohort Funnel Dashboard showing aggregate progress (% drafted, % submitted, % endorsed, % school list finalized).
+- [x] Privacy safeguards ensuring administrators view only status metadata and turnaround metrics without access to confidential student essay text.
+- [x] Automated tests asserting SLA deadline calculations and overdue queue filtering.

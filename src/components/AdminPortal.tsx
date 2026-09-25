@@ -95,15 +95,89 @@ export function AdminPortal({ context }: AdminPortalProps) {
           <span className="text-xs text-slate-500">Auto-routes to Dean for Advisor Support</span>
         </div>
 
-        <div className="p-6">
-          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4 text-xs text-amber-900 flex items-start gap-3">
+        <div className="p-6 space-y-4">
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-3.5 text-xs text-amber-900 flex items-start gap-3">
             <Clock className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
             <div>
-              <strong className="font-semibold">3 Student Submissions currently exceed the 14-day turnaround target.</strong>
-              <p className="mt-1 text-amber-800">
-                Automated Day 10 reminders were dispatched. Student Affairs advisors can gently check in with the respective department chairs to relieve clinical burdens.
+              <strong className="font-semibold">Institutional Turnaround Policy (14-Day SLA Active):</strong>
+              <p className="mt-0.5 text-amber-800">
+                To protect students from pre-season anxiety and review delays, Student Affairs monitors turnaround times. Confidential essay text is never exposed to administrative viewers.
               </p>
             </div>
+          </div>
+
+          <div className="border border-slate-200 rounded-xl overflow-hidden">
+            <table className="w-full text-left text-xs">
+              <thead className="bg-slate-50 border-b border-slate-200 text-slate-500 uppercase tracking-wider text-[10px]">
+                <tr>
+                  <th className="px-4 py-3 font-semibold">Student Advisee</th>
+                  <th className="px-4 py-3 font-semibold">Assigned Faculty Reviewer</th>
+                  <th className="px-4 py-3 font-semibold">Department</th>
+                  <th className="px-4 py-3 font-semibold">Elapsed Days</th>
+                  <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 font-semibold text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100">
+                <tr className="hover:bg-slate-50/50">
+                  <td className="px-4 py-3 font-semibold text-slate-900">Alex Rivera</td>
+                  <td className="px-4 py-3 text-slate-700">Dr. Marcus Chen</td>
+                  <td className="px-4 py-3 text-slate-500">Internal Medicine</td>
+                  <td className="px-4 py-3 font-bold text-red-600">16 days in queue</td>
+                  <td className="px-4 py-3">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-200">
+                      +2d Breached
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => alert('Administrative Nudge dispatched to Dr. Marcus Chen (Internal Medicine).')}
+                      className="px-2.5 py-1 text-[11px] font-semibold rounded bg-slate-800 hover:bg-slate-900 text-white shadow-sm transition-colors"
+                    >
+                      Send Nudge
+                    </button>
+                  </td>
+                </tr>
+                <tr className="hover:bg-slate-50/50">
+                  <td className="px-4 py-3 font-semibold text-slate-900">Jordan Lee</td>
+                  <td className="px-4 py-3 text-slate-700">Dr. Sarah Vance</td>
+                  <td className="px-4 py-3 text-slate-500">General Surgery</td>
+                  <td className="px-4 py-3 font-bold text-red-600">19 days in queue</td>
+                  <td className="px-4 py-3">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-800 border border-red-200">
+                      +5d Breached
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => alert('Administrative Nudge dispatched to Dr. Sarah Vance (General Surgery).')}
+                      className="px-2.5 py-1 text-[11px] font-semibold rounded bg-slate-800 hover:bg-slate-900 text-white shadow-sm transition-colors"
+                    >
+                      Send Nudge
+                    </button>
+                  </td>
+                </tr>
+                <tr className="hover:bg-slate-50/50">
+                  <td className="px-4 py-3 font-semibold text-slate-900">Priya Patel</td>
+                  <td className="px-4 py-3 text-slate-700">Dr. Robert Hayes</td>
+                  <td className="px-4 py-3 text-slate-500">Pediatrics</td>
+                  <td className="px-4 py-3 font-bold text-amber-600">12 days in queue</td>
+                  <td className="px-4 py-3">
+                    <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-amber-100 text-amber-800 border border-amber-200">
+                      Day 10 Auto-Nudged
+                    </span>
+                  </td>
+                  <td className="px-4 py-3 text-right">
+                    <button
+                      onClick={() => alert('Administrative Courtesy Follow-up logged for Pediatrics.')}
+                      className="px-2.5 py-1 text-[11px] font-semibold rounded border border-slate-300 text-slate-700 hover:bg-slate-100 transition-colors"
+                    >
+                      Follow-up
+                    </button>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
           </div>
         </div>
       </div>
