@@ -47,6 +47,28 @@ export default function HomePage() {
     setRefreshKey((k) => k + 1);
   };
 
+  const handleSubmitFeedback = (reviewId: string, evaluation: any) => {
+    service.submitAdvisorFeedback({
+      reviewRequestId: reviewId,
+      advisorId: advisorContext.advisor.id,
+      evaluation,
+    });
+    setRefreshKey((k) => k + 1);
+  };
+
+  const handleCreateRevision = () => {
+    storage.personalStatement.currentVersionNumber += 1;
+    storage.personalStatement.stage = 'drafting';
+    setRefreshKey((k) => k + 1);
+  };
+
+  const getAdvisorFeedback = () => {
+    const req = storage.reviewRequests.find(
+      r => r.studentId === studentContext.student.id && (r.stage === 'revisions_requested' || r.stage === 'endorsed')
+    );
+    return req ? service.getFeedbackForReview(req.id) : undefined;
+  };
+
   const studentContext = service.getStudentDashboardContext();
   const advisorContext = service.getAdvisorDashboardContext();
   const adminContext = service.getAdminCohortContext();
@@ -68,12 +90,15 @@ export default function HomePage() {
             onUpdatePersonalStatement={handleUpdatePS}
             onSubmitPersonalStatement={handleSubmitPS}
             onUpdateExperience={handleUpdateExp}
+            getAdvisorFeedback={getAdvisorFeedback}
+            onCreateRevision={handleCreateRevision}
           />
         )}
         {currentRole === 'advisor' && (
           <AdvisorPortal
             context={advisorContext}
             onOpenReview={handleOpenReview}
+            onSubmitFeedback={handleSubmitFeedback}
             getSnapshotContent={(id) => service.getSnapshot(id)}
           />
         )}

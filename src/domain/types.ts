@@ -45,6 +45,25 @@ export interface ExperienceDraft {
   descriptionText: string; // Max 750
   isMostMeaningful: boolean;
   reflectionText?: string; // Max 300
+  status?: 'drafting' | 'approved' | 'revisions_needed';
+  advisorNote?: string;
+}
+
+export interface RubricEvaluation {
+  narrativeMotivation: number; // 1 to 5
+  clinicalReflection: number; // 1 to 5
+  toneAndFit: number; // 1 to 5
+  structureAndMechanics: number; // 1 to 5
+  overallVerdict: 'ready_to_lock' | 'revisions_requested';
+  generalNotes: string;
+}
+
+export interface ReviewFeedback {
+  id: string;
+  reviewRequestId: string;
+  advisorId: string;
+  evaluation: RubricEvaluation;
+  submittedAt: string;
 }
 
 export interface DocumentSnapshot {

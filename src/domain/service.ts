@@ -2,7 +2,9 @@ import {
   UserProfile,
   StudentDashboardContext,
   AdvisorDashboardContext,
-  AdminCohortContext
+  AdminCohortContext,
+  RubricEvaluation,
+  ReviewFeedback
 } from './types';
 import { InMemoryStorageAdapter } from './storage/in-memory-adapter';
 
@@ -70,6 +72,35 @@ export class AdvisingPlatformService {
 
   getSnapshot(snapshotId: string) {
     return this.storage.snapshots.find(s => s.id === snapshotId);
+  }
+
+  submitAdvisorFeedback(params: {
+    reviewRequestId: string;
+    advisorId: string;
+    evaluation: RubricEvaluation;
+  }): ReviewFeedback {
+    const stage = params.evaluation.overallVerdict === 'ready_to_lock' ? 'endorsed' : 'revisions_requested';
+    this.storage.updateReviewStage(params.reviewRequestId, stage, {
+      completedAt: new Date().toISOString(),
+    });
+
+    const feedback: ReviewFeedback = {
+      id: `fb-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      reviewRequestId: params.reviewRequestId,
+      advisorId: params.advisorId,
+      evaluation: params.evaluation,
+      submittedAt: new Date().toISOString(),
+    };
+    this.storage.reviewFeedbacks.push(feedback);
+    return feedback;
+  }
+
+  setExperienceApprovalStatus(id: string, status: 'drafting' | 'approved' | 'revisions_needed', note?: string) {
+    return this.storage.setExperienceApprovalStatus(id, status, note);
+  }
+
+  getFeedbackForReview(reviewRequestId: string): ReviewFeedback | undefined {
+    return this.storage.reviewFeedbacks.find(f => f.reviewRequestId === reviewRequestId);
   }
 
   updateExperience(id: string, updates: any) {

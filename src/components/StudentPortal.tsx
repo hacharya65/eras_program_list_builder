@@ -3,6 +3,7 @@ import { StudentDashboardContext, ExperienceDraft } from '@/domain/types';
 import { PersonalStatementEditor } from './PersonalStatementEditor';
 import { ExperiencesManager } from './ExperiencesManager';
 import { OrderTracker } from './OrderTracker';
+import { StudentFeedbackViewer } from './StudentFeedbackViewer';
 import {
   FileText,
   Briefcase,
@@ -21,6 +22,8 @@ interface StudentPortalProps {
   onUpdatePersonalStatement?: (content: string) => void;
   onSubmitPersonalStatement?: (changelog: string) => void;
   onUpdateExperience?: (id: string, updates: Partial<ExperienceDraft>) => void;
+  getAdvisorFeedback?: () => any;
+  onCreateRevision?: () => void;
 }
 
 export function StudentPortal({
@@ -28,6 +31,8 @@ export function StudentPortal({
   onUpdatePersonalStatement,
   onSubmitPersonalStatement,
   onUpdateExperience,
+  getAdvisorFeedback,
+  onCreateRevision,
 }: StudentPortalProps) {
   const [activeView, setActiveView] = useState<'overview' | 'personal_statement' | 'experiences'>('overview');
   const { student, personalStatement, experiences, assignedAdvisors } = context;
@@ -102,6 +107,19 @@ export function StudentPortal({
 
       {/* 5-Stage Clinical Order Pipeline Tracker */}
       <OrderTracker currentStage={personalStatement.stage} />
+
+      {/* Advisor Rubric Feedback Banner (if returned) */}
+      {getAdvisorFeedback?.() && (
+        <StudentFeedbackViewer
+          feedback={getAdvisorFeedback()}
+          advisor={assignedAdvisors[0]}
+          versionNumber={personalStatement.currentVersionNumber}
+          onCreateRevision={() => {
+            onCreateRevision?.();
+            setActiveView('personal_statement');
+          }}
+        />
+      )}
 
       {/* Main Grid: Pre-Season Modules */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

@@ -13,16 +13,20 @@ import {
   Stethoscope
 } from 'lucide-react';
 import { VisualDiffViewer } from './VisualDiffViewer';
+import { ClinicalRubricForm } from './ClinicalRubricForm';
+import { RubricEvaluation } from '@/domain/types';
 
 interface AdvisorPortalProps {
   context: AdvisorDashboardContext;
   onOpenReview?: (reviewId: string) => void;
+  onSubmitFeedback?: (reviewId: string, evaluation: RubricEvaluation) => void;
   getSnapshotContent?: (snapshotId: string) => any;
 }
 
 export function AdvisorPortal({
   context,
   onOpenReview,
+  onSubmitFeedback,
   getSnapshotContent,
 }: AdvisorPortalProps) {
   const { advisor, advisees, pendingReviews } = context;
@@ -61,6 +65,17 @@ export function AdvisorPortal({
           newContent={snapshot.content}
           changelogNote={snapshot.changelogNote || 'Initial submission for faculty review.'}
           studentName={selectedReview.studentName}
+        />
+
+        {/* 4-Pillar Clinical Evaluation Form */}
+        <ClinicalRubricForm
+          studentName={selectedReview.studentName}
+          versionNumber={snapshot.versionNumber}
+          onSubmit={(evaluation) => {
+            onSubmitFeedback?.(selectedReview.id, evaluation);
+            alert(`Evaluation submitted! Feedback returned to ${selectedReview.studentName}.`);
+            setSelectedReviewId(null);
+          }}
         />
       </div>
     );

@@ -6,6 +6,7 @@ import {
   DocumentSnapshot,
   ReviewRequest,
   ReviewStage,
+  ReviewFeedback,
   CohortSummary
 } from '../types';
 
@@ -77,6 +78,15 @@ export class InMemoryStorageAdapter {
   snapshots: DocumentSnapshot[] = [];
 
   reviewRequests: ReviewRequest[] = [];
+  reviewFeedbacks: ReviewFeedback[] = [];
+
+  setExperienceApprovalStatus(id: string, status: 'drafting' | 'approved' | 'revisions_needed', note?: string): ExperienceDraft | null {
+    const exp = this.experiences.find(e => e.id === id);
+    if (!exp) return null;
+    exp.status = status;
+    if (note !== undefined) exp.advisorNote = note;
+    return exp;
+  }
 
   getAvailablePersonas(): UserProfile[] {
     return Object.values(this.personas);
