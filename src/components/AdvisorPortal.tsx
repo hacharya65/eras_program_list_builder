@@ -10,10 +10,13 @@ import {
   AlertTriangle,
   ChevronRight,
   FileCheck,
-  Stethoscope
+  Stethoscope,
+  MessageSquare,
+  Highlighter
 } from 'lucide-react';
 import { VisualDiffViewer } from './VisualDiffViewer';
 import { ClinicalRubricForm } from './ClinicalRubricForm';
+import { AnnotatedDocumentViewer } from './collaborative/AnnotatedDocumentViewer';
 import { RubricEvaluation } from '@/domain/types';
 import { calculateSlaStatus } from '@/domain/sla-engine';
 
@@ -35,6 +38,8 @@ export function AdvisorPortal({
   const { advisor, advisees, pendingReviews } = context;
   const [selectedReviewId, setSelectedReviewId] = React.useState<string | null>(null);
   const [activeEntryIndex, setActiveEntryIndex] = React.useState<number>(1);
+  const [psReviewTab, setPsReviewTab] = React.useState<'live_annotations' | 'rubric'>('live_annotations');
+  const [expReviewTab, setExpReviewTab] = React.useState<'live_annotations' | 'standard'>('live_annotations');
 
   const selectedReview = pendingReviews.find((r) => r.id === selectedReviewId);
   const snapshot = selectedReview ? getSnapshotContent?.(selectedReview.snapshotId) : null;
@@ -148,27 +153,66 @@ export function AdvisorPortal({
                 </div>
               </div>
 
-              {/* Context, Roles, and Responsibilities (750 chars max) */}
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-bold text-slate-700">Context, Roles, and Responsibilities</span>
-                  <span className="font-mono text-slate-500">{currentEntry.descriptionText?.length || 0} / 750 chars</span>
-                </div>
-                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 text-xs font-mono leading-relaxed text-slate-800 whitespace-pre-wrap">
-                  {currentEntry.descriptionText}
-                </div>
+              {/* Review Sub-tabs */}
+              <div className="flex items-center gap-2 border-b border-slate-100 pb-3">
+                <button
+                  onClick={() => setExpReviewTab('live_annotations')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                    expReviewTab === 'live_annotations'
+                      ? 'bg-purple-600 text-white shadow-xs'
+                      : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  <Highlighter className="w-3.5 h-3.5" />
+                  Interactive Markup &amp; Margin Comments
+                </button>
+                <button
+                  onClick={() => setExpReviewTab('standard')}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+                    expReviewTab === 'standard'
+                      ? 'bg-sky-600 text-white shadow-xs'
+                      : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  Standard Readout
+                </button>
               </div>
 
-              {/* Most Meaningful Reflection (300 chars max) */}
-              {currentEntry.isMostMeaningful && (
-                <div className="space-y-1.5 p-4 bg-amber-50/50 rounded-xl border border-amber-200">
-                  <div className="flex items-center justify-between text-xs text-amber-900">
-                    <span className="font-bold">Most Meaningful Summary &amp; Clinical Reflection</span>
-                    <span className="font-mono">{currentEntry.reflectionText?.length || 0} / 300 chars</span>
+              {expReviewTab === 'live_annotations' ? (
+                <AnnotatedDocumentViewer
+                  documentId={`exp-entry-${activeEntryIndex}`}
+                  documentTitle={`Entry #${activeEntryIndex}: ${currentEntry.title}`}
+                  documentSubtitle={`Role: ${currentEntry.roleName} • Organization: ${currentEntry.orgName}`}
+                  text={currentEntry.descriptionText || ''}
+                  userRole="advisor"
+                  currentUserId={advisor.id}
+                  currentUserName={advisor.name}
+                />
+              ) : (
+                <div className="space-y-4">
+                  {/* Context, Roles, and Responsibilities (750 chars max) */}
+                  <div className="space-y-1.5">
+                    <div className="flex items-center justify-between text-xs">
+                      <span className="font-bold text-slate-700">Context, Roles, and Responsibilities</span>
+                      <span className="font-mono text-slate-500">{currentEntry.descriptionText?.length || 0} / 750 chars</span>
+                    </div>
+                    <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 text-xs font-mono leading-relaxed text-slate-800 whitespace-pre-wrap">
+                      {currentEntry.descriptionText}
+                    </div>
                   </div>
-                  <p className="p-3 bg-white rounded-lg border border-amber-200 text-xs font-mono leading-relaxed text-slate-800 whitespace-pre-wrap">
-                    {currentEntry.reflectionText}
-                  </p>
+
+                  {/* Most Meaningful Reflection (300 chars max) */}
+                  {currentEntry.isMostMeaningful && (
+                    <div className="space-y-1.5 p-4 bg-amber-50/50 rounded-xl border border-amber-200">
+                      <div className="flex items-center justify-between text-xs text-amber-900">
+                        <span className="font-bold">Most Meaningful Summary &amp; Clinical Reflection</span>
+                        <span className="font-mono">{currentEntry.reflectionText?.length || 0} / 300 chars</span>
+                      </div>
+                      <p className="p-3 bg-white rounded-lg border border-amber-200 text-xs font-mono leading-relaxed text-slate-800 whitespace-pre-wrap">
+                        {currentEntry.reflectionText}
+                      </p>
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -202,26 +246,66 @@ export function AdvisorPortal({
           </div>
         </div>
 
-        {/* Visual Diff & Snapshot View */}
-        <VisualDiffViewer
-          previousVersionTitle="Baseline Template / v0"
-          previousContent="Standing in the clinic, I observed the team treat patients..."
-          newVersionTitle={`v${snapshot.versionNumber} Submitted Draft`}
-          newContent={snapshot.content}
-          changelogNote={snapshot.changelogNote || 'Initial submission for faculty review.'}
-          studentName={selectedReview.studentName}
-        />
+        {/* Review Mode Tabs */}
+        <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
+          <button
+            onClick={() => setPsReviewTab('live_annotations')}
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+              psReviewTab === 'live_annotations'
+                ? 'bg-purple-600 text-white shadow-sm'
+                : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300'
+            }`}
+          >
+            <Highlighter className="w-3.5 h-3.5" />
+            Live Document Markup &amp; Anchored Comments
+          </button>
+          <button
+            onClick={() => setPsReviewTab('rubric')}
+            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+              psReviewTab === 'rubric'
+                ? 'bg-sky-600 text-white shadow-sm'
+                : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300'
+            }`}
+          >
+            <FileCheck className="w-3.5 h-3.5" />
+            Clinical Rubric &amp; Visual Diff
+          </button>
+        </div>
 
-        {/* 4-Pillar Clinical Evaluation Form */}
-        <ClinicalRubricForm
-          studentName={selectedReview.studentName}
-          versionNumber={snapshot.versionNumber}
-          onSubmit={(evaluation) => {
-            onSubmitFeedback?.(selectedReview.id, evaluation);
-            alert(`Evaluation submitted! Feedback returned to ${selectedReview.studentName}.`);
-            setSelectedReviewId(null);
-          }}
-        />
+        {psReviewTab === 'live_annotations' ? (
+          <AnnotatedDocumentViewer
+            documentId={`ps-v${snapshot.versionNumber}`}
+            documentTitle={`${selectedReview.studentName}'s Personal Statement (v${snapshot.versionNumber})`}
+            documentSubtitle="Faculty Collaborative Review Mode — Select text with cursor to highlight, suggest deletions, or anchor margin comments."
+            text={snapshot.content}
+            userRole="advisor"
+            currentUserId={advisor.id}
+            currentUserName={advisor.name}
+          />
+        ) : (
+          <div className="space-y-6">
+            {/* Visual Diff & Snapshot View */}
+            <VisualDiffViewer
+              previousVersionTitle="Baseline Template / v0"
+              previousContent="Standing in the clinic, I observed the team treat patients..."
+              newVersionTitle={`v${snapshot.versionNumber} Submitted Draft`}
+              newContent={snapshot.content}
+              changelogNote={snapshot.changelogNote || 'Initial submission for faculty review.'}
+              studentName={selectedReview.studentName}
+            />
+
+            {/* 4-Pillar Clinical Evaluation Form */}
+            <ClinicalRubricForm
+              studentName={selectedReview.studentName}
+              versionNumber={snapshot.versionNumber}
+              onSubmit={(evaluation) => {
+                onSubmitFeedback?.(selectedReview.id, evaluation);
+                alert(`Evaluation submitted! Feedback returned to ${selectedReview.studentName}.`);
+                setSelectedReviewId(null);
+              }}
+            />
+          </div>
+        )}
       </div>
     );
   }

@@ -17,8 +17,10 @@ import {
   Lock,
   Edit3,
   GitBranch,
-  X
+  X,
+  MessageSquare
 } from 'lucide-react';
+import { AnnotatedDocumentViewer } from './collaborative/AnnotatedDocumentViewer';
 
 interface PersonalStatementEditorProps {
   draft: PersonalStatementDraft;
@@ -51,6 +53,7 @@ export function PersonalStatementEditor({
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [showDiffModal, setShowDiffModal] = useState(false);
   const [sanitizedNotice, setSanitizedNotice] = useState(false);
+  const [viewMode, setViewMode] = useState<'editor' | 'annotations'>('editor');
 
   // Sync content when draft changes
   useEffect(() => {
@@ -250,36 +253,84 @@ export function PersonalStatementEditor({
         </div>
       )}
 
-      {/* Main Drafting Canvas */}
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        {/* Editor (3 cols) */}
-        <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col">
-          <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 text-xs text-slate-500">
-            <span className="font-medium text-slate-700">
-              {isViewingSnapshot ? `Locked Snapshot (v${selectedVersionNum})` : 'AAMC Plain-Text Drafting Canvas (Active)'}
-            </span>
-            <span>{isViewingSnapshot ? 'Read-only snapshot' : 'Autosaving locally & auto-forks upon edit'}</span>
+      {/* View Mode Switcher */}
+      <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
+        <button
+          onClick={() => setViewMode('editor')}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+            viewMode === 'editor'
+              ? 'bg-sky-600 text-white shadow-sm'
+              : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <Edit3 className="w-3.5 h-3.5" />
+          AAMC Plain-Text Canvas
+        </button>
+        <button
+          onClick={() => setViewMode('annotations')}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
+            viewMode === 'annotations'
+              ? 'bg-purple-600 text-white shadow-sm'
+              : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300'
+          }`}
+        >
+          <MessageSquare className="w-3.5 h-3.5" />
+          Faculty Markup & Anchored Comments
+        </button>
+      </div>
+
+      {viewMode === 'annotations' ? (
+        <AnnotatedDocumentViewer
+          documentId={`ps-v${selectedVersionNum}`}
+          documentTitle={`Personal Statement v${selectedVersionNum}`}
+          documentSubtitle={
+            isViewingSnapshot
+              ? `Locked snapshot submitted on ${new Date(selectedSnapshot?.submittedAt || '').toLocaleDateString()}`
+              : `Active drafting branch for ${draft.specialty}`
+          }
+          text={displayedContent}
+          userRole="applicant"
+          currentUserId="stu-101"
+          currentUserName="Applicant"
+          onTextUpdate={(updatedText) => {
+            if (!isViewingSnapshot) {
+              setContent(updatedText);
+              onSave(updatedText);
+            }
+          }}
+          readOnly={isViewingSnapshot}
+        />
+      ) : (
+        /* Main Drafting Canvas */
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Editor (3 cols) */}
+          <div className="lg:col-span-3 bg-white rounded-xl border border-slate-200 shadow-sm p-5 flex flex-col">
+            <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 text-xs text-slate-500">
+              <span className="font-medium text-slate-700">
+                {isViewingSnapshot ? `Locked Snapshot (v${selectedVersionNum})` : 'AAMC Plain-Text Drafting Canvas (Active)'}
+              </span>
+              <span>{isViewingSnapshot ? 'Read-only snapshot' : 'Autosaving locally & auto-forks upon edit'}</span>
+            </div>
+
+            <textarea
+              value={displayedContent}
+              readOnly={isViewingSnapshot}
+              onChange={handleChange}
+              onPaste={handlePaste}
+              rows={22}
+              className={`w-full flex-1 p-4 rounded-lg font-mono text-sm leading-relaxed resize-none transition-all placeholder:text-slate-400 ${
+                isViewingSnapshot
+                  ? 'bg-amber-50/20 border-amber-200 text-slate-700 cursor-not-allowed'
+                  : 'bg-slate-50/50 border border-slate-200 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/40 focus:border-sky-500'
+              }`}
+              placeholder="Type or paste your personal statement here... Pasted smart-quotes and dashes will be automatically sanitized."
+            />
           </div>
 
-          <textarea
-            value={displayedContent}
-            readOnly={isViewingSnapshot}
-            onChange={handleChange}
-            onPaste={handlePaste}
-            rows={22}
-            className={`w-full flex-1 p-4 rounded-lg font-mono text-sm leading-relaxed resize-none transition-all placeholder:text-slate-400 ${
-              isViewingSnapshot
-                ? 'bg-amber-50/20 border-amber-200 text-slate-700 cursor-not-allowed'
-                : 'bg-slate-50/50 border border-slate-200 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/40 focus:border-sky-500'
-            }`}
-            placeholder="Type or paste your personal statement here... Pasted smart-quotes and dashes will be automatically sanitized."
-          />
-        </div>
-
-        {/* Sidebar Metrics & ERAS Rules (1 col) */}
-        <div className="space-y-4">
-          {/* Live Counter Card */}
-          <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
+          {/* Sidebar Metrics & ERAS Rules (1 col) */}
+          <div className="space-y-4">
+            {/* Live Counter Card */}
+            <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
             <h2 className="text-xs font-bold text-slate-500 uppercase tracking-wider">Live ERAS Metrics</h2>
             
             <div>
@@ -341,6 +392,7 @@ export function PersonalStatementEditor({
           </div>
         </div>
       </div>
+      )}
 
       {/* Diff Comparison Modal */}
       {showDiffModal && (

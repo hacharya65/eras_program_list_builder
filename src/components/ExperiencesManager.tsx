@@ -21,8 +21,10 @@ import {
   X,
   Send,
   Eye,
-  Clock
+  Clock,
+  MessageSquare
 } from 'lucide-react';
+import { AnnotatedDocumentViewer } from './collaborative/AnnotatedDocumentViewer';
 
 interface ExperiencesManagerProps {
   experiences: ExperienceDraft[];
@@ -48,6 +50,7 @@ export function ExperiencesManager({
   const [impactfulText, setImpactfulText] = useState('');
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [submitChangelog, setSubmitChangelog] = useState('');
+  const [expAnnotationView, setExpAnnotationView] = useState<Record<string, boolean>>({});
   const [validationErrors, setValidationErrors] = useState<string[]>([]);
   const [showValidationModal, setShowValidationModal] = useState(false);
 
@@ -449,26 +452,58 @@ export function ExperiencesManager({
                             <label className="block text-xs font-bold text-slate-700">
                               Context, Roles, and Responsibilities: 750-character limit
                             </label>
-                            <span className={`text-xs font-mono font-bold ${descLen > 750 ? 'text-red-600' : 'text-slate-500'}`}>
-                              {descLen} / 750 characters
-                            </span>
+                            <div className="flex items-center gap-3">
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setExpAnnotationView((prev) => ({ ...prev, [exp.id]: !prev[exp.id] }))
+                                }
+                                className="text-[11px] font-semibold text-purple-700 hover:text-purple-900 flex items-center gap-1 bg-purple-50 hover:bg-purple-100 px-2 py-0.5 rounded border border-purple-200 transition-colors"
+                              >
+                                <MessageSquare className="w-3 h-3 text-purple-600" />
+                                {expAnnotationView[exp.id] ? 'Standard Input' : 'Faculty Markup & Comments'}
+                              </button>
+                              <span className={`text-xs font-mono font-bold ${descLen > 750 ? 'text-red-600' : 'text-slate-500'}`}>
+                                {descLen} / 750 characters
+                              </span>
+                            </div>
                           </div>
-                          <textarea
-                            value={exp.descriptionText || ''}
-                            onChange={(e) => handleUpdate(exp.id, 'descriptionText', sanitizeErasText(e.target.value))}
-                            rows={5}
-                            className={`w-full p-3 rounded-lg border text-xs font-mono leading-relaxed focus:outline-none focus:ring-2 ${
-                              descLen > 750
-                                ? 'border-red-400 bg-red-50 focus:ring-red-400'
-                                : 'border-slate-300 bg-white focus:ring-emerald-500'
-                            }`}
-                            placeholder="Describe your context, roles, and responsibilities (750-character limit)..."
-                          />
-                          {descLen > 750 && (
-                            <p className="text-[11px] text-red-600 font-medium mt-1 flex items-center gap-1">
-                              <AlertTriangle className="w-3.5 h-3.5" />
-                              Exceeds official ERAS limit by {descLen - 750} characters. Text will be cut off upon ERAS import!
-                            </p>
+
+                          {expAnnotationView[exp.id] ? (
+                            <div className="mt-2">
+                              <AnnotatedDocumentViewer
+                                documentId={`exp-entry-${index + 1}`}
+                                documentTitle={`Entry #${index + 1}: ${exp.title || 'Selected Experience'}`}
+                                documentSubtitle="Faculty Review Annotations & Suggestions"
+                                text={exp.descriptionText || ''}
+                                userRole="applicant"
+                                currentUserId="stu-101"
+                                currentUserName="Applicant"
+                                onTextUpdate={(updatedText) =>
+                                  handleUpdate(exp.id, 'descriptionText', sanitizeErasText(updatedText))
+                                }
+                              />
+                            </div>
+                          ) : (
+                            <>
+                              <textarea
+                                value={exp.descriptionText || ''}
+                                onChange={(e) => handleUpdate(exp.id, 'descriptionText', sanitizeErasText(e.target.value))}
+                                rows={5}
+                                className={`w-full p-3 rounded-lg border text-xs font-mono leading-relaxed focus:outline-none focus:ring-2 ${
+                                  descLen > 750
+                                    ? 'border-red-400 bg-red-50 focus:ring-red-400'
+                                    : 'border-slate-300 bg-white focus:ring-emerald-500'
+                                }`}
+                                placeholder="Describe your context, roles, and responsibilities (750-character limit)..."
+                              />
+                              {descLen > 750 && (
+                                <p className="text-[11px] text-red-600 font-medium mt-1 flex items-center gap-1">
+                                  <AlertTriangle className="w-3.5 h-3.5" />
+                                  Exceeds official ERAS limit by {descLen - 750} characters. Text will be cut off upon ERAS import!
+                                </p>
+                              )}
+                            </>
                           )}
                         </div>
 
