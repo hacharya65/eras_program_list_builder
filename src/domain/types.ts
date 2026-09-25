@@ -88,6 +88,7 @@ export interface ReviewRequest {
   inReviewAt?: string;
   completedAt?: string;
   slaDueAt: string;
+  currentViewingEntryIndex?: number;
 }
 
 export interface StudentDashboardContext {

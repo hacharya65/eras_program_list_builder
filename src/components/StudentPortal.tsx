@@ -30,6 +30,7 @@ interface StudentPortalProps {
   onUpdatePersonalStatement?: (content: string) => void;
   onSubmitPersonalStatement?: (changelog: string) => void;
   onUpdateExperience?: (id: string, updates: Partial<ExperienceDraft>) => void;
+  onSubmitExperiences?: (changelog: string) => void;
   getAdvisorFeedback?: () => any;
   onCreateRevision?: () => void;
 }
@@ -39,6 +40,7 @@ export function StudentPortal({
   onUpdatePersonalStatement,
   onSubmitPersonalStatement,
   onUpdateExperience,
+  onSubmitExperiences,
   getAdvisorFeedback,
   onCreateRevision,
 }: StudentPortalProps) {
@@ -72,9 +74,13 @@ export function StudentPortal({
   }
 
   if (activeView === 'experiences') {
+    const activeExpReview = context.activeReviewRequests.find(r => r.documentType === 'experience_portfolio');
     return (
       <ExperiencesManager
         experiences={experiences}
+        assignedAdvisor={assignedAdvisors[0]}
+        activeReviewRequest={activeExpReview}
+        onSubmitForReview={onSubmitExperiences}
         onSaveExperience={(id, updates) => onUpdateExperience?.(id, updates)}
         onDeleteExperience={(id) => {}}
         onBack={() => setActiveView('overview')}

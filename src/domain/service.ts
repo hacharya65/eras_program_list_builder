@@ -7,6 +7,7 @@ import {
   ReviewFeedback
 } from './types';
 import { InMemoryStorageAdapter } from './storage/in-memory-adapter';
+import { validateExperiencesSubmission } from './experience-validation';
 
 export class AdvisingPlatformService {
   constructor(private storage: InMemoryStorageAdapter) {}
@@ -70,6 +71,33 @@ export class AdvisingPlatformService {
     });
 
     return request;
+  }
+
+  submitExperiencesForReview(params: {
+    studentId: string;
+    advisorId: string;
+    changelogNote?: string;
+  }) {
+    const validation = validateExperiencesSubmission(this.storage.experiences);
+    if (!validation.canSubmit) {
+      throw new Error(validation.errors.join('; '));
+    }
+
+    const snapshot = this.storage.createExperiencesSnapshot(params.changelogNote);
+    const student = this.storage.personas.student;
+    const request = this.storage.createReviewRequest({
+      snapshotId: snapshot.id,
+      studentId: params.studentId,
+      studentName: student.name,
+      advisorId: params.advisorId,
+      documentType: 'experience_portfolio',
+    });
+
+    return request;
+  }
+
+  setAdvisorViewingEntry(reviewRequestId: string, entryIndex: number) {
+    return this.storage.setAdvisorViewingEntry(reviewRequestId, entryIndex);
   }
 
   openReviewAsAdvisor(reviewRequestId: string, advisorId: string) {

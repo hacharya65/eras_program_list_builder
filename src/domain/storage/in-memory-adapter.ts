@@ -218,6 +218,27 @@ export class InMemoryStorageAdapter {
     return snapshot;
   }
 
+  createExperiencesSnapshot(changelogNote?: string): DocumentSnapshot {
+    const snapshot: DocumentSnapshot = {
+      id: `snap-exp-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+      documentType: 'experience_portfolio',
+      documentId: 'exp-portfolio-1',
+      versionNumber: 1,
+      content: JSON.stringify(this.experiences),
+      changelogNote,
+      submittedAt: new Date().toISOString(),
+    };
+    this.snapshots.push(snapshot);
+    return snapshot;
+  }
+
+  setAdvisorViewingEntry(reviewRequestId: string, entryIndex: number): ReviewRequest | null {
+    const rev = this.reviewRequests.find(r => r.id === reviewRequestId);
+    if (!rev) return null;
+    rev.currentViewingEntryIndex = entryIndex;
+    return rev;
+  }
+
   createReviewRequest(params: {
     snapshotId: string;
     studentId: string;
@@ -240,7 +261,9 @@ export class InMemoryStorageAdapter {
       slaDueAt: slaDue.toISOString(),
     };
     this.reviewRequests.push(request);
-    this.personalStatement.stage = 'submitted';
+    if (params.documentType === 'personal_statement') {
+      this.personalStatement.stage = 'submitted';
+    }
     return request;
   }
 

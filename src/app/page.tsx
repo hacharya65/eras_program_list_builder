@@ -56,6 +56,24 @@ export default function HomePage() {
     setRefreshKey((k) => k + 1);
   };
 
+  const handleSubmitExperiences = (changelog: string) => {
+    try {
+      service.submitExperiencesForReview({
+        studentId: studentContext.student.id,
+        advisorId: studentContext.assignedAdvisors[0].id,
+        changelogNote: changelog,
+      });
+      setRefreshKey((k) => k + 1);
+    } catch (err: any) {
+      alert(err.message || 'Could not submit experiences portfolio.');
+    }
+  };
+
+  const handleViewingEntry = (reviewId: string, entryIndex: number) => {
+    service.setAdvisorViewingEntry(reviewId, entryIndex);
+    setRefreshKey((k) => k + 1);
+  };
+
   const handleCreateRevision = () => {
     storage.personalStatement.currentVersionNumber += 1;
     storage.personalStatement.stage = 'drafting';
@@ -90,6 +108,7 @@ export default function HomePage() {
             onUpdatePersonalStatement={handleUpdatePS}
             onSubmitPersonalStatement={handleSubmitPS}
             onUpdateExperience={handleUpdateExp}
+            onSubmitExperiences={handleSubmitExperiences}
             getAdvisorFeedback={getAdvisorFeedback}
             onCreateRevision={handleCreateRevision}
           />
@@ -100,6 +119,7 @@ export default function HomePage() {
             onOpenReview={handleOpenReview}
             onSubmitFeedback={handleSubmitFeedback}
             getSnapshotContent={(id) => service.getSnapshot(id)}
+            onViewingEntry={handleViewingEntry}
           />
         )}
         {currentRole === 'admin' && <AdminPortal context={adminContext} />}

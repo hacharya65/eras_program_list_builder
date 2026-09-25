@@ -22,6 +22,7 @@ interface AdvisorPortalProps {
   onOpenReview?: (reviewId: string) => void;
   onSubmitFeedback?: (reviewId: string, evaluation: RubricEvaluation) => void;
   getSnapshotContent?: (snapshotId: string) => any;
+  onViewingEntry?: (reviewId: string, entryIndex: number) => void;
 }
 
 export function AdvisorPortal({
@@ -29,14 +30,157 @@ export function AdvisorPortal({
   onOpenReview,
   onSubmitFeedback,
   getSnapshotContent,
+  onViewingEntry,
 }: AdvisorPortalProps) {
   const { advisor, advisees, pendingReviews } = context;
   const [selectedReviewId, setSelectedReviewId] = React.useState<string | null>(null);
+  const [activeEntryIndex, setActiveEntryIndex] = React.useState<number>(1);
 
-  const selectedReview = pendingReviews.find(r => r.id === selectedReviewId);
+  const selectedReview = pendingReviews.find((r) => r.id === selectedReviewId);
   const snapshot = selectedReview ? getSnapshotContent?.(selectedReview.snapshotId) : null;
 
   if (selectedReview && snapshot) {
+    // Check if this is an experience_portfolio review
+    if (selectedReview.documentType === 'experience_portfolio') {
+      let experiencesList: any[] = [];
+      try {
+        experiencesList = JSON.parse(snapshot.content);
+      } catch {
+        experiencesList = [];
+      }
+
+      const currentEntry = experiencesList[activeEntryIndex - 1];
+
+      const handleSelectEntry = (index: number) => {
+        setActiveEntryIndex(index);
+        onViewingEntry?.(selectedReview.id, index);
+      };
+
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSelectedReviewId(null)}
+                className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg text-xs font-semibold"
+              >
+                &larr; Back to Queue
+              </button>
+              <div>
+                <h2 className="text-base font-bold text-slate-900">
+                  Reviewing: {selectedReview.studentName}'s 10 Selected Experiences Portfolio
+                </h2>
+                <span className="text-xs text-slate-500">
+                  Stage: <strong className="text-blue-700 capitalize">{selectedReview.stage.replace('_', ' ')}</strong> &bull; Submitted on {new Date(selectedReview.submittedAt).toLocaleDateString()}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  alert(`Endorsed! 10 Selected Experiences for ${selectedReview.studentName} marked ERAS ready.`);
+                  setSelectedReviewId(null);
+                }}
+                className="px-4 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm"
+              >
+                Endorse 10 Experiences
+              </button>
+            </div>
+          </div>
+
+          {/* Active Review Tracker Bar */}
+          <div className="bg-white p-4 rounded-xl border border-sky-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+              <span className="text-xs font-bold text-slate-900">
+                Active Viewing Position: Entry #{activeEntryIndex} of 10 ({currentEntry?.title || 'Selected Experience'})
+              </span>
+            </div>
+            <span className="text-xs text-slate-500">
+              Student live tracker automatically synchronized
+            </span>
+          </div>
+
+          {/* 10 Entry Pagination Tabs */}
+          <div className="flex flex-wrap gap-2">
+            {Array.from({ length: 10 }, (_, i) => {
+              const num = i + 1;
+              const isSelected = activeEntryIndex === num;
+              const exp = experiencesList[i];
+              return (
+                <button
+                  key={num}
+                  onClick={() => handleSelectEntry(num)}
+                  className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all border ${
+                    isSelected
+                      ? 'bg-sky-600 text-white border-sky-600 shadow-sm'
+                      : 'bg-white text-slate-700 border-slate-200 hover:border-slate-300'
+                  }`}
+                >
+                  Entry #{num} {exp?.isMostMeaningful ? '★' : ''}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Detailed Experience Review Card */}
+          {currentEntry ? (
+            <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm space-y-5">
+              <div className="flex items-start justify-between gap-4 pb-4 border-b border-slate-100">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-bold text-sky-700 bg-sky-50 px-2.5 py-0.5 rounded border border-sky-200">
+                      {currentEntry.experienceType}
+                    </span>
+                    {currentEntry.isMostMeaningful && (
+                      <span className="text-xs font-bold text-amber-800 bg-amber-50 px-2.5 py-0.5 rounded border border-amber-200 flex items-center gap-1">
+                        ★ Most Meaningful Experience
+                      </span>
+                    )}
+                  </div>
+                  <h3 className="text-lg font-bold text-slate-900 mt-2">
+                    {currentEntry.title}
+                  </h3>
+                  <p className="text-xs text-slate-600 mt-0.5">
+                    <strong>Organization:</strong> {currentEntry.orgName} &bull; <strong>Role:</strong> {currentEntry.roleName} &bull; <strong>Frequency:</strong> {currentEntry.frequency}
+                  </p>
+                </div>
+              </div>
+
+              {/* Context, Roles, and Responsibilities (750 chars max) */}
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between text-xs">
+                  <span className="font-bold text-slate-700">Context, Roles, and Responsibilities</span>
+                  <span className="font-mono text-slate-500">{currentEntry.descriptionText?.length || 0} / 750 chars</span>
+                </div>
+                <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 text-xs font-mono leading-relaxed text-slate-800 whitespace-pre-wrap">
+                  {currentEntry.descriptionText}
+                </div>
+              </div>
+
+              {/* Most Meaningful Reflection (300 chars max) */}
+              {currentEntry.isMostMeaningful && (
+                <div className="space-y-1.5 p-4 bg-amber-50/50 rounded-xl border border-amber-200">
+                  <div className="flex items-center justify-between text-xs text-amber-900">
+                    <span className="font-bold">Most Meaningful Summary &amp; Clinical Reflection</span>
+                    <span className="font-mono">{currentEntry.reflectionText?.length || 0} / 300 chars</span>
+                  </div>
+                  <p className="p-3 bg-white rounded-lg border border-amber-200 text-xs font-mono leading-relaxed text-slate-800 whitespace-pre-wrap">
+                    {currentEntry.reflectionText}
+                  </p>
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="bg-white p-8 rounded-xl border text-center text-slate-500 text-sm">
+              Entry #{activeEntryIndex} is blank.
+            </div>
+          )}
+        </div>
+      );
+    }
+
     return (
       <div className="space-y-6">
         <div className="flex items-center justify-between bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
@@ -152,7 +296,7 @@ export function AdvisorPortal({
                           </span>
                         </div>
                         <div className="text-xs text-slate-500 mt-1">
-                          Document: Personal Statement &bull; Submitted on {new Date(rev.submittedAt).toLocaleDateString()}
+                          Document: {rev.documentType === 'experience_portfolio' ? '10 Selected Experiences Portfolio' : 'Personal Statement'} &bull; Submitted on {new Date(rev.submittedAt).toLocaleDateString()}
                         </div>
                         {sla.shouldNudgeAdvisor && (
                           <div className="mt-2 text-[11px] text-amber-800 bg-amber-50 p-2 rounded-md border border-amber-200 flex items-center gap-1.5">
@@ -168,7 +312,7 @@ export function AdvisorPortal({
                         }}
                         className="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs rounded-lg font-medium shadow-sm transition-colors shrink-0"
                       >
-                        Open Review &amp; Diff
+                        {rev.documentType === 'experience_portfolio' ? 'Review Portfolio' : 'Open Review & Diff'}
                       </button>
                     </div>
                   );
