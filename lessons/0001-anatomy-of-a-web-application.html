@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 0001: The Anatomy of a Web Application</title>
+  <link rel="stylesheet" href="../assets/style.css">
+</head>
+<body>
+  <header>
+    <div class="lesson-meta">Lesson 0001 &bull; Foundations</div>
+    <h1>The Anatomy of a Web Application</h1>
+    <p class="subtitle">How modern software systems work, translated into medical residency advising.</p>
+  </header>
+
+  <main>
+    <p>
+      When approaching software with no technical background, code can feel like an impenetrable wall of syntax. But building software is fundamentally about <strong>architecture and workflow</strong>, not memorizing code keywords.
+    </p>
+    <p>
+      Every web application—including the residency advising portal you are setting out to build—operates across three cooperating layers.
+    </p>
+
+    <h2>The Three Core Layers</h2>
+    <div class="architecture-grid">
+      <div class="arch-card">
+        <span class="arch-tag tag-front">1. Client / Frontend</span>
+        <h4>The User Interface</h4>
+        <p>Everything the medical student or faculty advisor sees and interacts with in Google Chrome or Safari: text boxes, character counters, buttons, and radar graphs.</p>
+        <div class="arch-analogy"><strong>Analogy:</strong> The Clinic Exam Room where the patient and doctor talk face-to-face.</div>
+      </div>
+
+      <div class="arch-card">
+        <span class="arch-tag tag-back">2. Server / Backend</span>
+        <h4>The Logic & Rules Engine</h4>
+        <p>The invisible decision-maker. It enforces official AAMC rules (e.g. strict 750-character caps), calculates competitiveness scores, and communicates with AI models.</p>
+        <div class="arch-analogy"><strong>Analogy:</strong> The Clinical Diagnostic Protocol that evaluates lab values against medical guidelines.</div>
+      </div>
+
+      <div class="arch-card">
+        <span class="arch-tag tag-db">3. Database / Storage</span>
+        <h4>The Permanent Vault</h4>
+        <p>Where information is permanently stored in organized tables: student rosters, drafted essays, advisor feedback notes, and 5,500+ ACGME residency programs.</p>
+        <div class="arch-analogy"><strong>Analogy:</strong> The Electronic Health Record (EHR) where historical patient charts are safely kept.</div>
+      </div>
+    </div>
+
+    <h2>A Concrete ERAS Advising Example</h2>
+    <p>
+      Imagine a student named Sarah is preparing her application for an Internal Medicine residency. Here is what happens under the hood during a single advising interaction:
+    </p>
+    <ol style="margin-left: 1.5rem; margin-bottom: 1.5rem; font-family: var(--font-sans); line-height: 1.8;">
+      <li><strong>Sarah types in the Frontend:</strong> She enters her clinical volunteering experience. The frontend immediately updates a live character counter: <code>682 / 750 characters</code>.</li>
+      <li><strong>Sarah clicks "Submit for Advisor Review":</strong> The frontend sends the draft across the internet to the <strong>Backend</strong>.</li>
+      <li><strong>The Backend validates and processes:</strong> The backend verifies that Sarah has not exceeded the 10-experience limit and notifies her assigned advisor, Dr. Martinez.</li>
+      <li><strong>The Database stores the record:</strong> The database safely saves the timestamp, Sarah's draft, and updates the status to <code>"In Review"</code>. Even if Sarah shuts her laptop, her work is completely secure.</li>
+    </ol>
+
+    <div class="callout">
+      <div class="callout-title">Your Role as the Product Lead</div>
+      <p>
+        Because you are directing AI to build this application, you do not need to memorize how to write database queries or styling syntax. Your job is to define the <strong>rules of the clinic</strong>:
+        <em>What are the character limits? Who is allowed to review a draft? What data should an advisor see before signing off?</em>
+      </p>
+    </div>
+
+    <h2>Check Your Understanding</h2>
+    <div class="quiz-container" id="quiz-block">
+      <span class="quiz-badge">Retrieval Check</span>
+      <div class="quiz-question">
+        A medical student clicks "Save" on their 750-character ERAS clinical experience draft. Which component is responsible for permanently preserving this draft so it is not lost when they log out?
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-btn" onclick="handleQuiz(this, false)">The browser graphical interface</button>
+        <button class="quiz-btn" onclick="handleQuiz(this, true)">The relational database table</button>
+        <button class="quiz-btn" onclick="handleQuiz(this, false)">The background timer service</button>
+        <button class="quiz-btn" onclick="handleQuiz(this, false)">The client cascading stylesheet</button>
+      </div>
+      <div id="quiz-feedback" class="quiz-feedback"></div>
+    </div>
+
+    <div class="primary-source">
+      <strong>Recommended Primary Source:</strong> Chapter 1 ("Introduction & Architectural Thinking") of 
+      <a href="file:///Users/hacharya/Desktop/AI%20Coding/OReilly.Fundamentals.of.Software.Architecture.2020.1.pdf">Fundamentals of Software Architecture (O'Reilly)</a>, available right here in your workspace. It defines the exact shift from thinking about low-level code to thinking about architectural capabilities.
+    </div>
+
+    <div class="callout" style="border-left-color: #059669; background: #f0fdf4;">
+      <div class="callout-title" style="color: #059669;">Your Turn & Follow-up</div>
+      <p>
+        Remember, I am your interactive teacher and pair-programmer. When you finish reading this, head back to our chat and ask any questions about these layers, or tell me which part of the advising flow you want to explore next!
+      </p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-nav">
+      <a href="../reference/web-app-architecture.html">View Architecture Reference Sheet &rarr;</a>
+    </div>
+    <div>Internal-ERAS Advising Learning Workspace</div>
+  </footer>
+
+  <script>
+    function handleQuiz(button, isCorrect) {
+      const container = document.getElementById('quiz-block');
+      const buttons = container.querySelectorAll('.quiz-btn');
+      const feedback = document.getElementById('quiz-feedback');
+
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.cursor = 'default';
+      });
+
+      if (isCorrect) {
+        button.classList.add('correct');
+        feedback.className = 'quiz-feedback show success';
+        feedback.innerHTML = '<strong>Correct!</strong> The database (such as PostgreSQL / Supabase) is the permanent vault where records survive even after the student closes their browser or logs out.';
+      } else {
+        button.classList.add('incorrect');
+        feedback.className = 'quiz-feedback show error';
+        feedback.innerHTML = '<strong>Not quite.</strong> The browser interface and styling only live temporarily in the student’s computer memory. Permanent preservation requires storing the data in the <strong>relational database</strong>.';
+      }
+    }
+  </script>
+</body>
+</html>

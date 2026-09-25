@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference: Core Web App Architecture & ERAS Advising Mapping</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border-light);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background: var(--accent-light);
+      color: var(--text-accent);
+      font-weight: 600;
+    }
+    tr:nth-child(even) {
+      background: #fafafa;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="lesson-meta">Quick Reference Guide #01</div>
+    <h1>The 3-Layer Web App Architecture</h1>
+    <p class="subtitle">A cheat sheet mapping standard software layers to the Medical Residency Advising domain.</p>
+  </header>
+
+  <main>
+    <h2>Architectural Matrix</h2>
+    <table>
+      <thead>
+        <tr>
+          <th>Layer</th>
+          <th>What It Does</th>
+          <th>ERAS Advising Example</th>
+          <th>Tools We Use</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Frontend (Client)</strong></td>
+          <td>Renders user interfaces in the browser, registers clicks and text input, counts characters in real time.</td>
+          <td>The student typing their 750-character clinical description; selecting Gold/Silver program signals.</td>
+          <td>React, Next.js, HTML/CSS</td>
+        </tr>
+        <tr>
+          <td><strong>Backend (Server / API)</strong></td>
+          <td>Enforces business rules, runs algorithms, authenticates users, talks to AI services.</td>
+          <td>Calculates the Specialty Competitiveness Index ($SCI$); calls Gemini for Socratic drafting prompts.</td>
+          <td>Next.js Route Handlers, Node.js</td>
+        </tr>
+        <tr>
+          <td><strong>Database (Storage)</strong></td>
+          <td>Persistently stores, indexes, and secures structured records in tables with access controls.</td>
+          <td>Tables for <code>students</code>, <code>advisors</code>, <code>experiences</code>, <code>acgme_programs</code>, and <code>nrmp_benchmarks</code>.</td>
+          <td>PostgreSQL (Supabase)</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Hospital / Clinical Analogy</h2>
+    <div class="callout">
+      <div class="callout-title">The Clinical Metaphor</div>
+      <p><strong>The Exam Room / Triage Desk (Frontend):</strong> Where the patient meets the clinical staff, answers questions, and sees their vitals on a monitor.</p>
+      <p><strong>The Clinical Protocol / Treatment Algorithm (Backend):</strong> The diagnostic logic that interprets the vitals, flags contraindications, and orders the proper labs.</p>
+      <p><strong>The Electronic Health Record (EHR / Database):</strong> The permanent, HIPAA-compliant vault where patient encounters, history, and lab results are securely saved and fetched.</p>
+    </div>
+
+    <h2>Golden Rules for the Non-Technical Creator</h2>
+    <ol style="margin-left: 1.5rem; margin-bottom: 2rem; font-family: var(--font-sans); line-height: 1.8;">
+      <li><strong>Never store data on the frontend:</strong> If a student refreshes their browser, any data not sent to the database is lost.</li>
+      <li><strong>Enforce critical limits on the backend:</strong> Even if the frontend has a character counter, the backend must guarantee that no text over the AAMC limit is accepted.</li>
+      <li><strong>Respect user roles:</strong> Students only edit their own draft; advisors can read their advisees' drafts and leave feedback; deans see aggregate cohort stats.</li>
+    </ol>
+  </main>
+
+  <footer>
+    <div><a href="../lessons/0001-anatomy-of-a-web-application.html">← Back to Lesson 0001</a></div>
+    <div>Internal-ERAS Advising Learning Workspace</div>
+  </footer>
+</body>
+</html>

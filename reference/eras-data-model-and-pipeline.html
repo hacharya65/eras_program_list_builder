@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Reference: Review Pipeline & Alumni Relational Schema</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    .flow-step {
+      display: inline-block;
+      padding: 0.35rem 0.75rem;
+      border-radius: 4px;
+      font-family: var(--font-sans);
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-right: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+    .step-draft { background: #f3f4f6; color: #4b5563; }
+    .step-submitted { background: #fef3c7; color: #92400e; }
+    .step-review { background: #e0e7ff; color: #3730a3; }
+    .step-feedback { background: #fed7aa; color: #9a3412; }
+    .step-approved { background: #dcfce7; color: #166534; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1.5rem 0;
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+    }
+    th, td {
+      border: 1px solid var(--border-light);
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+    th {
+      background: var(--accent-light);
+      color: var(--text-accent);
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="lesson-meta">Quick Reference Guide #02</div>
+    <h1>The Advising Review Pipeline & Relational Data</h1>
+    <p class="subtitle">Replacing email ping-pong and scavenger hunts with deterministic software pipelines.</p>
+  </header>
+
+  <main>
+    <h2>1. The 5-Stage Document Lifecycle (State Machine)</h2>
+    <p>In a web application, an essay or experience is never an unmanaged file. It is a record with an explicit <strong>Status</strong>:</p>
+    
+    <div style="margin: 1.25rem 0;">
+      <span class="flow-step step-draft">1. Drafting</span> &rarr;
+      <span class="flow-step step-submitted">2. Submitted</span> &rarr;
+      <span class="flow-step step-review">3. In Review</span> &rarr;
+      <span class="flow-step step-feedback">4. Feedback Ready</span> &rarr;
+      <span class="flow-step step-approved">5. Approved</span>
+    </div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Stage</th>
+          <th>What Student Sees</th>
+          <th>What Advisor Sees</th>
+          <th>System Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><strong>Drafting</strong></td>
+          <td>Editable fields with real-time character caps.</td>
+          <td>Nothing (student's private work-in-progress).</td>
+          <td>Autosaves drafts safely in the database.</td>
+        </tr>
+        <tr>
+          <td><strong>Submitted</strong></td>
+          <td>Fields lock to read-only; status badge says "Waiting in Queue".</td>
+          <td>Appears in the advisor's incoming review inbox with timestamp.</td>
+          <td>Sends alert to advisor; locks document editing.</td>
+        </tr>
+        <tr>
+          <td><strong>In Review</strong></td>
+          <td>Status badge turns purple: "Currently being reviewed by Dr. X".</td>
+          <td>Active split-screen: student draft on left, rubric/notes on right.</td>
+          <td>Prevents two advisors from reviewing simultaneously.</td>
+        </tr>
+        <tr>
+          <td><strong>Feedback Ready</strong></td>
+          <td>Notification received; student sees inline rubric & actionable notes.</td>
+          <td>Archived in completed reviews history.</td>
+          <td>Unlocks document if revisions are requested.</td>
+        </tr>
+        <tr>
+          <td><strong>Approved</strong></td>
+          <td>Green checkmark: "Ready for 1-Click ERAS Export".</td>
+          <td>Signed-off badge on Dean's cohort dashboard.</td>
+          <td>Generates clean, pre-validated text formatted for ERAS.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>2. Solving the Alumni "Scavenger Hunt" with Relational Data</h2>
+    <p>
+      In a spreadsheet or email thread, alumni data is disconnected. In a relational database, tables connect to each other through <strong>relationships</strong>:
+    </p>
+
+    <div class="callout">
+      <div class="callout-title">The Relational Chain</div>
+      <p>
+        <strong>ACGME Programs Table:</strong> Master list of 5,500+ verified residency programs (specialty, hospital, city, state).<br>
+        &uarr; <em>linked to</em><br>
+        <strong>Alumni Match Table:</strong> Which graduates from your medical school matched there (Match Year, Specialty, Fellowship track).<br>
+        &uarr; <em>linked to</em><br>
+        <strong>Alumni Contact Table:</strong> Willingness to be contacted, verified institutional email, LinkedIn, and peer advising tips.
+      </p>
+      <p style="margin-top: 0.75rem; font-style: italic; color: var(--text-accent);">
+        <strong>Result:</strong> When a student adds "Massachusetts General Hospital - Internal Medicine" to their school list, the app instantly displays: <em>"3 Alumni from your school matched here (2023, 2024, 2025). [View Contacts]"</em>
+      </p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-nav">
+      <a href="../lessons/0002-from-email-chaos-to-structured-pipeline.html">&larr; Back to Lesson 0002</a>
+    </div>
+    <div>Internal-ERAS Advising Learning Workspace</div>
+  </footer>
+</body>
+</html>

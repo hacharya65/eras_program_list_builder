@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lesson 0002: From Email Chaos to a Structured Advising Pipeline</title>
+  <link rel="stylesheet" href="../assets/style.css">
+  <style>
+    /* Pipeline Simulator Styles */
+    .simulator-container {
+      background: var(--bg-card);
+      border: 1px solid var(--border-light);
+      border-radius: 8px;
+      padding: 1.5rem;
+      margin: 2rem 0;
+      font-family: var(--font-sans);
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+    }
+    .status-tracker {
+      display: flex;
+      justify-content: space-between;
+      position: relative;
+      margin-bottom: 2rem;
+    }
+    .status-tracker::before {
+      content: '';
+      position: absolute;
+      top: 50%;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: var(--border-light);
+      z-index: 1;
+      transform: translateY(-50%);
+    }
+    .tracker-node {
+      position: relative;
+      z-index: 2;
+      background: var(--bg-card);
+      border: 3px solid var(--border-light);
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      transition: all 0.2s ease;
+    }
+    .tracker-node.active {
+      border-color: var(--text-accent);
+      background: var(--text-accent);
+      color: #ffffff;
+      box-shadow: 0 0 0 4px var(--accent-light);
+    }
+    .tracker-node.completed {
+      border-color: var(--success);
+      background: var(--success);
+      color: #ffffff;
+    }
+    .sim-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.25rem;
+      margin-bottom: 1.5rem;
+    }
+    .sim-view {
+      background: #f8fafc;
+      border: 1px solid var(--border-light);
+      border-radius: 6px;
+      padding: 1rem;
+    }
+    .sim-view h5 {
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      margin-bottom: 0.5rem;
+    }
+    .sim-body {
+      font-size: 0.95rem;
+      line-height: 1.45;
+      color: var(--text-main);
+    }
+    .sim-btn {
+      background: var(--text-accent);
+      color: #ffffff;
+      border: none;
+      padding: 0.75rem 1.25rem;
+      border-radius: 6px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+    }
+    .sim-btn:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="lesson-meta">Lesson 0002 &bull; Architecture & Workflow</div>
+    <h1>From Email Chaos to a Structured Pipeline</h1>
+    <p class="subtitle">Solving the Google Doc version scramble, advisor black hole, and alumni scavenger hunt.</p>
+  </header>
+
+  <main>
+    <p>
+      In your audio note, you pinpointed the exact triad of headaches that every medical student and residency advisor endures:
+    </p>
+    <ul style="margin-left: 1.5rem; margin-bottom: 1.5rem; font-family: var(--font-sans); line-height: 1.8;">
+      <li><strong>Google Doc version sprawl:</strong> Juggling separate files (<code>Draft_v1</code>, <code>v2_edits</code>, <code>v3_final</code>), losing track of comments, and worrying about formatting breaking when copy-pasting into ERAS come June/July.</li>
+      <li><strong>The communication black hole:</strong> Emailing busy faculty advisors and wondering: <em>Did they open it? Are they reviewing it? When will I hear back?</em></li>
+      <li><strong>The alumni scavenger hunt:</strong> Trying to figure out which past graduates matched at target programs and hunting down their contact info across scattered spreadsheets.</li>
+    </ul>
+
+    <p>
+      These aren’t just personal frustrations—they are classic <strong>information architecture failures</strong>. Let's see how a web application fixes all three using two foundational software patterns: <strong>State Machines</strong> and <strong>Relational Connections</strong>.
+    </p>
+
+    <h2>Solution 1: The Document State Machine</h2>
+    <p>
+      Instead of sending an untracked Word or Google Doc over email, a web application gives every essay an explicit <strong>lifecycle status</strong>. The system itself acts as the traffic controller:
+    </p>
+
+    <div class="simulator-container">
+      <div style="font-size: 0.85rem; font-weight: 700; text-transform: uppercase; color: var(--text-accent); margin-bottom: 1rem;">
+        Interactive Pipeline Simulator: Personal Statement Draft
+      </div>
+      <div class="status-tracker">
+        <div class="tracker-node active" id="node-0">1</div>
+        <div class="tracker-node" id="node-1">2</div>
+        <div class="tracker-node" id="node-2">3</div>
+        <div class="tracker-node" id="node-3">4</div>
+        <div class="tracker-node" id="node-4">5</div>
+      </div>
+
+      <div class="sim-split">
+        <div class="sim-view">
+          <h5>What the Student Sees</h5>
+          <div class="sim-body" id="student-view">
+            <strong>Drafting in Progress:</strong> You can edit your essay text. Live counter: <code>680 / 750 words</code>.
+          </div>
+        </div>
+        <div class="sim-view">
+          <h5>What the Faculty Advisor Sees</h5>
+          <div class="sim-body" id="advisor-view">
+            <strong>Private Workspace:</strong> Student is actively drafting. Nothing in your review inbox yet.
+          </div>
+        </div>
+      </div>
+
+      <button class="sim-btn" id="advance-btn" onclick="advancePipeline()">Advance to Next Stage &rarr;</button>
+    </div>
+
+    <h2>Solution 2: Relational Tables End the "Alumni Scavenger Hunt"</h2>
+    <p>
+      In a spreadsheet, if you want to know who matched at a hospital, someone has to manually search through rows or ask alumni affairs. In a web app's <strong>relational database</strong>, the data is already linked like puzzle pieces:
+    </p>
+
+    <div class="callout">
+      <div class="callout-title">The Three Connected Tables</div>
+      <p>
+        <strong>1. ACGME Directory:</strong> Contains verified program IDs, names, cities, and specialties.<br>
+        <strong>2. Match History Table:</strong> Records which senior from your school matched into which program ID in what year.<br>
+        <strong>3. Alumni Directory:</strong> Records current contact info, willingness to mentor, and advice notes.
+      </p>
+      <p style="margin-top: 0.75rem;">
+        When a student adds a program to their school list, the database automatically queries: <em>"Fetch all alumni where ProgramID matches this hospital."</em> The student gets instant contact cards without anyone searching manually.
+      </p>
+    </div>
+
+    <h2>Check Your Understanding</h2>
+    <div class="quiz-container" id="quiz-block">
+      <span class="quiz-badge">Retrieval Check</span>
+      <div class="quiz-question">
+        Why does managing essay drafts inside a database status pipeline eliminate the "email black hole" experienced by medical students?
+      </div>
+      <div class="quiz-options">
+        <button class="quiz-btn" onclick="handleQuiz(this, true)">Every status transition updates automatically</button>
+        <button class="quiz-btn" onclick="handleQuiz(this, false)">Students can email advisors directly</button>
+        <button class="quiz-btn" onclick="handleQuiz(this, false)">Word documents format character counts</button>
+        <button class="quiz-btn" onclick="handleQuiz(this, false)">Drafts get printed out daily</button>
+      </div>
+      <div id="quiz-feedback" class="quiz-feedback"></div>
+    </div>
+
+    <div class="primary-source">
+      <strong>Recommended Primary Source:</strong> Chapter 9 ("Architecture Characteristics") of 
+      <a href="file:///Users/hacharya/Desktop/AI%20Coding/OReilly.Fundamentals.of.Software.Architecture.2020.1.pdf">Fundamentals of Software Architecture</a>. It explains how systems guarantee workflow reliability and visibility instead of relying on manual communication.
+    </div>
+
+    <div class="callout" style="border-left-color: #059669; background: #f0fdf4;">
+      <div class="callout-title" style="color: #059669;">Next Steps in Our Collaboration</div>
+      <p>
+        Because this workflow is so clear, we can actually look at the <strong>Review Queue</strong> and <strong>School List Builder</strong> modules that already exist in your local code to see how these exact screens work in practice!
+      </p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="footer-nav">
+      <a href="0001-anatomy-of-a-web-application.html">&larr; Lesson 0001</a>
+      <span style="margin: 0 0.5rem;">|</span>
+      <a href="../reference/eras-data-model-and-pipeline.html">View Review Pipeline Reference &rarr;</a>
+    </div>
+    <div>Internal-ERAS Advising Learning Workspace</div>
+  </footer>
+
+  <script>
+    const stages = [
+      {
+        name: "Drafting",
+        student: "<strong>Drafting in Progress:</strong> You can edit your essay text. Live counter: <code>680 / 750 words</code>.",
+        advisor: "<strong>Private Workspace:</strong> Student is actively drafting. Nothing in your review inbox yet.",
+        btn: "Student Clicks 'Submit for Review' &rarr;"
+      },
+      {
+        name: "Submitted",
+        student: "<strong>Submitted to Queue:</strong> Document locked to prevent version conflicts. Waiting for advisor claim.",
+        advisor: "<strong>New Alert in Inbox:</strong> Essay arrived with timestamp. Claim button available.",
+        btn: "Advisor Clicks 'Claim & Begin Review' &rarr;"
+      },
+      {
+        name: "In Review",
+        student: "<strong>Active Review:</strong> Badge turns purple: <em>'Dr. Martinez is currently reviewing your draft.'</em>",
+        advisor: "<strong>Split Review Screen:</strong> Student draft on left; scoring rubric and feedback notes on right.",
+        btn: "Advisor Clicks 'Return with Feedback' &rarr;"
+      },
+      {
+        name: "Feedback Ready",
+        student: "<strong>Feedback Received:</strong> Student reviews rubric score (Specialty Alignment: 4/5) and suggested edits.",
+        advisor: "<strong>Review Completed:</strong> Archived in advisor's past reviews ledger.",
+        btn: "Student Revises & Clicks 'Request Final Sign-Off' &rarr;"
+      },
+      {
+        name: "Approved",
+        student: "<strong>Approved for ERAS:</strong> Green checkmark badge. 1-Click export to clipboard for June/July ERAS entry!",
+        advisor: "<strong>Dean Cohort Summary:</strong> Student is flagged as 'Ready to Submit' on Dean's dashboard.",
+        btn: "Reset Simulator to Stage 1"
+      }
+    ];
+
+    let currentStage = 0;
+
+    function advancePipeline() {
+      currentStage = (currentStage + 1) % stages.length;
+      
+      // Update nodes
+      for (let i = 0; i < stages.length; i++) {
+        const node = document.getElementById('node-' + i);
+        if (i < currentStage) {
+          node.className = 'tracker-node completed';
+          node.innerHTML = '&#10003;';
+        } else if (i === currentStage) {
+          node.className = 'tracker-node active';
+          node.innerHTML = (i + 1);
+        } else {
+          node.className = 'tracker-node';
+          node.innerHTML = (i + 1);
+        }
+      }
+
+      // Update text
+      document.getElementById('student-view').innerHTML = stages[currentStage].student;
+      document.getElementById('advisor-view').innerHTML = stages[currentStage].advisor;
+      document.getElementById('advance-btn').innerHTML = stages[currentStage].btn;
+    }
+
+    function handleQuiz(button, isCorrect) {
+      const container = document.getElementById('quiz-block');
+      const buttons = container.querySelectorAll('.quiz-btn');
+      const feedback = document.getElementById('quiz-feedback');
+
+      buttons.forEach(btn => {
+        btn.disabled = true;
+        btn.style.cursor = 'default';
+      });
+
+      if (isCorrect) {
+        button.classList.add('correct');
+        feedback.className = 'quiz-feedback show success';
+        feedback.innerHTML = '<strong>Correct!</strong> In a status pipeline, the database automatically records each state change (Drafting &rarr; In Review &rarr; Approved) and notifies the student immediately, completely eliminating the "did they get my email?" anxiety.';
+      } else {
+        button.classList.add('incorrect');
+        feedback.className = 'quiz-feedback show error';
+        feedback.innerHTML = '<strong>Not quite.</strong> The true breakthrough of a web app pipeline is that <strong>every status transition updates automatically</strong>, giving both the student and advisor instantaneous visibility.';
+      }
+    }
+  </script>
+</body>
+</html>
