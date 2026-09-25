@@ -14,6 +14,7 @@ This backlog tracks the next cycle of feature requests, enhancements, and bugfix
 | **[#14](.scratch/eras-advising/issues/14-universal-residency-database-matrix.md)** | Universal Residency Program Database & Row Matrix | Data / UI Redesign | High | None | `Completed` |
 | **[#15](.scratch/eras-advising/issues/15-signaling-strategy-recommendation-engine.md)** | Program Signaling Strategy Recommendation Engine | Algorithm / Decision Support | Medium | #14 recommended | `Completed` |
 | **[#16](.scratch/eras-advising/issues/16-advisor-live-editing-annotations-comments.md)** | Advisor Live Document Editing, Annotations & Anchored Comments | Collaborative Review | High | #11, #12 | `Completed` |
+| **[#17](.scratch/eras-advising/issues/10-eras-transfer-kit-pdf-export.md)** | Compiled Institutional PDF Packet Generator (MSPE Dean's Office Bundle) | Export / Reporting | Medium | #10 | `Completed` |
 
 ---
 

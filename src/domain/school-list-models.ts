@@ -106,7 +106,7 @@ export interface SchoolListItem {
   programDirector?: string;
   tier: ProgramTier;
   signal: SignalType;
-  track: ApplicationTrack;
+  track?: ApplicationTrack;
   yieldNoSignal?: number;
   yieldSilver?: number;
   yieldGold?: number;

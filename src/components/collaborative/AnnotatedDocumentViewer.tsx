@@ -441,7 +441,7 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
               }
 
               if (isSelected) {
-                styleClasses += 'ring-2 ring-sky-500 ring-offset-1 ';
+                styleClasses += 'bg-amber-200/90 font-medium ';
               }
 
               return (

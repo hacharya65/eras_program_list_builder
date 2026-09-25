@@ -13,6 +13,8 @@ export interface SignalingRecommendation {
   explanation: string;
   deltaGoldSilver: number;
   deltaSilverNone: number;
+  silverMultiplier?: string; // e.g. "2.4x"
+  goldMultiplier?: string;   // e.g. "14.5x"
 }
 
 export function computeSignalingRecommendation(
@@ -35,6 +37,20 @@ export function computeSignalingRecommendation(
   const deltaGoldSilver = yieldGold - yieldSilver;
   const deltaSilverNone = yieldSilver - yieldNoSignal;
 
+  const silverMultiplier =
+    yieldNoSignal > 0
+      ? `${(yieldSilver / yieldNoSignal).toFixed(1)}x`
+      : yieldSilver > 0
+      ? `+${yieldSilver}%`
+      : '1.0x';
+
+  const goldMultiplier =
+    yieldNoSignal > 0
+      ? `${(yieldGold / yieldNoSignal).toFixed(1)}x`
+      : yieldGold > 0
+      ? `+${yieldGold}%`
+      : '1.0x';
+
   // Case 1: High organic interview yield without signal (home program / strong pipeline)
   if (yieldNoSignal >= 35) {
     return {
@@ -45,6 +61,8 @@ export function computeSignalingRecommendation(
       explanation: `High baseline yield (${yieldNoSignal}% without signal). Conserve your valuable tokens for out-of-region or competitive reach programs.`,
       deltaGoldSilver,
       deltaSilverNone,
+      silverMultiplier,
+      goldMultiplier,
     };
   }
 
@@ -58,6 +76,8 @@ export function computeSignalingRecommendation(
       explanation: `Gold signal produces a dramatic +${deltaGoldSilver}% interview surge over Silver (${yieldGold}% vs ${yieldSilver}%). Prime target for Gold token.`,
       deltaGoldSilver,
       deltaSilverNone,
+      silverMultiplier,
+      goldMultiplier,
     };
   }
 
@@ -71,6 +91,8 @@ export function computeSignalingRecommendation(
       explanation: `Silver captures most of the signal benefit (+${deltaSilverNone}% over no signal), while Gold only adds +${deltaGoldSilver}%. Reserve Gold for programs with higher delta.`,
       deltaGoldSilver,
       deltaSilverNone,
+      silverMultiplier,
+      goldMultiplier,
     };
   }
 
@@ -84,6 +106,8 @@ export function computeSignalingRecommendation(
       explanation: `Low overall yield gain (+${deltaGoldSilver}% Gold / +${deltaSilverNone}% Silver). Tokens yield minimal interview advantage at this program.`,
       deltaGoldSilver,
       deltaSilverNone,
+      silverMultiplier,
+      goldMultiplier,
     };
   }
 
@@ -97,6 +121,8 @@ export function computeSignalingRecommendation(
       explanation: `Silver provides solid yield enhancement (+${deltaSilverNone}%).`,
       deltaGoldSilver,
       deltaSilverNone,
+      silverMultiplier,
+      goldMultiplier,
     };
   }
 
@@ -108,5 +134,7 @@ export function computeSignalingRecommendation(
     explanation: `Gold signal recommended (+${deltaGoldSilver}% over Silver).`,
     deltaGoldSilver,
     deltaSilverNone,
+    silverMultiplier,
+    goldMultiplier,
   };
 }

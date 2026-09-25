@@ -157,6 +157,14 @@ describe('Ticket 07: Strategic School List Matrix & Dynamic Specialty Signaling'
       expect(result.recommendation).toBe('SIGNAL_INEFFICIENT');
       expect(result.recommendedSignal).toBe('none');
     });
+
+    it('computes exact multiplier change ratios for Silver and Gold signals', async () => {
+      const { computeSignalingRecommendation } = await import('@/domain/signaling-recommendation');
+      // No signal: 2%, Silver: 4.8%, Gold: 29% -> 2.4x Silver, 14.5x Gold
+      const result = computeSignalingRecommendation(2, 4.8, 29);
+      expect(result.silverMultiplier).toBe('2.4x');
+      expect(result.goldMultiplier).toBe('14.5x');
+    });
   });
 });
 

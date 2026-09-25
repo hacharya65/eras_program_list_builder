@@ -62,10 +62,9 @@ const DEFAULT_ITEMS: SchoolListItem[] = [
     programDirector: 'J. Kevin Tucker, MD',
     tier: 'reach',
     signal: 'gold',
-    track: 'categorical',
-    yieldNoSignal: 4,
-    yieldSilver: 18,
-    yieldGold: 48,
+    yieldNoSignal: undefined,
+    yieldSilver: undefined,
+    yieldGold: undefined,
     advisorNotes: 'Strong research emphasis; Gold signal essential for out-of-region consideration.',
     residencyExplorerUrl: 'https://www.residencyexplorer.org',
     doximityUrl: 'https://www.doximity.com/residency/programs/1402421162',
@@ -81,10 +80,9 @@ const DEFAULT_ITEMS: SchoolListItem[] = [
     programDirector: 'Maria A. Yialamas, MD',
     tier: 'reach',
     signal: 'gold',
-    track: 'categorical',
-    yieldNoSignal: 5,
-    yieldSilver: 20,
-    yieldGold: 45,
+    yieldNoSignal: undefined,
+    yieldSilver: undefined,
+    yieldGold: undefined,
     advisorNotes: 'Strong applicant pool; Gold token yields +25% jump over Silver.',
     residencyExplorerUrl: 'https://www.residencyexplorer.org',
     doximityUrl: 'https://www.doximity.com/residency/programs/1402421160',
@@ -100,10 +98,9 @@ const DEFAULT_ITEMS: SchoolListItem[] = [
     programDirector: 'Ken Steinberg, MD',
     tier: 'target',
     signal: 'silver',
-    track: 'categorical',
-    yieldNoSignal: 8,
-    yieldSilver: 38,
-    yieldGold: 42,
+    yieldNoSignal: undefined,
+    yieldSilver: undefined,
+    yieldGold: undefined,
     advisorNotes: 'Silver signal captures bulk of yield (+30%); reserve Gold for top reach.',
     residencyExplorerUrl: 'https://www.residencyexplorer.org',
     doximityUrl: 'https://www.doximity.com/residency/programs/1405421430',
@@ -119,10 +116,9 @@ const DEFAULT_ITEMS: SchoolListItem[] = [
     programDirector: 'Wendy Armstrong, MD',
     tier: 'target',
     signal: 'silver',
-    track: 'categorical',
-    yieldNoSignal: 6,
-    yieldSilver: 30,
-    yieldGold: 35,
+    yieldNoSignal: undefined,
+    yieldSilver: undefined,
+    yieldGold: undefined,
     advisorNotes: 'Solid clinical training; Silver optimal allocation.',
     residencyExplorerUrl: 'https://www.residencyexplorer.org',
     doximityUrl: 'https://www.doximity.com/residency/programs/1401221105',
@@ -138,10 +134,9 @@ const DEFAULT_ITEMS: SchoolListItem[] = [
     programDirector: 'Laura K. Snydman, MD',
     tier: 'safety',
     signal: 'none',
-    track: 'categorical',
-    yieldNoSignal: 42,
-    yieldSilver: 52,
-    yieldGold: 56,
+    yieldNoSignal: undefined,
+    yieldSilver: undefined,
+    yieldGold: undefined,
     advisorNotes: 'Excellent home-region anchor; high baseline interview yield.',
     residencyExplorerUrl: 'https://www.residencyexplorer.org',
     doximityUrl: 'https://www.doximity.com/residency/programs/1402421175',
@@ -191,6 +186,14 @@ export function SchoolListMatrix({
   // Selected Program Details Modal
   const [detailItem, setDetailItem] = useState<SchoolListItem | null>(null);
 
+  // Step 2 CK Score Range (Residency Explorer)
+  const [step2ScoreRange, setStep2ScoreRange] = useState<string>(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('eras_applicant_step2_range') || '240 - 249';
+    }
+    return '240 - 249';
+  });
+
   // Edit Yield Inline State
   const [editingYieldId, setEditingYieldId] = useState<string | null>(null);
 
@@ -223,10 +226,9 @@ export function SchoolListMatrix({
       programDirector: prog.programDirector,
       tier: 'target',
       signal: 'none',
-      track: 'categorical',
-      yieldNoSignal: 8,
-      yieldSilver: 25,
-      yieldGold: 40,
+      yieldNoSignal: undefined,
+      yieldSilver: undefined,
+      yieldGold: undefined,
       residencyExplorerUrl: prog.residencyExplorerUrl || 'https://www.residencyexplorer.org',
       doximityUrl: prog.doximityUrl || 'https://www.doximity.com/residency',
     };
@@ -312,28 +314,46 @@ export function SchoolListMatrix({
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
-          {/* Specialty Selector Dropdown */}
-          <select
-            value={selectedSpecialty}
-            onChange={(e) => setSelectedSpecialty(e.target.value)}
-            className="text-xs font-semibold rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-sm"
-          >
-            {Object.keys(SPECIALTY_SIGNALING_RULES).map((spec) => (
-              <option key={spec} value={spec}>
-                {spec}
-              </option>
-            ))}
-          </select>
+        <div className="flex flex-wrap items-center gap-2.5">
+          {/* USMLE Step 2 CK Score Range */}
+          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs shadow-xs">
+            <span className="text-slate-600 font-bold whitespace-nowrap">Step 2 CK:</span>
+            <select
+              value={step2ScoreRange}
+              onChange={(e) => {
+                setStep2ScoreRange(e.target.value);
+                if (typeof window !== 'undefined') {
+                  localStorage.setItem('eras_applicant_step2_range', e.target.value);
+                }
+              }}
+              className="text-xs font-bold rounded border-0 bg-transparent text-slate-800 focus:outline-none focus:ring-0 cursor-pointer"
+            >
+              <option value="Not Set">Select Range...</option>
+              <option value="< 220">&lt; 220</option>
+              <option value="220 - 229">220 - 229</option>
+              <option value="230 - 239">230 - 239</option>
+              <option value="240 - 249">240 - 249</option>
+              <option value="250 - 259">250 - 259</option>
+              <option value="260 - 269">260 - 269</option>
+              <option value="270+">270+</option>
+            </select>
+          </div>
 
-          {/* Add Program from Universal Database */}
-          <button
-            onClick={() => setShowBrowseModal(true)}
-            className="px-4 py-2 text-xs font-semibold rounded-lg bg-sky-600 hover:bg-sky-700 text-white flex items-center gap-1.5 shadow-sm transition-colors"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Browse &amp; Add Programs</span>
-          </button>
+          {/* Specialty Selector Dropdown */}
+          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs shadow-xs">
+            <span className="text-slate-600 font-bold whitespace-nowrap">Specialty:</span>
+            <select
+              value={selectedSpecialty}
+              onChange={(e) => setSelectedSpecialty(e.target.value)}
+              className="text-xs font-bold rounded border-0 bg-transparent text-slate-800 focus:outline-none focus:ring-0 cursor-pointer"
+            >
+              {Object.keys(SPECIALTY_SIGNALING_RULES).map((spec) => (
+                <option key={spec} value={spec}>
+                  {spec}
+                </option>
+              ))}
+            </select>
+          </div>
         </div>
       </div>
 
@@ -459,6 +479,15 @@ export function SchoolListMatrix({
             />
           </div>
 
+          {/* Browse & Add Programs Button positioned directly beside search bar */}
+          <button
+            onClick={() => setShowBrowseModal(true)}
+            className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-sky-600 hover:bg-sky-700 text-white flex items-center gap-1.5 shadow-sm transition-colors whitespace-nowrap shrink-0"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Browse &amp; Add Programs</span>
+          </button>
+
           {/* Region Filter */}
           <div className="flex items-center gap-1.5">
             <span className="text-xs text-slate-500 font-semibold whitespace-nowrap">Region:</span>
@@ -562,16 +591,15 @@ export function SchoolListMatrix({
                 <th className="py-3 px-3 w-12 text-center">#</th>
                 <th className="py-3 px-4">Program &amp; Location</th>
                 <th className="py-3 px-3 w-32">Tier</th>
-                <th className="py-3 px-3 w-40">ERAS Signal</th>
-                <th className="py-3 px-4">Signaling Strategy Recommendation (Ticket 15)</th>
-                <th className="py-3 px-3 w-28">Track</th>
+                <th className="py-3 px-3 w-36">ERAS Signal</th>
+                <th className="py-3 px-4">Signaling Multipliers &amp; Recommendation</th>
                 <th className="py-3 px-3 text-right w-24">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400 text-sm">
+                  <td colSpan={6} className="py-12 text-center text-slate-400 text-sm">
                     No residency programs match your search/filter criteria.
                   </td>
                 </tr>
@@ -677,93 +705,109 @@ export function SchoolListMatrix({
                         </div>
                       </td>
 
-                      {/* Signaling Strategy Recommendation (Ticket 15) */}
+                      {/* Signaling Strategy Multipliers & Recommendation */}
                       <td className="py-3 px-4">
-                        <div className="space-y-1">
-                          <div className="flex items-center gap-2">
-                            <span className={`px-2 py-0.5 rounded text-[11px] border ${recommendation.badgeClass}`}>
-                              {recommendation.label}
-                            </span>
+                        <div className="space-y-1.5">
+                          {item.yieldNoSignal === undefined &&
+                          item.yieldSilver === undefined &&
+                          item.yieldGold === undefined ? (
+                            <div className="flex items-center gap-2">
+                              <button
+                                onClick={() => setEditingYieldId(editingYieldId === item.id ? null : item.id)}
+                                className="text-xs text-sky-700 hover:text-sky-900 font-semibold flex items-center gap-1 bg-sky-50 hover:bg-sky-100 px-2.5 py-1 rounded-md border border-sky-200 transition-colors"
+                              >
+                                <Plus className="w-3.5 h-3.5 text-sky-600" />
+                                + Enter Yield Rates (Residency Explorer)
+                              </button>
+                            </div>
+                          ) : (
+                            <div className="space-y-1">
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                {/* Silver Multiplier Change Badge */}
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-black bg-slate-100 text-slate-800 border border-slate-300 shadow-2xs">
+                                  <Award className="w-3.5 h-3.5 text-slate-500" />
+                                  {recommendation.silverMultiplier || '1.0x'} Silver
+                                </span>
 
-                            {item.yieldNoSignal !== undefined && (
-                              <span className="text-[11px] font-mono text-slate-500">
-                                Yield: {item.yieldNoSignal}% ➔ {item.yieldSilver}% ➔ {item.yieldGold}%
-                              </span>
-                            )}
+                                {/* Gold Multiplier Change Badge */}
+                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-black bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
+                                  <Award className="w-3.5 h-3.5 text-amber-600" />
+                                  {recommendation.goldMultiplier || '1.0x'} Gold
+                                </span>
 
-                            <button
-                              onClick={() => setEditingYieldId(editingYieldId === item.id ? null : item.id)}
-                              className="text-[10px] text-sky-600 hover:underline font-semibold"
-                            >
-                              {editingYieldId === item.id ? 'Done' : 'Edit Yield'}
-                            </button>
-                          </div>
+                                {/* Algorithmic Recommendation Tag */}
+                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${recommendation.badgeClass}`}>
+                                  {recommendation.label}
+                                </span>
 
-                          <p className="text-[11px] text-slate-600 leading-snug">
-                            {recommendation.explanation}
-                          </p>
+                                <button
+                                  onClick={() => setEditingYieldId(editingYieldId === item.id ? null : item.id)}
+                                  className="text-[11px] text-sky-600 hover:text-sky-800 hover:underline font-semibold ml-1"
+                                >
+                                  {editingYieldId === item.id ? 'Close' : 'Edit'}
+                                </button>
+                              </div>
+
+                              <div className="text-[11px] font-mono text-slate-500">
+                                Yield Rates: {item.yieldNoSignal ?? 0}% (No Signal) &rarr; {item.yieldSilver ?? 0}% (Silver) &rarr; {item.yieldGold ?? 0}% (Gold)
+                              </div>
+                            </div>
+                          )}
 
                           {/* Inline Yield Input Box */}
                           {editingYieldId === item.id && (
-                            <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 flex flex-wrap items-center gap-3 text-xs mt-2">
+                            <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 flex flex-wrap items-center gap-3 text-xs mt-2 animate-fade-in shadow-xs">
                               <div className="flex items-center gap-1">
-                                <span className="text-slate-500">No Signal:</span>
+                                <span className="text-slate-600 font-medium">No Signal %:</span>
                                 <input
                                   type="number"
                                   value={item.yieldNoSignal ?? ''}
                                   onChange={(e) =>
                                     handleUpdateItem(item.id, {
-                                      yieldNoSignal: e.target.value ? Number(e.target.value) : undefined,
+                                      yieldNoSignal: e.target.value !== '' ? Number(e.target.value) : undefined,
                                     })
                                   }
-                                  className="w-14 p-1 rounded border font-mono text-xs"
+                                  className="w-16 p-1 rounded border border-slate-300 bg-white font-mono text-xs focus:ring-1 focus:ring-sky-500"
                                   placeholder="%"
                                 />
                               </div>
                               <div className="flex items-center gap-1">
-                                <span className="text-slate-500">Silver:</span>
+                                <span className="text-slate-600 font-medium">Silver %:</span>
                                 <input
                                   type="number"
                                   value={item.yieldSilver ?? ''}
                                   onChange={(e) =>
                                     handleUpdateItem(item.id, {
-                                      yieldSilver: e.target.value ? Number(e.target.value) : undefined,
+                                      yieldSilver: e.target.value !== '' ? Number(e.target.value) : undefined,
                                     })
                                   }
-                                  className="w-14 p-1 rounded border font-mono text-xs"
+                                  className="w-16 p-1 rounded border border-slate-300 bg-white font-mono text-xs focus:ring-1 focus:ring-sky-500"
                                   placeholder="%"
                                 />
                               </div>
                               <div className="flex items-center gap-1">
-                                <span className="text-slate-500">Gold:</span>
+                                <span className="text-slate-600 font-medium">Gold %:</span>
                                 <input
                                   type="number"
                                   value={item.yieldGold ?? ''}
                                   onChange={(e) =>
                                     handleUpdateItem(item.id, {
-                                      yieldGold: e.target.value ? Number(e.target.value) : undefined,
+                                      yieldGold: e.target.value !== '' ? Number(e.target.value) : undefined,
                                     })
                                   }
-                                  className="w-14 p-1 rounded border font-mono text-xs"
+                                  className="w-16 p-1 rounded border border-slate-300 bg-white font-mono text-xs focus:ring-1 focus:ring-sky-500"
                                   placeholder="%"
                                 />
                               </div>
+                              <button
+                                onClick={() => setEditingYieldId(null)}
+                                className="px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded text-xs font-semibold shadow-2xs"
+                              >
+                                Done
+                              </button>
                             </div>
                           )}
                         </div>
-                      </td>
-
-                      {/* Track Selector */}
-                      <td className="py-3 px-3">
-                        <select
-                          value={item.track}
-                          onChange={(e) => handleUpdateItem(item.id, { track: e.target.value as ApplicationTrack })}
-                          className="w-full p-1.5 rounded-lg text-xs bg-slate-50 border border-slate-200 text-slate-700 font-medium"
-                        >
-                          <option value="categorical">Categorical</option>
-                          <option value="preliminary">Preliminary</option>
-                          <option value="pstp">PSTP / Research</option>
-                        </select>
                       </td>
 
                       {/* Actions */}
