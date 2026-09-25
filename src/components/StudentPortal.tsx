@@ -6,6 +6,7 @@ import { ScholarlyWorksManager } from './ScholarlyWorksManager';
 import { OrderTracker } from './OrderTracker';
 import { StudentFeedbackViewer } from './StudentFeedbackViewer';
 import { SchoolListMatrix } from './SchoolListMatrix';
+import { CompetitivenessCalculator } from './CompetitivenessCalculator';
 import {
   FileText,
   Briefcase,
@@ -16,7 +17,8 @@ import {
   AlertCircle,
   ChevronRight,
   ExternalLink,
-  Sparkles
+  Sparkles,
+  BarChart3
 } from 'lucide-react';
 
 interface StudentPortalProps {
@@ -36,7 +38,7 @@ export function StudentPortal({
   getAdvisorFeedback,
   onCreateRevision,
 }: StudentPortalProps) {
-  const [activeView, setActiveView] = useState<'overview' | 'personal_statement' | 'experiences' | 'scholarly_works' | 'school_list'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'personal_statement' | 'experiences' | 'scholarly_works' | 'school_list' | 'competitiveness'>('overview');
   const { student, personalStatement, experiences, assignedAdvisors } = context;
 
   const stageLabels = {
@@ -87,6 +89,15 @@ export function StudentPortal({
     return (
       <SchoolListMatrix
         specialty={student.specialty}
+        onBack={() => setActiveView('overview')}
+      />
+    );
+  }
+
+  if (activeView === 'competitiveness') {
+    return (
+      <CompetitivenessCalculator
+        initialSpecialty={student.specialty}
         onBack={() => setActiveView('overview')}
       />
     );
@@ -251,6 +262,34 @@ export function StudentPortal({
             className="mt-5 w-full py-2 px-3 bg-amber-600 hover:bg-amber-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
           >
             Open School List Strategy <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
+
+        {/* Module 5: Multimodal Competitiveness Engine */}
+        <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:border-slate-300 transition-all flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
+                <BarChart3 className="w-5 h-5" />
+              </div>
+              <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-teal-50 text-teal-700 border border-teal-200">
+                Official NRMP 2026 Medians
+              </span>
+            </div>
+            <h2 className="text-lg font-bold text-slate-900 mt-4">Competitiveness Engine</h2>
+            <p className="text-xs text-slate-600 mt-1">
+              Benchmark your Step 2 CK, research outputs, and AOA status against matched vs. unmatched national medians.
+            </p>
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+              <span>National Medians: <strong className="text-slate-700">23 Specialties</strong></span>
+              <span>Yield Explorer: <strong className="text-teal-700 font-bold">Enabled</strong></span>
+            </div>
+          </div>
+          <button
+            onClick={() => setActiveView('competitiveness')}
+            className="mt-5 w-full py-2 px-3 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+          >
+            Assess Specialty Profile <ChevronRight className="w-4 h-4" />
           </button>
         </div>
       </div>

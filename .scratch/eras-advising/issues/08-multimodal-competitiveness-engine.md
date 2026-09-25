@@ -4,10 +4,10 @@
 
 **Blocked by:** 07: Strategic School List Matrix with Dynamic Specialty Signaling
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Population-level benchmark data ingested from `Summary Statistics.pdf` covering all ACGME specialties (matched vs unmatched medians).
-- [ ] Student metric profile entry (USMLE Step 2 CK, research experiences, abstracts, presentations, publications, volunteer experiences, AOA membership).
-- [ ] Multimodal benchmark indicator translating comparison data into intuitive ranges: *Comfortable*, *Competitive*, and *Stretch*.
-- [ ] Deep links to Residency Explorer on program cards allowing students to check interview yield rates for Gold vs Silver vs No Signal.
-- [ ] Automated tests asserting that student metrics are accurately mapped to the correct specialty benchmark medians.
+- [x] Population-level benchmark data ingested from `Summary Statistics.pdf` covering all ACGME specialties (matched vs unmatched medians).
+- [x] Student metric profile entry (USMLE Step 2 CK, research experiences, abstracts, presentations, publications, volunteer experiences, AOA membership).
+- [x] Multimodal benchmark indicator translating comparison data into intuitive ranges: *Comfortable*, *Competitive*, and *Stretch*.
+- [x] Deep links to Residency Explorer on program cards allowing students to check interview yield rates for Gold vs Silver vs No Signal.
+- [x] Automated tests asserting that student metrics are accurately mapped to the correct specialty benchmark medians.

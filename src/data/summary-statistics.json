@@ -1,0 +1,1290 @@
+{
+  "ANESTHESIOLOGY": {
+    "specialty": "ANESTHESIOLOGY",
+    "page": 1,
+    "sampleSize": {
+      "matched": 1219,
+      "notMatched": 167
+    },
+    "step2Ck": {
+      "matched": 255.0,
+      "notMatched": 239.0
+    },
+    "researchExperiences": {
+      "matched": 5.0,
+      "notMatched": 4.0
+    },
+    "abstracts": {
+      "matched": 2.0,
+      "notMatched": 2.0
+    },
+    "presentations": {
+      "matched": 4.0,
+      "notMatched": 3.0
+    },
+    "publications": {
+      "matched": 2.0,
+      "notMatched": 1.0
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": 3.0
+    },
+    "volunteerExperiences": {
+      "matched": 5.0,
+      "notMatched": 6.0
+    },
+    "aoaPercentage": {
+      "matched": 18.6,
+      "notMatched": 0.0
+    },
+    "top40NihPercentage": {
+      "matched": 32.2,
+      "notMatched": 25.7
+    },
+    "phdPercentage": {
+      "matched": 2.8,
+      "notMatched": 2.0
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 14.8,
+      "notMatched": 19.2
+    },
+    "contiguousRanks": {
+      "matched": 13.0,
+      "notMatched": 5.0
+    }
+  },
+  "CHILD NEUROLOGY": {
+    "specialty": "CHILD NEUROLOGY",
+    "page": 2,
+    "sampleSize": {
+      "matched": 111,
+      "notMatched": 4
+    },
+    "step2Ck": {
+      "matched": 251.0,
+      "notMatched": null
+    },
+    "researchExperiences": {
+      "matched": 4.0,
+      "notMatched": null
+    },
+    "abstracts": {
+      "matched": 2.0,
+      "notMatched": null
+    },
+    "presentations": {
+      "matched": 4.0,
+      "notMatched": null
+    },
+    "publications": {
+      "matched": 2.0,
+      "notMatched": null
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": null
+    },
+    "volunteerExperiences": {
+      "matched": 6.0,
+      "notMatched": null
+    },
+    "aoaPercentage": {
+      "matched": 15.3,
+      "notMatched": null
+    },
+    "top40NihPercentage": {
+      "matched": 34.2,
+      "notMatched": null
+    },
+    "phdPercentage": {
+      "matched": 10.0,
+      "notMatched": null
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 17.3,
+      "notMatched": null
+    },
+    "contiguousRanks": {
+      "matched": 14.0,
+      "notMatched": null
+    }
+  },
+  "DERMATOLOGY": {
+    "specialty": "DERMATOLOGY",
+    "page": 3,
+    "sampleSize": {
+      "matched": 356,
+      "notMatched": 181
+    },
+    "step2Ck": {
+      "matched": 258.0,
+      "notMatched": 252.0
+    },
+    "researchExperiences": {
+      "matched": 7.0,
+      "notMatched": 8.0
+    },
+    "abstracts": {
+      "matched": 4.0,
+      "notMatched": 4.0
+    },
+    "presentations": {
+      "matched": 12.0,
+      "notMatched": 9.0
+    },
+    "publications": {
+      "matched": 9.0,
+      "notMatched": 6.0
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": 2.0
+    },
+    "volunteerExperiences": {
+      "matched": 6.0,
+      "notMatched": 6.0
+    },
+    "aoaPercentage": {
+      "matched": 35.1,
+      "notMatched": 21.0
+    },
+    "top40NihPercentage": {
+      "matched": 41.3,
+      "notMatched": 29.8
+    },
+    "phdPercentage": {
+      "matched": 7.7,
+      "notMatched": 1.9
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 17.4,
+      "notMatched": 19.3
+    },
+    "contiguousRanks": {
+      "matched": 7.0,
+      "notMatched": 4.0
+    }
+  },
+  "EMERGENCY MEDICINE": {
+    "specialty": "EMERGENCY MEDICINE",
+    "page": 4,
+    "sampleSize": {
+      "matched": 1176,
+      "notMatched": 41
+    },
+    "step2Ck": {
+      "matched": 249.0,
+      "notMatched": 229.0
+    },
+    "researchExperiences": {
+      "matched": 3.0,
+      "notMatched": 3.0
+    },
+    "abstracts": {
+      "matched": 1.0,
+      "notMatched": 1.0
+    },
+    "presentations": {
+      "matched": 3.0,
+      "notMatched": 2.0
+    },
+    "publications": {
+      "matched": 1.0,
+      "notMatched": 1.0
+    },
+    "workExperiences": {
+      "matched": 3.0,
+      "notMatched": 3.5
+    },
+    "volunteerExperiences": {
+      "matched": 5.0,
+      "notMatched": 6.0
+    },
+    "aoaPercentage": {
+      "matched": 11.1,
+      "notMatched": 4.9
+    },
+    "top40NihPercentage": {
+      "matched": 26.2,
+      "notMatched": 19.5
+    },
+    "phdPercentage": {
+      "matched": 0.9,
+      "notMatched": 0.0
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 18.2,
+      "notMatched": 48.6
+    },
+    "contiguousRanks": {
+      "matched": 15.0,
+      "notMatched": 4.0
+    }
+  },
+  "FAMILY MEDICINE": {
+    "specialty": "FAMILY MEDICINE",
+    "page": 5,
+    "sampleSize": {
+      "matched": 1148,
+      "notMatched": 11
+    },
+    "step2Ck": {
+      "matched": 244.0,
+      "notMatched": 230.0
+    },
+    "researchExperiences": {
+      "matched": 3.0,
+      "notMatched": 2.0
+    },
+    "abstracts": {
+      "matched": 1.0,
+      "notMatched": 0.0
+    },
+    "presentations": {
+      "matched": 2.0,
+      "notMatched": 2.5
+    },
+    "publications": {
+      "matched": 1.0,
+      "notMatched": 2.5
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": 3.0
+    },
+    "volunteerExperiences": {
+      "matched": 5.0,
+      "notMatched": 5.0
+    },
+    "aoaPercentage": {
+      "matched": 6.4,
+      "notMatched": 0.0
+    },
+    "top40NihPercentage": {
+      "matched": 25.2,
+      "notMatched": 27.3
+    },
+    "phdPercentage": {
+      "matched": 0.6,
+      "notMatched": 0.0
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 17.7,
+      "notMatched": 40.0
+    },
+    "contiguousRanks": {
+      "matched": 14.0,
+      "notMatched": 1.0
+    }
+  },
+  "INTERNAL MEDICINE": {
+    "specialty": "INTERNAL MEDICINE",
+    "page": 6,
+    "sampleSize": {
+      "matched": 3236,
+      "notMatched": 84
+    },
+    "step2Ck": {
+      "matched": 254.0,
+      "notMatched": 233.0
+    },
+    "researchExperiences": {
+      "matched": 4.0,
+      "notMatched": 3.0
+    },
+    "abstracts": {
+      "matched": 2.0,
+      "notMatched": 1.0
+    },
+    "presentations": {
+      "matched": 4.0,
+      "notMatched": 3.0
+    },
+    "publications": {
+      "matched": 2.0,
+      "notMatched": 2.0
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": 2.0
+    },
+    "volunteerExperiences": {
+      "matched": 5.0,
+      "notMatched": 4.0
+    },
+    "aoaPercentage": {
+      "matched": 16.1,
+      "notMatched": 1.2
+    },
+    "top40NihPercentage": {
+      "matched": 31.1,
+      "notMatched": 20.2
+    },
+    "phdPercentage": {
+      "matched": 5.7,
+      "notMatched": 11.3
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 17.8,
+      "notMatched": 28.6
+    },
+    "contiguousRanks": {
+      "matched": 12.0,
+      "notMatched": 3.0
+    }
+  },
+  "INTERNAL MEDICINE/PEDIATRICS": {
+    "specialty": "INTERNAL MEDICINE/PEDIATRICS",
+    "page": 7,
+    "sampleSize": {
+      "matched": 264,
+      "notMatched": 29
+    },
+    "step2Ck": {
+      "matched": 255.0,
+      "notMatched": 249.0
+    },
+    "researchExperiences": {
+      "matched": 4.0,
+      "notMatched": 4.0
+    },
+    "abstracts": {
+      "matched": 1.0,
+      "notMatched": 1.0
+    },
+    "presentations": {
+      "matched": 4.0,
+      "notMatched": 3.0
+    },
+    "publications": {
+      "matched": 2.0,
+      "notMatched": 2.0
+    },
+    "workExperiences": {
+      "matched": 3.0,
+      "notMatched": 2.0
+    },
+    "volunteerExperiences": {
+      "matched": 7.0,
+      "notMatched": 5.0
+    },
+    "aoaPercentage": {
+      "matched": 17.8,
+      "notMatched": 10.3
+    },
+    "top40NihPercentage": {
+      "matched": 34.8,
+      "notMatched": 34.5
+    },
+    "phdPercentage": {
+      "matched": 2.6,
+      "notMatched": 0.0
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 23.2,
+      "notMatched": 26.9
+    },
+    "contiguousRanks": {
+      "matched": 12.0,
+      "notMatched": 2.0
+    }
+  },
+  "INTERVENTIONAL RADIOLOGY (INTEGRATED)": {
+    "specialty": "INTERVENTIONAL RADIOLOGY (INTEGRATED)",
+    "page": 8,
+    "sampleSize": {
+      "matched": 128,
+      "notMatched": 15
+    },
+    "step2Ck": {
+      "matched": 255.0,
+      "notMatched": 252.0
+    },
+    "researchExperiences": {
+      "matched": 6.0,
+      "notMatched": 7.0
+    },
+    "abstracts": {
+      "matched": 4.0,
+      "notMatched": 2.0
+    },
+    "presentations": {
+      "matched": 7.0,
+      "notMatched": 5.0
+    },
+    "publications": {
+      "matched": 4.0,
+      "notMatched": 2.0
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": 2.0
+    },
+    "volunteerExperiences": {
+      "matched": 4.0,
+      "notMatched": 4.0
+    },
+    "aoaPercentage": {
+      "matched": 21.1,
+      "notMatched": 13.3
+    },
+    "top40NihPercentage": {
+      "matched": 28.9,
+      "notMatched": 20.0
+    },
+    "phdPercentage": {
+      "matched": 1.0,
+      "notMatched": 0.0
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 21.7,
+      "notMatched": 26.7
+    },
+    "contiguousRanks": {
+      "matched": 3.0,
+      "notMatched": 1.0
+    }
+  },
+  "NEUROLOGICAL SURGERY": {
+    "specialty": "NEUROLOGICAL SURGERY",
+    "page": 9,
+    "sampleSize": {
+      "matched": 192,
+      "notMatched": 72
+    },
+    "step2Ck": {
+      "matched": 256.0,
+      "notMatched": 244.0
+    },
+    "researchExperiences": {
+      "matched": 6.0,
+      "notMatched": 6.0
+    },
+    "abstracts": {
+      "matched": 9.0,
+      "notMatched": 7.5
+    },
+    "presentations": {
+      "matched": 11.0,
+      "notMatched": 11.0
+    },
+    "publications": {
+      "matched": 12.5,
+      "notMatched": 9.0
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": 2.0
+    },
+    "volunteerExperiences": {
+      "matched": 4.0,
+      "notMatched": 5.0
+    },
+    "aoaPercentage": {
+      "matched": 23.4,
+      "notMatched": 9.7
+    },
+    "top40NihPercentage": {
+      "matched": 43.2,
+      "notMatched": 29.2
+    },
+    "phdPercentage": {
+      "matched": 9.6,
+      "notMatched": 14.1
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 30.7,
+      "notMatched": 42.2
+    },
+    "contiguousRanks": {
+      "matched": 15.0,
+      "notMatched": 7.0
+    }
+  },
+  "NEUROLOGY": {
+    "specialty": "NEUROLOGY",
+    "page": 10,
+    "sampleSize": {
+      "matched": 571,
+      "notMatched": 36
+    },
+    "step2Ck": {
+      "matched": 252.0,
+      "notMatched": 232.0
+    },
+    "researchExperiences": {
+      "matched": 4.0,
+      "notMatched": 4.0
+    },
+    "abstracts": {
+      "matched": 2.0,
+      "notMatched": 2.0
+    },
+    "presentations": {
+      "matched": 4.0,
+      "notMatched": 4.0
+    },
+    "publications": {
+      "matched": 3.0,
+      "notMatched": 2.0
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": 2.5
+    },
+    "volunteerExperiences": {
+      "matched": 5.0,
+      "notMatched": 5.0
+    },
+    "aoaPercentage": {
+      "matched": 16.5,
+      "notMatched": 2.8
+    },
+    "top40NihPercentage": {
+      "matched": 27.7,
+      "notMatched": 30.6
+    },
+    "phdPercentage": {
+      "matched": 9.0,
+      "notMatched": 3.4
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 18.3,
+      "notMatched": 17.2
+    },
+    "contiguousRanks": {
+      "matched": 12.0,
+      "notMatched": 4.5
+    }
+  },
+  "OBSTETRICS AND GYNECOLOGY": {
+    "specialty": "OBSTETRICS AND GYNECOLOGY",
+    "page": 11,
+    "sampleSize": {
+      "matched": 942,
+      "notMatched": 135
+    },
+    "step2Ck": {
+      "matched": 253.0,
+      "notMatched": 245.0
+    },
+    "researchExperiences": {
+      "matched": 4.0,
+      "notMatched": 4.0
+    },
+    "abstracts": {
+      "matched": 2.0,
+      "notMatched": 1.0
+    },
+    "presentations": {
+      "matched": 5.0,
+      "notMatched": 4.0
+    },
+    "publications": {
+      "matched": 2.0,
+      "notMatched": 2.0
+    },
+    "workExperiences": {
+      "matched": 3.0,
+      "notMatched": 3.0
+    },
+    "volunteerExperiences": {
+      "matched": 6.0,
+      "notMatched": 6.0
+    },
+    "aoaPercentage": {
+      "matched": 19.1,
+      "notMatched": 12.6
+    },
+    "top40NihPercentage": {
+      "matched": 27.4,
+      "notMatched": 14.8
+    },
+    "phdPercentage": {
+      "matched": 1.9,
+      "notMatched": 4.2
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 24.1,
+      "notMatched": 28.9
+    },
+    "contiguousRanks": {
+      "matched": 12.0,
+      "notMatched": 6.0
+    }
+  },
+  "ORTHOPAEDIC SURGERY": {
+    "specialty": "ORTHOPAEDIC SURGERY",
+    "page": 12,
+    "sampleSize": {
+      "matched": 628,
+      "notMatched": 245
+    },
+    "step2Ck": {
+      "matched": 259.0,
+      "notMatched": 251.0
+    },
+    "researchExperiences": {
+      "matched": 7.5,
+      "notMatched": 7.0
+    },
+    "abstracts": {
+      "matched": 5.0,
+      "notMatched": 4.0
+    },
+    "presentations": {
+      "matched": 11.0,
+      "notMatched": 8.0
+    },
+    "publications": {
+      "matched": 7.0,
+      "notMatched": 5.0
+    },
+    "workExperiences": {
+      "matched": 3.0,
+      "notMatched": 3.0
+    },
+    "volunteerExperiences": {
+      "matched": 5.0,
+      "notMatched": 5.0
+    },
+    "aoaPercentage": {
+      "matched": 34.9,
+      "notMatched": 14.3
+    },
+    "top40NihPercentage": {
+      "matched": 33.0,
+      "notMatched": 23.7
+    },
+    "phdPercentage": {
+      "matched": 1.7,
+      "notMatched": 0.5
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 20.8,
+      "notMatched": 28.2
+    },
+    "contiguousRanks": {
+      "matched": 10.0,
+      "notMatched": 6.0
+    }
+  },
+  "OTOLARYNGOLOGY": {
+    "specialty": "OTOLARYNGOLOGY",
+    "page": 13,
+    "sampleSize": {
+      "matched": 289,
+      "notMatched": 74
+    },
+    "step2Ck": {
+      "matched": 261.0,
+      "notMatched": 249.0
+    },
+    "researchExperiences": {
+      "matched": 9.0,
+      "notMatched": 9.0
+    },
+    "abstracts": {
+      "matched": 4.0,
+      "notMatched": 4.0
+    },
+    "presentations": {
+      "matched": 12.0,
+      "notMatched": 6.0
+    },
+    "publications": {
+      "matched": 6.0,
+      "notMatched": 5.0
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": 2.0
+    },
+    "volunteerExperiences": {
+      "matched": 5.0,
+      "notMatched": 5.0
+    },
+    "aoaPercentage": {
+      "matched": 40.5,
+      "notMatched": 9.5
+    },
+    "top40NihPercentage": {
+      "matched": 38.1,
+      "notMatched": 39.2
+    },
+    "phdPercentage": {
+      "matched": 4.3,
+      "notMatched": 5.0
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 18.1,
+      "notMatched": 16.9
+    },
+    "contiguousRanks": {
+      "matched": 12.0,
+      "notMatched": 7.0
+    }
+  },
+  "PATHOLOGY-ANATOMIC AND CLINICAL": {
+    "specialty": "PATHOLOGY-ANATOMIC AND CLINICAL",
+    "page": 14,
+    "sampleSize": {
+      "matched": 210,
+      "notMatched": 16
+    },
+    "step2Ck": {
+      "matched": 247.0,
+      "notMatched": 237.0
+    },
+    "researchExperiences": {
+      "matched": 4.0,
+      "notMatched": 3.0
+    },
+    "abstracts": {
+      "matched": 2.0,
+      "notMatched": 0.0
+    },
+    "presentations": {
+      "matched": 4.0,
+      "notMatched": 1.5
+    },
+    "publications": {
+      "matched": 3.0,
+      "notMatched": 1.0
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": 3.0
+    },
+    "volunteerExperiences": {
+      "matched": 4.0,
+      "notMatched": 5.0
+    },
+    "aoaPercentage": {
+      "matched": 9.0,
+      "notMatched": 0.0
+    },
+    "top40NihPercentage": {
+      "matched": 26.2,
+      "notMatched": 18.8
+    },
+    "phdPercentage": {
+      "matched": 20.0,
+      "notMatched": 21.4
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 17.6,
+      "notMatched": 26.7
+    },
+    "contiguousRanks": {
+      "matched": 12.5,
+      "notMatched": 6.0
+    }
+  },
+  "PEDIATRICS": {
+    "specialty": "PEDIATRICS",
+    "page": 15,
+    "sampleSize": {
+      "matched": 1127,
+      "notMatched": 6
+    },
+    "step2Ck": {
+      "matched": 249.0,
+      "notMatched": 243.0
+    },
+    "researchExperiences": {
+      "matched": 3.0,
+      "notMatched": 2.5
+    },
+    "abstracts": {
+      "matched": 1.0,
+      "notMatched": 0.0
+    },
+    "presentations": {
+      "matched": 3.0,
+      "notMatched": 1.5
+    },
+    "publications": {
+      "matched": 1.0,
+      "notMatched": 0.5
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": 5.0
+    },
+    "volunteerExperiences": {
+      "matched": 6.0,
+      "notMatched": 7.0
+    },
+    "aoaPercentage": {
+      "matched": 14.4,
+      "notMatched": 0.0
+    },
+    "top40NihPercentage": {
+      "matched": 25.2,
+      "notMatched": 0.0
+    },
+    "phdPercentage": {
+      "matched": 4.0,
+      "notMatched": 0.0
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 18.5,
+      "notMatched": 33.3
+    },
+    "contiguousRanks": {
+      "matched": 15.0,
+      "notMatched": 1.0
+    }
+  },
+  "PHYSICAL MEDICINE AND REHABILITATION": {
+    "specialty": "PHYSICAL MEDICINE AND REHABILITATION",
+    "page": 16,
+    "sampleSize": {
+      "matched": 235,
+      "notMatched": 45
+    },
+    "step2Ck": {
+      "matched": 251.0,
+      "notMatched": 237.0
+    },
+    "researchExperiences": {
+      "matched": 5.0,
+      "notMatched": 4.5
+    },
+    "abstracts": {
+      "matched": 2.0,
+      "notMatched": 2.0
+    },
+    "presentations": {
+      "matched": 4.5,
+      "notMatched": 4.0
+    },
+    "publications": {
+      "matched": 2.0,
+      "notMatched": 2.0
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": 2.0
+    },
+    "volunteerExperiences": {
+      "matched": 5.5,
+      "notMatched": 6.0
+    },
+    "aoaPercentage": {
+      "matched": 13.6,
+      "notMatched": 2.2
+    },
+    "top40NihPercentage": {
+      "matched": 25.1,
+      "notMatched": 13.3
+    },
+    "phdPercentage": {
+      "matched": 1.5,
+      "notMatched": 2.6
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 15.3,
+      "notMatched": 20.0
+    },
+    "contiguousRanks": {
+      "matched": 13.0,
+      "notMatched": 6.0
+    }
+  },
+  "PLASTIC SURGERY (INTEGRATED)": {
+    "specialty": "PLASTIC SURGERY (INTEGRATED)",
+    "page": 17,
+    "sampleSize": {
+      "matched": 159,
+      "notMatched": 82
+    },
+    "step2Ck": {
+      "matched": 259.0,
+      "notMatched": 251.0
+    },
+    "researchExperiences": {
+      "matched": 6.0,
+      "notMatched": 7.0
+    },
+    "abstracts": {
+      "matched": 6.0,
+      "notMatched": 6.0
+    },
+    "presentations": {
+      "matched": 20.0,
+      "notMatched": 14.5
+    },
+    "publications": {
+      "matched": 10.0,
+      "notMatched": 9.0
+    },
+    "workExperiences": {
+      "matched": 3.0,
+      "notMatched": 4.0
+    },
+    "volunteerExperiences": {
+      "matched": 5.0,
+      "notMatched": 6.0
+    },
+    "aoaPercentage": {
+      "matched": 35.2,
+      "notMatched": 12.2
+    },
+    "top40NihPercentage": {
+      "matched": 44.7,
+      "notMatched": 39.0
+    },
+    "phdPercentage": {
+      "matched": 3.1,
+      "notMatched": 2.9
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 18.4,
+      "notMatched": 35.2
+    },
+    "contiguousRanks": {
+      "matched": 12.0,
+      "notMatched": 6.0
+    }
+  },
+  "PSYCHIATRY": {
+    "specialty": "PSYCHIATRY",
+    "page": 18,
+    "sampleSize": {
+      "matched": 1075,
+      "notMatched": 74
+    },
+    "step2Ck": {
+      "matched": 247.0,
+      "notMatched": 234.0
+    },
+    "researchExperiences": {
+      "matched": 4.0,
+      "notMatched": 3.0
+    },
+    "abstracts": {
+      "matched": 1.0,
+      "notMatched": 1.0
+    },
+    "presentations": {
+      "matched": 3.0,
+      "notMatched": 2.0
+    },
+    "publications": {
+      "matched": 2.0,
+      "notMatched": 1.0
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": 3.0
+    },
+    "volunteerExperiences": {
+      "matched": 5.0,
+      "notMatched": 5.0
+    },
+    "aoaPercentage": {
+      "matched": 7.8,
+      "notMatched": 2.7
+    },
+    "top40NihPercentage": {
+      "matched": 32.2,
+      "notMatched": 23.0
+    },
+    "phdPercentage": {
+      "matched": 6.0,
+      "notMatched": 1.5
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 22.3,
+      "notMatched": 19.1
+    },
+    "contiguousRanks": {
+      "matched": 12.0,
+      "notMatched": 5.0
+    }
+  },
+  "RADIATION ONCOLOGY": {
+    "specialty": "RADIATION ONCOLOGY",
+    "page": 19,
+    "sampleSize": {
+      "matched": 108,
+      "notMatched": 3
+    },
+    "step2Ck": {
+      "matched": 251.0,
+      "notMatched": null
+    },
+    "researchExperiences": {
+      "matched": 5.0,
+      "notMatched": null
+    },
+    "abstracts": {
+      "matched": 3.0,
+      "notMatched": null
+    },
+    "presentations": {
+      "matched": 6.0,
+      "notMatched": null
+    },
+    "publications": {
+      "matched": 4.0,
+      "notMatched": null
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": null
+    },
+    "volunteerExperiences": {
+      "matched": 5.0,
+      "notMatched": null
+    },
+    "aoaPercentage": {
+      "matched": 18.5,
+      "notMatched": null
+    },
+    "top40NihPercentage": {
+      "matched": 32.4,
+      "notMatched": null
+    },
+    "phdPercentage": {
+      "matched": 11.6,
+      "notMatched": null
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 22.7,
+      "notMatched": null
+    },
+    "contiguousRanks": {
+      "matched": 16.0,
+      "notMatched": null
+    }
+  },
+  "RADIOLOGY-DIAGNOSTIC": {
+    "specialty": "RADIOLOGY-DIAGNOSTIC",
+    "page": 20,
+    "sampleSize": {
+      "matched": 629,
+      "notMatched": 37
+    },
+    "step2Ck": {
+      "matched": 257.0,
+      "notMatched": 242.0
+    },
+    "researchExperiences": {
+      "matched": 5.0,
+      "notMatched": 5.0
+    },
+    "abstracts": {
+      "matched": 2.0,
+      "notMatched": 1.0
+    },
+    "presentations": {
+      "matched": 5.0,
+      "notMatched": 4.0
+    },
+    "publications": {
+      "matched": 3.0,
+      "notMatched": 2.0
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": 2.0
+    },
+    "volunteerExperiences": {
+      "matched": 4.0,
+      "notMatched": 4.0
+    },
+    "aoaPercentage": {
+      "matched": 20.5,
+      "notMatched": 2.7
+    },
+    "top40NihPercentage": {
+      "matched": 29.4,
+      "notMatched": 24.3
+    },
+    "phdPercentage": {
+      "matched": 2.9,
+      "notMatched": 2.9
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 16.8,
+      "notMatched": 8.6
+    },
+    "contiguousRanks": {
+      "matched": 13.0,
+      "notMatched": 2.0
+    }
+  },
+  "SURGERY-GENERAL": {
+    "specialty": "SURGERY-GENERAL",
+    "page": 21,
+    "sampleSize": {
+      "matched": 882,
+      "notMatched": 202
+    },
+    "step2Ck": {
+      "matched": 255.0,
+      "notMatched": 238.0
+    },
+    "researchExperiences": {
+      "matched": 5.0,
+      "notMatched": 4.0
+    },
+    "abstracts": {
+      "matched": 2.0,
+      "notMatched": 2.0
+    },
+    "presentations": {
+      "matched": 5.0,
+      "notMatched": 4.0
+    },
+    "publications": {
+      "matched": 3.0,
+      "notMatched": 2.0
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": 3.0
+    },
+    "volunteerExperiences": {
+      "matched": 5.0,
+      "notMatched": 5.0
+    },
+    "aoaPercentage": {
+      "matched": 20.5,
+      "notMatched": 5.0
+    },
+    "top40NihPercentage": {
+      "matched": 29.8,
+      "notMatched": 21.3
+    },
+    "phdPercentage": {
+      "matched": 2.6,
+      "notMatched": 1.1
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 18.9,
+      "notMatched": 29.8
+    },
+    "contiguousRanks": {
+      "matched": 14.0,
+      "notMatched": 5.0
+    }
+  },
+  "THORACIC SURGERY (INTEGRATED)": {
+    "specialty": "THORACIC SURGERY (INTEGRATED)",
+    "page": 22,
+    "sampleSize": {
+      "matched": 40,
+      "notMatched": 22
+    },
+    "step2Ck": {
+      "matched": 260.0,
+      "notMatched": 257.0
+    },
+    "researchExperiences": {
+      "matched": 6.0,
+      "notMatched": 9.0
+    },
+    "abstracts": {
+      "matched": 7.5,
+      "notMatched": 5.0
+    },
+    "presentations": {
+      "matched": 11.0,
+      "notMatched": 7.0
+    },
+    "publications": {
+      "matched": 10.5,
+      "notMatched": 4.0
+    },
+    "workExperiences": {
+      "matched": 3.0,
+      "notMatched": 2.0
+    },
+    "volunteerExperiences": {
+      "matched": 5.0,
+      "notMatched": 4.0
+    },
+    "aoaPercentage": {
+      "matched": 35.0,
+      "notMatched": 31.8
+    },
+    "top40NihPercentage": {
+      "matched": 50.0,
+      "notMatched": 45.5
+    },
+    "phdPercentage": {
+      "matched": 12.1,
+      "notMatched": 6.3
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 30.3,
+      "notMatched": 13.3
+    },
+    "contiguousRanks": {
+      "matched": 7.0,
+      "notMatched": 3.0
+    }
+  },
+  "VASCULAR SURGERY (INTEGRATED)": {
+    "specialty": "VASCULAR SURGERY (INTEGRATED)",
+    "page": 23,
+    "sampleSize": {
+      "matched": 64,
+      "notMatched": 8
+    },
+    "step2Ck": {
+      "matched": 256.0,
+      "notMatched": 235.0
+    },
+    "researchExperiences": {
+      "matched": 6.0,
+      "notMatched": 4.0
+    },
+    "abstracts": {
+      "matched": 4.0,
+      "notMatched": 1.0
+    },
+    "presentations": {
+      "matched": 8.0,
+      "notMatched": 2.0
+    },
+    "publications": {
+      "matched": 6.0,
+      "notMatched": 4.0
+    },
+    "workExperiences": {
+      "matched": 2.0,
+      "notMatched": 2.0
+    },
+    "volunteerExperiences": {
+      "matched": 4.0,
+      "notMatched": 4.0
+    },
+    "aoaPercentage": {
+      "matched": 34.4,
+      "notMatched": 0.0
+    },
+    "top40NihPercentage": {
+      "matched": 26.6,
+      "notMatched": 25.0
+    },
+    "phdPercentage": {
+      "matched": 3.8,
+      "notMatched": 0.0
+    },
+    "otherGraduateDegreePercentage": {
+      "matched": 22.2,
+      "notMatched": 28.6
+    },
+    "contiguousRanks": {
+      "matched": 21.0,
+      "notMatched": 6.5
+    }
+  }
+}
