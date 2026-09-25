@@ -265,9 +265,9 @@ export function CompetitivenessCalculator({
               {/* Overall Competitiveness Tier Banner */}
               <div
                 className={`p-6 rounded-xl border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4 ${
-                  assessment.overallTier === 'comfortable'
+                  assessment.overallTier === 'above_average'
                     ? 'bg-emerald-50 border-emerald-200 text-emerald-950'
-                    : assessment.overallTier === 'competitive'
+                    : assessment.overallTier === 'average'
                     ? 'bg-blue-50 border-blue-200 text-blue-950'
                     : 'bg-amber-50 border-amber-200 text-amber-950'
                 }`}
@@ -276,14 +276,18 @@ export function CompetitivenessCalculator({
                   <div className="flex items-center gap-2">
                     <span
                       className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                        assessment.overallTier === 'comfortable'
+                        assessment.overallTier === 'above_average'
                           ? 'bg-emerald-600 text-white'
-                          : assessment.overallTier === 'competitive'
+                          : assessment.overallTier === 'average'
                           ? 'bg-blue-600 text-white'
                           : 'bg-amber-600 text-white'
                       }`}
                     >
-                      {assessment.overallTier.toUpperCase()} APPLICANT TIER
+                      {assessment.overallTier === 'above_average'
+                        ? 'ABOVE AVERAGE APPLICANT TIER'
+                        : assessment.overallTier === 'average'
+                        ? 'AVERAGE APPLICANT TIER'
+                        : 'BELOW AVERAGE APPLICANT TIER'}
                     </span>
                     <span className="text-xs font-semibold text-slate-600">
                       Target: {assessment.specialty}
@@ -291,9 +295,9 @@ export function CompetitivenessCalculator({
                   </div>
 
                   <h3 className="text-lg font-bold mt-2">
-                    {assessment.overallTier === 'comfortable'
+                    {assessment.overallTier === 'above_average'
                       ? 'Solid Advantage Over National Matched Medians'
-                      : assessment.overallTier === 'competitive'
+                      : assessment.overallTier === 'average'
                       ? 'Well-Balanced & Aligned with Matched Cohort'
                       : 'High-Risk Profile Requiring Strategic Mitigation'}
                   </h3>

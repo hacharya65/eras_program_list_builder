@@ -101,14 +101,6 @@ export function PersonalStatementEditor({
 
         <div className="flex items-center gap-2">
           <button
-            onClick={handleManualSanitize}
-            className="px-3 py-1.5 text-xs font-medium border border-slate-300 rounded-lg text-slate-700 hover:bg-slate-50 flex items-center gap-1.5 transition-colors"
-            title="Clean smart-quotes, em-dashes, and rich bullets"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-sky-600" />
-            Sanitize Formatting
-          </button>
-          <button
             onClick={() => setShowSubmitModal(true)}
             className="px-4 py-1.5 text-xs font-semibold rounded-lg bg-sky-600 hover:bg-sky-700 text-white flex items-center gap-1.5 shadow-sm transition-colors"
           >

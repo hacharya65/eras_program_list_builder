@@ -242,9 +242,21 @@ export function ScholarlyWorksManager({ onBack }: ScholarlyWorksManagerProps) {
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1 min-w-0">
-                      <span className="text-[10px] uppercase font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
-                        {work.type}
-                      </span>
+                      <div className="flex flex-wrap items-center gap-1.5">
+                        <span className="text-[10px] uppercase font-bold text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
+                          {work.type}
+                        </span>
+                        {(() => {
+                          const col = collections.find((c) => c.id === work.collectionId);
+                          if (!col) return null;
+                          return (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-700 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded">
+                              <Tag className="w-2.5 h-2.5 text-indigo-500" />
+                              {col.title}
+                            </span>
+                          );
+                        })()}
+                      </div>
                       <h4 className="text-xs font-bold text-slate-900 mt-1.5 line-clamp-2">
                         {work.title}
                       </h4>

@@ -38,7 +38,7 @@ describe('Multimodal Competitiveness Engine', () => {
     expect(derm?.step2Ck.matched).toBe(258);
   });
 
-  it('evaluates a comfortable candidate profile with high metrics', () => {
+  it('evaluates an above average candidate profile with high metrics', () => {
     const highProfile: StudentMetricProfile = {
       step2Ck: 262,
       researchExperiences: 6,
@@ -50,7 +50,7 @@ describe('Multimodal Competitiveness Engine', () => {
     };
 
     const assessment = assessCompetitiveness(highProfile, 'Internal Medicine');
-    expect(assessment.overallTier).toBe('comfortable');
+    expect(assessment.overallTier).toBe('above_average');
     expect(assessment.step2Delta).toBe(8); // 262 - 254
     expect(assessment.totalScholarlyStudent).toBe(17);
     expect(assessment.dimensionBreakdowns.length).toBe(6);
@@ -65,7 +65,7 @@ describe('Multimodal Competitiveness Engine', () => {
     expect(aoaBreakdown?.studentValue).toBe('Member (Inducted)');
   });
 
-  it('evaluates a competitive candidate aligned with national medians', () => {
+  it('evaluates an average candidate aligned with national medians', () => {
     const medianProfile: StudentMetricProfile = {
       step2Ck: 254,
       researchExperiences: 4,
@@ -77,7 +77,7 @@ describe('Multimodal Competitiveness Engine', () => {
     };
 
     const assessment = assessCompetitiveness(medianProfile, 'Internal Medicine');
-    expect(assessment.overallTier).toBe('competitive');
+    expect(assessment.overallTier).toBe('average');
     expect(assessment.step2Delta).toBe(0); // 254 - 254
     expect(assessment.totalScholarlyStudent).toBe(8);
 
@@ -85,7 +85,7 @@ describe('Multimodal Competitiveness Engine', () => {
     expect(step2Breakdown?.status).toBe('at_median');
   });
 
-  it('evaluates a stretch candidate with score deficits in a competitive surgical field', () => {
+  it('evaluates a below average candidate with score deficits in a competitive surgical field', () => {
     const stretchProfile: StudentMetricProfile = {
       step2Ck: 242,
       researchExperiences: 3,
@@ -97,7 +97,7 @@ describe('Multimodal Competitiveness Engine', () => {
     };
 
     const assessment = assessCompetitiveness(stretchProfile, 'Orthopaedic Surgery');
-    expect(assessment.overallTier).toBe('stretch');
+    expect(assessment.overallTier).toBe('below_average');
     expect(assessment.step2Delta).toBe(242 - 259); // -17
     expect(assessment.recommendedSignalingStrategy).toContain('Target and Safety');
 

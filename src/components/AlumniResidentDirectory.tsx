@@ -5,17 +5,12 @@ import {
   SAMPLE_ALUMNI_ROSTER,
   AlumniResident,
   getNonRoboticOutreachGuide,
-  generateDoximityProgramUrl,
 } from '@/domain/alumni-models';
 import {
   Users,
   Search,
   ChevronLeft,
   Mail,
-  Coffee,
-  MessageSquare,
-  Sparkles,
-  ExternalLink,
   Copy,
   CheckCircle2,
   AlertCircle,
@@ -24,7 +19,8 @@ import {
   MapPin,
   Check,
   ShieldCheck,
-  BookOpen
+  Award,
+  Stethoscope
 } from 'lucide-react';
 
 interface AlumniResidentDirectoryProps {
@@ -58,7 +54,8 @@ export function AlumniResidentDirectory({
       alum.name.toLowerCase().includes(q) ||
       alum.institutionName.toLowerCase().includes(q) ||
       alum.programCity.toLowerCase().includes(q) ||
-      alum.programState.toLowerCase().includes(q)
+      alum.programState.toLowerCase().includes(q) ||
+      alum.currentPgy.toLowerCase().includes(q)
     );
   });
 
@@ -99,7 +96,7 @@ export function AlumniResidentDirectory({
             </div>
             <h1 className="text-xl font-bold text-slate-900 mt-1 flex items-center gap-2">
               <Users className="w-6 h-6 text-violet-600" />
-              Alumni Resident Match Roster & Mentorship
+              Alumni Resident Match Roster &amp; Mentorship
             </h1>
           </div>
         </div>
@@ -110,7 +107,7 @@ export function AlumniResidentDirectory({
             <Search className="w-4 h-4 absolute left-3 top-2.5 text-slate-400" />
             <input
               type="text"
-              placeholder="Search hospital or city..."
+              placeholder="Search resident, hospital, city..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
               className="pl-9 pr-3 py-1.5 bg-slate-50 border border-slate-300 rounded-lg text-xs text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-500 w-48 md:w-60"
@@ -164,7 +161,7 @@ export function AlumniResidentDirectory({
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
           <div className="w-10 h-10 rounded-lg bg-amber-50 text-amber-600 flex items-center justify-center font-bold">
-            <Sparkles className="w-5 h-5" />
+            <Award className="w-5 h-5" />
           </div>
           <div>
             <div className="text-xl font-bold text-slate-900">75%</div>
@@ -173,96 +170,137 @@ export function AlumniResidentDirectory({
         </div>
 
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-sky-50 text-sky-600 flex items-center justify-center font-bold">
-            <BookOpen className="w-5 h-5" />
+          <div className="w-10 h-10 rounded-lg bg-indigo-50 text-indigo-600 flex items-center justify-center font-bold">
+            <Stethoscope className="w-5 h-5" />
           </div>
           <div>
-            <div className="text-xl font-bold text-slate-900">Doximity</div>
-            <div className="text-xs text-slate-500">Direct Resident Reviews</div>
+            <div className="text-xl font-bold text-slate-900">9 Programs</div>
+            <div className="text-xs text-slate-500">Direct Network Anchors</div>
           </div>
         </div>
       </div>
 
-      {/* Alumni Roster Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {filteredAlumni.map((alum) => (
-          <div
-            key={alum.id}
-            className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm hover:border-slate-300 transition-all flex flex-col justify-between space-y-4"
-          >
-            <div>
-              <div className="flex items-start justify-between">
-                <div>
-                  <h3 className="text-base font-bold text-slate-900">{alum.name}</h3>
-                  <div className="flex items-center gap-1.5 text-xs text-slate-500 mt-0.5">
-                    <span className="font-semibold text-slate-700">{alum.currentPgy}</span>
-                    <span>&bull;</span>
-                    <span>Class of {alum.graduationYear}</span>
-                  </div>
-                </div>
-
-                {alum.isAvailableForMentorship ? (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
-                    Mentorship Opt-in
-                  </span>
-                ) : (
-                  <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-600">
-                    Busy on Service
-                  </span>
-                )}
-              </div>
-
-              {/* Institution and Location */}
-              <div className="mt-3 space-y-1 text-xs">
-                <div className="flex items-center gap-1.5 text-slate-800 font-semibold">
-                  <Building2 className="w-3.5 h-3.5 text-violet-600 shrink-0" />
-                  <span className="truncate">{alum.institutionName}</span>
-                </div>
-                <div className="flex items-center gap-1.5 text-slate-500">
-                  <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                  <span>
-                    {alum.programCity}, {alum.programState} &bull; {alum.specialty}
-                  </span>
-                </div>
-              </div>
-
-              {/* Signal Strategy & Advice Quote */}
-              {alum.signalStrategyUsed && (
-                <div className="mt-3 inline-block px-2 py-0.5 rounded text-[11px] font-semibold bg-amber-50 text-amber-800 border border-amber-200">
-                  Matched using {alum.signalStrategyUsed} Signal
-                </div>
-              )}
-
-              {alum.adviceQuote && (
-                <blockquote className="mt-3 p-2.5 rounded-lg bg-slate-50 border-l-2 border-violet-400 text-[11px] text-slate-600 italic">
-                  &ldquo;{alum.adviceQuote}&rdquo;
-                </blockquote>
-              )}
-            </div>
-
-            {/* Actions & Links */}
-            <div className="pt-3 border-t border-slate-100 flex items-center justify-between gap-2">
-              <a
-                href={generateDoximityProgramUrl(alum.institutionName, alum.specialty)}
-                target="_blank"
-                rel="noreferrer"
-                className="text-[11px] font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1"
-              >
-                Doximity Reviews <ExternalLink className="w-3 h-3" />
-              </a>
-
-              {alum.isAvailableForMentorship && (
-                <button
-                  onClick={() => setSelectedResident(alum)}
-                  className="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors"
-                >
-                  <Mail className="w-3.5 h-3.5" />
-                  Outreach Template
-                </button>
-              )}
-            </div>
+      {/* Compact Row-Based Table View */}
+      <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        <div className="p-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900">Internal Alumni Residency Match Roster</h2>
+            <p className="text-xs text-slate-500 mt-0.5">
+              Showing {filteredAlumni.length} verified graduates currently training across residency programs.
+            </p>
           </div>
-        ))}
+          <span className="text-xs text-slate-500 font-medium">
+            Contact preferences &amp; advice quotes verified internally
+          </span>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs">
+            <thead className="bg-slate-50 text-slate-600 uppercase font-semibold text-[10px] tracking-wider border-b border-slate-200">
+              <tr>
+                <th className="px-4 py-3">Resident &amp; Class</th>
+                <th className="px-4 py-3">Level</th>
+                <th className="px-4 py-3">Specialty</th>
+                <th className="px-4 py-3">Residency Program / Hospital</th>
+                <th className="px-4 py-3">Location</th>
+                <th className="px-4 py-3">Match Strategy</th>
+                <th className="px-4 py-3">Mentorship</th>
+                <th className="px-4 py-3 text-right">Action</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-slate-100">
+              {filteredAlumni.map((alum) => (
+                <tr key={alum.id} className="hover:bg-slate-50/70 transition-colors">
+                  {/* Resident Name & Class */}
+                  <td className="px-4 py-3">
+                    <div className="font-bold text-slate-900">{alum.name}</div>
+                    <div className="text-[11px] text-slate-500">Class of {alum.graduationYear}</div>
+                  </td>
+
+                  {/* PGY Level */}
+                  <td className="px-4 py-3">
+                    <span className="px-2 py-0.5 rounded font-bold text-[11px] bg-slate-100 text-slate-700">
+                      {alum.currentPgy}
+                    </span>
+                  </td>
+
+                  {/* Specialty */}
+                  <td className="px-4 py-3 font-semibold text-slate-800">
+                    {alum.specialty}
+                  </td>
+
+                  {/* Hospital */}
+                  <td className="px-4 py-3">
+                    <div className="font-medium text-slate-900 flex items-center gap-1.5">
+                      <Building2 className="w-3.5 h-3.5 text-violet-600 shrink-0" />
+                      <span className="truncate max-w-[220px]">{alum.institutionName}</span>
+                    </div>
+                    {alum.adviceQuote && (
+                      <div className="text-[10px] text-slate-500 italic mt-0.5 line-clamp-1 max-w-[260px]">
+                        &ldquo;{alum.adviceQuote}&rdquo;
+                      </div>
+                    )}
+                  </td>
+
+                  {/* Location */}
+                  <td className="px-4 py-3 text-slate-600 whitespace-nowrap">
+                    <div className="flex items-center gap-1 text-[11px]">
+                      <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                      {alum.programCity}, {alum.programState}
+                    </div>
+                  </td>
+
+                  {/* Signal Strategy */}
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {alum.signalStrategyUsed ? (
+                      <span
+                        className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                          alum.signalStrategyUsed === 'Gold'
+                            ? 'bg-amber-100 text-amber-900 border border-amber-300'
+                            : alum.signalStrategyUsed === 'Silver'
+                            ? 'bg-slate-200 text-slate-800 border border-slate-300'
+                            : 'bg-slate-100 text-slate-600'
+                        }`}
+                      >
+                        {alum.signalStrategyUsed} Signal
+                      </span>
+                    ) : (
+                      <span className="text-[11px] text-slate-400">Standard</span>
+                    )}
+                  </td>
+
+                  {/* Mentorship Status */}
+                  <td className="px-4 py-3 whitespace-nowrap">
+                    {alum.isAvailableForMentorship ? (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 flex items-center gap-1 w-fit">
+                        <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Opt-In
+                      </span>
+                    ) : (
+                      <span className="px-2 py-0.5 rounded-full text-[10px] font-medium bg-slate-100 text-slate-500">
+                        On Service
+                      </span>
+                    )}
+                  </td>
+
+                  {/* Action Button */}
+                  <td className="px-4 py-3 text-right whitespace-nowrap">
+                    {alum.isAvailableForMentorship ? (
+                      <button
+                        onClick={() => setSelectedResident(alum)}
+                        className="px-3 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-lg text-xs font-semibold inline-flex items-center gap-1.5 shadow-sm transition-colors"
+                      >
+                        <Mail className="w-3 h-3" />
+                        Outreach
+                      </button>
+                    ) : (
+                      <span className="text-slate-400 text-[11px]">Unavailable</span>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Non-Robotic Outreach Guide Modal */}
@@ -272,7 +310,7 @@ export function AlumniResidentDirectory({
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
                 <span className="text-xs font-bold text-violet-600 uppercase tracking-wider">
-                  Non-Robotic Resident Outreach
+                  Internal Alumni Mentorship Outreach
                 </span>
                 <h3 className="text-lg font-bold text-slate-900 mt-0.5">
                   Connect with {selectedResident.name} ({selectedResident.institutionName})

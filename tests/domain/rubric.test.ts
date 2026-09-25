@@ -81,6 +81,20 @@ describe('Ticket 05: 4-Pillar Clinical Rubric & Faculty Review Studio', () => {
 
   it('allows advisor to set granular approval status on individual experiences in portfolio', () => {
     const expId = 'exp-1';
+    storage.experiences.push({
+      id: expId,
+      studentId: 'student-1',
+      title: 'Triage Volunteer',
+      orgName: 'Free Clinic',
+      roleName: 'Volunteer',
+      experienceType: 'Volunteer/service/advocacy',
+      frequency: 'Weekly (recurring)',
+      startDate: '2024-01-01',
+      isCurrent: true,
+      descriptionText: 'Assisted in triage.',
+      isMostMeaningful: false,
+    });
+
     expect(storage.experiences[0].status).toBeUndefined();
 
     service.setExperienceApprovalStatus(expId, 'approved', 'Looks strong and concise.');

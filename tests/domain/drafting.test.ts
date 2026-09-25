@@ -78,9 +78,10 @@ describe('Ticket 02: Strict ERAS Plain-Text Drafting Sandbox & Sanitizer', () =>
 
     it('enforces maximum 3 most meaningful designations across experiences', () => {
       const result = service.canDesignateMeaningfulExperience('exp-new');
-      expect(result).toBe(true); // currently only 1 is meaningful in mock data
+      expect(result).toBe(true);
 
-      // Add 2 more meaningful
+      // Add 3 meaningful experiences
+      service.setExperienceMeaningful('exp-1', true);
       service.setExperienceMeaningful('exp-2', true);
       service.setExperienceMeaningful('exp-3', true);
 
