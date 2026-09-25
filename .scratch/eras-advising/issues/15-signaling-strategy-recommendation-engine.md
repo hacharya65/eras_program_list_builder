@@ -4,13 +4,13 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** pending
+**Status:** completed
 
-- [ ] Applicant input fields: Dedicated inputs for recording proprietary Residency Explorer interview yield metrics per target program (No Signal % interview rate, Silver % interview rate, Gold % interview rate).
-- [ ] Delta calculation logic:
+- [x] Applicant input fields: Dedicated inputs for recording proprietary Residency Explorer interview yield metrics per target program (No Signal % interview rate, Silver % interview rate, Gold % interview rate).
+- [x] Delta calculation logic:
   - If Gold yields marginal gain over Silver (e.g. Δ < 10%), advise allocating Silver and reserving Gold for high-yield programs.
   - If Gold yields a statistically significant jump over Silver, recommend Gold tier allocation.
   - If No Signal has high interview yield (e.g., home programs or safety programs with historical affinity), recommend assigning 0 signals to conserve tokens.
-- [ ] Strategic guidance tags: Render contextual UI badges on the school list (e.g. `Gold High Yield`, `Silver Optimal`, `Signal Inefficient`) with explanatory hover tips.
-- [ ] Portfolio signaling summary: Dynamic allocation scorecard showing total Gold and Silver tokens spent vs. specialty budget caps, with optimization warnings.
-- [ ] Automated domain tests for recommendation calculations, delta thresholds, and budget constraints.
+- [x] Strategic guidance tags: Render contextual UI badges on the school list (e.g. `Gold High Yield`, `Silver Optimal`, `Signal Inefficient`) with explanatory hover tips.
+- [x] Portfolio signaling summary: Dynamic allocation scorecard showing total Gold and Silver tokens spent vs. specialty budget caps, with optimization warnings.
+- [x] Automated domain tests for recommendation calculations, delta thresholds, and budget constraints.

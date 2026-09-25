@@ -4,10 +4,10 @@
 
 **Blocked by:** None (can start immediately)
 
-**Status:** pending
+**Status:** completed
 
-- [ ] Data ingestion: Ingest and parse residency program records from project PDF/dataset context (`Context/Residency Programs/`) with contact, city, state, region, and specialty fields.
-- [ ] Row-based table architecture: Replace or augment card view with a compact, sortable, and filterable table displaying Program Name, Specialty, Tier (Reach, Target, Safety), Region, Signals assigned, and Status.
-- [ ] Full-text search and faceted filters: Multi-select filtering by Specialty, Region (Northeast, South, Midwest, West), and Tier, plus instant text search for program names and cities.
-- [ ] Program details drawer / modal: Expandable details view with Program Director name, website link, and verified training statistics.
-- [ ] Comprehensive tests for searching, sorting, tiering, and signal assignments across the new row-based matrix.
+- [x] Data ingestion: Ingest and parse residency program records from project PDF/dataset context (`Context/Residency Programs/`) with contact, city, state, region, and specialty fields.
+- [x] Row-based table architecture: Replace or augment card view with a compact, sortable, and filterable table displaying Program Name, Specialty, Tier (Reach, Target, Safety), Region, Signals assigned, and Status.
+- [x] Full-text search and faceted filters: Multi-select filtering by Specialty, Region (Northeast, South, Midwest, West), and Tier, plus instant text search for program names and cities.
+- [x] Program details drawer / modal: Expandable details view with Program Director name, website link, and verified training statistics.
+- [x] Comprehensive tests for searching, sorting, tiering, and signal assignments across the new row-based matrix.

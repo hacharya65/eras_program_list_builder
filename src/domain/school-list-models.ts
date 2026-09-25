@@ -102,9 +102,14 @@ export interface SchoolListItem {
   specialty: string;
   city?: string;
   state?: string;
+  region?: string;
+  programDirector?: string;
   tier: ProgramTier;
   signal: SignalType;
   track: ApplicationTrack;
+  yieldNoSignal?: number;
+  yieldSilver?: number;
+  yieldGold?: number;
   advisorNotes?: string;
   doximityUrl?: string;
   residencyExplorerUrl?: string;
