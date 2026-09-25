@@ -8,6 +8,7 @@ import { StudentFeedbackViewer } from './StudentFeedbackViewer';
 import { SchoolListMatrix } from './SchoolListMatrix';
 import { CompetitivenessCalculator } from './CompetitivenessCalculator';
 import { AlumniResidentDirectory } from './AlumniResidentDirectory';
+import { ErasTransferKit } from './ErasTransferKit';
 import {
   FileText,
   Briefcase,
@@ -20,7 +21,8 @@ import {
   ExternalLink,
   Sparkles,
   BarChart3,
-  Users
+  Users,
+  ClipboardCopy
 } from 'lucide-react';
 
 interface StudentPortalProps {
@@ -40,7 +42,7 @@ export function StudentPortal({
   getAdvisorFeedback,
   onCreateRevision,
 }: StudentPortalProps) {
-  const [activeView, setActiveView] = useState<'overview' | 'personal_statement' | 'experiences' | 'scholarly_works' | 'school_list' | 'competitiveness' | 'alumni_directory'>('overview');
+  const [activeView, setActiveView] = useState<'overview' | 'personal_statement' | 'experiences' | 'scholarly_works' | 'school_list' | 'competitiveness' | 'alumni_directory' | 'transfer_kit'>('overview');
   const { student, personalStatement, experiences, assignedAdvisors } = context;
 
   const stageLabels = {
@@ -115,6 +117,15 @@ export function StudentPortal({
     );
   }
 
+  if (activeView === 'transfer_kit') {
+    return (
+      <ErasTransferKit
+        context={context}
+        onBack={() => setActiveView('overview')}
+      />
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Student Welcome Header */}
@@ -134,15 +145,26 @@ export function StudentPortal({
           </p>
         </div>
 
-        {/* Assigned Advisor Card */}
-        <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs flex items-center gap-3">
-          <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
-            MC
-          </div>
-          <div>
-            <div className="text-[11px] text-slate-500 font-medium uppercase tracking-wider">Primary Faculty Advisor</div>
-            <div className="font-semibold text-slate-900">{assignedAdvisors[0]?.name || 'Dr. Marcus Chen'}</div>
-            <div className="text-slate-500">{assignedAdvisors[0]?.specialty} | Apex Health</div>
+        <div className="flex items-center gap-3">
+          {/* 1-Click Transfer Kit CTA */}
+          <button
+            onClick={() => setActiveView('transfer_kit')}
+            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm transition-all"
+          >
+            <ClipboardCopy className="w-4 h-4 text-emerald-100" />
+            1-Click ERAS Transfer Kit
+          </button>
+
+          {/* Assigned Advisor Card */}
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs flex items-center gap-3">
+            <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
+              MC
+            </div>
+            <div>
+              <div className="text-[11px] text-slate-500 font-medium uppercase tracking-wider">Primary Faculty Advisor</div>
+              <div className="font-semibold text-slate-900">{assignedAdvisors[0]?.name || 'Dr. Marcus Chen'}</div>
+              <div className="text-slate-500">{assignedAdvisors[0]?.specialty} | Apex Health</div>
+            </div>
           </div>
         </div>
       </div>

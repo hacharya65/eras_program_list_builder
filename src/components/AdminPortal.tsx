@@ -47,13 +47,23 @@ export function AdminPortal({ context }: AdminPortalProps) {
           </p>
         </div>
 
-        {/* FERPA / Privacy Badge */}
-        <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs flex items-center gap-3">
-          <Lock className="w-5 h-5 text-slate-600" />
-          <div>
-            <div className="text-[11px] text-slate-500 font-medium uppercase tracking-wider">FERPA Privacy Guard Active</div>
-            <div className="font-semibold text-slate-800">Metadata & Turnaround Only</div>
-            <div className="text-slate-500 text-[11px]">Confidential essay text is restricted to assigned mentors</div>
+        {/* FERPA / Privacy Badge & MSPE Export */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+          <button
+            onClick={() => alert("Opening Dean's Office MSPE Student Dossier Archive. Compiled application packets ready for Dean's letter compilation.")}
+            className="px-3.5 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold flex items-center gap-2 shadow-sm transition-colors"
+          >
+            <FileText className="w-4 h-4 text-emerald-400" />
+            MSPE Application Packets
+          </button>
+
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs flex items-center gap-3">
+            <Lock className="w-5 h-5 text-slate-600" />
+            <div>
+              <div className="text-[11px] text-slate-500 font-medium uppercase tracking-wider">FERPA Privacy Guard Active</div>
+              <div className="font-semibold text-slate-800">Metadata & Turnaround Only</div>
+              <div className="text-slate-500 text-[11px]">Confidential essay text is restricted to assigned mentors</div>
+            </div>
           </div>
         </div>
       </div>

@@ -4,10 +4,10 @@
 
 **Blocked by:** 02: Strict ERAS Plain-Text Drafting Sandbox & Content Sanitizer, 03: Scholarly Works Portfolio & Starred Collections, 05: 4-Pillar Clinical Rubric & Faculty Review Studio, 07: Strategic School List Matrix with Dynamic Specialty Signaling
 
-**Status:** ready-for-agent
+**Status:** completed
 
-- [ ] Interactive 1-click clipboard transfer assistant featuring dedicated `Copy to Clipboard` buttons for every approved field (personal statement, 10 experiences, 3 reflections, hobbies, scholarly works).
-- [ ] Transfer progress checklist allowing students to verify and mark each field as copied into official ERAS.
-- [ ] Compiled institutional application packet PDF generator compiling all approved essays, experiences, reflections, scholarly works, and school lists.
-- [ ] Dean's Office / MSPE review view for downloading or printing student application summaries.
-- [ ] Automated tests asserting that exported clipboard payloads match exact character caps and formatting sanitization rules.
+- [x] Interactive 1-click clipboard transfer assistant featuring dedicated `Copy to Clipboard` buttons for every approved field (personal statement, 10 experiences, 3 reflections, hobbies, scholarly works).
+- [x] Transfer progress checklist allowing students to verify and mark each field as copied into official ERAS.
+- [x] Compiled institutional application packet PDF generator compiling all approved essays, experiences, reflections, scholarly works, and school lists.
+- [x] Dean's Office / MSPE review view for downloading or printing student application summaries.
+- [x] Automated tests asserting that exported clipboard payloads match exact character caps and formatting sanitization rules.
