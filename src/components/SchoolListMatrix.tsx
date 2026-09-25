@@ -16,6 +16,7 @@ import {
 import {
   searchResidencyPrograms,
   ResidencyProgramRecord,
+  CENSUS_DIVISIONS,
 } from '@/domain/residency-database';
 import { getAlumniByProgram } from '@/domain/alumni-models';
 import {
@@ -54,12 +55,15 @@ const DEFAULT_ITEMS: SchoolListItem[] = [
   {
     id: 'item-1',
     programId: '1402421162',
+    programNumber: '1402421162',
     programName: 'Massachusetts General Hospital',
     specialty: 'Internal Medicine',
     city: 'Boston',
     state: 'MA',
-    region: 'Northeast',
+    region: 'New England',
+    address: '55 Fruit Street, Bulfinch 120, Boston, MA 02114',
     programDirector: 'J. Kevin Tucker, MD',
+    step2ScoreRange: '250 - 259',
     tier: 'reach',
     signal: 'gold',
     yieldNoSignal: undefined,
@@ -72,12 +76,15 @@ const DEFAULT_ITEMS: SchoolListItem[] = [
   {
     id: 'item-2',
     programId: '1402421160',
+    programNumber: '1402421160',
     programName: 'Brigham and Women’s Hospital',
     specialty: 'Internal Medicine',
     city: 'Boston',
     state: 'MA',
-    region: 'Northeast',
+    region: 'New England',
+    address: '75 Francis Street, Boston, MA 02115',
     programDirector: 'Maria A. Yialamas, MD',
+    step2ScoreRange: '250 - 259',
     tier: 'reach',
     signal: 'gold',
     yieldNoSignal: undefined,
@@ -90,12 +97,15 @@ const DEFAULT_ITEMS: SchoolListItem[] = [
   {
     id: 'item-3',
     programId: '1405421430',
+    programNumber: '1405421430',
     programName: 'University of Washington',
     specialty: 'Internal Medicine',
     city: 'Seattle',
     state: 'WA',
-    region: 'West',
+    region: 'Pacific',
+    address: '1959 NE Pacific Street, Box 356420, Seattle, WA 98195',
     programDirector: 'Ken Steinberg, MD',
+    step2ScoreRange: '240 - 249',
     tier: 'target',
     signal: 'silver',
     yieldNoSignal: undefined,
@@ -108,12 +118,15 @@ const DEFAULT_ITEMS: SchoolListItem[] = [
   {
     id: 'item-4',
     programId: '1401221105',
+    programNumber: '1401221105',
     programName: 'Emory University School of Medicine',
     specialty: 'Internal Medicine',
     city: 'Atlanta',
     state: 'GA',
-    region: 'South',
+    region: 'South Atlantic',
+    address: '100 Woodruff Circle, Suite 400, Atlanta, GA 30322',
     programDirector: 'Wendy Armstrong, MD',
+    step2ScoreRange: '240 - 249',
     tier: 'target',
     signal: 'silver',
     yieldNoSignal: undefined,
@@ -126,12 +139,15 @@ const DEFAULT_ITEMS: SchoolListItem[] = [
   {
     id: 'item-5',
     programId: '1402421175',
+    programNumber: '1402421175',
     programName: 'Tufts Medical Center',
     specialty: 'Internal Medicine',
     city: 'Boston',
     state: 'MA',
-    region: 'Northeast',
+    region: 'New England',
+    address: '800 Washington Street, Box 243, Boston, MA 02111',
     programDirector: 'Laura K. Snydman, MD',
+    step2ScoreRange: '230 - 239',
     tier: 'safety',
     signal: 'none',
     yieldNoSignal: undefined,
@@ -186,14 +202,6 @@ export function SchoolListMatrix({
   // Selected Program Details Modal
   const [detailItem, setDetailItem] = useState<SchoolListItem | null>(null);
 
-  // Step 2 CK Score Range (Residency Explorer)
-  const [step2ScoreRange, setStep2ScoreRange] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      return localStorage.getItem('eras_applicant_step2_range') || '240 - 249';
-    }
-    return '240 - 249';
-  });
-
   // Edit Yield Inline State
   const [editingYieldId, setEditingYieldId] = useState<string | null>(null);
 
@@ -218,12 +226,15 @@ export function SchoolListMatrix({
     const newItem: SchoolListItem = {
       id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       programId: prog.id,
+      programNumber: prog.programNumber || prog.id,
       programName: prog.name,
       specialty: prog.specialty,
       city: prog.city,
       state: prog.state,
       region: prog.region,
+      address: prog.address,
       programDirector: prog.programDirector,
+      step2ScoreRange: '240 - 249',
       tier: 'target',
       signal: 'none',
       yieldNoSignal: undefined,
@@ -315,30 +326,6 @@ export function SchoolListMatrix({
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          {/* USMLE Step 2 CK Score Range */}
-          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs shadow-xs">
-            <span className="text-slate-600 font-bold whitespace-nowrap">Step 2 CK:</span>
-            <select
-              value={step2ScoreRange}
-              onChange={(e) => {
-                setStep2ScoreRange(e.target.value);
-                if (typeof window !== 'undefined') {
-                  localStorage.setItem('eras_applicant_step2_range', e.target.value);
-                }
-              }}
-              className="text-xs font-bold rounded border-0 bg-transparent text-slate-800 focus:outline-none focus:ring-0 cursor-pointer"
-            >
-              <option value="Not Set">Select Range...</option>
-              <option value="< 220">&lt; 220</option>
-              <option value="220 - 229">220 - 229</option>
-              <option value="230 - 239">230 - 239</option>
-              <option value="240 - 249">240 - 249</option>
-              <option value="250 - 259">250 - 259</option>
-              <option value="260 - 269">260 - 269</option>
-              <option value="270+">270+</option>
-            </select>
-          </div>
-
           {/* Specialty Selector Dropdown */}
           <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs shadow-xs">
             <span className="text-slate-600 font-bold whitespace-nowrap">Specialty:</span>
@@ -488,19 +475,20 @@ export function SchoolListMatrix({
             <span>Browse &amp; Add Programs</span>
           </button>
 
-          {/* Region Filter */}
+          {/* Region Filter (9 US Census Divisions) */}
           <div className="flex items-center gap-1.5">
-            <span className="text-xs text-slate-500 font-semibold whitespace-nowrap">Region:</span>
+            <span className="text-xs text-slate-500 font-semibold whitespace-nowrap">Census Division:</span>
             <select
               value={regionFilter}
               onChange={(e) => setRegionFilter(e.target.value)}
               className="text-xs rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
             >
-              <option value="All">All Regions</option>
-              <option value="Northeast">Northeast</option>
-              <option value="Midwest">Midwest</option>
-              <option value="South">South</option>
-              <option value="West">West</option>
+              <option value="All">All 9 Census Divisions</option>
+              {CENSUS_DIVISIONS.map((division) => (
+                <option key={division} value={division}>
+                  {division}
+                </option>
+              ))}
             </select>
           </div>
 
@@ -588,18 +576,31 @@ export function SchoolListMatrix({
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50/75 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
-                <th className="py-3 px-3 w-12 text-center">#</th>
-                <th className="py-3 px-4">Program &amp; Location</th>
-                <th className="py-3 px-3 w-32">Tier</th>
-                <th className="py-3 px-3 w-36">ERAS Signal</th>
-                <th className="py-3 px-4">Signaling Multipliers &amp; Recommendation</th>
-                <th className="py-3 px-3 text-right w-24">Actions</th>
+                <th className="py-3 px-3 w-10 text-center">#</th>
+                <th className="py-3 px-4 min-w-[280px]">Program &amp; Metadata</th>
+                <th className="py-3 px-3 w-28">Tier</th>
+                <th className="py-3 px-3 w-32">ERAS Signal</th>
+                <th className="py-3 px-3 w-36">
+                  <a
+                    href="https://www.residencyexplorer.org/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1 text-slate-700 hover:text-sky-700 font-bold hover:underline"
+                    title="Search on Residency Explorer"
+                  >
+                    <span>Step 2 CK Range</span>
+                    <ExternalLink className="w-3 h-3 text-sky-600" />
+                  </a>
+                </th>
+                <th className="py-3 px-4 min-w-[230px]">Yield Rates &amp; Multipliers</th>
+                <th className="py-3 px-4 min-w-[200px]">Recommended Strategy</th>
+                <th className="py-3 px-3 text-right w-20">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400 text-sm">
+                  <td colSpan={8} className="py-12 text-center text-slate-400 text-sm">
                     No residency programs match your search/filter criteria.
                   </td>
                 </tr>
@@ -621,26 +622,36 @@ export function SchoolListMatrix({
                         {index + 1}
                       </td>
 
-                      {/* Program Name & Location */}
+                      {/* Program Name & Metadata (Item 11) */}
                       <td className="py-3 px-4">
-                        <div className="font-bold text-slate-900 group-hover:text-sky-700 transition-colors">
-                          {item.programName}
-                        </div>
-                        <div className="flex items-center gap-2 text-[11px] text-slate-500 mt-0.5">
-                          <span className="flex items-center gap-0.5">
-                            <MapPin className="w-3 h-3 text-slate-400" />
-                            {item.city}, {item.state}
+                        <div className="flex items-start justify-between gap-2">
+                          <div className="font-bold text-slate-900 group-hover:text-sky-700 transition-colors">
+                            {item.programName}
+                          </div>
+                          <span className="font-mono text-[10px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">
+                            #{item.programNumber || item.programId}
                           </span>
-                          {item.region && (
-                            <span className="px-1.5 py-0.2 rounded bg-slate-100 text-slate-600 font-semibold border border-slate-200">
-                              {item.region}
-                            </span>
-                          )}
-                          {item.programDirector && (
-                            <span className="truncate max-w-[180px]">
-                              PD: {item.programDirector.replace('\n', ' ')}
-                            </span>
-                          )}
+                        </div>
+                        <div className="text-[11px] text-slate-500 mt-1 space-y-0.5">
+                          <div
+                            className="flex items-center gap-1.5 text-slate-600 truncate max-w-[340px]"
+                            title={item.address || `${item.city}, ${item.state}`}
+                          >
+                            <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <span className="truncate">{item.address || `${item.city}, ${item.state}`}</span>
+                          </div>
+                          <div className="flex items-center gap-2 pt-0.5">
+                            {item.region && (
+                              <span className="px-1.5 py-0.5 rounded bg-sky-50 text-sky-800 font-bold text-[10px] border border-sky-200">
+                                {item.region}
+                              </span>
+                            )}
+                            {item.programDirector && (
+                              <span className="truncate max-w-[200px] text-[10px] text-slate-500">
+                                PD: {item.programDirector.replace('\n', ' ')}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </td>
 
@@ -705,58 +716,75 @@ export function SchoolListMatrix({
                         </div>
                       </td>
 
-                      {/* Signaling Strategy Multipliers & Recommendation */}
+                      {/* Step 2 CK Range (Item 12) */}
+                      <td className="py-3 px-3">
+                        <select
+                          value={item.step2ScoreRange || ''}
+                          onChange={(e) => handleUpdateItem(item.id, { step2ScoreRange: e.target.value })}
+                          className="w-full p-1.5 rounded-lg text-xs font-semibold border border-slate-200 bg-white text-slate-700 focus:outline-none focus:ring-1 focus:ring-sky-500 shadow-2xs"
+                        >
+                          <option value="">Not Recorded</option>
+                          <option value="< 220">&lt; 220</option>
+                          <option value="220 - 229">220 - 229</option>
+                          <option value="230 - 239">230 - 239</option>
+                          <option value="240 - 249">240 - 249</option>
+                          <option value="250 - 259">250 - 259</option>
+                          <option value="260 - 269">260 - 269</option>
+                          <option value="270+">270+</option>
+                        </select>
+                      </td>
+
+                      {/* Yield Rates & Multipliers (Item 9) */}
                       <td className="py-3 px-4">
-                        <div className="space-y-1.5">
+                        <div className="space-y-2">
                           {item.yieldNoSignal === undefined &&
                           item.yieldSilver === undefined &&
                           item.yieldGold === undefined ? (
-                            <div className="flex items-center gap-2">
-                              <button
-                                onClick={() => setEditingYieldId(editingYieldId === item.id ? null : item.id)}
-                                className="text-xs text-sky-700 hover:text-sky-900 font-semibold flex items-center gap-1 bg-sky-50 hover:bg-sky-100 px-2.5 py-1 rounded-md border border-sky-200 transition-colors"
-                              >
-                                <Plus className="w-3.5 h-3.5 text-sky-600" />
-                                + Enter Yield Rates (Residency Explorer)
-                              </button>
-                            </div>
+                            <button
+                              onClick={() => setEditingYieldId(editingYieldId === item.id ? null : item.id)}
+                              className="text-xs text-sky-700 hover:text-sky-900 font-semibold flex items-center gap-1 bg-sky-50 hover:bg-sky-100 px-2.5 py-1.5 rounded-md border border-sky-200 transition-colors"
+                            >
+                              <Plus className="w-3.5 h-3.5 text-sky-600" />
+                              + Enter Yield Rates (Residency Explorer)
+                            </button>
                           ) : (
-                            <div className="space-y-1">
-                              <div className="flex flex-wrap items-center gap-1.5">
-                                {/* Silver Multiplier Change Badge */}
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-black bg-slate-100 text-slate-800 border border-slate-300 shadow-2xs">
-                                  <Award className="w-3.5 h-3.5 text-slate-500" />
-                                  {recommendation.silverMultiplier || '1.0x'} Silver
+                            <div className="space-y-1.5">
+                              {/* Prominent Multiplier Badges in Large High-Contrast Font */}
+                              <div className="flex items-center gap-2">
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-black bg-slate-900 text-white shadow-xs">
+                                  <Award className="w-3.5 h-3.5 text-slate-300" />
+                                  <span className="text-[13px] tracking-tight">{recommendation.silverMultiplier || '1.0x'}</span>
+                                  <span className="text-slate-300 text-[11px] font-bold">Silver</span>
                                 </span>
 
-                                {/* Gold Multiplier Change Badge */}
-                                <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded text-xs font-black bg-amber-100 text-amber-900 border border-amber-300 shadow-2xs">
-                                  <Award className="w-3.5 h-3.5 text-amber-600" />
-                                  {recommendation.goldMultiplier || '1.0x'} Gold
-                                </span>
-
-                                {/* Algorithmic Recommendation Tag */}
-                                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${recommendation.badgeClass}`}>
-                                  {recommendation.label}
+                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-black bg-amber-600 text-white shadow-xs">
+                                  <Award className="w-3.5 h-3.5 text-amber-200" />
+                                  <span className="text-[13px] tracking-tight">{recommendation.goldMultiplier || '1.0x'}</span>
+                                  <span className="text-amber-200 text-[11px] font-bold">Gold</span>
                                 </span>
 
                                 <button
                                   onClick={() => setEditingYieldId(editingYieldId === item.id ? null : item.id)}
-                                  className="text-[11px] text-sky-600 hover:text-sky-800 hover:underline font-semibold ml-1"
+                                  className="text-[11px] text-sky-700 hover:text-sky-900 font-bold hover:underline ml-1"
                                 >
                                   {editingYieldId === item.id ? 'Close' : 'Edit'}
                                 </button>
                               </div>
 
-                              <div className="text-[11px] font-mono text-slate-500">
-                                Yield Rates: {item.yieldNoSignal ?? 0}% (No Signal) &rarr; {item.yieldSilver ?? 0}% (Silver) &rarr; {item.yieldGold ?? 0}% (Gold)
+                              {/* Clean Yield Rates with Visual Breathing Room */}
+                              <div className="flex items-center gap-2 text-[11px] text-slate-600 font-medium">
+                                <span>No Signal: <strong className="font-mono text-slate-900">{item.yieldNoSignal ?? 0}%</strong></span>
+                                <span className="text-slate-300">&bull;</span>
+                                <span>Silver: <strong className="font-mono text-slate-900">{item.yieldSilver ?? 0}%</strong></span>
+                                <span className="text-slate-300">&bull;</span>
+                                <span>Gold: <strong className="font-mono text-slate-900">{item.yieldGold ?? 0}%</strong></span>
                               </div>
                             </div>
                           )}
 
                           {/* Inline Yield Input Box */}
                           {editingYieldId === item.id && (
-                            <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 flex flex-wrap items-center gap-3 text-xs mt-2 animate-fade-in shadow-xs">
+                            <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 flex flex-wrap items-center gap-2 text-xs mt-2 animate-fade-in shadow-xs">
                               <div className="flex items-center gap-1">
                                 <span className="text-slate-600 font-medium">No Signal %:</span>
                                 <input
@@ -767,7 +795,7 @@ export function SchoolListMatrix({
                                       yieldNoSignal: e.target.value !== '' ? Number(e.target.value) : undefined,
                                     })
                                   }
-                                  className="w-16 p-1 rounded border border-slate-300 bg-white font-mono text-xs focus:ring-1 focus:ring-sky-500"
+                                  className="w-14 p-1 rounded border border-slate-300 bg-white font-mono text-xs focus:ring-1 focus:ring-sky-500"
                                   placeholder="%"
                                 />
                               </div>
@@ -781,7 +809,7 @@ export function SchoolListMatrix({
                                       yieldSilver: e.target.value !== '' ? Number(e.target.value) : undefined,
                                     })
                                   }
-                                  className="w-16 p-1 rounded border border-slate-300 bg-white font-mono text-xs focus:ring-1 focus:ring-sky-500"
+                                  className="w-14 p-1 rounded border border-slate-300 bg-white font-mono text-xs focus:ring-1 focus:ring-sky-500"
                                   placeholder="%"
                                 />
                               </div>
@@ -795,7 +823,7 @@ export function SchoolListMatrix({
                                       yieldGold: e.target.value !== '' ? Number(e.target.value) : undefined,
                                     })
                                   }
-                                  className="w-16 p-1 rounded border border-slate-300 bg-white font-mono text-xs focus:ring-1 focus:ring-sky-500"
+                                  className="w-14 p-1 rounded border border-slate-300 bg-white font-mono text-xs focus:ring-1 focus:ring-sky-500"
                                   placeholder="%"
                                 />
                               </div>
@@ -803,10 +831,22 @@ export function SchoolListMatrix({
                                 onClick={() => setEditingYieldId(null)}
                                 className="px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded text-xs font-semibold shadow-2xs"
                               >
-                                Done
+                                Save
                               </button>
                             </div>
                           )}
+                        </div>
+                      </td>
+
+                      {/* Dedicated Recommended Signal Strategy Column (Item 9) */}
+                      <td className="py-3 px-4">
+                        <div className="space-y-1">
+                          <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider border shadow-2xs ${recommendation.badgeClass}`}>
+                            {recommendation.label}
+                          </span>
+                          <p className="text-[11px] text-slate-600 leading-tight">
+                            {recommendation.explanation}
+                          </p>
                         </div>
                       </td>
 
@@ -877,11 +917,12 @@ export function SchoolListMatrix({
                 onChange={(e) => setDbRegionFilter(e.target.value)}
                 className="text-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
               >
-                <option value="All">All Regions</option>
-                <option value="Northeast">Northeast</option>
-                <option value="Midwest">Midwest</option>
-                <option value="South">South</option>
-                <option value="West">West</option>
+                <option value="All">All 9 Census Divisions</option>
+                {CENSUS_DIVISIONS.map((division) => (
+                  <option key={division} value={division}>
+                    {division}
+                  </option>
+                ))}
               </select>
             </div>
 
@@ -899,21 +940,29 @@ export function SchoolListMatrix({
                       key={prog.id}
                       className="bg-white p-3 rounded-lg border border-slate-200 flex items-center justify-between gap-3 hover:border-sky-300 transition-colors"
                     >
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2">
                           <h4 className="text-xs font-bold text-slate-900 truncate">{prog.name}</h4>
+                          <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
+                            #{prog.programNumber || prog.id}
+                          </span>
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sky-50 text-sky-800 border border-sky-200">
                             {prog.region}
                           </span>
                         </div>
-                        <div className="text-[11px] text-slate-500 mt-0.5 flex items-center gap-3">
-                          <span>{prog.city}, {prog.state}</span>
-                          {prog.programDirector && (
-                            <span className="truncate">PD: {prog.programDirector.replace('\n', ' ')}</span>
-                          )}
-                          {prog.offersPreliminary && (
-                            <span className="text-emerald-700 font-semibold">&bull; Offers Prelim</span>
-                          )}
+                        <div className="text-[11px] text-slate-500 mt-1 space-y-0.5">
+                          <div className="flex items-center gap-1 text-slate-600 truncate">
+                            <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                            <span className="truncate">{prog.address || `${prog.city}, ${prog.state}`}</span>
+                          </div>
+                          <div className="flex items-center gap-3 text-[10px] text-slate-400">
+                            {prog.programDirector && (
+                              <span className="truncate">PD: {prog.programDirector.replace('\n', ' ')}</span>
+                            )}
+                            {prog.offersPreliminary && (
+                              <span className="text-emerald-700 font-semibold">&bull; Offers Prelim</span>
+                            )}
+                          </div>
                         </div>
                       </div>
 
@@ -947,17 +996,25 @@ export function SchoolListMatrix({
         </div>
       )}
 
-      {/* Program Details Drawer / Modal */}
+      {/* Program Details Drawer / Modal (Item 11) */}
       {detailItem && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-scale-in">
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
-                  {detailItem.specialty} &bull; {detailItem.region || 'US'}
-                </span>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-sky-700 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
+                    {detailItem.specialty} &bull; {detailItem.region || 'US'}
+                  </span>
+                  <span className="text-[10px] font-mono font-bold text-slate-700 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200">
+                    ACGME #{detailItem.programNumber || detailItem.programId}
+                  </span>
+                </div>
                 <h3 className="text-base font-bold text-slate-900 mt-1">{detailItem.programName}</h3>
-                <p className="text-xs text-slate-500">{detailItem.city}, {detailItem.state}</p>
+                <p className="text-xs text-slate-500 flex items-center gap-1 mt-0.5">
+                  <MapPin className="w-3.5 h-3.5 text-slate-400" />
+                  {detailItem.address || `${detailItem.city}, ${detailItem.state}`}
+                </p>
               </div>
               <button
                 onClick={() => setDetailItem(null)}
@@ -970,6 +1027,22 @@ export function SchoolListMatrix({
             {/* Metadata Fields */}
             <div className="space-y-3 text-xs">
               <div className="bg-slate-50 p-3 rounded-lg border border-slate-200 space-y-1.5">
+                <div>
+                  <strong className="text-slate-700">Official Program Number:</strong>{' '}
+                  <span className="font-mono font-semibold text-slate-900">{detailItem.programNumber || detailItem.programId}</span>
+                </div>
+                <div>
+                  <strong className="text-slate-700">Complete Address:</strong>{' '}
+                  <span className="text-slate-900">{detailItem.address || `${detailItem.city}, ${detailItem.state}`}</span>
+                </div>
+                <div>
+                  <strong className="text-slate-700">US Census Division:</strong>{' '}
+                  <span className="text-slate-900">{detailItem.region}</span>
+                </div>
+                <div>
+                  <strong className="text-slate-700">Step 2 CK Score Range:</strong>{' '}
+                  <span className="font-semibold text-slate-900">{detailItem.step2ScoreRange || 'Not Recorded'}</span>
+                </div>
                 <div>
                   <strong className="text-slate-700">Program Director:</strong>{' '}
                   <span className="text-slate-900">{detailItem.programDirector || 'Department Leadership'}</span>

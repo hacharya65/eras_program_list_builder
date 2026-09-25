@@ -108,10 +108,18 @@ describe('Ticket 07: Strategic School List Matrix & Dynamic Specialty Signaling'
       expect(imPrograms.length).toBeGreaterThan(0);
       expect(imPrograms.every(p => p.specialty === 'Internal Medicine')).toBe(true);
 
-      // Search by region
-      const northeast = searchResidencyPrograms({ specialty: 'Internal Medicine', region: 'Northeast' });
-      expect(northeast.length).toBeGreaterThan(0);
-      expect(northeast.every(p => p.region === 'Northeast')).toBe(true);
+      // Search by 9 US Census divisions (Item 10)
+      const midAtlantic = searchResidencyPrograms({ specialty: 'Internal Medicine', region: 'Middle Atlantic' });
+      expect(midAtlantic.length).toBeGreaterThan(0);
+      expect(midAtlantic.every(p => p.region === 'Middle Atlantic')).toBe(true);
+
+      const newEngland = searchResidencyPrograms({ specialty: 'Internal Medicine', region: 'New England' });
+      expect(newEngland.length).toBeGreaterThan(0);
+      expect(newEngland.every(p => p.region === 'New England')).toBe(true);
+
+      // Verify programNumber and address metadata (Item 11)
+      expect(midAtlantic[0].programNumber).toBeDefined();
+      expect(midAtlantic[0].address).toBeDefined();
 
       // Search by text query
       const boston = searchResidencyPrograms({ search: 'Boston' });

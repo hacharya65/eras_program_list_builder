@@ -98,15 +98,18 @@ export type ApplicationTrack = 'categorical' | 'preliminary' | 'pstp';
 export interface SchoolListItem {
   id: string;
   programId: string;
+  programNumber?: string;
   programName: string;
   specialty: string;
   city?: string;
   state?: string;
   region?: string;
+  address?: string;
   programDirector?: string;
   tier: ProgramTier;
   signal: SignalType;
   track?: ApplicationTrack;
+  step2ScoreRange?: string; // Program Step 2 CK range as reported on Residency Explorer
   yieldNoSignal?: number;
   yieldSilver?: number;
   yieldGold?: number;
