@@ -8,7 +8,7 @@ This backlog tracks the next cycle of feature requests, enhancements, and bugfix
 
 | Ticket # | Title | Category | Complexity | Dependencies | Status |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **[#11](.scratch/eras-advising/issues/11-personal-statement-version-forking.md)** | Personal Statement Version Forking (V1 Lock & V2 Branch) | Workflow / Data Integrity | Medium | None | `Pending` |
+| **[#11](.scratch/eras-advising/issues/11-personal-statement-version-forking.md)** | Personal Statement Dynamic Version Forking (V1 through V_n) | Workflow / Data Integrity | Medium | None | `Pending` |
 | **[#12](.scratch/eras-advising/issues/12-experiences-advisor-review-submission.md)** | Faculty Advisor Review Submission for Experiences | Workflow / Advising | Medium | None | `Pending` |
 | **[#13](.scratch/eras-advising/issues/13-scholarly-works-persistence-bugfix.md)** | Scholarly Works State Persistence Bugfix | Bugfix / UX | Low | None | `Pending` |
 | **[#14](.scratch/eras-advising/issues/14-universal-residency-database-matrix.md)** | Universal Residency Program Database & Row Matrix | Data / UI Redesign | High | None | `Pending` |
@@ -19,13 +19,13 @@ This backlog tracks the next cycle of feature requests, enhancements, and bugfix
 
 ## Detailed Specifications
 
-### [Ticket 11: Personal Statement Version Forking (V1 Lock & V2 Branch)](.scratch/eras-advising/issues/11-personal-statement-version-forking.md)
-* **Summary:** Lock submitted drafts as immutable V1 snapshots upon submission. Any subsequent edits automatically fork into an active V2 draft rather than re-flagging or editing the locked V1 record.
+### [Ticket 11: Personal Statement Dynamic Version Forking (V1 through V_n)](.scratch/eras-advising/issues/11-personal-statement-version-forking.md)
+* **Summary:** Lock submitted drafts as immutable snapshots upon submission. Any subsequent edits automatically fork into an active incremental draft branch (`V1` → `V2` → ... → `V_n`), allowing unlimited iterative submission and review cycles without mutating locked records.
 * **Key Scope:**
-  - Immutable snapshot model (`V1` locked upon submission with timestamp & changelog).
-  - Draft-forking trigger on post-submission edits into active `V2` branch.
-  - UI version switcher between `V1 (Locked - In Review)` and `V2 (Active Draft)`.
-  - Visual side-by-side or inline diff highlighting additions (green) and deletions (red).
+  - Immutable snapshot model (`V_k` locked upon submission with timestamp, changelog, and review metadata).
+  - Draft-forking trigger on post-submission edits into active `V_{k+1}` branch.
+  - UI version selector dropdown to inspect any historical snapshot (`V1` to `V_n`) with status tags (`Locked - In Review`, `Reviewed`, `Current Active Draft`).
+  - Visual side-by-side or inline diff highlighting additions (green) and deletions (red) across any selected versions.
 
 ### [Ticket 12: Faculty Advisor Review Submission for Experiences](.scratch/eras-advising/issues/12-experiences-advisor-review-submission.md)
 * **Summary:** Add an end-to-end "Submit for Review" workflow to the 10 Selected Experiences module, routing the portfolio directly to the assigned faculty advisor.
