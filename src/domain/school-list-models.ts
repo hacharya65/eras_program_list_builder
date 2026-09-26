@@ -3,7 +3,7 @@
  * Formatted for ACGME specialties with exact Gold and Silver signal allocations.
  */
 
-import { getAllResidencyPrograms, ResidencyProgramRecord } from './residency-database';
+import { getAllResidencyPrograms, ResidencyProgramRecord, formatProgramDisplayName } from './residency-database';
 
 export interface SpecialtySignalRule {
   specialty: string;
@@ -783,7 +783,7 @@ export function getSampleProgramsForSpecialty(
       id: `sample-${normSpec.toLowerCase().replace(/[^a-z0-9]/g, '-')}-${p.id || idx + 1}`,
       programId: p.id,
       programNumber: p.programNumber || p.id,
-      programName: p.name,
+      programName: formatProgramDisplayName(p) || p.name,
       specialty: p.specialty,
       city: p.city,
       state: p.state,

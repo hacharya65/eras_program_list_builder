@@ -25,6 +25,7 @@ import {
   searchResidencyPrograms,
   ResidencyProgramRecord,
   CENSUS_DIVISIONS,
+  formatProgramDisplayName,
 } from '@/domain/residency-database';
 import { getAlumniByProgram } from '@/domain/alumni-models';
 import {
@@ -215,9 +216,20 @@ export function SchoolListMatrix({
   };
 
   const handleAddFromDatabase = (prog: ResidencyProgramRecord) => {
-    // Check if already in list
-    if (items.some((i) => i.programName.toLowerCase() === prog.name.toLowerCase())) {
-      alert(`"${prog.name}" is already in your School List.`);
+    const displayName = formatProgramDisplayName(prog);
+
+    // Check if already in list by ACGME ID or unique display name + location
+    const isAlreadyAdded = items.some(
+      (i) =>
+        (i.programId && (i.programId === prog.id || i.programId === prog.programNumber)) ||
+        (i.programNumber && (i.programNumber === prog.id || i.programNumber === prog.programNumber)) ||
+        (i.programName.toLowerCase() === displayName.toLowerCase() &&
+          i.city?.toLowerCase() === prog.city?.toLowerCase() &&
+          i.state?.toLowerCase() === prog.state?.toLowerCase())
+    );
+
+    if (isAlreadyAdded) {
+      alert(`"${displayName}" is already in your School List.`);
       return;
     }
 
@@ -230,7 +242,7 @@ export function SchoolListMatrix({
       id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
       programId: prog.id,
       programNumber: prog.programNumber || prog.id,
-      programName: prog.name,
+      programName: displayName,
       specialty: prog.specialty,
       city: prog.city,
       state: prog.state,
@@ -263,7 +275,8 @@ export function SchoolListMatrix({
         if (tierFilter !== 'All' && item.tier !== tierFilter) return false;
         if (searchQuery.trim()) {
           const q = searchQuery.toLowerCase();
-          const matchName = item.programName.toLowerCase().includes(q);
+          const displayName = formatProgramDisplayName(item);
+          const matchName = item.programName.toLowerCase().includes(q) || displayName.toLowerCase().includes(q);
           const matchCity = item.city?.toLowerCase().includes(q);
           const matchState = item.state?.toLowerCase().includes(q);
           const matchDir = item.programDirector?.toLowerCase().includes(q);
@@ -748,7 +761,7 @@ export function SchoolListMatrix({
                       <td className="py-2.5 px-3 align-top">
                         <div className="flex items-start justify-between gap-1.5">
                           <div className="font-bold text-slate-900 group-hover:text-sky-700 transition-colors leading-tight">
-                            {item.programName}
+                            {formatProgramDisplayName(item) || item.programName}
                           </div>
                           <span className="font-mono text-[9px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">
                             #{item.programNumber || item.programId}
@@ -1216,7 +1229,15 @@ export function SchoolListMatrix({
                 </div>
               ) : (
                 dbResults.map((prog) => {
-                  const isAdded = items.some((i) => i.programName.toLowerCase() === prog.name.toLowerCase());
+                  const displayName = formatProgramDisplayName(prog);
+                  const isAdded = items.some(
+                    (i) =>
+                      (i.programId && (i.programId === prog.id || i.programId === prog.programNumber)) ||
+                      (i.programNumber && (i.programNumber === prog.id || i.programNumber === prog.programNumber)) ||
+                      (i.programName.toLowerCase() === displayName.toLowerCase() &&
+                        i.city?.toLowerCase() === prog.city?.toLowerCase() &&
+                        i.state?.toLowerCase() === prog.state?.toLowerCase())
+                  );
                   return (
                     <div
                       key={prog.id}
@@ -1224,7 +1245,7 @@ export function SchoolListMatrix({
                     >
                       <div className="min-w-0 flex-1">
                         <div className="flex items-center gap-2 flex-wrap">
-                          <h4 className="text-xs font-bold text-slate-900 truncate">{prog.name}</h4>
+                          <h4 className="text-xs font-bold text-slate-900 truncate">{displayName}</h4>
                           <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
                             #{prog.programNumber || prog.id}
                           </span>

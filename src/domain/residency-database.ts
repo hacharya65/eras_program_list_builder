@@ -143,6 +143,81 @@ export function getProgramsForSpecialty(specialty: string): ResidencyProgramReco
   return typedPrograms.filter((p) => p.specialty.toLowerCase() === specialty.toLowerCase());
 }
 
+export function formatProgramDisplayName(p: {
+  name?: string;
+  programName?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+}): string {
+  if (!p) return '';
+  const baseName = (p.name || p.programName || '').trim();
+  const addr = (p.address || '').trim();
+
+  // If name is just "University" or "Medical College" or "Hospital" or "Center"
+  if (/^(university|medical college|hospital|center)$/i.test(baseName)) {
+    const cleanedAddr = addr.replace(/^of,?\s+/i, 'of ').replace(/^at,?\s+/i, 'at ');
+    const match = cleanedAddr.match(/^([A-Za-z0-9\s\(\)\-\/&]+?)(?:,\s*Program|\s+Program|,|\n|$)/i);
+    if (match && match[1].trim()) {
+      const suffix = match[1].trim().replace(/^,\s*/, '').replace(/\s+,/g, ',');
+      return `${baseName} ${suffix}`.replace(/\s+/g, ' ');
+    }
+  }
+
+  // 1. Tag in leading parentheses: "(Columbia, Campus)" -> "Columbia Campus"
+  const leadingParenMatch = addr.match(/^\s*\(([^)]+)\)/);
+  if (leadingParenMatch) {
+    const rawTag = leadingParenMatch[1].replace(/,\s*/g, ' ').trim();
+    if (rawTag && !baseName.toLowerCase().includes(rawTag.toLowerCase())) {
+      return `${baseName} (${rawTag})`;
+    }
+  }
+
+  // 2. Mayo Clinic pattern: "of Medicine and Science, (Jacksonville) Program"
+  const mayoMatch = addr.match(/of Medicine and Science,?\s*\(([^)]+)\)/i);
+  if (mayoMatch) {
+    const rawTag = mayoMatch[1].replace(/,\s*/g, ' ').trim();
+    if (rawTag && !baseName.toLowerCase().includes(rawTag.toLowerCase())) {
+      return `${baseName} (${rawTag})`;
+    }
+  }
+
+  // 3. Creighton / School of Medicine pattern: "School of Medicine-, Phoenix Program" or "School of Medicine, (Omaha) Program"
+  const schoolMatch = addr.match(/School of Medicine-?,?\s*(?:\(([^)]+)\)|([A-Za-z\s]+?))\s+Program/i);
+  if (schoolMatch) {
+    const rawTag = (schoolMatch[1] || schoolMatch[2]).replace(/,\s*/g, ' ').trim();
+    if (rawTag && !baseName.toLowerCase().includes(rawTag.toLowerCase()) && !/^(program|department)$/i.test(rawTag)) {
+      return `${baseName} (${rawTag})`;
+    }
+  }
+
+  // 4. Any other "(<Campus/City>) Program" in address
+  const parenProgramMatch = addr.match(/\(([^)]+)\)\s+Program/i);
+  if (parenProgramMatch) {
+    const rawTag = parenProgramMatch[1].replace(/,\s*/g, ' ').trim();
+    if (rawTag && !baseName.toLowerCase().includes(rawTag.toLowerCase())) {
+      return `${baseName} (${rawTag})`;
+    }
+  }
+
+  // 5. Larkin Community Hospital campus
+  if (baseName.toLowerCase().includes('larkin')) {
+    if (addr.toLowerCase().includes('palm springs') && !baseName.toLowerCase().includes('palm springs')) {
+      return `${baseName} (Palm Springs Campus)`;
+    }
+    if (addr.toLowerCase().includes('south miami') && !baseName.toLowerCase().includes('south miami')) {
+      return `${baseName} (South Miami Campus)`;
+    }
+  }
+
+  // 6. Louisiana State University (New Orleans vs Shreveport)
+  if (baseName === 'Louisiana State University' && p.city === 'New Orleans' && !addr.includes('Shreveport')) {
+    return `${baseName} (New Orleans)`;
+  }
+
+  return baseName;
+}
+
 export function searchResidencyPrograms(query: SearchProgramsQuery): ResidencyProgramRecord[] {
   const { specialty, region, search, limit = 50 } = query;
   const searchLower = search ? search.toLowerCase().trim() : '';
@@ -173,7 +248,8 @@ export function searchResidencyPrograms(query: SearchProgramsQuery): ResidencyPr
       }
     }
     if (searchLower) {
-      const matchName = p.name.toLowerCase().includes(searchLower);
+      const displayName = formatProgramDisplayName(p).toLowerCase();
+      const matchName = displayName.includes(searchLower) || p.name.toLowerCase().includes(searchLower);
       const matchCity = p.city.toLowerCase().includes(searchLower);
       const matchState = p.state.toLowerCase().includes(searchLower);
       const matchDirector = p.programDirector
@@ -195,3 +271,4 @@ export function searchResidencyPrograms(query: SearchProgramsQuery): ResidencyPr
 export function getResidencyProgramById(id: string): ResidencyProgramRecord | undefined {
   return typedPrograms.find((p) => p.id === id || p.programNumber === id);
 }
+

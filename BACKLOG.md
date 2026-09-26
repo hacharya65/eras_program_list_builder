@@ -126,3 +126,6 @@ This backlog tracks the next cycle of feature requests, enhancements, and bugfix
    - **Ticket 19 (UX Entry Point)**: Homepage Feedback Gateway banner and direct routing.
    - **Ticket 20 (Review Hub)**: Dedicated Student Feedback & Analysis Hub.
    - **Ticket 21 (Iteration Canvas)**: Split-Screen live drafting with synchronized faculty notes and comments.
+6. **Sprint 6 (School List Matrix Multi-Campus Disambiguation)**:
+   - **Ticket 22 (Bugfix / Enhancement)**: Multi-Campus & Identical-Name Institution Disambiguation (ACGME ID deduplication & campus display formatting).
+
