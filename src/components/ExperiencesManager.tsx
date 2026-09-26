@@ -22,9 +22,17 @@ import {
   Send,
   Eye,
   Clock,
-  MessageSquare
+  MessageSquare,
+  BookOpen
 } from 'lucide-react';
 import { AnnotatedDocumentViewer } from './collaborative/AnnotatedDocumentViewer';
+import {
+  getSpecialtyEssayGroup,
+  getStoredSpecialtyEssays,
+  saveStoredSpecialtyEssay,
+  SpecialtyEssayGroup,
+} from '@/domain/specialty-essays';
+import { getStoredTargetSpecialty } from '@/domain/school-list-models';
 
 interface ExperiencesManagerProps {
   experiences: ExperienceDraft[];
@@ -34,6 +42,7 @@ interface ExperiencesManagerProps {
   assignedAdvisor?: UserProfile;
   activeReviewRequest?: ReviewRequest;
   onSubmitForReview?: (changelog: string) => void;
+  targetSpecialty?: string;
 }
 
 export function ExperiencesManager({
@@ -44,10 +53,73 @@ export function ExperiencesManager({
   assignedAdvisor,
   activeReviewRequest,
   onSubmitForReview,
+  targetSpecialty,
 }: ExperiencesManagerProps) {
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [hobbiesText, setHobbiesText] = useState('');
-  const [impactfulText, setImpactfulText] = useState('');
+  const [hobbiesText, setHobbiesText] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('eras_hobbies_text') || '';
+    }
+    return '';
+  });
+  const [impactfulText, setImpactfulText] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return localStorage.getItem('eras_impactful_text') || '';
+    }
+    return '';
+  });
+  const [currentSpecialty, setCurrentSpecialty] = useState<string>(() => {
+    return targetSpecialty || getStoredTargetSpecialty() || 'Internal Medicine';
+  });
+
+  const [specialtyResponses, setSpecialtyResponses] = useState<Record<string, Record<string, string>>>(() => {
+    return getStoredSpecialtyEssays();
+  });
+
+  React.useEffect(() => {
+    if (targetSpecialty) {
+      setCurrentSpecialty(targetSpecialty);
+    }
+  }, [targetSpecialty]);
+
+  React.useEffect(() => {
+    const handleSpecialtyUpdated = (e: any) => {
+      if (e?.detail) {
+        setCurrentSpecialty(e.detail);
+      }
+    };
+    if (typeof window !== 'undefined') {
+      window.addEventListener('applicant_specialty_updated', handleSpecialtyUpdated);
+      return () => {
+        window.removeEventListener('applicant_specialty_updated', handleSpecialtyUpdated);
+      };
+    }
+  }, []);
+
+  const essayGroup = getSpecialtyEssayGroup(currentSpecialty);
+
+  const handleSpecialtyEssayChange = (promptId: string, val: string, maxChars: number) => {
+    const sanitized = sanitizeErasText(val.slice(0, maxChars));
+    saveStoredSpecialtyEssay(currentSpecialty, promptId, sanitized);
+    setSpecialtyResponses(getStoredSpecialtyEssays());
+  };
+
+  const handleHobbiesChange = (val: string) => {
+    const sanitized = sanitizeErasText(val);
+    setHobbiesText(sanitized);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('eras_hobbies_text', sanitized);
+    }
+  };
+
+  const handleImpactfulChange = (val: string) => {
+    const sanitized = sanitizeErasText(val);
+    setImpactfulText(sanitized);
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('eras_impactful_text', sanitized);
+    }
+  };
+
   const [showSubmitModal, setShowSubmitModal] = useState(false);
   const [submitChangelog, setSubmitChangelog] = useState('');
   const [expAnnotationView, setExpAnnotationView] = useState<Record<string, boolean>>({});
@@ -622,7 +694,7 @@ export function ExperiencesManager({
 
           <textarea
             value={impactfulText}
-            onChange={(e) => setImpactfulText(sanitizeErasText(e.target.value))}
+            onChange={(e) => handleImpactfulChange(e.target.value)}
             rows={4}
             className={`w-full p-3 rounded-lg border text-xs font-mono leading-relaxed focus:outline-none focus:ring-2 ${
               impactfulText.length > 750
@@ -661,7 +733,7 @@ export function ExperiencesManager({
 
           <textarea
             value={hobbiesText}
-            onChange={(e) => setHobbiesText(sanitizeErasText(e.target.value))}
+            onChange={(e) => handleHobbiesChange(e.target.value)}
             rows={2}
             className={`w-full p-3 rounded-lg border text-xs font-mono leading-relaxed focus:outline-none focus:ring-2 ${
               hobbiesText.length > 300
@@ -678,6 +750,113 @@ export function ExperiencesManager({
           )}
         </div>
       </div>
+
+      {/* SECTION 3: ERAS Specialty Questions (Rendered once student declares Anesthesiology, Neurosurgery, or Plastic Surgery) */}
+      {essayGroup && (
+        <div className="bg-white rounded-xl border border-amber-200 p-6 shadow-sm space-y-6 animate-fade-in">
+          <div className="border-b border-amber-100 pb-3 flex flex-wrap items-center justify-between gap-3">
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                  Official ERAS Specialty Questions
+                </span>
+                <span className="text-xs font-mono text-slate-500">
+                  Declared Specialty: <strong className="text-slate-900">{essayGroup.specialty}</strong>
+                </span>
+              </div>
+              <h2 className="text-base font-bold text-slate-900 mt-1 flex items-center gap-2">
+                <Sparkles className="w-4 h-4 text-amber-600" />
+                Additional Specialty Essays ({essayGroup.specialty})
+              </h2>
+            </div>
+            <span className="text-xs font-mono text-amber-800 bg-amber-50 px-2.5 py-1 rounded-md border border-amber-200">
+              {essayGroup.prompts.length} Prompts Required
+            </span>
+          </div>
+
+          {/* Official AAMC Worksheet Notice (Pages 22-24) */}
+          <div className="p-3.5 bg-amber-50/80 border border-amber-200 rounded-lg text-xs text-amber-950 flex items-start gap-2.5">
+            <Info className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+            <div className="space-y-1">
+              <p className="font-bold text-amber-900">
+                Official 2027 AAMC ERAS Specialty Questions Instructions
+              </p>
+              <p className="text-[11px] text-amber-900/90 leading-relaxed">
+                {essayGroup.notice}
+              </p>
+            </div>
+          </div>
+
+          {/* Specialty Prompts List */}
+          <div className="space-y-5">
+            {essayGroup.prompts.map((promptItem, idx) => {
+              const currentText =
+                (specialtyResponses[essayGroup.specialty] &&
+                  specialtyResponses[essayGroup.specialty][promptItem.id]) ||
+                '';
+              const isOverLimit = currentText.length > promptItem.maxChars;
+
+              return (
+                <div
+                  key={promptItem.id}
+                  className="space-y-2.5 bg-slate-50/70 p-4 rounded-xl border border-slate-200"
+                >
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <span className="text-[10px] font-bold text-amber-700 uppercase tracking-wider block">
+                        Question {idx + 1} of {essayGroup.prompts.length} &bull; {essayGroup.specialty}
+                      </span>
+                      <h4 className="text-xs font-bold text-slate-900 leading-snug mt-0.5">
+                        {promptItem.prompt}
+                      </h4>
+                    </div>
+                    <span
+                      className={`text-xs font-mono font-bold px-2 py-0.5 rounded shrink-0 ${
+                        isOverLimit
+                          ? 'bg-red-100 text-red-800'
+                          : 'bg-slate-200 text-slate-700'
+                      }`}
+                    >
+                      {currentText.length} / {promptItem.maxChars} characters
+                    </span>
+                  </div>
+
+                  <textarea
+                    rows={4}
+                    value={currentText}
+                    onChange={(e) =>
+                      handleSpecialtyEssayChange(promptItem.id, e.target.value, promptItem.maxChars)
+                    }
+                    className={`w-full p-3 rounded-lg border text-xs font-mono leading-relaxed focus:outline-none focus:ring-2 ${
+                      isOverLimit
+                        ? 'border-red-400 bg-red-50 focus:ring-red-400'
+                        : 'border-slate-300 bg-white focus:ring-amber-500'
+                    }`}
+                    placeholder={
+                      promptItem.placeholder ||
+                      `Type your response here (${promptItem.maxChars}-character limit)...`
+                    }
+                  />
+
+                  {isOverLimit ? (
+                    <p className="text-[11px] text-red-600 font-medium flex items-center gap-1">
+                      <AlertTriangle className="w-3.5 h-3.5" />
+                      Exceeds official ERAS limit by {currentText.length - promptItem.maxChars} characters.
+                    </p>
+                  ) : (
+                    <div className="flex items-center justify-between text-[11px] text-slate-500">
+                      <span>Responses will only be sent to {essayGroup.specialty} programs.</span>
+                      <span className="text-emerald-700 font-medium">
+                        {currentText.length > 0 ? '✓ Auto-saved' : 'Editable until certified'}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Validation Gate Modal */}
       {showValidationModal && (

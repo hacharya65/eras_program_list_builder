@@ -14,6 +14,9 @@ import {
   X,
   PlusCircle,
   Filter,
+  History,
+  Eye,
+  BookOpen,
 } from 'lucide-react';
 import {
   DocumentAnnotation,
@@ -31,10 +34,14 @@ import {
   saveStoredAnnotations,
   loadStoredThreads,
   saveStoredThreads,
+  loadHistoricalDraftAnnotations,
+  HistoricalDraftAnnotationLog,
 } from '../../domain/annotation-models';
 
 interface AnnotatedDocumentViewerProps {
   documentId: string;
+  documentVersionId?: string;
+  versionNumber?: number;
   documentTitle: string;
   documentSubtitle?: string;
   text: string;
@@ -47,6 +54,8 @@ interface AnnotatedDocumentViewerProps {
 
 export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = ({
   documentId,
+  documentVersionId,
+  versionNumber,
   documentTitle,
   documentSubtitle,
   text,
@@ -56,8 +65,16 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
   onTextUpdate,
   readOnly = false,
 }) => {
+  // Derive effective version ID (e.g. 'v1', 'v2') and base document ID
+  const effectiveVersionId =
+    documentVersionId ||
+    (versionNumber ? `v${versionNumber}` : (documentId.match(/v\d+/)?.[0] || 'v1'));
+  const effectiveBaseDocId = documentId.replace(/-?v\d+$/, '') || 'personal_statement';
+
   const [annotations, setAnnotations] = useState<DocumentAnnotation[]>([]);
   const [threads, setThreads] = useState<CommentThread[]>([]);
+  const [historicalLogs, setHistoricalLogs] = useState<HistoricalDraftAnnotationLog[]>([]);
+  const [showHistoricalLog, setShowHistoricalLog] = useState(false);
   const [selectedThreadId, setSelectedThreadId] = useState<string | null>(null);
   const [filterMode, setFilterMode] = useState<'all' | 'open' | 'resolved'>('open');
   const [replyTexts, setReplyTexts] = useState<Record<string, string>>({});
@@ -84,23 +101,45 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
   const docContainerRef = useRef<HTMLDivElement>(null);
   const commentCardsRef = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // Load from local storage
+  // Strictly isolate annotations to this version ID and load historical draft log if version > 1
   useEffect(() => {
-    const loadedAnn = loadStoredAnnotations(documentId);
-    const loadedThr = loadStoredThreads(documentId);
-    setAnnotations(loadedAnn);
-    setThreads(loadedThr);
-  }, [documentId]);
+    const loadedAnn = loadStoredAnnotations(effectiveBaseDocId, effectiveVersionId);
+    const loadedThr = loadStoredThreads(effectiveBaseDocId, effectiveVersionId);
 
-  // Save to local storage on change
+    // Auto-purge orphaned standalone highlight annotations (from legacy highlight tool)
+    const validThreadAnnIds = new Set(loadedThr.map((t) => t.annotationId).filter(Boolean));
+    const cleanedAnn = loadedAnn.filter((a) => {
+      if (a.type === 'highlight' && !validThreadAnnIds.has(a.id)) {
+        return false;
+      }
+      return true;
+    });
+
+    if (cleanedAnn.length !== loadedAnn.length) {
+      saveStoredAnnotations(effectiveBaseDocId, cleanedAnn, effectiveVersionId);
+    }
+
+    setAnnotations(cleanedAnn);
+    setThreads(loadedThr);
+
+    const vNum = versionNumber || (parseInt(effectiveVersionId.replace('v', ''), 10) || 1);
+    if (vNum > 1) {
+      const history = loadHistoricalDraftAnnotations(effectiveBaseDocId, vNum);
+      setHistoricalLogs(history);
+    } else {
+      setHistoricalLogs([]);
+    }
+  }, [effectiveBaseDocId, effectiveVersionId, versionNumber]);
+
+  // Save to local storage on change with strict version scoping
   const updateAnnotationsState = (newAnn: DocumentAnnotation[]) => {
     setAnnotations(newAnn);
-    saveStoredAnnotations(documentId, newAnn);
+    saveStoredAnnotations(effectiveBaseDocId, newAnn, effectiveVersionId);
   };
 
   const updateThreadsState = (newThr: CommentThread[]) => {
     setThreads(newThr);
-    saveStoredThreads(documentId, newThr);
+    saveStoredThreads(effectiveBaseDocId, newThr, effectiveVersionId);
   };
 
   // Selection detection for Advisor
@@ -135,30 +174,11 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
     });
   };
 
-  // Add Annotation Action
-  const handleAddHighlight = (color: AnnotationColor) => {
-    if (!selectionRange) return;
-    const newAnn = createAnnotation({
-      documentId,
-      authorId: currentUserId,
-      authorName: currentUserName,
-      authorRole: userRole,
-      startOffset: selectionRange.start,
-      endOffset: selectionRange.end,
-      anchorText: selectionRange.text,
-      type: 'highlight',
-      color,
-    });
-
-    updateAnnotationsState([...annotations, newAnn]);
-    setSelectionRange(null);
-    window.getSelection()?.removeAllRanges();
-  };
-
   const handleAddStrikethrough = () => {
     if (!selectionRange) return;
     const newAnn = createAnnotation({
-      documentId,
+      documentId: effectiveBaseDocId,
+      documentVersionId: effectiveVersionId,
       authorId: currentUserId,
       authorName: currentUserName,
       authorRole: userRole,
@@ -169,7 +189,8 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
     });
 
     const newThread = createCommentThread({
-      documentId,
+      documentId: effectiveBaseDocId,
+      documentVersionId: effectiveVersionId,
       authorId: currentUserId,
       authorName: currentUserName,
       authorRole: userRole,
@@ -206,7 +227,8 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
 
     if (newCommentModal.type === 'replacement') {
       const newAnn = createAnnotation({
-        documentId,
+        documentId: effectiveBaseDocId,
+        documentVersionId: effectiveVersionId,
         authorId: currentUserId,
         authorName: currentUserName,
         authorRole: userRole,
@@ -221,7 +243,8 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
       updateAnnotationsState([...annotations, newAnn]);
     } else {
       const newAnn = createAnnotation({
-        documentId,
+        documentId: effectiveBaseDocId,
+        documentVersionId: effectiveVersionId,
         authorId: currentUserId,
         authorName: currentUserName,
         authorRole: userRole,
@@ -229,14 +252,15 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
         endOffset: newCommentModal.end,
         anchorText: newCommentModal.anchorText,
         type: 'highlight',
-        color: 'yellow',
+        color: 'blue',
       });
       linkedAnnId = newAnn.id;
       updateAnnotationsState([...annotations, newAnn]);
     }
 
     const newThread = createCommentThread({
-      documentId,
+      documentId: effectiveBaseDocId,
+      documentVersionId: effectiveVersionId,
       authorId: currentUserId,
       authorName: currentUserName,
       authorRole: userRole,
@@ -326,6 +350,9 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
         behavior: 'smooth',
         block: 'center',
       });
+    } else if (userRole === 'advisor') {
+      // If clicking an orphaned markup with no thread, delete it immediately
+      handleDeleteAnnotation(ann.id);
     }
   };
 
@@ -335,7 +362,16 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
     return true;
   });
 
-  const textSpans = segmentDocumentText(text, annotations, threads);
+  // Exclude orphaned highlight markups that have no thread
+  const validThreadAnnIds = new Set(threads.map((t) => t.annotationId).filter(Boolean));
+  const displayAnnotations = annotations.filter((a) => {
+    if (a.type === 'highlight' && !validThreadAnnIds.has(a.id)) {
+      return false;
+    }
+    return true;
+  });
+
+  const textSpans = segmentDocumentText(text, displayAnnotations, threads);
 
   return (
     <div className="space-y-4">
@@ -400,9 +436,23 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
             <div className="mb-4 p-2.5 bg-purple-50 rounded-lg border border-purple-200 text-xs text-purple-900 flex items-center justify-between">
               <span className="flex items-center gap-1.5">
                 <Highlighter className="w-4 h-4 text-purple-600" />
-                Select any text with cursor to highlight, suggest deletions, or anchor margin comments.
+                Select any text with cursor to apply strikethrough or anchor margin comments.
               </span>
-              <span className="text-[10px] text-purple-700 font-semibold uppercase">Live Active</span>
+              <div className="flex items-center gap-2">
+                {annotations.length > 0 && (
+                  <button
+                    onClick={() => {
+                      updateAnnotationsState([]);
+                      updateThreadsState([]);
+                    }}
+                    className="px-2 py-0.5 text-[11px] font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 border border-rose-200 rounded transition-colors"
+                    title="Clear all annotations on this document"
+                  >
+                    Clear Markups ({annotations.length})
+                  </button>
+                )}
+                <span className="text-[10px] text-purple-700 font-semibold uppercase">Live Active</span>
+              </div>
             </div>
           )}
 
@@ -425,23 +475,12 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
               } else if (ann.type === 'replacement') {
                 styleClasses += 'bg-emerald-100 border-b-2 border-emerald-500 text-emerald-900 ';
               } else {
-                switch (ann.color) {
-                  case 'green':
-                    styleClasses += 'bg-emerald-100 border-b-2 border-emerald-400 text-emerald-950 ';
-                    break;
-                  case 'blue':
-                    styleClasses += 'bg-sky-100 border-b-2 border-sky-400 text-sky-950 ';
-                    break;
-                  case 'purple':
-                    styleClasses += 'bg-purple-100 border-b-2 border-purple-400 text-purple-950 ';
-                    break;
-                  default:
-                    styleClasses += 'bg-amber-100 border-b-2 border-amber-400 text-amber-950 ';
-                }
+                // Comment anchor: clean sky accent with subtle underline, no yellow marker styling
+                styleClasses += 'bg-sky-50 border-b-2 border-sky-400 text-slate-900 hover:bg-sky-100 ';
               }
 
               if (isSelected) {
-                styleClasses += 'bg-amber-200/90 font-medium ';
+                styleClasses += 'bg-sky-100 ring-2 ring-sky-300 font-medium ';
               }
 
               return (
@@ -472,37 +511,16 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
               }}
             >
               <button
-                onClick={() => handleAddHighlight('yellow')}
-                className="p-1.5 hover:bg-slate-800 rounded text-amber-300 hover:text-amber-200 transition-colors"
-                title="Highlight Yellow"
-              >
-                <div className="w-3.5 h-3.5 rounded bg-amber-400" />
-              </button>
-              <button
-                onClick={() => handleAddHighlight('green')}
-                className="p-1.5 hover:bg-slate-800 rounded text-emerald-300 hover:text-emerald-200 transition-colors"
-                title="Highlight Green"
-              >
-                <div className="w-3.5 h-3.5 rounded bg-emerald-400" />
-              </button>
-              <button
                 onClick={handleAddStrikethrough}
-                className="p-1.5 hover:bg-slate-800 rounded text-red-300 hover:text-red-200 transition-colors flex items-center gap-1 text-xs font-bold"
+                className="p-1.5 px-2 hover:bg-slate-800 rounded text-red-300 hover:text-red-200 transition-colors flex items-center gap-1 text-xs font-bold"
                 title="Suggest Deletion (Strikethrough)"
               >
-                <span className="line-through">Strike</span>
-              </button>
-              <button
-                onClick={() => handleOpenCommentModal('replacement')}
-                className="p-1.5 hover:bg-slate-800 rounded text-sky-300 hover:text-sky-200 transition-colors flex items-center gap-1 text-xs font-bold"
-                title="Suggest Replacement"
-              >
-                Suggest
+                <span className="line-through">Strikethrough</span>
               </button>
               <div className="w-px h-4 bg-slate-700 mx-0.5" />
               <button
                 onClick={() => handleOpenCommentModal('comment')}
-                className="p-1.5 hover:bg-slate-800 rounded text-white hover:text-sky-300 transition-colors flex items-center gap-1 text-xs font-semibold"
+                className="p-1.5 px-2 hover:bg-slate-800 rounded text-white hover:text-sky-300 transition-colors flex items-center gap-1 text-xs font-semibold"
                 title="Add Comment Thread"
               >
                 <MessageSquare className="w-3.5 h-3.5" />
@@ -517,19 +535,69 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
           <div className="flex items-center justify-between">
             <h3 className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
               <MessageSquare className="w-4 h-4 text-sky-600" />
-              Margin Annotations ({filteredThreads.length})
+              Active Annotations ({filteredThreads.length})
             </h3>
-            {userRole === 'advisor' && (
-              <span className="text-[11px] text-slate-500">Live advisor sync</span>
-            )}
+            <span className="text-[11px] font-semibold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+              Draft {effectiveVersionId.toUpperCase()}
+            </span>
           </div>
+
+          {/* Historical Previous Drafts Read-Only Log (Ticket Candidate 10) */}
+          {historicalLogs.length > 0 && (
+            <div className="bg-slate-50 border border-slate-200 rounded-xl p-3.5 text-xs space-y-2.5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-1.5 font-bold text-slate-800">
+                  <History className="w-4 h-4 text-indigo-600" />
+                  <span>Previous Draft History ({historicalLogs.reduce((acc, h) => acc + h.threads.length, 0)} archived)</span>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowHistoricalLog(!showHistoricalLog)}
+                  className="text-[11px] font-bold text-sky-700 hover:text-sky-800 hover:underline cursor-pointer"
+                >
+                  {showHistoricalLog ? 'Hide History Log' : 'View Read-Only Log'}
+                </button>
+              </div>
+
+              {showHistoricalLog && (
+                <div className="space-y-3 pt-2 border-t border-slate-200 max-h-80 overflow-y-auto pr-1">
+                  {historicalLogs.map((log) => (
+                    <div key={log.versionId} className="space-y-2">
+                      <div className="flex items-center justify-between bg-slate-200/80 px-2 py-1 rounded text-[10px] font-bold text-slate-700">
+                        <span>DRAFT V{log.versionNumber} MARKS</span>
+                        <span className="text-slate-500 font-normal italic">Archived • Read Only</span>
+                      </div>
+
+                      {log.threads.map((t) => (
+                        <div
+                          key={t.id}
+                          className="p-2.5 bg-white rounded-lg border border-slate-200 text-xs space-y-1 shadow-2xs"
+                        >
+                          <div className="border-l-2 border-slate-400 pl-2 text-[11px] italic text-slate-600">
+                            &quot;{t.anchorText}&quot;
+                          </div>
+                          <div className="text-slate-800 font-medium">
+                            {t.comments[0]?.content}
+                          </div>
+                          <div className="text-[10px] text-slate-400 flex items-center justify-between pt-0.5">
+                            <span>{t.comments[0]?.authorName}</span>
+                            <span className="font-semibold text-slate-500 capitalize">{t.status}</span>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
 
           {filteredThreads.length === 0 ? (
             <div className="bg-slate-50 border border-dashed border-slate-200 rounded-xl p-8 text-center">
               <MessageSquare className="w-8 h-8 text-slate-300 mx-auto mb-2" />
               <p className="text-xs text-slate-500 font-medium">
                 {filterMode === 'open'
-                  ? 'No open comments. Highlight text to start a thread.'
+                  ? 'No open comments. Select text with cursor to apply strikethrough or add comments.'
                   : 'No comments found for this filter.'}
               </p>
             </div>

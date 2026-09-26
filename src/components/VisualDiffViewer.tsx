@@ -71,7 +71,7 @@ export function VisualDiffViewer({
           <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100">
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
               <GitCompare className="w-4 h-4 text-sky-600" />
-              <span>{newVersionTitle} (Visual Diff)</span>
+              <span>{newVersionTitle}</span>
             </div>
             <span className="text-[10px] uppercase font-bold text-sky-600 tracking-wider">
               Current Submission

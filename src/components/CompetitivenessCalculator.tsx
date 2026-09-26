@@ -10,6 +10,7 @@ import {
   CompetitivenessAssessment,
 } from '@/domain/competitiveness-engine';
 import {
+  CANONICAL_SPECIALTIES,
   getStoredApplicantStep2Ck,
   setStoredApplicantStep2Ck,
   APPLICANT_PROFILE_STORAGE_KEY,
@@ -41,6 +42,13 @@ export function CompetitivenessCalculator({
   onBack,
 }: CompetitivenessCalculatorProps) {
   const [specialty, setSpecialty] = useState(initialSpecialty);
+
+  // Sync state whenever initialSpecialty updates from parent
+  React.useEffect(() => {
+    if (initialSpecialty) {
+      setSpecialty(initialSpecialty);
+    }
+  }, [initialSpecialty]);
 
   // Student metrics state
   const [step2Ck, setStep2CkState] = useState<number>(() => getStoredApplicantStep2Ck());
@@ -107,11 +115,11 @@ export function CompetitivenessCalculator({
         <div className="flex items-center gap-3">
           <label className="text-xs font-medium text-slate-600">Target Specialty:</label>
           <select
-            value={benchmark?.specialty || specialty}
+            value={specialty}
             onChange={(e) => setSpecialty(e.target.value)}
             className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
           >
-            {allSpecialties.map((spec) => (
+            {CANONICAL_SPECIALTIES.map((spec) => (
               <option key={spec} value={spec}>
                 {spec}
               </option>

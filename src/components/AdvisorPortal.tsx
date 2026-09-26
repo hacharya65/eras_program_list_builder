@@ -25,6 +25,7 @@ interface AdvisorPortalProps {
   onOpenReview?: (reviewId: string) => void;
   onSubmitFeedback?: (reviewId: string, evaluation: RubricEvaluation) => void;
   getSnapshotContent?: (snapshotId: string) => any;
+  getPreviousSnapshot?: (snapshotId: string) => any;
   onViewingEntry?: (reviewId: string, entryIndex: number) => void;
 }
 
@@ -33,6 +34,7 @@ export function AdvisorPortal({
   onOpenReview,
   onSubmitFeedback,
   getSnapshotContent,
+  getPreviousSnapshot,
   onViewingEntry,
 }: AdvisorPortalProps) {
   const { advisor, advisees, pendingReviews } = context;
@@ -43,6 +45,7 @@ export function AdvisorPortal({
 
   const selectedReview = pendingReviews.find((r) => r.id === selectedReviewId);
   const snapshot = selectedReview ? getSnapshotContent?.(selectedReview.snapshotId) : null;
+  const previousSnapshot = snapshot && snapshot.versionNumber >= 2 ? getPreviousSnapshot?.(snapshot.id) : null;
 
   // Filter faculty submission list so only the latest submitted version is displayed per student document, preventing draft clutter
   const latestPendingReviews = React.useMemo(() => {
@@ -281,15 +284,17 @@ export function AdvisorPortal({
             }`}
           >
             <FileCheck className="w-3.5 h-3.5" />
-            Clinical Rubric &amp; Visual Diff
+            Rubric and Change Log
           </button>
         </div>
 
         {psReviewTab === 'live_annotations' ? (
           <AnnotatedDocumentViewer
-            documentId={`ps-v${snapshot.versionNumber}`}
+            documentId="personal_statement"
+            documentVersionId={`v${snapshot.versionNumber}`}
+            versionNumber={snapshot.versionNumber}
             documentTitle={`${selectedReview.studentName}'s Personal Statement (v${snapshot.versionNumber})`}
-            documentSubtitle="Faculty Collaborative Review Mode — Select text with cursor to highlight, suggest deletions, or anchor margin comments."
+            documentSubtitle="Faculty Collaborative Review Mode — Select text with cursor to apply strikethrough or anchor margin comments."
             text={snapshot.content}
             userRole="advisor"
             currentUserId={advisor.id}
@@ -297,17 +302,19 @@ export function AdvisorPortal({
           />
         ) : (
           <div className="space-y-6">
-            {/* Visual Diff & Snapshot View */}
-            <VisualDiffViewer
-              previousVersionTitle="Baseline Template / v0"
-              previousContent="Standing in the clinic, I observed the team treat patients..."
-              newVersionTitle={`v${snapshot.versionNumber} Submitted Draft`}
-              newContent={snapshot.content}
-              changelogNote={snapshot.changelogNote || 'Initial submission for faculty review.'}
-              studentName={selectedReview.studentName}
-            />
+            {/* Version comparison / Visual Diff engages strictly starting from V2 onwards */}
+            {snapshot.versionNumber >= 2 && (
+              <VisualDiffViewer
+                previousVersionTitle={`v${previousSnapshot ? previousSnapshot.versionNumber : snapshot.versionNumber - 1} Submitted Draft`}
+                previousContent={previousSnapshot ? previousSnapshot.content : ''}
+                newVersionTitle={`v${snapshot.versionNumber} Submitted Draft`}
+                newContent={snapshot.content}
+                changelogNote={snapshot.changelogNote || `Revisions submitted for v${snapshot.versionNumber}.`}
+                studentName={selectedReview.studentName}
+              />
+            )}
 
-            {/* 4-Pillar Clinical Evaluation Form */}
+            {/* Standardized Rubric Evaluation Form */}
             <ClinicalRubricForm
               studentName={selectedReview.studentName}
               versionNumber={snapshot.versionNumber}

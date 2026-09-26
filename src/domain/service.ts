@@ -4,10 +4,12 @@ import {
   AdvisorDashboardContext,
   AdminCohortContext,
   RubricEvaluation,
-  ReviewFeedback
+  ReviewFeedback,
+  DocumentSnapshot
 } from './types';
 import { InMemoryStorageAdapter } from './storage/in-memory-adapter';
 import { validateExperiencesSubmission } from './experience-validation';
+import { saveStoredAnnotations, saveStoredThreads } from './annotation-models';
 
 export class AdvisingPlatformService {
   constructor(private storage: InMemoryStorageAdapter) {}
@@ -61,6 +63,11 @@ export class AdvisingPlatformService {
     }
 
     const snapshot = this.storage.createPersonalStatementSnapshot(params.changelogNote);
+
+    // Ensure newly submitted draft version starts completely clean with cleared markups
+    saveStoredAnnotations('personal_statement', [], `v${snapshot.versionNumber}`);
+    saveStoredThreads('personal_statement', [], `v${snapshot.versionNumber}`);
+
     const student = this.storage.personas.student;
     const request = this.storage.createReviewRequest({
       snapshotId: snapshot.id,
@@ -108,6 +115,19 @@ export class AdvisingPlatformService {
 
   getSnapshot(snapshotId: string) {
     return this.storage.snapshots.find(s => s.id === snapshotId);
+  }
+
+  getPreviousSnapshot(snapshotId: string): DocumentSnapshot | undefined {
+    const current = this.storage.snapshots.find(s => s.id === snapshotId);
+    if (!current || current.versionNumber <= 1) return undefined;
+    return this.storage.snapshots
+      .filter(
+        s =>
+          s.documentType === current.documentType &&
+          s.documentId === current.documentId &&
+          s.versionNumber < current.versionNumber
+      )
+      .sort((a, b) => b.versionNumber - a.versionNumber)[0];
   }
 
   submitAdvisorFeedback(params: {

@@ -281,7 +281,9 @@ export function PersonalStatementEditor({
 
       {viewMode === 'annotations' ? (
         <AnnotatedDocumentViewer
-          documentId={`ps-v${selectedVersionNum}`}
+          documentId="personal_statement"
+          documentVersionId={`v${selectedVersionNum}`}
+          versionNumber={selectedVersionNum}
           documentTitle={`Personal Statement v${selectedVersionNum}`}
           documentSubtitle={
             isViewingSnapshot
@@ -404,7 +406,7 @@ export function PersonalStatementEditor({
                   <GitCompare className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-slate-900">Visual Diff &amp; Version Comparison</h3>
+                  <h3 className="text-base font-bold text-slate-900">Version Comparison &amp; Changes</h3>
                   <p className="text-xs text-slate-500">Track textual evolution and word additions/deletions</p>
                 </div>
               </div>

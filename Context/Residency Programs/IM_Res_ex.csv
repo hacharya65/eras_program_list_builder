@@ -1,0 +1,703 @@
+Program,City,State,Location,Step 2 CK All Invited Middle 80 LOW,Step 2 CK All Invited Middle 80 HIGH,Step 2 CK All Invited,Level 2 CE DOs Invited,Silver Signal,Gold Signal,No Signal,MD
+Kaiser Permanente Southern California (Los Angeles) Program,Los Angeles,CA,"Los Angeles, CA",240,268,240-268,497-736,0.17,0.24,0.02,0.13
+Olive View/UCLA Medical Center Program,Sylmar,CA,"Sylmar, CA",234,266,234-266,437-712,0.39,0.42,0.05,0.30
+Cooper Medical School of Rowan University/Cooper University Hospital Program,Camden,NJ,"Camden, NJ",238,269,238-269,483-700,0.26,0.25,0.05,0.27
+Centro Medico Menonita Cayey Program,Cayey,PR,"Cayey, PR",220,247,220-247,--,0.21,0.40,0.08,0.31
+Legacy Health/Salmon Creek Medical Center Program,Vancouver,WA,"Vancouver, WA",226,261,226-261,435-647,0.52,0.50,0.13,0.61
+Washington State University College of Medicine Program,Everett,WA,"Everett, WA",227,264,227-264,437-657,0.35,0.63,0.02,0.34
+Virginia Commonwealth University Health System Program,Richmond,VA,"Richmond, VA",237,268,237-268,526-678,0.36,0.28,0.03,0.28
+Virginia Mason Franciscan Health/St Joseph's Hospital Program,Tacoma,WA,"Tacoma, WA",230,263,230-263,429-649,0.61,0.73,0.32,0.53
+University of Vermont Medical Center Program,Burlington,VT,"Burlington, VT",233,268,233-268,470-667,0.50,0.42,0.14,0.31
+University of Texas at Austin Dell Medical School Program,Austin,TX,"Austin, TX",242,267,242-267,523-729,0.38,0.49,0.02,0.29
+University of Washington Program,Seattle,WA,"Seattle, WA",241,275,241-275,!,0.29,0.47,0.00,0.29
+Spokane Teaching Health Center Program,Spokane,WA,"Spokane, WA",226,264,226-264,437-657,0.65,0.72,0.09,0.35
+West Virginia University Program,Morgantown,WV,"Morgantown, WV",230,265,230-265,496-712,0.42,0.53,0.03,0.47
+Kent Hospital/Brown University Program,Warwick,RI,"Warwick, RI",231,263,231-263,463-658,0.46,0.67,0.11,0.34
+Roger Williams Medical Center Program,Providence,RI,"Providence, RI",224,263,224-263,427-666,0.20,0.23,0.01,0.09
+Medical University of South Carolina Regional Network (Florence) Program,Florence,SC,"Florence, SC",238,270,238-270,464-657,0.21,0.38,0.11,0.33
+HCA Houston Healthcare/University of Houston (Kingwood) Program,Kingwood,TX,"Kingwood, TX",222,254,222-254,454-615,0.50,0.57,0.03,0.32
+New York-Presbyterian/Queens Program,Flushing,NY,"Flushing, NY",235,264,235-264,467-661,0.08,0.40,0.00,0.06
+Zucker School of Medicine at Hofstra/Northwell at Staten Island University Hospital Program,Staten Island,NY,"Staten Island, NY",230,267,230-267,449-653,0.31,0.46,0.06,0.55
+University of Rochester Medical Center Program,Rochester,NY,"Rochester, NY",238,268,238-268,489-698,0.53,0.58,0.04,0.32
+Zucker School of Medicine at Hofstra/Northwell Program,New Hyde Park,NY,"New Hyde Park, NY",236,268,236-268,458-835,0.68,0.70,0.14,0.60
+New York Presbyterian Hospital (Columbia Campus) Program,New York,NY,"New York, NY",251,275,251-275,--,0.27,0.42,0.03,0.26
+Duke University Hospital Program,Durham,NC,"Durham, NC",247,274,247-274,--,0.26,0.44,0.00,0.27
+Cleveland Clinic Foundation/Akron General Program,Akron,OH,"Akron, OH",232,266,232-266,469-644,0.09,0.38,0.00,0.10
+Ohio State University Hospital Program,Columbus,OH,"Columbus, OH",233,270,233-270,407-717,0.35,0.64,0.01,0.27
+University of Cincinnati Medical Center/College of Medicine Program,Cincinnati,OH,"Cincinnati, OH",243,268,243-268,560-735,0.28,0.57,0.01,0.24
+Legacy Health/Emanuel Medical Center Program,Portland,OR,"Portland, OR",230,261,230-261,428-632,0.61,0.79,0.22,0.40
+Providence Health & Services - Oregon/Providence Medical Center Program,Portland,OR,"Portland, OR",237,268,237-268,478-668,0.47,0.56,0.02,0.28
+Providence Health & Services - Oregon/St Vincent Hospital and Medical Center Program,Portland,OR,"Portland, OR",231,266,231-266,466-668,0.57,0.79,0.11,0.42
+Temple University Hospital Program,Philadelphia,PA,"Philadelphia, PA",238,270,238-270,535-720,0.33,0.43,0.01,0.25
+Medical College of Georgia/Candler Hospital Program,Savannah,GA,"Savannah, GA",,,--,--,--,--,--,--
+Hackensack Meridian Health/Hackensack University Medical Center Program,Hackensack,NJ,"Hackensack, NJ",229,264,229-264,527-759,0.13,0.17,0.01,0.14
+SSM Health/Saint Louis University School of Medicine Program,St Louis,MO,"St Louis, MO",235,267,235-267,451-686,0.35,0.44,0.07,0.33
+OPTI West/Valley Hospital Medical Center Program,Las Vegas,NV,"Las Vegas, NV",,,--,--,--,--,--,--
+Baton Rouge General Program,Baton Rouge,LA,"Baton Rouge, LA",236,264,236-264,492-636,0.20,0.41,0.04,0.28
+UMass Chan - Baystate Program,Springfield,MA,"Springfield, MA",225,262,225-262,437-662,0.28,0.41,0.00,0.28
+University of Michigan Health - Sparrow/Michigan State University Program,Lansing,MI,"Lansing, MI",232,266,232-266,476-731,0.16,0.41,0.01,0.12
+Greenwich Hospital/Yale University Program,Greenwich,CT,"Greenwich, CT",237,269,237-269,505-675,0.20,0.41,0.02,0.24
+Zucker School of Medicine at Hofstra/Northwell at Norwalk Hospital Program,Norwalk,CT,"Norwalk, CT",238,268,238-268,491-674,0.18,0.32,0.03,0.17
+Florida State University College of Medicine/Cape Coral Hospital Program,Cape Coral,FL,"Cape Coral, FL",232,262,232-262,468-642,0.36,0.43,0.06,0.20
+HCA Florida Orange Park Hospital Program,Orange Park,FL,"Orange Park, FL",228,258,228-258,446-634,0.24,0.49,0.05,0.36
+Florida State University College of Medicine/Sarasota Memorial Hospital Program,Sarasota,FL,"Sarasota, FL",228,262,228-262,466-675,0.31,0.43,0.03,0.35
+Manatee Memorial Hospital Program,Bradenton,FL,"Bradenton, FL",234,263,234-263,497-660,0.26,0.71,0.17,0.17
+HCA Florida JFK Hospital/University of Miami Miller School of Medicine GME Consortium Program,Atlantis,FL,"Atlantis, FL",228,261,228-261,471-643,0.35,0.36,0.08,0.52
+Atrium Health Navicent The Medical Center/Mercer University School of Medicine Program,Macon,GA,"Macon, GA",221,261,221-261,438-635,0.23,0.50,0.02,0.25
+University of Washington [Boise] Program,Boise,ID,"Boise, ID",229,267,229-267,443-661,0.52,0.84,0.04,0.37
+Rush University Medical Center Program,Chicago,IL,"Chicago, IL",244,269,244-269,!,0.31,0.50,0.00,0.30
+University of Illinois College of Medicine at Peoria Program,Peoria,IL,"Peoria, IL",232,268,232-268,464-756,0.14,0.31,0.01,0.14
+Ascension St. Vincent Hospital (Evansville) Program,Evansville,IN,"Evansville, IN",221,254,221-254,414-641,0.12,0.23,0.09,0.73
+Ascension St. Vincent Hospital (Indianapolis) Program,Indianapolis,IN,"Indianapolis, IN",225,260,225-260,432-678,0.31,0.51,0.00,0.18
+Sutter Health/Sutter Roseville Medical Center Program,Roseville,CA,"Roseville, CA",229,259,229-259,428-637,0.61,0.66,0.05,0.34
+Sutter Health/Alta Bates Summit Medical Center Program,Oakland,CA,"Oakland, CA",225,261,225-261,442-648,0.30,0.38,0.14,0.58
+Keck School of Medicine of USC Program,Los Angeles,CA,"Los Angeles, CA",237,264,237-264,442-658,0.52,0.48,0.02,0.28
+HCA Healthcare Riverside Program,Riverside,CA,"Riverside, CA",227,252,227-252,455-612,0.46,0.41,0.25,0.54
+Eisenhower Medical Center Program,Rancho Mirage,CA,"Rancho Mirage, CA",230,260,230-260,491-670,0.33,0.47,0.10,0.34
+St Joseph's Medical Center Program,Stockton,CA,"Stockton, CA",223,255,223-255,422-607,0.30,0.46,0.11,0.32
+San Ysidro Health Program,San Diego,CA,"San Diego, CA",234,264,234-264,509-671,0.20,0.19,0.14,0.40
+"Charles R Drew University of Medicine and Science, College of Medicine Program",Los Angeles,CA,"Los Angeles, CA",230,258,230-258,451-638,0.37,0.40,0.15,0.33
+Adventist Health White Memorial Program,Los Angeles,CA,"Los Angeles, CA",232,266,232-266,425-640,0.21,0.40,0.00,0.13
+Huntington Memorial Hospital Program,Pasadena,CA,"Pasadena, CA",,,--,--,--,--,--,--
+Scripps Mercy Hospital Program,San Diego,CA,"San Diego, CA",235,264,235-264,497-704,0.34,0.38,0.01,0.25
+Los Angeles County-Harbor-UCLA Medical Center Program,Torrance,CA,"Torrance, CA",235,268,235-268,463-703,0.36,0.33,0.05,0.28
+Florida State University College of Medicine/Sarasota Memorial Hospital Program,Sarasota,FL,"Sarasota, FL",228,262,228-262,466-675,0.31,0.43,0.03,0.35
+Manatee Memorial Hospital Program,Bradenton,FL,"Bradenton, FL",234,263,234-263,497-660,0.26,0.71,0.17,0.17
+HCA Florida JFK Hospital/University of Miami Miller School of Medicine GME Consortium Program,Atlantis,FL,"Atlantis, FL",228,261,228-261,471-643,0.35,0.36,0.08,0.52
+Atrium Health Navicent The Medical Center/Mercer University School of Medicine Program,Macon,GA,"Macon, GA",221,261,221-261,438-635,0.23,0.50,0.02,0.25
+University of Washington [Boise] Program,Boise,ID,"Boise, ID",229,267,229-267,443-661,0.52,0.84,0.04,0.37
+Rush University Medical Center Program,Chicago,IL,"Chicago, IL",244,269,244-269,!,0.31,0.50,0.00,0.30
+University of Illinois College of Medicine at Peoria Program,Peoria,IL,"Peoria, IL",232,268,232-268,464-756,0.14,0.31,0.01,0.14
+Ascension St. Vincent Hospital (Evansville) Program,Evansville,IN,"Evansville, IN",221,254,221-254,414-641,0.12,0.23,0.09,0.73
+Ascension St. Vincent Hospital (Indianapolis) Program,Indianapolis,IN,"Indianapolis, IN",225,260,225-260,432-678,0.31,0.51,0.00,0.18
+University of Kansas School of Medicine Program,Kansas City,KS,"Kansas City, KS",239,268,239-268,521-742,0.30,0.28,0.01,0.26
+University of Kentucky College of Medicine Program,Lexington,KY,"Lexington, KY",240,267,240-267,549-749,0.35,0.40,0.02,0.27
+Baton Rouge General Program,Baton Rouge,LA,"Baton Rouge, LA",236,264,236-264,492-636,0.20,0.41,0.04,0.28
+UMass Chan - Baystate Program,Springfield,MA,"Springfield, MA",225,262,225-262,437-662,0.28,0.41,0.00,0.28
+McLaren Health Care Corporation (Port Huron) Program,Port Huron,MI,"Port Huron, MI",231,259,231-259,451-713,0.08,0.29,0.13,0.34
+Detroit Medical Center (Huron Valley-Sinai) Program,Commerce Township,MI,"Commerce Township, MI",229,260,229-260,446-667,0.12,0.13,0.06,0.35
+Trinity Health Muskegon Program,Muskegon,MI,"Muskegon, MI",224,258,224-258,447-675,0.17,0.36,0.04,0.26
+Henry Ford Warren Hospital Program,Warren,MI,"Warren, MI",244,269,244-269,464-716,0.26,0.28,0.16,0.29
+Henry Ford Health/Henry Ford Macomb Hospital Program,Clinton Township,MI,"Clinton Township, MI",229,260,229-260,450-599,0.32,0.60,0.02,0.15
+Detroit Wayne County Health Authority (Authority Health) GME Consortium Program,Detroit,MI,"Detroit, MI",218,250,218-250,404-678,0.08,0.09,0.06,0.40
+McLaren Health Care/Macomb/MSU Program,Mount Clemens,MI,"Mount Clemens, MI",229,261,229-261,448-678,0.32,0.41,0.14,0.51
+"Appalachian Regional Healthcare, Inc. Program",Whitesburg,KY,"Whitesburg, KY",,,--,--,--,--,--,--
+Johns Hopkins University Program,Baltimore,MD,"Baltimore, MD",246,273,246-273,--,0.44,0.50,0.01,0.36
+Cambridge Health Alliance Program,Cambridge,MA,"Cambridge, MA",228,263,228-263,452-637,0.52,0.70,0.03,0.37
+Beth Israel Deaconess Medical Center Program,Boston,MA,"Boston, MA",251,275,251-275,--,0.33,0.41,0.00,0.29
+MaineHealth Program,Portland,ME,"Portland, ME",231,265,231-265,444-662,0.51,0.70,0.02,0.32
+Kaiser Permanente Mid-Atlantic States Program,Gaithersburg,MD,"Gaithersburg, MD",226,257,226-257,466-605,0.44,0.54,0.01,0.22
+Anne Arundel Medical Center Program,Annapolis,MD,"Annapolis, MD",231,264,231-264,486-624,0.14,0.24,0.02,0.22
+Tulane University Program,New Orleans,LA,"New Orleans, LA",232,266,232-266,475-712,0.45,0.57,0.06,0.34
+Louisiana State University (Shreveport) Program,Shreveport,LA,"Shreveport, LA",230,264,230-264,453-637,0.22,0.36,0.02,0.28
+Lake Cumberland Regional Hospital Program,Somerset,KY,"Somerset, KY",,,--,--,--,--,--,--
+"North Oaks Medical Center, LLC Program",Hammond,LA,"Hammond, LA",218,255,218-255,414-602,0.34,0.29,0.21,0.45
+Carle Foundation Hospital Program,Urbana,IL,"Urbana, IL",235,272,235-272,--,0.15,0.35,0.01,0.17
+University of Iowa (Des Moines) Program,Des Moines,IA,"Des Moines, IA",227,265,227-265,459-679,0.67,0.84,0.02,0.31
+Indiana University School of Medicine/Ball Memorial Program,Muncie,IN,"Muncie, IN",237,266,237-266,432-756,0.24,0.31,0.05,0.52
+Indiana University School of Medicine Program,Indianapolis,IN,"Indianapolis, IN",240,268,240-268,490-727,0.41,0.46,0.01,0.35
+MercyOne Des Moines/PHC Consortium Program,Des Moines,IA,"Des Moines, IA",231,258,231-258,448-645,0.21,0.31,0.09,0.44
+Parkview Health Program,Fort Wayne,IN,"Fort Wayne, IN",227,263,227-263,430-614,0.21,0.44,0.02,0.19
+Indiana University School of Medicine-Bloomington Program,Bloomington,IN,"Bloomington, IN",232,264,232-264,435-697,0.28,0.43,0.05,0.56
+Adventist Health Central California Network (Tulare) Program,Tulare,CA,"Tulare, CA",223,259,223-259,453-669,0.18,0.25,0.13,0.37
+Sutter Health/Memorial Medical Center Program,Modesto,CA,"Modesto, CA",226,261,226-261,425-639,0.45,0.47,0.16,0.45
+Prime West Consortium/Centinela Hospital Medical Center Program,Inglewood,CA,"Inglewood, CA",233,267,233-267,!,0.06,0.36,0.02,0.02
+Baptist Memorial Medical Education (Jonesboro) Program,Jonesboro,AR,"Jonesboro, AR",223,251,223-251,435-615,0.31,0.46,0.15,0.22
+CHI St. Vincent - Hot Springs Program,Hot Springs,AR,"Hot Springs, AR",221,255,221-255,416-603,0.09,0.33,0.06,0.48
+St Mary's Hospital (Waterbury) Program,Waterbury,CT,"Waterbury, CT",230,262,230-262,!,0.30,0.55,0.00,0.23
+Santa Clara Valley Healthcare Program,San Jose,CA,"San Jose, CA",232,268,232-268,447-706,0.20,0.11,0.15,0.21
+HCA HealthONE/Sky Ridge Medical Center Program,Lone Tree,CO,"Lone Tree, CO",231,263,231-263,466-638,0.54,0.46,0.27,0.52
+University of California (San Francisco)/Fresno Program,Fresno,CA,"Fresno, CA",,,--,--,--,--,--,--
+St Mary Medical Center Program,Long Beach,CA,"Long Beach, CA",237,267,237-267,477-679,0.19,0.36,0.05,0.23
+Scripps Clinic/Scripps Green Hospital Program,La Jolla,CA,"La Jolla, CA",237,269,237-269,505-715,0.36,0.36,0.04,0.24
+Sutter Health/California Pacific Medical Center Program,San Francisco,CA,"San Francisco, CA",239,270,239-270,!,0.44,0.61,0.09,0.39
+Cedars-Sinai Medical Center Program,Los Angeles,CA,"Los Angeles, CA",241,270,241-270,!,0.39,0.40,0.03,0.33
+Southwest Healthcare Medical Education Consortium Program,Temecula,CA,"Temecula, CA",229,257,229-257,450-645,0.35,0.30,0.24,0.70
+University of California (San Diego) Medical Center Program,San Diego,CA,"San Diego, CA",244,273,244-273,!,0.46,0.42,0.00,0.38
+Tulane University Program,New Orleans,LA,"New Orleans, LA",232,266,232-266,475-712,0.45,0.57,0.06,0.34
+Louisiana State University (Shreveport) Program,Shreveport,LA,"Shreveport, LA",230,264,230-264,453-637,0.22,0.36,0.02,0.28
+Lake Cumberland Regional Hospital Program,Somerset,KY,"Somerset, KY",,,--,--,--,--,--,--
+"Appalachian Regional Healthcare, Inc. Program",Whitesburg,KY,"Whitesburg, KY",,,--,--,--,--,--,--
+Indiana University School of Medicine/Ball Memorial Program,Muncie,IN,"Muncie, IN",237,266,237-266,432-756,0.24,0.31,0.05,0.52
+Indiana University School of Medicine Program,Indianapolis,IN,"Indianapolis, IN",240,268,240-268,490-727,0.41,0.46,0.01,0.35
+MercyOne Des Moines/PHC Consortium Program,Des Moines,IA,"Des Moines, IA",231,258,231-258,448-645,0.21,0.31,0.09,0.44
+Carle Foundation Hospital Program,Urbana,IL,"Urbana, IL",235,272,235-272,--,0.15,0.35,0.01,0.17
+University of Iowa (Des Moines) Program,Des Moines,IA,"Des Moines, IA",227,265,227-265,459-679,0.67,0.84,0.02,0.31
+Parkview Health Program,Fort Wayne,IN,"Fort Wayne, IN",227,263,227-263,430-614,0.21,0.44,0.02,0.19
+Indiana University School of Medicine-Bloomington Program,Bloomington,IN,"Bloomington, IN",232,264,232-264,435-697,0.28,0.43,0.05,0.56
+University of Illinois College of Medicine at Chicago Program,Chicago,IL,"Chicago, IL",237,269,237-269,590-767,0.32,0.46,0.01,0.28
+Advocate Health Care/Advocate Lutheran General Hospital Program,Park Ridge,IL,"Park Ridge, IL",231,265,231-265,450-663,0.22,0.45,0.00,0.20
+Medical College of Georgia Program,Augusta,GA,"Augusta, GA",244,269,244-269,538-691,0.39,0.41,0.02,0.23
+Prime Midwest GME Consortium/Saint Francis Hospital Program,Evanston,IL,"Evanston, IL",248,275,248-275,343-747,0.21,0.45,0.05,0.23
+Loyola Medicine MacNeal Hospital Program,Berwyn,IL,"Berwyn, IL",243,270,243-270,462-660,0.27,0.36,0.01,0.06
+Mercyhealth GME Consortium Program,Rockford,IL,"Rockford, IL",230,259,230-259,463-657,0.41,0.42,0.11,0.56
+HCA Healthcare/Mercer University School of Medicine/Memorial Health University Medical Center Program,Savannah,GA,"Savannah, GA",229,257,229-257,443-645,0.56,0.56,0.08,0.33
+University of Hawaii Program,Honolulu,HI,"Honolulu, HI",232,266,232-266,506-747,0.20,0.39,0.07,0.35
+HCA Healthcare/Eastern Idaho Regional Medical Center Program,Idaho Falls,ID,"Idaho Falls, ID",226,255,226-255,429-638,0.28,0.50,0.23,0.28
+Northside Hospital - Gwinnett Program,Lawrenceville,GA,"Lawrenceville, GA",227,255,227-255,443-619,0.47,0.62,0.03,0.26
+University of Georgia School of Medicine Program,Athens,GA,"Athens, GA",222,258,222-258,438-628,0.41,0.45,0.08,0.32
+AdventHealth Redmond Program,Rome,GA,"Rome, GA",225,258,225-258,450-628,0.31,0.25,0.14,0.44
+Piedmont Macon Medical Center/Mercer University School of Medicine Program,Macon,GA,"Macon, GA",228,258,228-258,426-638,0.15,0.23,0.03,0.40
+Northeast Georgia Medical Center Program,Gainesville,GA,"Gainesville, GA",224,258,224-258,448-641,0.25,0.36,0.04,0.51
+Hamilton Medical Center Program,Dalton,GA,"Dalton, GA",229,264,229-264,435-571,0.19,0.40,0.04,0.40
+AdventHealth Florida (Orlando) Program,Orlando,FL,"Orlando, FL",242,272,242-272,486-672,0.14,0.17,0.01,0.11
+St. Francis-Emory Healthcare Program,Columbus,GA,"Columbus, GA",,,--,--,--,--,--,--
+Archbold Medical Center Program,Thomasville,GA,"Thomasville, GA",219,251,219-251,410-543,0.20,0.21,0.18,0.22
+Prime South GME Consortium/Southern Regional Medical Center Program,Riverdale,GA,"Riverdale, GA",228,265,228-265,412-535,0.11,0.27,0.03,0.18
+Coffee Regional Medical Center Program,Douglas,GA,"Douglas, GA",219,257,219-257,!,--,--,--,0.50
+Lakeland Regional Health Program,Lakeland,FL,"Lakeland, FL",,,--,--,--,--,--,--
+AdventHealth Florida (Sebring) Program,Sebring,FL,"Sebring, FL",226,260,226-260,408-629,0.07,0.31,0.03,0.33
+Mount Sinai Medical Center of Florida Program,Miami Beach,FL,"Miami Beach, FL",225,262,225-262,433-628,0.11,0.28,0.02,0.10
+University of Miami/Jackson Health System Program,Miami,FL,"Miami, FL",236,270,236-270,482-735,0.19,0.25,0.00,0.19
+Mayo Clinic College of Medicine and Science (Jacksonville) Program,Jacksonville,FL,"Jacksonville, FL",249,270,249-270,!,0.22,0.38,0.01,0.27
+Cleveland Clinic Foundation/Florida Weston Program,Weston,FL,"Weston, FL",229,265,229-265,493-663,0.11,0.24,0.00,0.15
+University of Central Florida/HCA Florida Healthcare (Ocala) Program,Ocala,FL,"Ocala, FL",233,258,233-258,475-641,0.30,0.58,0.04,0.22
+HCA Florida Healthcare/USF Morsani College of Medicine GME - Tampa South/Brandon Hospital Program,Brandon,FL,"Brandon, FL",225,258,225-258,489-652,0.20,0.28,0.10,0.32
+Naples Comprehensive Health Program,Naples,FL,"Naples, FL",227,261,227-261,475-617,0.37,0.63,0.00,0.29
+"Memorial Healthcare System (Hollywood, Florida) Program",Pembroke Pines,FL,"Pembroke Pines, FL",234,265,234-265,479-655,0.28,0.61,0.01,0.34
+HCA Florida Healthcare/USF Morsani College of Medicine GME - Tampa North/Bayonet Point Hospital Program,Hudson,FL,"Hudson, FL",228,256,228-256,426-631,0.25,0.30,0.17,0.41
+Larkin Community Hospital Program,South Miami,FL,"South Miami, FL",219,255,219-255,!,0.06,0.20,0.01,0.04
+HCA Florida Healthcare/Westside/Northwest Hospital Program,Plantation,FL,"Plantation, FL",229,258,229-258,497-650,0.29,0.43,0.09,0.64
+HCA Florida Healthcare/USF Morsani College of Medicine GME - Tampa South/Largo Hospital Program,Largo,FL,"Largo, FL",231,259,231-259,429-631,0.39,0.72,0.06,0.12
+Florida State University College of Medicine/Tallahassee Memorial Hospital Program,Tallahassee,FL,"Tallahassee, FL",228,263,228-263,487-639,0.22,0.32,0.03,0.13
+University of Central Florida/HCA Florida Healthcare (Greater Orlando/Osceola) Program,Kissimmee,FL,"Kissimmee, FL",227,263,227-263,429-639,0.37,0.64,0.03,0.20
+Florida Atlantic University Charles E. Schmidt College of Medicine Program,Boca Raton,FL,"Boca Raton, FL",239,262,239-262,469-671,0.24,0.38,0.01,0.20
+HCA Florida Healthcare/Aventura Hospital Program,Aventura,FL,"Aventura, FL",226,254,226-254,433-645,0.56,0.50,0.02,0.34
+HCA Florida Healthcare/Kendall Hospital Program,Miami,FL,"Miami, FL",223,258,223-258,439-666,0.26,0.63,0.07,0.34
+BayCare Health System (St. Joseph's Hospital) Program,Tampa,FL,"Tampa, FL",231,257,231-257,442-638,0.43,0.67,0.09,0.25
+University of Central Florida/HCA Florida Healthcare (Fort Walton Beach) Program,Fort Walton Beach,FL,"Fort Walton Beach, FL",221,253,221-253,429-615,0.37,0.58,0.10,0.45
+AdventHealth Florida (Tampa) Program,Tampa,FL,"Tampa, FL",235,265,235-265,504-639,0.22,0.33,0.03,0.21
+BayCare Health System (St. Joseph's Hospital-South) Program,Riverview,FL,"Riverview, FL",223,254,223-254,465-641,0.32,0.33,0.06,0.13
+Florida International University/Veterans Affairs Medical Center (Miami) Program,Miami,FL,"Miami, FL",227,260,227-260,445-660,0.22,0.22,0.15,0.50
+University of Central Florida/HCA Florida Healthcare (Pensacola) Program,Pensacola,FL,"Pensacola, FL",226,259,226-259,456-639,0.19,0.43,0.04,0.20
+MedStar Health Georgetown University/Washington Hospital Center Program,Washington,DC,"Washington, DC",240,271,240-271,440-742,0.22,0.32,0.03,0.15
+MedStar Health Georgetown University/Georgetown Hospital Program,Washington,DC,"Washington, DC",246,271,246-271,577-743,0.32,0.59,0.02,0.29
+Zucker School of Medicine at Hofstra/Northwell at Danbury Hospital Program,Danbury,CT,"Danbury, CT",238,269,238-269,543-679,0.14,0.38,0.07,0.45
+University of Connecticut Program,Farmington,CT,"Farmington, CT",236,271,236-271,499-678,0.23,0.42,0.01,0.21
+Yale-New Haven Medical Center (Primary Care) Program,New Haven,CT,"New Haven, CT",236,272,236-272,!,0.58,0.41,0.12,0.55
+Abbott-Northwestern Hospital Program,Minneapolis,MN,"Minneapolis, MN",234,266,234-266,486-698,0.46,0.63,0.06,0.47
+Corewell Health – Grand Rapids/Michigan State University Program,Grand Rapids,MI,"Grand Rapids, MI",231,266,231-266,502-701,0.47,0.72,0.03,0.31
+Central Michigan University College of Medicine/CMU Medical Education Partners Program,Saginaw,MI,"Saginaw, MI",228,262,228-262,455-641,0.22,0.35,0.01,0.25
+University of Minnesota Program,Minneapolis,MN,"Minneapolis, MN",240,270,240-270,476-783,0.43,0.55,0.02,0.36
+Detroit Medical Center/Wayne State University Program,Detroit,MI,"Detroit, MI",234,270,234-270,478-668,0.25,0.36,0.01,0.24
+McLaren Health Care/Flint/MSU Program,Flint,MI,"Flint, MI",231,265,231-265,463-683,0.11,0.10,0.10,0.37
+Detroit Medical Center/Wayne State University (Sinai Grace) Program,Detroit,MI,"Detroit, MI",230,262,230-262,420-704,0.14,0.47,0.01,0.32
+Detroit Medical Center (Huron Valley-Sinai) Program,Commerce Township,MI,"Commerce Township, MI",229,260,229-260,446-667,0.12,0.13,0.06,0.35
+Trinity Health Muskegon Program,Muskegon,MI,"Muskegon, MI",224,258,224-258,447-675,0.17,0.36,0.04,0.26
+Henry Ford Warren Hospital Program,Warren,MI,"Warren, MI",244,269,244-269,464-716,0.26,0.28,0.16,0.29
+Henry Ford Health/Henry Ford Macomb Hospital Program,Clinton Township,MI,"Clinton Township, MI",229,260,229-260,450-599,0.32,0.60,0.02,0.15
+Detroit Wayne County Health Authority (Authority Health) GME Consortium Program,Detroit,MI,"Detroit, MI",218,250,218-250,404-678,0.08,0.09,0.06,0.40
+McLaren Health Care/Macomb/MSU Program,Mount Clemens,MI,"Mount Clemens, MI",229,261,229-261,448-678,0.32,0.41,0.14,0.51
+Corewell Health (Trenton) Program,Trenton,MI,"Trenton, MI",226,262,226-262,422-642,0.49,0.54,0.01,0.12
+Henry Ford Health/Henry Ford Hospital Program,Detroit,MI,"Detroit, MI",238,269,238-269,502-717,0.32,0.51,0.00,0.32
+Henry Ford Providence Hospital Program,Southfield,MI,"Southfield, MI",228,262,228-262,452-675,0.24,0.47,0.01,0.32
+Trinity Health Ann Arbor Hospital Program,Ann Arbor,MI,"Ann Arbor, MI",237,263,237-263,504-709,0.19,0.46,0.00,0.33
+Corewell Health William Beaumont University Hospital Program,Royal Oak,MI,"Royal Oak, MI",236,272,236-272,516-712,0.22,0.49,0.02,0.37
+Beth Israel Deaconess Medical Center Program,Boston,MA,"Boston, MA",251,275,251-275,--,0.33,0.41,0.00,0.29
+McLaren Health Care Corporation (Port Huron) Program,Port Huron,MI,"Port Huron, MI",231,259,231-259,451-713,0.08,0.29,0.13,0.34
+Corewell Health Lakeland Program,St. Joseph,MI,"St. Joseph, MI",224,259,224-259,433-616,0.57,0.89,0.12,0.34
+MaineHealth Program,Portland,ME,"Portland, ME",231,265,231-265,444-662,0.51,0.70,0.02,0.32
+"North Oaks Medical Center, LLC Program",Hammond,LA,"Hammond, LA",218,255,218-255,414-602,0.34,0.29,0.21,0.45
+Kaiser Permanente Mid-Atlantic States Program,Gaithersburg,MD,"Gaithersburg, MD",226,257,226-257,466-605,0.44,0.54,0.01,0.22
+Anne Arundel Medical Center Program,Annapolis,MD,"Annapolis, MD",231,264,231-264,486-624,0.14,0.24,0.02,0.22
+Johns Hopkins University Program,Baltimore,MD,"Baltimore, MD",246,273,246-273,--,0.44,0.50,0.01,0.36
+Cambridge Health Alliance Program,Cambridge,MA,"Cambridge, MA",228,263,228-263,452-637,0.52,0.70,0.03,0.37
+Dartmouth-Hitchcock/Mary Hitchcock Memorial Hospital Program,Lebanon,NH,"Lebanon, NH",239,269,239-269,517-731,0.50,0.52,0.02,0.29
+Icahn School of Medicine at Mount Sinai/Valley Health Program,Paramus,NJ,"Paramus, NJ",229,262,229-262,464-660,0.29,0.31,0.07,0.51
+St Luke's Hospital Program,Chesterfield,MO,"Chesterfield, MO",,,--,--,--,--,--,--
+University of Missouri-Kansas City School of Medicine Program,Kansas City,MO,"Kansas City, MO",236,269,236-269,447-666,0.12,0.29,0.01,0.17
+Billings Clinic Program,Billings,MT,"Billings, MT",230,265,230-265,465-674,0.57,0.71,0.16,0.73
+Creighton University School of Medicine (Omaha) Program,Omaha,NE,"Omaha, NE",237,268,237-268,483-682,0.54,0.47,0.11,0.60
+Dignity Health St. Rose Dominican Hospitals Program,Las Vegas,NV,"Las Vegas, NV",223,253,223-253,423-622,0.54,0.52,0.17,0.22
+HCA Healthcare Sunrise Health GME/MountainView Program,Las Vegas,NV,"Las Vegas, NV",227,256,227-256,447-615,0.34,0.53,0.19,0.12
+Memorial Hospital at Gulfport Program,Gulfport,MS,"Gulfport, MS",218,258,218-258,415-597,0.13,0.28,0.03,0.55
+North Mississippi Medical Center Program,Tupelo,MS,"Tupelo, MS",223,260,223-260,406-555,0.10,0.29,0.03,0.58
+University of Mississippi Medical Center Program,Jackson,MS,"Jackson, MS",,,--,--,--,--,--,--
+Kansas City University GME Consortium (KCU-GME Consortium)/Freeman Program,Joplin,MO,"Joplin, MO",231,260,231-260,428-619,0.46,0.08,0.28,0.43
+Health Education Services/Poplar Bluff Regional Medical Center Program,Poplar Bluff,MO,"Poplar Bluff, MO",223,261,223-261,405-603,0.15,0.38,0.12,0.57
+Prime South GME Consortium/St. Joseph Medical Center Program,Kansas City,MO,"Kansas City, MO",230,264,230-264,450-647,0.20,0.23,0.03,0.41
+New York Medical College/St. Mary and St. Clare Program,Denville,NJ,"Denville, NJ",225,264,225-264,420-748,0.07,0.14,0.03,0.03
+Hackensack Meridian Health/Palisades Medical Center Program,North Bergen,NJ,"North Bergen, NJ",231,261,231-261,470-631,0.07,0.32,0.04,0.33
+Rutgers Health/Englewood Hospital Medical Center Program,Englewood,NJ,"Englewood, NJ",234,268,234-268,!,0.13,0.27,0.01,0.17
+Rutgers Health/New Jersey Medical School Program,Newark,NJ,"Newark, NJ",239,266,239-266,532-694,0.27,0.40,0.01,0.23
+Inspira Health Network/Inspira Medical Center - Mullica Hill Program,Mullica Hill,NJ,"Mullica Hill, NJ",227,260,227-260,451-655,0.33,0.56,0.07,0.26
+Atlantic Health Program,Morristown,NJ,"Morristown, NJ",238,267,238-267,518-720,0.18,0.29,0.01,0.17
+Capital Health Regional Medical Center Program,Trenton,NJ,"Trenton, NJ",235,263,235-263,!,0.11,0.14,0.09,0.03
+New Mexico Primary Care Training Consortium Program,Farmington,NM,"Farmington, NM",231,268,231-268,!,--,--,--,1.00
+Zucker School of Medicine at Hofstra/Northwell at Northern Westchester Hospital Program,Mount Kisco,NY,"Mount Kisco, NY",227,264,227-264,461-663,0.26,0.47,0.09,0.35
+Lehigh Valley Health Network Program,Allentown,PA,"Allentown, PA",,,--,--,--,--,--,--
+Geisinger Health System (Danville) Program,Danville,PA,"Danville, PA",231,262,231-262,471-649,0.39,0.49,0.01,0.20
+UPMC Medical Education (Harrisburg) Program,Harrisburg,PA,"Harrisburg, PA",225,262,225-262,423-602,0.33,0.40,0.01,0.30
+Penn State Milton S Hershey Medical Center Program,Hershey,PA,"Hershey, PA",234,267,234-267,483-668,0.23,0.21,0.06,0.19
+Mercy Catholic Medical Center Program,Darby,PA,"Darby, PA",224,260,224-260,428-580,0.11,0.31,0.02,0.13
+Oregon Health & Science University (OHSU Health) Program,Portland,OR,"Portland, OR",240,272,240-272,501-714,0.52,0.72,0.08,0.40
+University of Oklahoma School of Community Medicine (Tulsa) Program,Tulsa,OK,"Tulsa, OK",232,265,232-265,469-688,0.28,0.61,0.13,0.31
+Samaritan Health Services - Corvallis Program,Corvallis,OR,"Corvallis, OR",231,263,231-263,438-636,0.46,0.74,0.17,0.25
+Oregon Health & Science University (OHSU Health)/Hillsboro Medical Center Program,Hillsboro,OR,"Hillsboro, OR",230,264,230-264,467-651,0.33,0.51,0.00,0.24
+Corry Program,Corry,PA,"Corry, PA",,,--,--,--,--,--,--
+St. Clair Health Graduate Medical Education Program,Pittsburgh,PA,"Pittsburgh, PA",225,257,225-257,450-614,0.29,0.46,0.17,0.37
+Philadelphia College of Osteopathic Medicine Program,Philadelphia,PA,"Philadelphia, PA",,,--,--,--,--,--,--
+Nazareth Hospital Program,Philadelphia,PA,"Philadelphia, PA",223,259,223-259,437-575,0.12,0.36,0.01,0.07
+New York Medical College/Roxborough Memorial Hospital Program,Philadelphia,PA,"Philadelphia, PA",225,255,225-255,442-662,0.21,0.27,0.02,0.17
+St. Mary Medical Center Program,Langhorne,PA,"Langhorne, PA",225,261,225-261,437-549,0.21,0.49,0.03,0.07
+Case Western Reserve University/University Hospitals Cleveland Medical Center Program,Cleveland,OH,"Cleveland, OH",238,270,238-270,443-642,0.32,0.46,0.04,0.34
+Cleveland Clinic Foundation/Fairview Hospital Program,Cleveland,OH,"Cleveland, OH",243,267,243-267,467-691,0.13,0.31,0.01,0.06
+TriHealth (Good Samaritan Hospital) Program,Cincinnati,OH,"Cincinnati, OH",237,263,237-263,479-640,0.22,0.52,0.00,0.11
+Oklahoma State University Center for Health Sciences Program,Tulsa,OK,"Tulsa, OK",232,259,232-259,446-654,0.33,0.18,0.06,0.00
+Mount Carmel Health System Program,Grove City,OH,"Grove City, OH",227,260,227-260,447-634,0.48,0.29,0.33,0.52
+OhioHealth/Riverside Methodist Hospital Program,Columbus,OH,"Columbus, OH",226,262,226-262,464-627,0.30,0.38,0.05,0.15
+Mercy St Vincent Medical Center/Mercy Health Partners Program,Toledo,OH,"Toledo, OH",,,--,--,--,--,--,--
+Christ Hospital Program,Cincinnati,OH,"Cincinnati, OH",232,266,232-266,465-702,0.46,0.70,0.07,0.47
+Jewish Hospital of Cincinnati Program,Cincinnati,OH,"Cincinnati, OH",227,262,227-262,418-665,0.19,0.34,0.01,0.19
+East Liverpool City Hospital Program,East Liverpool,OH,"East Liverpool, OH",217,259,217-259,426-589,0.12,0.32,0.04,0.03
+Mercy Health-St Rita's Medical Center Program,Lima,OH,"Lima, OH",224,257,224-257,438-599,0.33,0.36,0.17,0.57
+Trinity Health System Program,Steubenville,OH,"Steubenville, OH",223,258,223-258,410-578,0.15,0.18,0.01,0.08
+Summa Health System/NEOMED Program,Akron,OH,"Akron, OH",225,259,225-259,457-627,0.40,0.55,0.13,0.34
+Adena Regional Medical Center Program,Chillicothe,OH,"Chillicothe, OH",223,263,223-263,428-614,0.41,0.50,0.14,0.31
+University Hospitals Community Consortium (Westlake) Program,Westlake,OH,"Westlake, OH",225,258,225-258,454-607,0.47,0.56,0.13,0.39
+Wake Forest University Baptist Medical Center Program,Winston-Salem,NC,"Winston-Salem, NC",242,269,242-269,576-763,0.41,0.64,0.00,0.30
+Marshall Community Health Consortium Program,Huntington,WV,"Huntington, WV",228,266,228-266,424-534,0.24,0.45,0.03,0.44
+Novant Health New Hanover Regional Medical Center Program,Wilmington,NC,"Wilmington, NC",229,258,229-258,503-657,0.56,0.71,0.05,0.31
+UNC Health Blue Ridge Program,Morganton,NC,"Morganton, NC",230,257,230-257,436-638,0.32,0.33,0.06,0.30
+Southeastern Regional Medical Center Program,Lumberton,NC,"Lumberton, NC",222,254,222-254,431-600,0.34,0.50,0.14,0.45
+Cape Fear Valley Health Program,Fayetteville,NC,"Fayetteville, NC",225,260,225-260,455-660,0.16,0.34,0.03,0.25
+Campbell University/Harnett Health Program,Dunn,NC,"Dunn, NC",223,254,223-254,427-590,0.17,0.33,0.02,0.13
+Rochester Regional Health/Unity Internal Medicine Program,Rochester,NY,"Rochester, NY",241,269,241-269,431-656,0.13,0.36,0.00,0.00
+Mountain Area Health Education Center Program,Asheville,NC,"Asheville, NC",228,262,228-262,483-660,0.42,0.58,0.25,0.77
+Carolinas Medical Center Program,Charlotte,NC,"Charlotte, NC",238,266,238-266,509-689,0.31,0.48,0.00,0.23
+Albany Med Health System Program,Albany,NY,"Albany, NY",230,263,230-263,457-687,0.18,0.46,0.00,0.17
+University at Buffalo Program,Buffalo,NY,"Buffalo, NY",233,266,233-266,472-687,0.18,0.30,0.10,0.46
+Icahn School of Medicine at Mount Sinai/NYC Health and Hospitals (Elmhurst) Program,Elmhurst,NY,"Elmhurst, NY",249,270,249-270,517-749,0.24,0.26,0.00,0.20
+NYC Health & Hospitals/South Brooklyn Health Program,Brooklyn,NY,"Brooklyn, NY",,,--,--,--,--,--,--
+Zucker School of Medicine at Hofstra/Northwell at Lenox Hill Hospital Program,New York,NY,"New York, NY",234,267,234-267,491-675,0.30,0.40,0.00,0.20
+Samaritan Medical Center Program,Watertown,NY,"Watertown, NY",,,--,--,--,--,--,--
+University of Texas Health Science Center at Tyler Program,Tyler,TX,"Tyler, TX",228,260,228-260,438-644,0.53,0.41,0.04,0.29
+Texas Institute for Graduate Medical Education and Research (TIGMER) Program,San Antonio,TX,"San Antonio, TX",226,259,226-259,436-655,0.33,0.44,0.09,0.22
+HCA Medical City Healthcare GME (Arlington) Program,Arlington,TX,"Arlington, TX",224,258,224-258,431-607,0.34,0.32,0.09,0.52
+Baylor All Saints Medical Center Fort Worth Program,Fort Worth,TX,"Fort Worth, TX",229,262,229-262,455-682,0.27,0.60,0.01,0.22
+CHRISTUS Health/Texas A&M University School of Medicine Program,Longview,TX,"Longview, TX",222,257,222-257,429-638,0.32,0.17,0.10,0.57
+HCA Medical City Healthcare GME (Fort Worth) Program,Fort Worth,TX,"Fort Worth, TX",228,257,228-257,453-620,0.34,0.41,0.09,0.28
+University of Tennessee Medical Center at Knoxville Program,Knoxville,TN,"Knoxville, TN",237,264,237-264,506-705,0.36,0.49,0.02,0.28
+East Tennessee State University/Quillen College of Medicine Program,Johnson City,TN,"Johnson City, TN",230,265,230-265,437-647,0.21,0.61,0.01,0.20
+University of Tennessee College of Medicine (Memphis) Program,Memphis,TN,"Memphis, TN",230,263,230-263,428-679,0.63,0.62,0.00,0.34
+Vanderbilt University Medical Center Program,Nashville,TN,"Nashville, TN",249,274,249-274,!,0.26,0.44,0.02,0.23
+Texas Health Resources/Harris Methodist Hospital Fort Worth Program,Fort Worth,TX,"Fort Worth, TX",229,258,229-258,503-681,0.31,0.47,0.01,0.24
+University of Texas RGV (HCA) Program,McAllen,TX,"McAllen, TX",219,255,219-255,!,0.35,0.49,0.02,0.26
+Texas Health Resources/Presbyterian Hospital of Plano Program,Plano,TX,"Plano, TX",228,262,228-262,422-646,0.42,0.42,0.01,0.44
+New York Medical College/Landmark Medical Center Program,Woonsocket,RI,"Woonsocket, RI",227,263,227-263,411-799,0.14,0.44,0.03,0.19
+Medical University of South Carolina Regional Network (Lancaster) Program,Lancaster,SC,"Lancaster, SC",228,261,228-261,441-583,0.29,0.47,0.01,0.08
+Health Education Services/North Knoxville Medical Center Program,Powell,TN,"Powell, TN",225,258,225-258,447-618,0.12,0.35,0.02,0.09
+University of Tennessee College of Medicine/Maury Regional Medical Center Program,Columbia,TN,"Columbia, TN",,,--,--,--,--,--,--
+Vanderbilt University Medical Center (Lebanon) Program,Lebanon,TN,"Lebanon, TN",225,259,225-259,423-624,0.13,0.22,0.05,0.78
+HCA Healthcare/TriStar Nashville/Centennial Medical Center Program,Nashville,TN,"Nashville, TN",230,259,230-259,463-672,0.26,0.47,0.09,0.46
+McLeod Regional Medical Center Program,Florence,SC,"Florence, SC",226,251,226-251,426-603,0.08,0.26,0.05,0.57
+Lexington Health Program,West Columbia,SC,"West Columbia, SC",216,252,216-252,400-550,--,--,--,0.81
+HCA Healthcare/Mercer University School of Medicine/Grand Strand Medical Center Program,Myrtle Beach,SC,"Myrtle Beach, SC",228,255,228-255,459-596,0.55,0.48,0.11,0.58
+HCA Healthcare/Mercer University School of Medicine/Trident Program,North Charleston,SC,"North Charleston, SC",231,260,231-260,453-654,0.22,0.45,0.06,0.17
+Prisma Health/University of South Carolina SOM Greenville (Greenville) Program,Greenville,SC,"Greenville, SC",232,263,232-263,508-684,0.39,0.60,0.00,0.29
+Medical University of South Carolina Program,Charleston,SC,"Charleston, SC",242,268,242-268,535-733,0.36,0.46,0.01,0.28
+Prisma Health/University of South Carolina SOM Columbia (Columbia) Program,Columbia,SC,"Columbia, SC",229,261,229-261,466-650,0.65,0.46,0.09,0.32
+Aiken Regional Medical Centers Program,Aiken,SC,"Aiken, SC",221,248,221-248,404-519,0.12,0.09,0.03,0.10
+Rhode Island Hospital/Brown University Health Program,Providence,RI,"Providence, RI",241,271,241-271,!,0.35,0.28,0.03,0.25
+University of Puerto Rico Program,San Juan,PR,"San Juan, PR",,,--,--,--,--,--,--
+UPMC Medical Education Program,Pittsburgh,PA,"Pittsburgh, PA",243,272,243-272,!,0.37,0.53,0.02,0.34
+St Luke's University Hospital Program,Bethlehem,PA,"Bethlehem, PA",230,258,230-258,488-662,0.49,0.58,0.01,0.36
+Hospital Episcopal San Lucas/Ponce School of Medicine Program,Ponce,PR,"Ponce, PR",,,--,--,--,--,--,--
+Damas Hospital Program,Ponce,PR,"Ponce, PR",,,--,--,--,--,--,--
+Charleston Area Medical Center/CAMC Institute for Academic Medicine Program,Charleston,WV,"Charleston, WV",236,269,236-269,453-633,0.16,0.29,0.00,0.22
+Marshall University School of Medicine Program,Huntington,WV,"Huntington, WV",235,269,235-269,452-723,0.24,0.50,0.02,0.48
+West Virginia University School of Medicine/Berkeley Medical Center Program,Martinsburg,WV,"Martinsburg, WV",222,256,222-256,422-587,0.14,0.12,0.02,0.21
+Trios Health Program,Kennewick,WA,"Kennewick, WA",224,255,224-255,426-590,0.47,0.20,0.15,0.50
+Virginia Mason Franciscan Health Program,Seattle,WA,"Seattle, WA",231,265,231-265,466-646,0.32,0.27,0.02,0.18
+Methodist Health System Dallas Program,Dallas,TX,"Dallas, TX",239,262,239-262,524-680,0.41,0.57,0.04,0.27
+University of Texas Southwestern Medical Center Program,Dallas,TX,"Dallas, TX",242,272,242-272,!,0.36,0.48,0.02,0.39
+University of Texas Medical Branch Hospitals Program,Galveston,TX,"Galveston, TX",236,265,236-265,490-692,0.30,0.45,0.00,0.29
+University of Texas Health Science Center San Antonio Joe and Teresa Lozano Long School of Medicine Program,San Antonio,TX,"San Antonio, TX",236,266,236-266,528-717,0.24,0.49,0.01,0.24
+Mary Washington Healthcare Program,Fredericksburg,VA,"Fredericksburg, VA",225,259,225-259,459-604,0.20,0.37,0.02,0.40
+University of Virginia Medical Center Program,Charlottesville,VA,"Charlottesville, VA",244,272,244-272,!,0.39,0.64,0.03,0.29
+Inova Fairfax Hospital Campus Program,Falls Church,VA,"Falls Church, VA",233,266,233-266,509-674,0.32,0.34,0.02,0.31
+HCA Healthcare LewisGale Medical Center Program,Salem,VA,"Salem, VA",226,249,226-249,442-593,0.23,0.30,0.15,0.18
+Wellmont Health System/Norton Community Hospital Program,Norton,VA,"Norton, VA",,,--,--,--,--,--,--
+Johnston Memorial Hospital Program,Abingdon,VA,"Abingdon, VA",225,256,225-256,458-626,0.18,0.25,0.02,0.08
+Sovah Health-Danville Program,Danville,VA,"Danville, VA",220,256,220-256,443-602,0.23,0.17,0.09,0.23
+HCA Healthcare LewisGale Hospital-Montgomery/VCOM Program,Blacksburg,VA,"Blacksburg, VA",226,257,226-257,435-605,0.50,0.44,0.19,0.31
+Carilion Clinic-Virginia Tech Carilion School of Medicine Program,Roanoke,VA,"Roanoke, VA",237,264,237-264,517-682,0.48,0.73,0.18,0.34
+HCA Healthcare Las Palmas Del Sol Program,El Paso,TX,"El Paso, TX",220,250,220-250,418-598,0.23,0.29,0.16,0.38
+Skagit Regional Health Program,Mount Vernon,WA,"Mount Vernon, WA",223,255,223-255,423-601,0.61,0.46,0.11,0.49
+Old Dominion University Program,Norfolk,VA,"Norfolk, VA",230,265,230-265,516-657,0.27,0.62,0.02,0.20
+"Augusta Health, Inc Program",Fishersville,VA,"Fishersville, VA",223,258,223-258,433-599,0.07,0.38,0.01,0.27
+Riverside Regional Medical Center Program,Newport News,VA,"Newport News, VA",223,255,223-255,429-594,0.11,0.31,0.04,0.12
+Sentara Health Program,Woodbridge,VA,"Woodbridge, VA",,,--,--,--,--,--,--
+Valley Health System Program,Winchester,VA,"Winchester, VA",224,255,224-255,418-609,--,--,--,0.71
+Texas Tech University (Permian Basin) Program,Odessa,TX,"Odessa, TX",227,264,227-264,507-614,0.09,0.16,0.03,0.62
+Baylor University Medical Center Program,Dallas,TX,"Dallas, TX",244,268,244-268,!,0.21,0.38,0.01,0.21
+Baylor Scott & White Medical Center - Baylor College of Medicine (Temple) Program,Temple,TX,"Temple, TX",234,266,234-266,501-686,0.42,0.62,0.01,0.25
+Texas Tech University Health Sciences Center at Lubbock Program,Lubbock,TX,"Lubbock, TX",235,267,235-267,!,0.13,0.41,0.00,0.15
+Baylor College of Medicine Program,Houston,TX,"Houston, TX",245,271,245-271,439-762,0.29,0.37,0.00,0.27
+Houston Methodist Hospital (Medical Center) Program,Houston,TX,"Houston, TX",242,267,242-267,532-726,0.32,0.40,0.05,0.38
+Marshfield Clinic Program,Marshfield,WI,"Marshfield, WI",229,266,229-266,!,0.10,0.35,0.00,0.13
+Medical College of Wisconsin Affiliated Hospitals Program,Milwaukee,WI,"Milwaukee, WI",237,268,237-268,502-720,0.53,0.54,0.02,0.38
+West Virginia University School of Medicine/Camden-Clark Program,Parkersburg,WV,"Parkersburg, WV",223,260,223-260,420-623,0.22,0.69,0.01,0.18
+Ascension St. Vincent Hospital (Milwaukee) Program,Milwaukee,WI,"Milwaukee, WI",232,265,232-265,428-648,0.26,0.36,0.05,0.26
+"Medical College of Wisconsin Affiliated Hospitals, Inc/ThedaCare Regional Medical Center - Neenah Program",Neenah,WI,"Neenah, WI",228,261,228-261,432-752,0.36,0.60,0.02,0.51
+Gundersen Lutheran Medical Foundation Program,La Crosse,WI,"La Crosse, WI",230,265,230-265,463-672,0.49,0.67,0.12,0.62
+University of Wisconsin Hospitals and Clinics Program,Madison,WI,"Madison, WI",241,272,241-272,!,0.36,0.70,0.06,0.31
+Universidad Central del Caribe Program,Bayamon,PR,"Bayamon, PR",,,--,--,--,--,--,--
+Universidad Central del Caribe School of Medicine (Cayetano Coll & Toste Hospital) Program,Arecibo,PR,"Arecibo, PR",,,--,--,--,--,--,--
+Baptist Memorial Medical Education (Oxford) Program,Oxford,MS,"Oxford, MS",225,265,225-265,409-582,0.12,0.36,0.06,0.58
+Robert Packer Hospital/Guthrie Program,Sayre,PA,"Sayre, PA",233,268,233-268,416-639,0.11,0.36,0.01,0.12
+Ramon Betances Hospital-Mayaguez Medical Center/Ponce School of Medicine Consortium Program,Mayaguez,PR,"Mayaguez, PR",,,--,--,--,--,--,--
+University of South Dakota Program,Sioux Falls,SD,"Sioux Falls, SD",252,273,252-273,!,0.32,0.38,0.01,0.19
+University of Tennessee College of Medicine at Chattanooga Program,Chattanooga,TN,"Chattanooga, TN",,,--,--,--,--,--,--
+Health Education Services/Northwest Health (Porter) Program,Valparaiso,IN,"Valparaiso, IN",238,264,238-264,!,0.14,0.35,0.01,0.03
+Prime South GME Consortium/Harlingen Medical Center Program,Harlingen,TX,"Harlingen, TX",229,265,229-265,!,0.15,0.40,0.02,0.05
+Texas College of Osteopathic Medicine Program,Paris,TX,"Paris, TX",,,--,--,--,--,--,--
+Baptist Hospitals of Southeast Texas Program,Beaumont,TX,"Beaumont, TX",239,270,239-270,463-646,0.15,0.20,0.03,0.22
+Texas Health Resources (Bedford/Denton) Program,Bedford,TX,"Bedford, TX",230,262,230-262,438-633,0.44,0.46,0.00,0.28
+University of Tennessee College of Medicine (Nashville) Program,Nashville,TN,"Nashville, TN",232,265,232-265,471-703,0.21,0.68,0.02,0.18
+Baylor Scott and White Medical Center - Round Rock Program,Round Rock,TX,"Round Rock, TX",232,260,232-260,482-660,0.24,0.52,0.01,0.16
+Texas Institute for Graduate Medical Education and Research (TIGMER) Laredo Program,Laredo,TX,"Laredo, TX",220,253,220-253,416-614,0.20,0.47,0.13,0.58
+HCA Healthcare Corpus Christi Medical Center - Bay Area Program,Corpus Christi,TX,"Corpus Christi, TX",226,258,226-258,458-643,0.16,0.55,0.14,0.34
+Arkansas College of Osteopathic Medicine Program,Greenville,TX,"Greenville, TX",221,252,221-252,415-602,0.18,0.17,0.03,0.08
+Prime South GME Consortium/Knapp Medical Center Program,Weslaco,TX,"Weslaco, TX",219,255,219-255,!,0.17,0.42,0.04,0.24
+Shannon Medical Center Program,San Angelo,TX,"San Angelo, TX",221,262,221-262,405-605,0.16,0.20,0.09,0.48
+Texas Health Resources (Dallas) Program,Dallas,TX,"Dallas, TX",234,269,234-269,488-693,0.21,0.59,0.01,0.20
+Texas Tech University HSC El Paso Program,El Paso,TX,"El Paso, TX",228,261,228-261,411-704,0.29,0.25,0.05,0.44
+Zucker School of Medicine at Hofstra/Northwell at Mather Hospital Program,Port Jefferson,NY,"Port Jefferson, NY",223,258,223-258,437-579,0.30,0.34,0.02,0.21
+Garnet Health Medical Center Program,Middletown,NY,"Middletown, NY",225,253,225-253,427-553,0.34,0.68,0.05,0.09
+Icahn School of Medicine at Mount Sinai/South Nassau Program,Oceanside,NY,"Oceanside, NY",,,--,--,--,--,--,--
+BronxCare Health System Program,Bronx,NY,"Bronx, NY",,,--,--,--,--,--,--
+One Brooklyn Health System/Brookdale University Hospital and Medical Center Program,Brooklyn,NY,"Brooklyn, NY",,,--,--,--,--,--,--
+NYU Grossman Long Island School of Medicine Program,Mineola,NY,"Mineola, NY",237,267,237-267,538-704,0.13,0.40,0.03,0.18
+Montefiore Medical Center/Albert Einstein College of Medicine (New Rochelle) Program,New Rochelle,NY,"New Rochelle, NY",,,--,--,--,--,--,--
+Zucker School of Medicine at Hofstra/Northwell at Vassar Brothers Medical Center Program,Poughkeepsie,NY,"Poughkeepsie, NY",232,264,232-264,452-645,0.14,0.45,0.04,0.25
+Maimonides Medical Center Program,Brooklyn,NY,"Brooklyn, NY",232,266,232-266,458-657,0.06,0.42,0.00,0.09
+Montefiore Medical Center/Albert Einstein College of Medicine (Wakefield Campus) Program,Bronx,NY,"Bronx, NY",236,264,236-264,488-655,0.08,0.22,0.02,0.05
+Montefiore Medical Center/Albert Einstein College of Medicine (Moses and Weiler Campuses) Program,Bronx,NY,"Bronx, NY",243,271,243-271,!,0.37,0.32,0.03,0.36
+NYU Grossman School of Medicine Program,New York,NY,"New York, NY",241,272,241-272,475-689,0.33,0.26,0.01,0.27
+Icahn School of Medicine at Mount Sinai/Morningside/West Program,New York,NY,"New York, NY",236,269,236-269,487-724,0.10,0.29,0.00,0.15
+University at Buffalo (Catholic Health System--Sisters of Charity) Program,Buffalo,NY,"Buffalo, NY",230,265,230-265,437-753,0.13,0.42,0.01,0.24
+Nassau University Medical Center Program,East Meadow,NY,"East Meadow, NY",228,260,228-260,456-666,0.07,0.16,0.03,0.07
+New York Presbyterian Hospital (Cornell Campus) Program,New York,NY,"New York, NY",247,274,247-274,--,0.33,0.45,0.02,0.30
+United Health Services Hospitals Program,Johnson City,NY,"Johnson City, NY",,,--,--,--,--,--,--
+Icahn School of Medicine at Mount Sinai/Mount Sinai Hospital Program,New York,NY,"New York, NY",248,273,248-273,!,0.30,0.48,0.00,0.33
+Icahn School of Medicine at Mount Sinai/NYC Health and Hospitals (Queens) Program,Jamaica,NY,"Jamaica, NY",232,262,232-262,471-653,0.28,0.41,0.04,0.21
+Wyckoff Heights Medical Center Program,Brooklyn,NY,"Brooklyn, NY",,,--,--,--,--,--,--
+Rochester Regional Health/Rochester General Hospital Program,Rochester,NY,"Rochester, NY",246,274,246-274,438-644,0.16,0.35,0.02,0.00
+Jacobi Medical Center/Albert Einstein College of Medicine Program,Bronx,NY,"Bronx, NY",246,272,246-272,!,0.17,0.36,0.00,0.07
+Harlem Hospital Center Program,New York,NY,"New York, NY",221,259,221-259,--,0.08,0.18,0.02,0.01
+Zucker School of Medicine at Hofstra/Northwell at Forest Hills Hospital Program,Forest Hills,NY,"Forest Hills, NY",230,265,230-265,457-674,0.34,0.41,0.08,0.24
+Iredell Health System Program,Statesville,NC,"Statesville, NC",222,254,222-254,411-588,--,--,--,0.30
+University of North Carolina Hospitals Program,Chapel Hill,NC,"Chapel Hill, NC",247,272,247-272,!,0.27,0.60,0.00,0.26
+WakeMed Health and Hospitals Program,Raleigh,NC,"Raleigh, NC",227,262,227-262,433-657,0.15,0.60,0.01,0.12
+ECU Health Medical Center/East Carolina University Program,Greenville,NC,"Greenville, NC",235,263,235-263,472-677,0.17,0.24,0.02,0.18
+University Hospitals Community Consortium Program,Chardon,OH,"Chardon, OH",229,264,229-264,456-643,0.34,0.50,0.13,0.30
+OhioHealth/Doctors Hospital Program,Columbus,OH,"Columbus, OH",230,257,230-257,463-631,0.60,0.65,0.08,0.07
+Western Reserve Hospital Program,Cuyahoga Falls,OH,"Cuyahoga Falls, OH",222,257,222-257,431-608,0.19,0.17,0.02,0.32
+Cleveland Clinic Foundation/South Pointe Hospital Program,Warrensville Heights,OH,"Warrensville Heights, OH",226,263,226-263,430-650,0.24,0.57,0.06,0.00
+Kettering Health Network/Grandview Medical Center Program,Dayton,OH,"Dayton, OH",,,--,--,--,--,--,--
+University of North Dakota Program,Fargo,ND,"Fargo, ND",240,270,240-270,508-622,0.26,0.39,0.02,0.28
+Cleveland Clinic Foundation Program,Cleveland,OH,"Cleveland, OH",246,270,246-270,531-736,0.32,0.40,0.04,0.25
+Oklahoma State University Center for Health Sciences (Stillwater) Program,Stillwater,OK,"Stillwater, OK",224,256,224-256,434-610,0.55,0.65,0.15,0.21
+Wright State University Program,Dayton,OH,"Dayton, OH",227,260,227-260,453-652,0.73,0.55,0.08,0.38
+Kettering Health Network/Kettering Medical Center Program,Kettering,OH,"Kettering, OH",236,264,236-264,568-708,0.35,0.41,0.09,0.60
+New York Medical College/Lower Bucks Hospital Program,Bristol,PA,"Bristol, PA",226,262,226-262,!,0.08,0.42,0.01,0.02
+St Luke’s Hospital – Anderson Campus Program,Easton,PA,"Easton, PA",228,258,228-258,469-603,0.24,0.28,0.10,0.36
+Geisinger Health System (Wilkes-Barre) Program,Wilkes-Barre,PA,"Wilkes-Barre, PA",229,266,229-266,439-644,0.07,0.33,0.02,0.16
+Jefferson Health Medical Education/Jefferson Einstein Montgomery Hospital Program,East Norriton,PA,"East Norriton, PA",226,257,226-257,431-586,0.22,0.32,0.00,0.15
+UPMC Medical Education/Lititz Program,Lititz,PA,"Lititz, PA",225,251,225-251,431-582,0.59,0.69,0.16,0.00
+University of Oklahoma Health Sciences Center Program,Oklahoma City,OK,"Oklahoma City, OK",239,271,239-271,483-675,0.45,0.52,0.01,0.27
+Main Line Health System/Lankenau Medical Center Program,Wynnewood,PA,"Wynnewood, PA",238,269,238-269,531-700,0.40,0.44,0.03,0.33
+UPMC Medical Education/Mercy Program,Pittsburgh,PA,"Pittsburgh, PA",,,--,--,--,--,--,--
+Wellspan Health/York Hospital Program,York,PA,"York, PA",228,264,228-264,428-626,0.15,0.44,0.02,0.28
+Sidney Kimmel Medical College at Thomas Jefferson University/TJUH Program,Philadelphia,PA,"Philadelphia, PA",,,--,--,--,--,--,--
+University of Pennsylvania Health System Program,Philadelphia,PA,"Philadelphia, PA",248,274,248-274,!,0.25,0.49,0.01,0.28
+Tower Health Program,West Reading,PA,"West Reading, PA",229,264,229-264,466-650,0.15,0.42,0.02,0.18
+Catholic Health Program,Smithtown,NY,"Smithtown, NY",,,--,--,--,--,--,--
+St. David's Healthcare Graduate Medical Education Program,Austin,TX,"Austin, TX",,,--,--,--,--,--,--
+Montefiore St. Luke's Cornwall Program,Newburgh,NY,"Newburgh, NY",229,265,229-265,411-480,0.14,0.34,0.01,0.05
+Jacobi Medical Center/North Central Bronx Hospital Program,Bronx,NY,"Bronx, NY",236,267,236-267,!,0.12,0.37,0.02,0.06
+Zucker School of Medicine at Hofstra/Northwell at South Shore University Hospital Program,Bay Shore,NY,"Bay Shore, NY",225,255,225-255,421-632,0.44,0.64,0.03,0.18
+Our Lady Of Lourdes Memorial Hospital Inc. Program,Binghamton,NY,"Binghamton, NY",218,251,218-251,!,0.24,0.39,0.04,0.05
+Hackensack Meridian Health/Mountainside Medical Center Program,Montclair,NJ,"Montclair, NJ",,,--,--,--,--,--,--
+Three Crosses Regional Hospital Program,Las Cruces,NM,"Las Cruces, NM",,,--,--,--,--,--,--
+Rutgers Health/Trinitas Regional Medical Center Program,Elizabeth,NJ,"Elizabeth, NJ",240,265,240-265,443-603,0.28,0.51,0.02,0.07
+Rutgers Health/Newark Beth Israel Medical Center Program,Newark,NJ,"Newark, NJ",224,258,224-258,448-632,0.18,0.27,0.03,0.14
+Atlantic Health Program,Summit,NJ,"Summit, NJ",226,265,226-265,433-629,0.23,0.48,0.01,0.24
+Hackensack Meridian Health/Jersey Shore University Medical Center Program,Neptune,NJ,"Neptune, NJ",234,265,234-265,500-673,0.19,0.41,0.01,0.23
+Rutgers Health/Robert Wood Johnson Medical School Program,New Brunswick,NJ,"New Brunswick, NJ",244,269,244-269,--,0.50,0.46,0.03,0.35
+New York Medical College/Hudson Regional Health - Bayonne University Hospital Program,Bayonne,NJ,"Bayonne, NJ",218,251,218-251,!,0.12,0.24,0.01,0.03
+New York Medical College at St Michael's Medical Center Program,Newark,NJ,"Newark, NJ",225,262,225-262,!,0.09,0.29,0.01,0.02
+Inspira Health Network/Inspira Medical Center Vineland Program,Vineland,NJ,"Vineland, NJ",224,257,224-257,434-579,0.20,0.38,0.04,0.11
+Rutgers Health/Community Medical Center Program,Toms River,NJ,"Toms River, NJ",219,249,219-249,415-560,0.12,0.21,0.01,0.01
+HCA Healthcare Kansas City/Centerpoint Medical Center Program,Independence,MO,"Independence, MO",,,--,--,--,--,--,--
+A.T. Still University-Kirksville College of Osteopathic Medicine Program,Kirksville,MO,"Kirksville, MO",210,252,210-252,402-547,0.11,0.33,0.05,0.07
+Washington University/B-JH/SLCH Consortium Program,St Louis,MO,"St Louis, MO",247,273,247-273,!,0.33,0.55,0.05,0.33
+HCA Healthcare Kansas City/Overland Park Regional Medical Center Program,Overland Park,KS,"Overland Park, KS",232,263,232-263,466-661,0.29,0.42,0.07,0.48
+Washington University/B-JH/SLCH Consortium at Missouri Baptist Medical Center Program,St. Louis,MO,"St. Louis, MO",233,271,233-271,512-730,0.31,0.29,0.05,0.65
+Baptist Memorial Medical Education (Jackson) Program,Jackson,MS,"Jackson, MS",218,253,218-253,410-575,0.15,0.29,0.04,0.65
+South Central Regional Medical Center Program,Laurel,MS,"Laurel, MS",224,261,224-261,407-547,0.05,0.23,0.01,0.05
+Magnolia Regional Health Center Program,Corinth,MS,"Corinth, MS",219,252,219-252,406-580,0.36,0.54,0.16,0.46
+Baptist Memorial Medical Education (Columbus) Program,Columbus,MS,"Columbus, MS",221,258,221-258,407-565,0.22,0.46,0.03,0.30
+University of Nebraska Medical Center College of Medicine Program,Omaha,NE,"Omaha, NE",238,270,238-270,498-688,0.53,0.58,0.04,0.38
+Mercy Hospital (St Louis) Program,St Louis,MO,"St Louis, MO",227,261,227-261,417-606,0.28,0.56,0.02,0.37
+Virtua Program,Voorhees,NJ,"Voorhees, NJ",235,267,235-267,488-647,0.15,0.37,0.06,0.32
+University of Nevada Reno School of Medicine Program,Reno,NV,"Reno, NV",227,261,227-261,452-620,0.27,0.47,0.01,0.18
+Greater Baltimore Medical Center Program,Baltimore,MD,"Baltimore, MD",236,267,236-267,518-821,0.27,0.57,0.01,0.17
+St Agnes HealthCare Program,Baltimore,MD,"Baltimore, MD",227,270,227-270,!,0.05,0.41,0.00,0.03
+Sinai Hospital of Baltimore Program,Baltimore,MD,"Baltimore, MD",232,266,232-266,435-764,0.14,0.31,0.00,0.18
+MedStar Health Georgetown University (Baltimore) Program,Baltimore,MD,"Baltimore, MD",,,--,--,--,--,--,--
+LSU Health Sciences Center/University Hospital and Clinics (Lafayette) Program,Lafayette,LA,"Lafayette, LA",226,263,226-263,468-679,0.29,0.56,0.08,0.30
+Louisiana State University School of Medicine Program,New Orleans,LA,"New Orleans, LA",235,266,235-266,470-661,0.35,0.64,0.08,0.28
+TidalHealth Program,Salisbury,MD,"Salisbury, MD",228,262,228-262,468-650,0.37,0.50,0.04,0.40
+Garden City Hospital Program,Garden City,MI,"Garden City, MI",,,--,--,--,--,--,--
+University of Michigan Health-West Program,Wyoming,MI,"Wyoming, MI",226,265,226-265,432-648,0.69,0.85,0.03,0.12
+McLaren Health Care/Oakland/MSU Program,Pontiac,MI,"Pontiac, MI",233,256,233-256,513-674,0.11,0.40,0.06,0.14
+UMass Chan Medical School Program,Worcester,MA,"Worcester, MA",234,269,234-269,473-697,0.41,0.52,0.04,0.35
+Tufts Medical Center Program,Boston,MA,"Boston, MA",244,271,244-271,!,0.42,0.41,0.00,0.29
+Johns Hopkins University/Bayview Medical Center Program,Baltimore,MD,"Baltimore, MD",235,269,235-269,474-776,0.29,0.28,0.00,0.20
+Trinity Health Livonia Hospital/Wayne State University Program,Livonia,MI,"Livonia, MI",234,263,234-263,478-663,0.10,0.23,0.01,0.30
+Henry Ford St. John Hospital Program,Grosse Pointe Woods,MI,"Grosse Pointe Woods, MI",240,270,240-270,512-706,0.15,0.17,0.05,0.13
+Trinity Health Oakland/Wayne State University Program,Pontiac,MI,"Pontiac, MI",229,256,229-256,!,0.06,0.29,0.01,0.08
+McLaren Health Care/Greater Lansing/MSU Program,Lansing,MI,"Lansing, MI",229,265,229-265,465-707,0.60,0.53,0.15,0.48
+Trinity Health Grand Rapids Program,Grand Rapids,MI,"Grand Rapids, MI",230,263,230-263,463-654,0.44,0.39,0.01,0.16
+Corewell Health (Dearborn) Program,Dearborn,MI,"Dearborn, MI",,,--,--,--,--,--,--
+Hurley Medical Center/Michigan State University Program,Flint,MI,"Flint, MI",238,264,238-264,--,0.18,0.20,0.02,0.04
+Wayne State University School of Medicine Program,Rochester,MI,"Rochester, MI",222,264,222-264,!,0.21,0.42,0.01,0.07
+Henry Ford Health/Henry Ford Jackson Hospital Program,Jackson,MI,"Jackson, MI",241,266,241-266,453-641,0.22,0.44,0.00,0.04
+Henry Ford Genesys Hospital Program,Grand Blanc,MI,"Grand Blanc, MI",227,255,227-255,450-656,0.38,0.57,0.09,0.36
+Mayo Clinic College of Medicine and Science (Rochester) Program,Rochester,MN,"Rochester, MN",245,273,245-273,!,0.27,0.25,0.06,0.26
+Hennepin Healthcare Program,Minneapolis,MN,"Minneapolis, MN",,,--,--,--,--,--,--
+Western Michigan University Homer Stryker MD School of Medicine Program,Kalamazoo,MI,"Kalamazoo, MI",231,266,231-266,470-693,0.33,0.38,0.03,0.35
+Griffin Hospital Program,Derby,CT,"Derby, CT",233,263,233-263,!,0.17,0.30,0.02,0.26
+Yale-New Haven Medical Center Program,New Haven,CT,"New Haven, CT",250,274,250-274,!,0.25,0.22,0.00,0.22
+Bayhealth Medical Center Program,Dover,DE,"Dover, DE",230,262,230-262,454-642,0.30,0.37,0.09,0.62
+Christiana Care Health Services Inc Program,Newark,DE,"Newark, DE",235,258,235-258,530-674,0.39,0.32,0.16,0.43
+George Washington University Program,Washington,DC,"Washington, DC",235,267,235-267,471-723,0.23,0.27,0.00,0.16
+Howard University Program,Washington,DC,"Washington, DC",229,265,229-265,!,0.19,0.26,0.04,0.21
+BayCare Health System/St. Anthony's Hospital Program,St. Petersburg,FL,"St. Petersburg, FL",230,254,230-254,460-629,0.28,0.28,0.08,0.26
+University of Central Florida/HCA Florida Healthcare (Greater Orlando/Lake Monroe) Program,Sanford,FL,"Sanford, FL",227,255,227-255,468-632,0.22,0.46,0.03,0.20
+HCA Florida Healthcare/USF Morsani College of Medicine GME - Tampa South/Sarasota Doctors Program,Sarasota,FL,"Sarasota, FL",226,254,226-254,448-650,0.35,0.47,0.02,0.06
+BayCare Health System (Morton Plant North Bay Hospital) Program,New Port Richey,FL,"New Port Richey, FL",219,253,219-253,425-611,0.38,0.26,0.07,0.30
+HCA Florida Healthcare/USF Morsani College of Medicine GME - Tampa North/Oak Hill Hospital Program,Brooksville,FL,"Brooksville, FL",229,256,229-256,452-639,0.05,0.06,0.09,0.10
+University of Miami Hospital and Clinics/Holy Cross Hospital Program,Fort Lauderdale,FL,"Fort Lauderdale, FL",229,263,229-263,465-656,0.25,0.29,0.02,0.19
+University of Central Florida/HCA Florida Healthcare (Gainesville) Program,Gainesville,FL,"Gainesville, FL",226,260,226-260,431-620,0.17,0.17,0.05,0.32
+Florida International University / Baptist Health Program,Miami,FL,"Miami, FL",233,265,233-265,444-638,0.35,0.46,0.03,0.39
+University of Central Florida/HCA Florida Healthcare Program,Tallahassee,FL,"Tallahassee, FL",,,--,--,--,--,--,--
+HCA Florida Healthcare/USF Morsani College of Medicine GME - Tampa North/Trinity Hospital Program,Trinity,FL,"Trinity, FL",226,253,226-253,442-608,0.13,0.32,0.07,0.01
+HCA Florida Healthcare/USF Morsani College of Medicine GME - Tampa North/Citrus Hospital Program,Inverness,FL,"Inverness, FL",223,253,223-253,435-640,0.22,0.38,0.08,0.28
+Palmetto General Hospital Program,Hialeah,FL,"Hialeah, FL",224,256,224-256,505-661,0.32,0.65,0.06,0.12
+Florida State University College of Medicine/Ascension Sacred Heart Hospital Program,Pensacola,FL,"Pensacola, FL",227,258,227-258,450-654,0.40,0.61,0.04,0.12
+HCA Florida Healthcare/USF Morsani College of Medicine GME - Tampa South/Blake Hospital Program,Bradenton,FL,"Bradenton, FL",232,255,232-255,466-607,0.25,0.40,0.09,0.14
+Orlando Health Program,Orlando,FL,"Orlando, FL",235,264,235-264,444-680,0.23,0.48,0.01,0.19
+University of Florida Program,Gainesville,FL,"Gainesville, FL",241,270,241-270,491-693,0.39,0.52,0.12,0.41
+Wellstar Health System Spalding Program,Griffin,GA,"Griffin, GA",229,261,229-261,421-587,0.13,0.39,0.03,0.57
+South Georgia Medical Center Program,Valdosta,GA,"Valdosta, GA",221,256,221-256,421-569,0.16,0.67,0.17,0.48
+Wellstar Health System/Paulding Hospital Program,Hiram,GA,"Hiram, GA",,,--,--,--,--,--,--
+Wellstar Health System/Wellstar Kennestone Regional Medical Center Program,Marietta,GA,"Marietta, GA",227,259,227-259,449-625,0.37,0.54,0.04,0.28
+University of Hawaii John A Burns School of Medicine Program,Honolulu,HI,"Honolulu, HI",220,261,220-261,476-655,0.33,0.43,0.06,0.48
+Kaiser Permanente Hawaii Program,Honolulu,HI,"Honolulu, HI",226,261,226-261,439-616,0.57,0.64,0.12,0.34
+Emory University School of Medicine Program,Atlanta,GA,"Atlanta, GA",243,271,243-271,!,0.28,0.35,0.03,0.23
+Advocate Health Care/Advocate Illinois Masonic Medical Center Program,Chicago,IL,"Chicago, IL",229,265,229-265,471-726,0.08,0.38,0.00,0.11
+Chicago Medical School/Rosalind Franklin University of Medicine & Science/Northwestern Medicine McHenry Hospital Program,McHenry,IL,"McHenry, IL",242,261,242-261,466-576,0.24,0.46,0.03,0.06
+Swedish Hospital Program,Chicago,IL,"Chicago, IL",235,267,235-267,470-687,0.19,0.32,0.05,0.15
+Riverside Medical Center Program,Kankakee,IL,"Kankakee, IL",230,257,230-257,416-604,0.64,0.76,0.03,0.06
+Cook County Health and Hospitals System Program,Chicago,IL,"Chicago, IL",232,267,232-267,446-654,0.10,0.29,0.02,0.14
+Chicago Medical School/Rosalind Franklin University of Medicine & Science Program,North Chicago,IL,"North Chicago, IL",231,268,231-268,!,0.09,0.29,0.01,0.04
+University of Chicago Program,Chicago,IL,"Chicago, IL",243,272,243-272,!,0.15,0.29,0.00,0.15
+Southern Illinois University Program,Springfield,IL,"Springfield, IL",230,262,230-262,497-686,0.23,0.38,0.03,0.36
+Indiana University School of Medicine (Southwest Indiana) Program,Vincennes,IN,"Vincennes, IN",226,261,226-261,431-598,0.11,0.04,0.12,0.21
+Mount Sinai Hospital Medical Center of Chicago Program,Chicago,IL,"Chicago, IL",233,265,233-265,!,0.06,0.17,0.01,0.03
+University of Chicago (Endeavor Health – NorthShore Hospitals) Program,Evanston,IL,"Evanston, IL",239,267,239-267,520-680,0.36,0.44,0.00,0.23
+MercyOne North Iowa Medical Center Program,Mason City,IA,"Mason City, IA",223,263,223-263,428-646,0.33,0.58,0.07,0.54
+University of Iowa Health Care Medical Center Program,Iowa City,IA,"Iowa City, IA",235,270,235-270,533-737,0.63,0.74,0.07,0.41
+Advocate Health Care/Advocate Christ Medical Center Program,Oak Lawn,IL,"Oak Lawn, IL",231,264,231-264,453-666,0.24,0.62,0.02,0.18
+University of Kansas (Wichita) Program,Wichita,KS,"Wichita, KS",231,264,231-264,451-634,0.23,0.40,0.00,0.14
+University of Kentucky College of Medicine (Ashland) Program,Ashland,KY,"Ashland, KY",218,264,218-264,412-758,0.19,0.74,0.01,0.16
+University of Kentucky College of Medicine (Pikeville) Program,Pikeville,KY,"Pikeville, KY",223,256,223-256,415-610,0.20,0.75,0.05,0.69
+Louisiana State University School of Medicine (Baton Rouge) Program,Baton Rouge,LA,"Baton Rouge, LA",,,--,--,--,--,--,--
+University of Louisville School of Medicine Program,Louisville,KY,"Louisville, KY",234,265,234-265,508-722,0.54,0.81,0.06,0.46
+Willis Knighton Health Program,Shreveport,LA,"Shreveport, LA",232,266,232-266,410-637,0.23,0.31,0.03,0.32
+University of California (San Francisco) Program,San Francisco,CA,"San Francisco, CA",244,275,244-275,--,0.11,0.47,0.02,0.24
+UCLA David Geffen School of Medicine/UCLA Medical Center Program,Los Angeles,CA,"Los Angeles, CA",246,275,246-275,--,0.27,0.32,0.00,0.24
+University of California (Irvine) Program,Orange,CA,"Orange, CA",238,269,238-269,472-716,0.30,0.40,0.04,0.27
+Loma Linda University Health Education Consortium Program,Loma Linda,CA,"Loma Linda, CA",232,264,232-264,476-674,0.31,0.52,0.02,0.24
+University of Colorado Program,Aurora,CO,"Aurora, CO",243,272,243-272,!,0.32,0.41,0.05,0.27
+Intermountain Health/Saint Joseph Hospital Program,Denver,CO,"Denver, CO",236,270,236-270,498-717,0.29,0.48,0.01,0.19
+Connecticut Institute For Communities Health Program,Danbury,CT,"Danbury, CT",,,--,--,--,--,--,--
+University of Connecticut (Waterbury) Program,Waterbury,CT,"Waterbury, CT",231,266,231-266,!,0.26,0.59,0.00,0.27
+Bridgeport Hospital/Yale University Program,Bridgeport,CT,"Bridgeport, CT",236,271,236-271,486-760,0.18,0.42,0.00,0.12
+Quinnipiac University Frank H. Netter MD School of Medicine/St Vincent's Medical Center Program,Bridgeport,CT,"Bridgeport, CT",233,267,233-267,470-689,0.26,0.45,0.03,0.36
+Parkview Medical Center Program,Pueblo,CO,"Pueblo, CO",224,257,224-257,418-598,0.14,0.62,0.02,0.22
+University of Arkansas for Medical Sciences (UAMS) College of Medicine Program,Little Rock,AR,"Little Rock, AR",236,269,236-269,489-689,0.35,0.50,0.01,0.34
+Prime West Consortium/Shasta Regional Medical Center Program,Redding,CA,"Redding, CA",224,261,224-261,--,0.06,0.29,0.02,0.03
+Riverside University Health System Program,Moreno Valley,CA,"Moreno Valley, CA",228,255,228-255,433-638,0.44,0.53,0.01,0.28
+St Joseph's Medical Center Program (Mercy San Juan Medical Center),Carmichael,CA,"Carmichael, CA",226,257,226-257,428-636,0.24,0.33,0.06,0.16
+Providence St. Mary Medical Center Program,Apple Valley,CA,"Apple Valley, CA",221,249,221-249,417-566,0.33,0.60,0.14,0.32
+Morehouse School of Medicine/Bakersfield Memorial Hospital Program,Bakersfield,CA,"Bakersfield, CA",223,244,223-244,443-594,0.24,0.33,0.21,0.27
+Adventist Health Central California Network (Bakersfield) Program,Bakersfield,CA,"Bakersfield, CA",222,254,222-254,427-619,0.16,0.23,0.12,0.35
+Arrowhead Regional Medical Center Program,Colton,CA,"Colton, CA",226,254,226-254,423-618,0.19,0.51,0.01,0.10
+Prime West Consortium/West Anaheim Medical Center Program,Anaheim,CA,"Anaheim, CA",234,263,234-263,!,0.10,0.30,0.01,0.03
+HCA Healthcare/Los Robles Regional Medical Center Program,Thousand Oaks,CA,"Thousand Oaks, CA",236,262,236-262,450-711,0.29,0.40,0.17,0.53
+Prime West Consortium/Desert Valley Hospital Program,Victorville,CA,"Victorville, CA",224,262,224-262,!,0.07,0.17,0.03,0.10
+University of Arkansas for Medical Sciences (UAMS) College of Medicine (Northwest) Program,Fayetteville,AR,"Fayetteville, AR",224,255,224-255,433-605,0.61,0.50,0.05,0.33
+White River Health System Program,Batesville,AR,"Batesville, AR",231,264,231-264,!,0.26,0.50,0.02,0.35
+University of Arizona College of Medicine-Tucson Program,Tucson,AZ,"Tucson, AZ",234,265,234-265,498-679,0.38,0.61,0.13,0.39
+University of Arkansas for Medical Sciences Regional Centers Program,Fayetteville,AR,"Fayetteville, AR",227,263,227-263,420-679,0.73,0.72,0.14,0.59
+Creighton University School of Medicine-Phoenix Program,Phoenix,AZ,"Phoenix, AZ",230,266,230-266,446-663,0.19,0.67,0.01,0.22
+Midwestern University GME Consortium / Canyon Vista Program,Sierra Vista,AZ,"Sierra Vista, AZ",,,--,--,--,--,--,--
+Mobile Infirmary Medical Center Program,Mobile,AL,"Mobile, AL",,,--,--,--,--,--,--
+Southeast Health Program,Dothan,AL,"Dothan, AL",225,259,225-259,435-599,0.17,0.36,0.16,0.42
+North Alabama Medical Center Program,Florence,AL,"Florence, AL",221,260,221-260,403-626,0.11,0.38,0.04,0.67
+Thomas Hospital Program,Fairhope,AL,"Fairhope, AL",221,256,221-256,429-637,0.21,0.37,0.07,0.49
+East Alabama Medical Center Program,Opelika,AL,"Opelika, AL",223,254,223-254,429-628,0.29,0.46,0.19,0.57
+USA Health Program,Mobile,AL,"Mobile, AL",231,267,231-267,476-671,0.42,0.66,0.05,0.45
+"TMC Health Medical Education Program, Inc. (THMEP) Program",Tucson,AZ,"Tucson, AZ",227,257,227-257,419-641,0.10,0.40,0.00,0.04
+Health Education Services/Northwest Healthcare (Tucson) Program,Tucson,AZ,"Tucson, AZ",222,257,222-257,425-666,0.19,0.34,0.02,0.24
+University of California (Irvine)/Irvine Medical Center Program,Irvine,CA,"Irvine, CA",232,264,232-264,452-678,--,--,--,0.76
+United Health Centers of the San Joaquin Valley Program,Fresno,CA,"Fresno, CA",219,253,219-253,419-591,0.16,0.28,0.17,0.42
+OPTI West/San Antonio Regional Hospital Program,Upland,CA,"Upland, CA",231,257,231-257,450-661,0.18,0.25,0.22,0.44
+Unity Health-White County Medical Center Program,Searcy,AR,"Searcy, AR",223,262,223-262,427-605,0.25,0.31,0.09,0.21
+Baptist Health - UAMS Program,North Little Rock,AR,"North Little Rock, AR",232,260,232-260,466-686,0.31,0.26,0.03,0.15
+UCSF Health – St. Mary’s Hospital Program,San Francisco,CA,"San Francisco, CA",,,--,--,--,--,--,--
+St. Francis Medical Center Program,Monroe,LA,"Monroe, LA",228,264,228-264,411-615,0.08,0.26,0.04,0.33
+Leonard J Chabert Medical Center Program,Houma,LA,"Houma, LA",221,256,221-256,417-637,0.21,0.24,0.05,0.38
+Ochsner Clinic Foundation Program,New Orleans,LA,"New Orleans, LA",225,264,225-264,444-662,0.43,0.62,0.10,0.50
+University of Kentucky College of Medicine (Bowling Green) Program,Bowling Green,KY,"Bowling Green, KY",229,264,229-264,484-691,0.23,0.62,0.06,0.45
+University of Kansas School of Medicine (Olathe) Program,Olathe,KS,"Olathe, KS",232,263,232-263,451-644,0.24,0.38,0.03,0.61
+Loyola University Medical Center Program,Maywood,IL,"Maywood, IL",237,268,237-268,543-776,0.41,0.60,0.01,0.29
+McGaw Medical Center of Northwestern University Program,Chicago,IL,"Chicago, IL",245,274,245-274,!,0.18,0.26,0.05,0.18
+Morehouse School of Medicine Program,Atlanta,GA,"Atlanta, GA",222,257,222-257,425-615,0.21,0.50,0.05,0.34
+Wellstar Health System/Wellstar Cobb Hospital Program,Austell,GA,"Austell, GA",228,264,228-264,497-621,0.07,0.15,0.03,0.35
+Tift Regional Health System Program,Tifton,GA,"Tifton, GA",217,247,217-247,401-576,--,--,--,0.22
+University of Florida College of Medicine Jacksonville Program,Jacksonville,FL,"Jacksonville, FL",235,264,235-264,511-677,0.17,0.33,0.02,0.14
+University of South Florida Morsani Program,Tampa,FL,"Tampa, FL",247,270,247-270,529-681,0.24,0.41,0.03,0.26
+Broward Health Medical Center Program,Fort Lauderdale,FL,"Fort Lauderdale, FL",225,256,225-256,466-639,0.28,0.52,0.06,0.06
+Health Education Services/Physicians Regional Medical Center - Pine Ridge Program,Naples,FL,"Naples, FL",235,264,235-264,!,--,--,--,0.00
+Broward Health North Program,Deerfield Beach,FL,"Deerfield Beach, FL",225,257,225-257,470-641,0.44,0.50,0.06,0.28
+Wellington Regional Medical Center Program,Wellington,FL,"Wellington, FL",232,257,232-257,494-644,0.29,0.22,0.12,0.33
+MetroWest Medical Center Program,Framingham,MA,"Framingham, MA",237,268,237-268,--,0.23,0.16,0.02,0.11
+University of Michigan Program,Ann Arbor,MI,"Ann Arbor, MI",,,--,--,--,--,--,--
+Mass General Brigham/Salem Hospital Program,Salem,MA,"Salem, MA",236,270,236-270,449-799,0.22,0.33,0.00,0.13
+Mass General Brigham/Brigham and Women's Hospital Program,Boston,MA,"Boston, MA",248,274,248-274,--,0.20,0.42,0.01,0.26
+Lahey Clinic Program,Burlington,MA,"Burlington, MA",228,265,228-265,476-668,0.13,0.28,0.00,0.12
+Boston University Medical Center Program,Boston,MA,"Boston, MA",244,271,244-271,--,0.28,0.43,0.00,0.27
+McLaren Health Care Corporation (Bay City) Program,Bay City,MI,"Bay City, MI",232,257,232-257,!,0.13,0.13,0.10,0.02
+University of Maryland Medical Center Midtown Campus Program,Baltimore,MD,"Baltimore, MD",245,271,245-271,!,0.17,0.24,0.02,0.10
+University of Maryland Program,Baltimore,MD,"Baltimore, MD",237,267,237-267,516-746,0.44,0.34,0.04,0.32
+University of Maryland Capital Region Health Program,Largo,MD,"Largo, MD",222,261,222-261,!,0.07,0.25,0.00,0.08
+Mount Auburn Hospital Program,Cambridge,MA,"Cambridge, MA",233,270,233-270,465-792,0.26,0.54,0.00,0.28
+Berkshire Medical Center Program,Pittsfield,MA,"Pittsfield, MA",227,260,227-260,453-663,0.08,0.20,0.01,0.06
+Kirk Kerkorian School of Medicine at UNLV Program,Las Vegas,NV,"Las Vegas, NV",232,264,232-264,473-669,0.47,0.74,0.06,0.36
+Holy Name Medical Center Program,Teaneck,NJ,"Teaneck, NJ",233,261,233-261,466-649,0.10,0.18,0.03,0.40
+OPTI West/Benefis Hospital Program,Great Falls,MT,"Great Falls, MT",227,260,227-260,419-622,0.11,0.23,0.03,0.47
+SSM St Mary's Hospital-St Louis Program,St Louis,MO,"St Louis, MO",230,259,230-259,!,0.07,0.39,0.01,0.01
+University of Missouri-Columbia Program,Columbia,MO,"Columbia, MO",233,263,233-263,492-679,0.34,0.46,0.01,0.18
+Hackensack Meridian Health/Ocean University Medical Center Program,Brick,NJ,"Brick, NJ",228,260,228-260,442-633,0.14,0.44,0.03,0.12
+Jefferson Health New Jersey Program,Stratford,NJ,"Stratford, NJ",228,254,228-254,477-625,0.50,0.48,0.06,0.05
+Rutgers Health/Jersey City Medical Center Program,Jersey City,NJ,"Jersey City, NJ",228,265,228-265,452-634,0.13,0.24,0.01,0.12
+Rutgers Health/Monmouth Medical Center Program,Long Branch,NJ,"Long Branch, NJ",232,269,232-269,447-582,0.22,0.45,0.02,0.31
+St Joseph's University Medical Center Program,Paterson,NJ,"Paterson, NJ",,,--,--,--,--,--,--
+Saint Peter's University Hospital/Rutgers Robert Wood Johnson Medical School Program,New Brunswick,NJ,"New Brunswick, NJ",228,263,228-263,472-641,0.08,0.29,0.03,0.24
+AtlantiCare Regional Medical Center Program,Atlantic City,NJ,"Atlantic City, NJ",224,258,224-258,435-661,0.43,0.17,0.06,0.22
+Hackensack Meridian Health/JFK University Medical Center Program,Edison,NJ,"Edison, NJ",231,258,231-258,492-645,0.37,0.28,0.06,0.15
+Family Health Center at NYU Langone Program,Brooklyn,NY,"Brooklyn, NY",229,258,229-258,463-659,0.40,0.45,0.05,0.53
+HES/Mountain View Regional Medical Center Program,Las Cruces,NM,"Las Cruces, NM",225,257,225-257,429-625,0.18,0.38,0.05,0.17
+University of New Mexico School of Medicine Program,Albuquerque,NM,"Albuquerque, NM",234,268,234-268,482-679,0.28,0.42,0.12,0.38
+Carrollton Regional Medical Center Program,Carrollton,TX,"Carrollton, TX",,,--,--,--,--,--,--
+Ochsner Lafayette General Medical Center Program,Lafayette,LA,"Lafayette, LA",,,--,--,--,--,--,--
+Abington Memorial Hospital Program,Abington,PA,"Abington, PA",230,262,230-262,482-658,0.14,0.35,0.04,0.63
+UPMC Medical Education/McKeesport Hospital Program,McKeesport,PA,"McKeesport, PA",,,--,--,--,--,--,--
+University of Pennsylvania Health System/Pennsylvania Hospital Program,Philadelphia,PA,"Philadelphia, PA",238,272,238-272,513-716,0.12,0.34,0.00,0.08
+Jefferson Health Medical Education/Jefferson Einstein Philadelphia Hospital Program,Philadelphia,PA,"Philadelphia, PA",,,--,--,--,--,--,--
+Jefferson Health Northeast Program,Philadelphia,PA,"Philadelphia, PA",229,258,229-258,461-641,0.29,0.35,0.01,0.03
+University of Toledo Program,Toledo,OH,"Toledo, OH",229,265,229-265,400-664,0.22,0.43,0.04,0.33
+St Elizabeth Youngstown Hospital/NEOMED Program,Youngstown,OH,"Youngstown, OH",231,260,231-260,467-654,0.16,0.28,0.01,0.15
+Canton Medical Education Foundation/NEOMED Program,Canton,OH,"Canton, OH",226,266,226-266,415-558,0.10,0.19,0.01,0.23
+Fairfield Medical Center Program,Lancaster,OH,"Lancaster, OH",,,!,409-536,0.45,0.83,0.09,0.03
+Mercy Health Fairfield Hospital Program,Fairfield,OH,"Fairfield, OH",224,257,224-257,414-587,0.16,0.23,0.03,0.26
+Cone Health Program,Greensboro,NC,"Greensboro, NC",229,267,229-267,466-640,0.45,0.49,0.01,0.25
+Lincoln Medical and Mental Health Center Program,Bronx,NY,"Bronx, NY",241,271,241-271,!,0.19,0.27,0.06,0.21
+St John's Episcopal Hospital-South Shore Program,Far Rockaway,NY,"Far Rockaway, NY",,,--,--,--,--,--,--
+SUNY Upstate Medical University Program,Syracuse,NY,"Syracuse, NY",232,265,232-265,449-647,0.16,0.37,0.01,0.31
+Richmond University Medical Center Program,Staten Island,NY,"Staten Island, NY",226,260,226-260,452-617,0.06,0.18,0.04,0.28
+New York Medical College (Metropolitan) Program,New York,NY,"New York, NY",233,268,233-268,--,0.10,0.42,0.02,0.12
+One Brooklyn Health System/Interfaith Medical Center Program,Brooklyn,NY,"Brooklyn, NY",,,--,--,--,--,--,--
+Flushing Hospital Medical Center Program,Flushing,NY,"Flushing, NY",239,264,239-264,499-631,0.27,0.26,0.15,0.36
+Westchester Medical Center Program,Valhalla,NY,"Valhalla, NY",231,268,231-268,440-680,0.46,0.51,0.03,0.35
+St. John's Riverside Hospital Program,Yonkers,NY,"Yonkers, NY",225,259,225-259,433-609,0.40,0.46,0.11,0.31
+Bassett Medical Center Program,Cooperstown,NY,"Cooperstown, NY",227,263,227-263,!,0.07,0.25,0.01,0.10
+Cayuga Medical Center Program,Ithaca,NY,"Ithaca, NY",224,258,224-258,421-719,0.06,0.19,0.01,0.18
+NYU Grossman Long Island School of Medicine Primary Care Program,Patchogue,NY,"Patchogue, NY",226,254,226-254,424-593,0.30,0.37,0.12,0.03
+Arnot Ogden Medical Center Program,Elmira,NY,"Elmira, NY",221,254,221-254,431-596,0.23,0.31,0.09,0.19
+Texas Tech University HSC El Paso/Hospitals of Providence Transmountain Campus Program,El Paso,TX,"El Paso, TX",226,261,226-261,498-678,0.10,0.15,0.07,0.38
+University of Texas RGV (Knapp) Program,Weslaco,TX,"Weslaco, TX",,,--,--,--,--,--,--
+Houston Methodist (The Woodlands) Program,The Woodlands,TX,"The Woodlands, TX",225,262,225-262,451-653,0.23,0.20,0.01,0.19
+"Doctors Hospital at Renaissance, Ltd. Program",Edinburg,TX,"Edinburg, TX",221,256,221-256,!,0.08,0.19,0.01,0.26
+VA Caribbean Healthcare System Program,San Juan,PR,"San Juan, PR",229,253,229-253,--,0.24,0.52,0.11,0.57
+Conemaugh Memorial Medical Center Program,Johnstown,PA,"Johnstown, PA",236,266,236-266,510-590,0.09,0.26,0.02,0.08
+San Juan City Hospital Program,San Juan,PR,"San Juan, PR",,,--,--,--,--,--,--
+Aurora Health Care Program,Milwaukee,WI,"Milwaukee, WI",231,260,231-260,452-677,0.36,0.56,0.01,0.23
+University of Texas Health Science Center at Houston Program,Houston,TX,"Houston, TX",235,265,235-265,547-725,0.13,0.35,0.01,0.18
+University of Utah Health Program,Salt Lake City,UT,"Salt Lake City, UT",241,271,241-271,489-796,0.64,0.67,0.11,0.56
+University of Texas RGV (VBMC) Program,Harlingen,TX,"Harlingen, TX",223,257,223-257,!,0.15,0.33,0.04,0.30
+MultiCare Health System Program,Spokane,WA,"Spokane, WA",,,--,--,--,--,--,--
+Texas Tech University (Amarillo) Program,Amarillo,TX,"Amarillo, TX",230,259,230-259,!,0.28,0.53,0.03,0.20
+Meharry Medical College Program,Nashville,TN,"Nashville, TN",232,259,232-259,447-659,0.09,0.06,0.18,0.20
+Stony Brook Medicine/Southampton Hospital Program,Southampton,NY,"Southampton, NY",231,256,231-256,471-647,0.35,0.19,0.16,0.52
+Brooklyn Hospital Center Program,Brooklyn,NY,"Brooklyn, NY",235,261,235-261,453-610,0.10,0.14,0.03,0.06
+SUNY Downstate Health Sciences University Program,Brooklyn,NY,"Brooklyn, NY",231,266,231-266,436-724,0.17,0.30,0.03,0.19
+Stony Brook Medicine/University Hospital Program,Stony Brook,NY,"Stony Brook, NY",232,265,232-265,471-680,0.54,0.51,0.01,0.31
+Woodhull Medical and Mental Health Center Program,Brooklyn,NY,"Brooklyn, NY",236,264,236-264,--,0.11,0.26,0.00,0.03
+St Barnabas Hospital Program,Bronx,NY,"Bronx, NY",,,--,--,--,--,--,--
+Mercy Health - Anderson Hospital Program,Cincinnati,OH,"Cincinnati, OH",227,264,227-264,413-722,0.20,0.51,0.01,0.15
+Wright Center for Graduate Medical Education Program A,Scranton,PA,"Scranton, PA",226,262,226-262,417-608,0.14,0.38,0.04,0.20
+Mass General Brigham/Massachusetts General Hospital Program,Boston,MA,"Boston, MA",249,275,249-275,--,--,--,--,0.24
+Boston Medical Center-Brighton Program,Boston,MA,"Boston, MA",236,270,236-270,542-750,0.21,0.47,0.02,0.14
+St Vincent Hospital Program,Worcester,MA,"Worcester, MA",238,269,238-269,!,0.23,0.53,0.01,0.11
+HCA Florida Healthcare/Lawnwood Hospital Program,Fort Pierce,FL,"Fort Pierce, FL",229,258,229-258,460-658,0.35,0.29,0.09,0.40
+Larkin Community Hospital Palm Springs Campus Program,Hialeah,FL,"Hialeah, FL",,,--,--,--,--,--,--
+Olympia Fields Hospital Program,Olympia Fields,IL,"Olympia Fields, IL",226,255,226-255,439-610,0.33,0.42,0.08,0.26
+Midwestern University GME Consortium / Verde Valley Program,Cottonwood,AZ,"Cottonwood, AZ",231,263,231-263,476-599,0.18,0.60,0.03,0.35
+HCA Healthcare/Tufts University School of Medicine: Portsmouth Regional Hospital Program,Portsmouth,NH,"Portsmouth, NH",230,268,230-268,412-664,0.21,0.40,0.09,0.28
+William Beaumont Army Medical Center Program,Fort Bliss,TX,"Fort Bliss, TX",,,--,--,--,--,--,--
+San Antonio Uniformed Services Health Education Consortium Program,JBSA Fort Sam Houston,TX,"JBSA Fort Sam Houston, TX",,,--,--,--,--,--,--
+South Texas Health System GME Consortium Program,McAllen,TX,"McAllen, TX",230,259,230-259,446-630,0.11,0.19,0.16,0.38
+HCA Houston Healthcare/University of Houston (Clear Lake) Program,Webster,TX,"Webster, TX",230,262,230-262,474-641,--,--,--,0.43
+Methodist Healthcare System of San Antonio Program,San Antonio,TX,"San Antonio, TX",227,259,227-259,431-618,0.41,0.36,0.22,0.62
+Bon Secours St. Francis Program,Greenville,SC,"Greenville, SC",225,258,225-258,428-648,0.25,0.38,0.10,0.40
+Methodist Le Bonheur Healthcare Program,Memphis,TN,"Memphis, TN",225,252,225-252,424-606,0.21,0.24,0.06,0.47
+Madigan Army Medical Center Program,Tacoma,WA,"Tacoma, WA",,,--,--,--,--,--,--
+Naval Medical Center (Portsmouth) Program,Portsmouth,VA,"Portsmouth, VA",,,--,--,--,--,--,--
+St Luke's University Hospital/Easton Hospital Program,Easton,PA,"Easton, PA",,,--,--,--,--,--,--
+Allegheny Health Network Medical Education Consortium (AGH) Program,Pittsburgh,PA,"Pittsburgh, PA",232,267,232-267,521-691,0.25,0.38,0.00,0.23
+Tower Health/Phoenixville Hospital Program,Phoenixville,PA,"Phoenixville, PA",227,267,227-267,497-640,0.10,0.27,0.03,0.40
+University Hospitals Community Consortium (Parma) Program,Parma,OH,"Parma, OH",221,255,221-255,411-619,0.34,0.57,0.08,0.36
+The MetroHealth System/Case Western Reserve University Program,Cleveland,OH,"Cleveland, OH",234,267,234-267,471-676,0.32,0.20,0.03,0.22
+"Osteopathic Medical Education Consortium of Oklahoma, Inc. (OMECO) Program",Tahlequah,OK,"Tahlequah, OK",221,254,221-254,413-603,0.26,0.33,0.15,0.18
+Univ of North Dakota School of Medicine and Health Sciences Program,Bismarck,ND,"Bismarck, ND",233,265,233-265,432-647,0.20,0.56,0.02,0.39
+Womack Army Medical Center Program,Fort Bragg,NC,"Fort Bragg, NC",,,--,--,--,--,--,--
+Jamaica Hospital Medical Center Program,Jamaica,NY,"Jamaica, NY",230,257,230-257,455-631,0.11,0.19,0.06,0.19
+New York-Presbyterian Brooklyn Methodist Hospital Program,Brooklyn,NY,"Brooklyn, NY",233,265,233-265,482-674,0.31,0.37,0.04,0.28
+SUNY Downstate Health Sciences University (Primary Care) Program,Brooklyn,NY,"Brooklyn, NY",224,260,224-260,424-630,0.14,0.07,0.06,0.52
+Mercy Hospital Springfield Program,Springfield,MO,"Springfield, MO",,,--,--,--,--,--,--
+"Western Reserve Health Education, Inc. Program",Sharon,PA,"Sharon, PA",,,--,--,--,--,--,--
+Valley Health System Program,Las Vegas,NV,"Las Vegas, NV",229,256,229-256,449-615,0.23,0.37,0.21,0.55
+"Hannibal Regional Healthcare System, Inc. Program",Hannibal,MO,"Hannibal, MO",222,255,222-255,402-580,0.04,0.12,0.04,0.50
+Keesler Medical Center Program,Keesler AFB,MS,"Keesler AFB, MS",,,--,--,--,--,--,--
+Corewell Health (Farmington Hills) Program,Farmington Hills,MI,"Farmington Hills, MI",,,--,--,--,--,--,--
+National Capital Consortium Program,Bethesda,MD,"Bethesda, MD",,,--,--,--,--,--,--
+Insight Hospital and Medical Center Chicago Program,Chicago,IL,"Chicago, IL",221,255,221-255,403-581,0.10,0.20,0.03,0.16
+Ascension Illinois/Saint Joseph (Chicago) Program,Chicago,IL,"Chicago, IL",240,269,240-269,501-754,0.06,0.17,0.02,0.03
+Piedmont Athens Regional Program,Athens,GA,"Athens, GA",221,260,221-260,!,0.05,0.37,0.00,0.09
+Tripler Army Medical Center Program,Tripler AMC,HI,"Tripler AMC, HI",217,259,217-259,435-581,0.52,0.64,0.23,0.54
+HCA Florida Healthcare/USF Morsani College of Medicine GME - Tampa South/Northside Hospital Program,St Petersburg,FL,"St Petersburg, FL",221,260,221-260,444-611,0.48,0.63,0.01,0.11
+"Southeast Georgia Health System, Inc. Program",Brunswick,GA,"Brunswick, GA",,,--,--,--,--,--,--
+BayCare Health System - Mease Countryside Hospital Program,Safety Harbor,FL,"Safety Harbor, FL",220,254,220-254,429-633,0.28,0.93,0.10,0.39
+Health Care Authority of the City of Huntsville Program,Huntsville,AL,"Huntsville, AL",224,263,224-263,414-607,0.17,0.87,0.04,0.26
+Stanford Health Care-Sponsored Stanford University Program,Stanford,CA,"Stanford, CA",250,276,250-276,--,0.19,0.53,0.03,0.27
+San Joaquin General Hospital Program,French Camp,CA,"French Camp, CA",235,264,235-264,!,0.12,0.44,0.03,0.01
+Naval Medical Center (San Diego) Program,San Diego,CA,"San Diego, CA",,,--,--,--,--,--,--
+Sierra View Medical Center Program,Porterville,CA,"Porterville, CA",222,255,222-255,414-617,0.16,0.30,0.03,0.10
+St. Agnes Medical Center (Fresno) Program,Fresno,CA,"Fresno, CA",241,265,241-265,460-669,0.11,0.45,0.05,0.20
+North East Medical Services Program,Daly City,CA,"Daly City, CA",223,258,223-258,414-656,0.16,0.38,0.05,0.09

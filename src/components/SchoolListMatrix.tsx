@@ -11,6 +11,11 @@ import {
   evaluateProgramTier,
   parseScoreRange,
   getStoredApplicantStep2Ck,
+  CANONICAL_SPECIALTIES,
+  setStoredTargetSpecialty,
+  loadItemsForSpecialty,
+  getStorageKeyForSpecialty,
+  DEFAULT_INTERNAL_MEDICINE_SAMPLE_ITEMS,
 } from '@/domain/school-list-models';
 import {
   computeSignalingRecommendation,
@@ -54,123 +59,7 @@ interface SchoolListMatrixProps {
   onBack: () => void;
 }
 
-const DEFAULT_ITEMS: SchoolListItem[] = [
-  {
-    id: 'item-1',
-    programId: '1402421162',
-    programNumber: '1402421162',
-    programName: 'Massachusetts General Hospital',
-    specialty: 'Internal Medicine',
-    city: 'Boston',
-    state: 'MA',
-    region: 'New England',
-    address: '55 Fruit Street, Bulfinch 120, Boston, MA 02114',
-    programDirector: 'J. Kevin Tucker, MD',
-    step2ScoreRange: '250 - 259',
-    step2Min: 250,
-    step2Max: 259,
-    tier: 'target',
-    signal: 'gold',
-    yieldNoSignal: undefined,
-    yieldSilver: undefined,
-    yieldGold: undefined,
-    advisorNotes: 'Strong research emphasis; Gold signal essential for out-of-region consideration.',
-    residencyExplorerUrl: 'https://www.residencyexplorer.org/?utm_source=gemini',
-    doximityUrl: 'https://www.doximity.com/residency/programs/1402421162',
-  },
-  {
-    id: 'item-2',
-    programId: '1402421160',
-    programNumber: '1402421160',
-    programName: 'Brigham and Women’s Hospital',
-    specialty: 'Internal Medicine',
-    city: 'Boston',
-    state: 'MA',
-    region: 'New England',
-    address: '75 Francis Street, Boston, MA 02115',
-    programDirector: 'Maria A. Yialamas, MD',
-    step2ScoreRange: '250 - 259',
-    step2Min: 250,
-    step2Max: 259,
-    tier: 'target',
-    signal: 'gold',
-    yieldNoSignal: undefined,
-    yieldSilver: undefined,
-    yieldGold: undefined,
-    advisorNotes: 'Strong applicant pool; Gold token yields +25% jump over Silver.',
-    residencyExplorerUrl: 'https://www.residencyexplorer.org/?utm_source=gemini',
-    doximityUrl: 'https://www.doximity.com/residency/programs/1402421160',
-  },
-  {
-    id: 'item-3',
-    programId: '1405421430',
-    programNumber: '1405421430',
-    programName: 'University of Washington',
-    specialty: 'Internal Medicine',
-    city: 'Seattle',
-    state: 'WA',
-    region: 'Pacific',
-    address: '1959 NE Pacific Street, Box 356420, Seattle, WA 98195',
-    programDirector: 'Ken Steinberg, MD',
-    step2ScoreRange: '240 - 249',
-    step2Min: 240,
-    step2Max: 249,
-    tier: 'safety',
-    signal: 'silver',
-    yieldNoSignal: undefined,
-    yieldSilver: undefined,
-    yieldGold: undefined,
-    advisorNotes: 'Silver signal captures bulk of yield (+30%); reserve Gold for top reach.',
-    residencyExplorerUrl: 'https://www.residencyexplorer.org/?utm_source=gemini',
-    doximityUrl: 'https://www.doximity.com/residency/programs/1405421430',
-  },
-  {
-    id: 'item-4',
-    programId: '1401221105',
-    programNumber: '1401221105',
-    programName: 'Emory University School of Medicine',
-    specialty: 'Internal Medicine',
-    city: 'Atlanta',
-    state: 'GA',
-    region: 'South Atlantic',
-    address: '100 Woodruff Circle, Suite 400, Atlanta, GA 30322',
-    programDirector: 'Wendy Armstrong, MD',
-    step2ScoreRange: '240 - 249',
-    step2Min: 240,
-    step2Max: 249,
-    tier: 'safety',
-    signal: 'silver',
-    yieldNoSignal: undefined,
-    yieldSilver: undefined,
-    yieldGold: undefined,
-    advisorNotes: 'Solid clinical training; Silver optimal allocation.',
-    residencyExplorerUrl: 'https://www.residencyexplorer.org/?utm_source=gemini',
-    doximityUrl: 'https://www.doximity.com/residency/programs/1401221105',
-  },
-  {
-    id: 'item-5',
-    programId: '1402421175',
-    programNumber: '1402421175',
-    programName: 'Tufts Medical Center',
-    specialty: 'Internal Medicine',
-    city: 'Boston',
-    state: 'MA',
-    region: 'New England',
-    address: '800 Washington Street, Box 243, Boston, MA 02111',
-    programDirector: 'Laura K. Snydman, MD',
-    step2ScoreRange: '230 - 239',
-    step2Min: 230,
-    step2Max: 239,
-    tier: 'safety',
-    signal: 'none',
-    yieldNoSignal: undefined,
-    yieldSilver: undefined,
-    yieldGold: undefined,
-    advisorNotes: 'Excellent home-region anchor; high baseline interview yield.',
-    residencyExplorerUrl: 'https://www.residencyexplorer.org/?utm_source=gemini',
-    doximityUrl: 'https://www.doximity.com/residency/programs/1402421175',
-  },
-];
+const DEFAULT_ITEMS: SchoolListItem[] = DEFAULT_INTERNAL_MEDICINE_SAMPLE_ITEMS;
 
 const STORAGE_KEY = 'eras_school_list_matrix';
 
@@ -183,6 +72,33 @@ export function SchoolListMatrix({
   // Applicant baseline Step 2 CK score (Ticket Candidate 8)
   const [applicantStep2Ck, setApplicantStep2Ck] = useState<number>(() => getStoredApplicantStep2Ck());
 
+  // Rehydrate state safely from local storage or auto-populate consistent sample programs
+  const [items, setItems] = useState<SchoolListItem[]>(() => {
+    return loadItemsForSpecialty(specialty, getStoredApplicantStep2Ck());
+  });
+
+  // Sync if parent prop changes
+  useEffect(() => {
+    if (specialty && specialty !== selectedSpecialty) {
+      setSelectedSpecialty(specialty);
+      setDbSpecialtyFilter(specialty);
+      setItems(loadItemsForSpecialty(specialty, applicantStep2Ck));
+    }
+  }, [specialty, applicantStep2Ck]);
+
+  // Sync if global target specialty updates
+  useEffect(() => {
+    const handleSpecialtyUpdated = (e: any) => {
+      if (e.detail && typeof e.detail === 'string' && e.detail !== selectedSpecialty) {
+        setSelectedSpecialty(e.detail);
+        setDbSpecialtyFilter(e.detail);
+        setItems(loadItemsForSpecialty(e.detail, applicantStep2Ck));
+      }
+    };
+    window.addEventListener('applicant_specialty_updated', handleSpecialtyUpdated);
+    return () => window.removeEventListener('applicant_specialty_updated', handleSpecialtyUpdated);
+  }, [selectedSpecialty, applicantStep2Ck]);
+
   useEffect(() => {
     const handleScoreUpdate = (e: any) => {
       if (e.detail && !isNaN(Number(e.detail))) {
@@ -192,40 +108,6 @@ export function SchoolListMatrix({
     window.addEventListener('applicant_step2_ck_updated', handleScoreUpdate);
     return () => window.removeEventListener('applicant_step2_ck_updated', handleScoreUpdate);
   }, []);
-
-  // Rehydrate state safely from local storage
-  const [items, setItems] = useState<SchoolListItem[]>(() => {
-    if (typeof window !== 'undefined') {
-      const cached = localStorage.getItem(STORAGE_KEY);
-      if (cached) {
-        try {
-          const parsed = JSON.parse(cached);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            return parsed.map((item: SchoolListItem) => {
-              let min = item.step2Min;
-              let max = item.step2Max;
-              if ((min === undefined || max === undefined) && item.step2ScoreRange) {
-                const p = parseScoreRange(item.step2ScoreRange);
-                if (p.min !== undefined && p.max !== undefined) {
-                  min = p.min;
-                  max = p.max;
-                }
-              }
-              const baseline = getStoredApplicantStep2Ck();
-              const autoTier = evaluateProgramTier(baseline, min, max);
-              return {
-                ...item,
-                step2Min: min,
-                step2Max: max,
-                ...(autoTier ? { tier: autoTier } : {}),
-              };
-            });
-          }
-        } catch {}
-      }
-    }
-    return DEFAULT_ITEMS;
-  });
 
   // Re-evaluate tier dynamically whenever applicant Step 2 CK score changes (Ticket Candidate 8)
   useEffect(() => {
@@ -257,10 +139,22 @@ export function SchoolListMatrix({
   }, [applicantStep2Ck]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+    if (typeof window !== 'undefined' && items && items.length > 0) {
+      const storageKey = getStorageKeyForSpecialty(selectedSpecialty);
+      localStorage.setItem(storageKey, JSON.stringify(items));
+      if (selectedSpecialty === 'Internal Medicine') {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
+      }
     }
-  }, [items]);
+  }, [items, selectedSpecialty]);
+
+  const handleSpecialtyChange = (newSpecialty: string) => {
+    setSelectedSpecialty(newSpecialty);
+    setStoredTargetSpecialty(newSpecialty);
+    setDbSpecialtyFilter(newSpecialty);
+    const loaded = loadItemsForSpecialty(newSpecialty, applicantStep2Ck);
+    setItems(loaded);
+  };
 
   // Filtering & Search states
   const [searchQuery, setSearchQuery] = useState('');
@@ -273,12 +167,23 @@ export function SchoolListMatrix({
   const [showBrowseModal, setShowBrowseModal] = useState(false);
   const [dbSearchQuery, setDbSearchQuery] = useState('');
   const [dbRegionFilter, setDbRegionFilter] = useState('All');
+  const [dbSpecialtyFilter, setDbSpecialtyFilter] = useState(selectedSpecialty);
+
+  useEffect(() => {
+    setDbSpecialtyFilter(selectedSpecialty);
+  }, [selectedSpecialty, showBrowseModal]);
 
   // Selected Program Details Modal
   const [detailItem, setDetailItem] = useState<SchoolListItem | null>(null);
 
   // Edit Yield Inline State
   const [editingYieldId, setEditingYieldId] = useState<string | null>(null);
+
+  // Automated Tiering Information Modal State
+  const [showTieringInfoModal, setShowTieringInfoModal] = useState(false);
+
+  // Yield Rates & Strategy Information Modal State
+  const [showStrategyInfoModal, setShowStrategyInfoModal] = useState(false);
 
   const signalStatus = validateSignalAllocation(selectedSpecialty, items);
   const rule = SPECIALTY_SIGNALING_RULES[selectedSpecialty] || SPECIALTY_SIGNALING_RULES['Internal Medicine'];
@@ -292,10 +197,10 @@ export function SchoolListMatrix({
     const rangeStr = newMin !== undefined && newMax !== undefined
       ? `${newMin} - ${newMax}`
       : newMin !== undefined
-      ? `${newMin}+`
-      : newMax !== undefined
-      ? `< ${newMax}`
-      : '';
+        ? `${newMin}+`
+        : newMax !== undefined
+          ? `< ${newMax}`
+          : '';
 
     handleUpdateItem(id, {
       step2Min: newMin,
@@ -316,9 +221,10 @@ export function SchoolListMatrix({
       return;
     }
 
-    const defaultMin = 240;
-    const defaultMax = 249;
-    const initialTier = evaluateProgramTier(applicantStep2Ck, defaultMin, defaultMax) || 'target';
+    const minScore = prog.step2CkLow !== undefined ? prog.step2CkLow : 240;
+    const maxScore = prog.step2CkHigh !== undefined ? prog.step2CkHigh : 260;
+    const scoreRangeStr = prog.step2ScoreRange || `${minScore} - ${maxScore}`;
+    const initialTier = evaluateProgramTier(applicantStep2Ck, minScore, maxScore) || 'target';
 
     const newItem: SchoolListItem = {
       id: `item-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
@@ -331,14 +237,16 @@ export function SchoolListMatrix({
       region: prog.region,
       address: prog.address,
       programDirector: prog.programDirector,
-      step2ScoreRange: `${defaultMin} - ${defaultMax}`,
-      step2Min: defaultMin,
-      step2Max: defaultMax,
+      step2ScoreRange: scoreRangeStr,
+      step2Min: minScore,
+      step2Max: maxScore,
       tier: initialTier,
       signal: 'none',
-      yieldNoSignal: undefined,
-      yieldSilver: undefined,
-      yieldGold: undefined,
+      yieldNoSignal: prog.noSignal,
+      yieldSilver: prog.silverSignal,
+      yieldGold: prog.goldSignal,
+      level2CeRange: prog.level2CeRange,
+      mdApplicantYield: prog.mdApplicantYield,
       residencyExplorerUrl: prog.residencyExplorerUrl || 'https://www.residencyexplorer.org/?utm_source=gemini',
       doximityUrl: prog.doximityUrl || 'https://www.doximity.com/residency',
     };
@@ -387,12 +295,12 @@ export function SchoolListMatrix({
   const dbResults = useMemo(() => {
     if (!showBrowseModal) return [];
     return searchResidencyPrograms({
-      specialty: selectedSpecialty,
+      specialty: dbSpecialtyFilter !== 'All' ? dbSpecialtyFilter : undefined,
       region: dbRegionFilter !== 'All' ? dbRegionFilter : undefined,
       search: dbSearchQuery,
-      limit: 30,
+      limit: 40,
     });
-  }, [showBrowseModal, selectedSpecialty, dbRegionFilter, dbSearchQuery]);
+  }, [showBrowseModal, dbSpecialtyFilter, dbRegionFilter, dbSearchQuery]);
 
   // Tier counts
   const reachCount = items.filter((i) => i.tier === 'reach').length;
@@ -430,68 +338,124 @@ export function SchoolListMatrix({
             <span className="text-slate-600 font-bold whitespace-nowrap">Specialty:</span>
             <select
               value={selectedSpecialty}
-              onChange={(e) => setSelectedSpecialty(e.target.value)}
+              onChange={(e) => handleSpecialtyChange(e.target.value)}
               className="text-xs font-bold rounded border-0 bg-transparent text-slate-800 focus:outline-none focus:ring-0 cursor-pointer"
             >
-              {Object.keys(SPECIALTY_SIGNALING_RULES).map((spec) => (
+              {CANONICAL_SPECIALTIES.map((spec) => (
                 <option key={spec} value={spec}>
                   {spec}
                 </option>
               ))}
             </select>
+            {rule.explanationRequired && (
+              <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 ml-1 whitespace-nowrap">
+                Explanation Req (300 chars)
+              </span>
+            )}
           </div>
         </div>
       </div>
 
       {/* Specialty Signaling Quotas & Balance Scorecard */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {/* Gold Signals Card */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1">
-              <Award className="w-4 h-4 text-amber-500" />
-              Gold Signals
-            </span>
-            <span className="text-xs font-mono font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-              {signalStatus.goldUsed} / {rule.goldSignals} Used
-            </span>
-          </div>
-          <div className="text-xl font-bold text-slate-900 mt-1">
-            {signalStatus.goldRemaining} Remaining
-          </div>
-          <div className="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
-            <div
-              className={`h-full rounded-full ${
-                signalStatus.goldUsed > rule.goldSignals ? 'bg-red-500' : 'bg-amber-500'
-              }`}
-              style={{ width: `${Math.min((signalStatus.goldUsed / (rule.goldSignals || 1)) * 100, 100)}%` }}
-            />
-          </div>
-        </div>
+        {rule.signalType === 'single_tier' ? (
+          <>
+            {/* Single-Tier Program Signals Card */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-sky-800 uppercase tracking-wider flex items-center gap-1">
+                  <Award className="w-4 h-4 text-sky-600" />
+                  Program Signals
+                </span>
+                <span className="text-xs font-mono font-bold text-sky-900 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
+                  {signalStatus.silverUsed} / {rule.totalSignals} Used
+                </span>
+              </div>
+              <div className="text-xl font-bold text-slate-900 mt-1">
+                {signalStatus.silverRemaining} Remaining
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${signalStatus.silverUsed > rule.totalSignals ? 'bg-red-500' : 'bg-sky-600'
+                    }`}
+                  style={{ width: `${Math.min((signalStatus.silverUsed / (rule.totalSignals || 1)) * 100, 100)}%` }}
+                />
+              </div>
+            </div>
 
-        {/* Silver Signals Card */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
-              <Award className="w-4 h-4 text-slate-400" />
-              Silver Signals
-            </span>
-            <span className="text-xs font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-              {signalStatus.silverUsed} / {rule.silverSignals} Used
-            </span>
-          </div>
-          <div className="text-xl font-bold text-slate-900 mt-1">
-            {signalStatus.silverRemaining} Remaining
-          </div>
-          <div className="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
-            <div
-              className={`h-full rounded-full ${
-                signalStatus.silverUsed > rule.silverSignals ? 'bg-red-500' : 'bg-slate-400'
-              }`}
-              style={{ width: `${Math.min((signalStatus.silverUsed / (rule.silverSignals || 1)) * 100, 100)}%` }}
-            />
-          </div>
-        </div>
+            {/* Explanation Requirement Card */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                  <Info className="w-4 h-4 text-slate-500" />
+                  Signal Explanation
+                </span>
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${rule.explanationRequired
+                    ? 'bg-amber-100 text-amber-900 border-amber-300'
+                    : 'bg-slate-100 text-slate-700 border-slate-200'
+                  }`}>
+                  {rule.explanationRequired ? 'Required (300 chars)' : 'Not Required'}
+                </span>
+              </div>
+              <div className="text-sm font-semibold text-slate-900 mt-1">
+                {rule.explanationRequired ? '300-Char Narrative Required' : 'Standard Submission'}
+              </div>
+              <p className="text-[11px] text-slate-500 mt-1 truncate">
+                {rule.explanationRequired
+                  ? `Each signal requires a brief rationale (${rule.explanationMaxChars || 300} chars max).`
+                  : 'Tokens submitted directly without essay justifications.'}
+              </p>
+            </div>
+          </>
+        ) : (
+          <>
+            {/* Gold Signals Card */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1">
+                  <Award className="w-4 h-4 text-amber-500" />
+                  Gold Signals
+                </span>
+                <span className="text-xs font-mono font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
+                  {signalStatus.goldUsed} / {rule.goldSignals} Used
+                </span>
+              </div>
+              <div className="text-xl font-bold text-slate-900 mt-1">
+                {signalStatus.goldRemaining} Remaining
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${signalStatus.goldUsed > rule.goldSignals ? 'bg-red-500' : 'bg-amber-500'
+                    }`}
+                  style={{ width: `${Math.min((signalStatus.goldUsed / (rule.goldSignals || 1)) * 100, 100)}%` }}
+                />
+              </div>
+            </div>
+
+            {/* Silver Signals Card */}
+            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
+              <div className="flex items-center justify-between">
+                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
+                  <Award className="w-4 h-4 text-slate-400" />
+                  Silver Signals
+                </span>
+                <span className="text-xs font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
+                  {signalStatus.silverUsed} / {rule.silverSignals} Used
+                </span>
+              </div>
+              <div className="text-xl font-bold text-slate-900 mt-1">
+                {signalStatus.silverRemaining} Remaining
+              </div>
+              <div className="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
+                <div
+                  className={`h-full rounded-full ${signalStatus.silverUsed > rule.silverSignals ? 'bg-red-500' : 'bg-slate-400'
+                    }`}
+                  style={{ width: `${Math.min((signalStatus.silverUsed / (rule.silverSignals || 1)) * 100, 100)}%` }}
+                />
+              </div>
+            </div>
+          </>
+        )}
 
         {/* Tier Distribution Card */}
         <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
@@ -520,11 +484,10 @@ export function SchoolListMatrix({
 
         {/* Quota Compliance Alert Card */}
         <div
-          className={`p-4 rounded-xl border shadow-sm flex items-center gap-3 ${
-            signalStatus.valid
+          className={`p-4 rounded-xl border shadow-sm flex items-center gap-3 ${signalStatus.valid
               ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900'
               : 'bg-red-50 border-red-200 text-red-900'
-          }`}
+            }`}
         >
           {signalStatus.valid ? (
             <>
@@ -533,6 +496,7 @@ export function SchoolListMatrix({
                 <div className="text-xs font-bold">Signaling Quota Compliant</div>
                 <div className="text-[11px] text-emerald-700">
                   {signalStatus.totalRemaining} tokens unassigned in {selectedSpecialty}.
+                  {rule.explanationRequired && ' (300-char explanation required)'}
                 </div>
               </div>
             </>
@@ -618,9 +582,8 @@ export function SchoolListMatrix({
                 setSortAsc(true);
               }
             }}
-            className={`px-2.5 py-1 rounded border text-xs font-semibold ${
-              sortField === 'tier' ? 'bg-sky-50 border-sky-400 text-sky-800' : 'bg-slate-50 border-slate-200 text-slate-600'
-            }`}
+            className={`px-2.5 py-1 rounded border text-xs font-semibold ${sortField === 'tier' ? 'bg-sky-50 border-sky-400 text-sky-800' : 'bg-slate-50 border-slate-200 text-slate-600'
+              }`}
           >
             Tier {sortField === 'tier' ? (sortAsc ? '↑' : '↓') : ''}
           </button>
@@ -632,9 +595,8 @@ export function SchoolListMatrix({
                 setSortAsc(true);
               }
             }}
-            className={`px-2.5 py-1 rounded border text-xs font-semibold ${
-              sortField === 'name' ? 'bg-sky-50 border-sky-400 text-sky-800' : 'bg-slate-50 border-slate-200 text-slate-600'
-            }`}
+            className={`px-2.5 py-1 rounded border text-xs font-semibold ${sortField === 'name' ? 'bg-sky-50 border-sky-400 text-sky-800' : 'bg-slate-50 border-slate-200 text-slate-600'
+              }`}
           >
             Name {sortField === 'name' ? (sortAsc ? '↑' : '↓') : ''}
           </button>
@@ -646,9 +608,8 @@ export function SchoolListMatrix({
                 setSortAsc(true);
               }
             }}
-            className={`px-2.5 py-1 rounded border text-xs font-semibold ${
-              sortField === 'region' ? 'bg-sky-50 border-sky-400 text-sky-800' : 'bg-slate-50 border-slate-200 text-slate-600'
-            }`}
+            className={`px-2.5 py-1 rounded border text-xs font-semibold ${sortField === 'region' ? 'bg-sky-50 border-sky-400 text-sky-800' : 'bg-slate-50 border-slate-200 text-slate-600'
+              }`}
           >
             Region {sortField === 'region' ? (sortAsc ? '↑' : '↓') : ''}
           </button>
@@ -660,9 +621,8 @@ export function SchoolListMatrix({
                 setSortAsc(true);
               }
             }}
-            className={`px-2.5 py-1 rounded border text-xs font-semibold ${
-              sortField === 'signal' ? 'bg-sky-50 border-sky-400 text-sky-800' : 'bg-slate-50 border-slate-200 text-slate-600'
-            }`}
+            className={`px-2.5 py-1 rounded border text-xs font-semibold ${sortField === 'signal' ? 'bg-sky-50 border-sky-400 text-sky-800' : 'bg-slate-50 border-slate-200 text-slate-600'
+              }`}
           >
             Signal {sortField === 'signal' ? (sortAsc ? '↑' : '↓') : ''}
           </button>
@@ -699,42 +659,69 @@ export function SchoolListMatrix({
             <span className="font-mono font-bold text-slate-900 text-sm">{applicantStep2Ck}</span>
             <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">(Baseline)</span>
           </div>
-          <span className="hidden lg:inline text-[11px] text-slate-500 italic">
-            Automated Tiering: Reach (&lt;25th) &bull; Target (25th–75th) &bull; Safety (&gt;75th)
-          </span>
+          <button
+            type="button"
+            onClick={() => setShowTieringInfoModal(true)}
+            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-800 text-[11px] font-semibold transition-colors cursor-pointer"
+            title="Click to learn how the Automated Tiering System works"
+          >
+            <span>Automated Tiering System</span>
+            <Info className="w-3.5 h-3.5 text-sky-600" />
+          </button>
         </div>
       </div>
 
-      {/* Row-Based Table Matrix View */}
+      {/* Row-Based Table Matrix View (No Horizontal Scroll Layout) */}
       <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-        <div className="overflow-x-auto">
+        <div className="w-full overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse">
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50/75 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
-                <th className="py-3 px-3 w-10 text-center">#</th>
-                <th className="py-3 px-4 min-w-[280px]">Program &amp; Metadata</th>
-                <th className="py-3 px-3 w-32">ERAS Signal</th>
-                <th className="py-3 px-3 min-w-[270px]">
+                <th className="py-2.5 px-3 w-8 text-center">#</th>
+                <th className="py-2.5 px-3 w-[27%]">Program &amp; Metadata</th>
+                <th className="py-2.5 px-3 w-[24%]">
+                  <div className="flex items-center justify-between">
+                    <span>ERAS Signal</span>
+                    {rule.explanationRequired && (
+                      <span className="text-[10px] lowercase font-normal text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
+                        {rule.explanationMaxChars || 300} char rationale
+                      </span>
+                    )}
+                  </div>
+                </th>
+                <th className="py-2.5 px-3 w-[16%]">
                   <a
                     href="https://www.residencyexplorer.org/?utm_source=gemini"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-slate-700 hover:text-sky-700 font-bold hover:underline"
-                    title="Lookup 25th–75th Percentiles on Residency Explorer"
+                    className="inline-flex items-center gap-1 text-slate-700 hover:text-sky-700 font-bold hover:underline"
+                    title="Lookup Middle 80% Range on Residency Explorer"
                   >
-                    <span>Step 2 CK Range (25th–75th) &amp; Tier</span>
-                    <ExternalLink className="w-3.5 h-3.5 text-sky-600" />
+                    <span>Step 2 CK &amp; Tier</span>
+                    <ExternalLink className="w-3 h-3 text-sky-600" />
                   </a>
                 </th>
-                <th className="py-3 px-4 min-w-[230px]">Yield Rates &amp; Multipliers</th>
-                <th className="py-3 px-4 min-w-[200px]">Recommended Strategy</th>
-                <th className="py-3 px-3 text-right w-20">Actions</th>
+                <th className="py-2.5 px-3 w-[27%]">
+                  <div className="flex items-center gap-1.5">
+                    <span>Yield Rates &amp; Strategy</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowStrategyInfoModal(true)}
+                      className="text-slate-400 hover:text-sky-600 p-0.5 rounded-full hover:bg-slate-200/60 transition-colors"
+                      title="How Signaling Recommendations are Calculated"
+                      aria-label="How Signaling Recommendations are Calculated"
+                    >
+                      <Info className="w-3.5 h-3.5 text-sky-600" />
+                    </button>
+                  </div>
+                </th>
+                <th className="py-2.5 px-2 text-right w-[6%]">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400 text-sm">
+                  <td colSpan={6} className="py-12 text-center text-slate-400 text-sm">
                     No residency programs match your search/filter criteria.
                   </td>
                 </tr>
@@ -743,7 +730,8 @@ export function SchoolListMatrix({
                   const recommendation = computeSignalingRecommendation(
                     item.yieldNoSignal,
                     item.yieldSilver,
-                    item.yieldGold
+                    item.yieldGold,
+                    rule.signalType
                   );
 
                   return (
@@ -756,34 +744,34 @@ export function SchoolListMatrix({
                         {index + 1}
                       </td>
 
-                      {/* Program Name & Metadata (Item 11 & Item 13) */}
-                      <td className="py-3 px-4">
-                        <div className="flex items-start justify-between gap-2">
-                          <div className="font-bold text-slate-900 group-hover:text-sky-700 transition-colors">
+                      {/* Program Name & Metadata */}
+                      <td className="py-2.5 px-3 align-top">
+                        <div className="flex items-start justify-between gap-1.5">
+                          <div className="font-bold text-slate-900 group-hover:text-sky-700 transition-colors leading-tight">
                             {item.programName}
                           </div>
-                          <span className="font-mono text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded border border-slate-200 shrink-0">
-                            ACGME ID: {item.programNumber || item.programId}
+                          <span className="font-mono text-[9px] font-bold text-slate-600 bg-slate-100 px-1.5 py-0.5 rounded border border-slate-200 shrink-0">
+                            #{item.programNumber || item.programId}
                           </span>
                         </div>
                         <div className="text-[11px] text-slate-500 mt-1 space-y-0.5">
                           <div
-                            className="flex items-center gap-1.5 text-slate-600 truncate max-w-[340px]"
+                            className="flex items-center gap-1.5 text-slate-600 truncate max-w-[300px]"
                             title={item.city && item.state ? `${item.city}, ${item.state}` : (item.city || item.state || 'Location Unknown')}
                           >
-                            <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                            <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
                             <span className="truncate">
                               {item.city && item.state ? `${item.city}, ${item.state}` : (item.city || item.state || 'Location Unknown')}
                             </span>
                           </div>
-                          <div className="flex items-center gap-2 pt-0.5">
+                          <div className="flex items-center gap-1.5 pt-0.5">
                             {item.region && (
-                              <span className="px-1.5 py-0.5 rounded bg-sky-50 text-sky-800 font-bold text-[10px] border border-sky-200">
+                              <span className="px-1.5 py-0.2 rounded bg-sky-50 text-sky-800 font-bold text-[9px] border border-sky-200">
                                 {item.region}
                               </span>
                             )}
                             {item.programDirector && (
-                              <span className="truncate max-w-[200px] text-[10px] text-slate-500">
+                              <span className="truncate max-w-[180px] text-[10px] text-slate-500">
                                 PD: {item.programDirector.replace('\n', ' ')}
                               </span>
                             )}
@@ -791,178 +779,273 @@ export function SchoolListMatrix({
                         </div>
                       </td>
 
-                      {/* Signal Button Toggles */}
-                      <td className="py-3 px-3">
-                        <div className="flex items-center gap-1">
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateItem(item.id, { signal: item.signal === 'gold' ? 'none' : 'gold' })}
-                            className={`px-2 py-1 rounded text-xs font-bold transition-all border ${
-                              item.signal === 'gold'
-                                ? 'bg-amber-400 text-amber-950 border-amber-500 shadow-xs'
-                                : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'
-                            }`}
-                            title="Assign Gold Signal"
-                          >
-                            Gold
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateItem(item.id, { signal: item.signal === 'silver' ? 'none' : 'silver' })}
-                            className={`px-2 py-1 rounded text-xs font-bold transition-all border ${
-                              item.signal === 'silver'
-                                ? 'bg-slate-300 text-slate-900 border-slate-400 shadow-xs'
-                                : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'
-                            }`}
-                            title="Assign Silver Signal"
-                          >
-                            Silver
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => handleUpdateItem(item.id, { signal: 'none' })}
-                            className={`px-2 py-1 rounded text-xs transition-all border ${
-                              item.signal === 'none'
-                                ? 'bg-slate-100 text-slate-700 border-slate-300'
-                                : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50'
-                            }`}
-                            title="No Signal"
-                          >
-                            None
-                          </button>
-                        </div>
+                      {/* Signal Button Toggles + Integrated Explanation */}
+                      <td className="py-2.5 px-3 align-top">
+                        {rule.signalType === 'single_tier' ? (
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateItem(item.id, { signal: item.signal === 'silver' ? 'none' : 'silver' })}
+                              className={`px-2.5 py-1 rounded text-xs font-bold transition-all border ${item.signal === 'silver'
+                                  ? 'bg-sky-600 text-white border-sky-700 shadow-xs'
+                                  : 'bg-white text-slate-600 border-slate-300 hover:bg-slate-100'
+                                }`}
+                              title={item.signal === 'silver' ? 'Remove Program Signal' : 'Assign Program Signal'}
+                            >
+                              {item.signal === 'silver' ? '✓ Signaled' : '+ Signal'}
+                            </button>
+                            {item.signal !== 'none' && (
+                              <button
+                                type="button"
+                                onClick={() => handleUpdateItem(item.id, { signal: 'none' })}
+                                className="px-1.5 py-1 rounded text-xs text-slate-400 hover:text-slate-700 hover:bg-slate-100"
+                                title="Clear Signal"
+                              >
+                                Clear
+                              </button>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="flex items-center gap-1">
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateItem(item.id, { signal: item.signal === 'gold' ? 'none' : 'gold' })}
+                              className={`px-2 py-1 rounded text-xs font-bold transition-all border ${item.signal === 'gold'
+                                  ? 'bg-amber-400 text-amber-950 border-amber-500 shadow-xs'
+                                  : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'
+                                }`}
+                              title="Assign Gold Signal"
+                            >
+                              Gold
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateItem(item.id, { signal: item.signal === 'silver' ? 'none' : 'silver' })}
+                              className={`px-2 py-1 rounded text-xs font-bold transition-all border ${item.signal === 'silver'
+                                  ? 'bg-slate-300 text-slate-900 border-slate-400 shadow-xs'
+                                  : 'bg-white text-slate-500 border-slate-200 hover:bg-slate-100'
+                                }`}
+                              title="Assign Silver Signal"
+                            >
+                              Silver
+                            </button>
+                            <button
+                              type="button"
+                              onClick={() => handleUpdateItem(item.id, { signal: 'none' })}
+                              className={`px-2 py-1 rounded text-xs transition-all border ${item.signal === 'none'
+                                  ? 'bg-slate-100 text-slate-700 border-slate-300'
+                                  : 'bg-white text-slate-400 border-slate-200 hover:bg-slate-50'
+                                }`}
+                              title="No Signal"
+                            >
+                              None
+                            </button>
+                          </div>
+                        )}
+
+                        {/* Integrated Signal Explanation (Embedded without extra column width) */}
+                        {rule.explanationRequired && (
+                          <div className="mt-2 space-y-1">
+                            <textarea
+                              rows={2}
+                              maxLength={rule.explanationMaxChars || 300}
+                              value={item.signalExplanation || ''}
+                              onChange={(e) => {
+                                const val = e.target.value.slice(0, rule.explanationMaxChars || 300);
+                                handleUpdateItem(item.id, { signalExplanation: val });
+                              }}
+                              placeholder={
+                                item.signal !== 'none'
+                                  ? `Signal rationale (${rule.explanationMaxChars || 300} chars max)...`
+                                  : 'Add rationale (if signaled)...'
+                              }
+                              className={`w-full p-1.5 text-[11px] rounded border transition-all focus:outline-none focus:ring-1 ${item.signal !== 'none' && !item.signalExplanation?.trim()
+                                  ? 'border-amber-300 bg-amber-50/50 focus:border-amber-500 focus:ring-amber-500'
+                                  : 'border-slate-200 bg-white focus:border-sky-500 focus:ring-sky-500'
+                                }`}
+                            />
+                            <div className="flex items-center justify-between text-[10px]">
+                              {item.signal !== 'none' && !item.signalExplanation?.trim() ? (
+                                <span className="text-amber-700 font-semibold flex items-center gap-0.5">
+                                  <AlertTriangle className="w-2.5 h-2.5 text-amber-500" />
+                                  Rationale required
+                                </span>
+                              ) : (
+                                <span className="text-slate-400">
+                                  {item.signal !== 'none' ? 'Saved' : 'Applies with signal'}
+                                </span>
+                              )}
+                              <span
+                                className={`font-mono ${(item.signalExplanation?.length || 0) >= (rule.explanationMaxChars || 300)
+                                    ? 'text-amber-700 font-bold'
+                                    : 'text-slate-400'
+                                  }`}
+                              >
+                                {item.signalExplanation?.length || 0}/{rule.explanationMaxChars || 300}
+                              </span>
+                            </div>
+                          </div>
+                        )}
                       </td>
 
-                      {/* Step 2 CK Dual Input, Automated Tier Icon (Item 14 & Ticket Candidate 8) */}
-                      <td className="py-3 px-3">
-                        <div className="flex items-center gap-2">
-                          <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-2xs">
+                      {/* Step 2 CK Dual Input, Automated Tier Icon */}
+                      <td className="py-2.5 px-3 align-top">
+                        <div className="space-y-1.5">
+                          <div className="flex items-center gap-1 bg-white p-1 rounded-lg border border-slate-200 shadow-2xs w-fit">
                             <input
                               type="number"
                               min={180}
                               max={300}
-                              placeholder="25th"
+                              placeholder="Low"
                               value={item.step2Min !== undefined ? item.step2Min : ''}
                               onChange={(e) => {
                                 const val = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
                                 const newMin = isNaN(val as number) ? undefined : val;
                                 handleStep2RangeChange(item.id, newMin, item.step2Max);
                               }}
-                              className="w-14 px-1.5 py-1 text-xs text-center font-mono font-bold rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-slate-50/50"
-                              title="25th Percentile Step 2 CK Score"
+                              className="w-12 px-1 py-0.5 text-xs text-center font-mono font-bold rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-slate-50/50"
+                              title="Middle 80% LOW Step 2 CK Score (Residency Explorer)"
                             />
                             <span className="text-slate-400 font-mono text-xs">–</span>
                             <input
                               type="number"
                               min={180}
                               max={300}
-                              placeholder="75th"
+                              placeholder="High"
                               value={item.step2Max !== undefined ? item.step2Max : ''}
                               onChange={(e) => {
                                 const val = e.target.value === '' ? undefined : parseInt(e.target.value, 10);
                                 const newMax = isNaN(val as number) ? undefined : val;
                                 handleStep2RangeChange(item.id, item.step2Min, newMax);
                               }}
-                              className="w-14 px-1.5 py-1 text-xs text-center font-mono font-bold rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-slate-50/50"
-                              title="75th Percentile Step 2 CK Score"
+                              className="w-12 px-1 py-0.5 text-xs text-center font-mono font-bold rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-slate-50/50"
+                              title="Middle 80% HIGH Step 2 CK Score (Residency Explorer)"
                             />
                           </div>
 
                           {/* Dynamic Compact Tier Icon */}
-                          {item.step2Min !== undefined && item.step2Max !== undefined ? (
-                            item.tier === 'safety' ? (
-                              <span
-                                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs shrink-0"
-                                title={`Safety: Applicant score (${applicantStep2Ck}) > Program 75th percentile (${item.step2Max})`}
-                              >
-                                <Shield className="w-3.5 h-3.5 text-emerald-600" />
-                                <span>Safety</span>
-                              </span>
-                            ) : item.tier === 'target' ? (
-                              <span
-                                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-bold bg-sky-100 text-sky-800 border border-sky-300 shadow-2xs shrink-0"
-                                title={`Target: Applicant score (${applicantStep2Ck}) is within 25th–75th range (${item.step2Min}–${item.step2Max})`}
-                              >
-                                <Target className="w-3.5 h-3.5 text-sky-600" />
-                                <span>Target</span>
-                              </span>
+                          <div>
+                            {item.step2Min !== undefined && item.step2Max !== undefined ? (
+                              item.tier === 'safety' ? (
+                                <span
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs"
+                                  title={`Safety: Applicant score (${applicantStep2Ck}) > Middle 80% High (${item.step2Max})`}
+                                >
+                                  <Shield className="w-3 h-3 text-emerald-600" />
+                                  <span>Safety</span>
+                                </span>
+                              ) : item.tier === 'target' ? (
+                                <span
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-sky-100 text-sky-800 border border-sky-300 shadow-2xs"
+                                  title={`Target: Applicant score (${applicantStep2Ck}) is within Middle 80% range (${item.step2Min}–${item.step2Max})`}
+                                >
+                                  <Target className="w-3 h-3 text-sky-600" />
+                                  <span>Target</span>
+                                </span>
+                              ) : (
+                                <span
+                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-300 shadow-2xs"
+                                  title={`Reach: Applicant score (${applicantStep2Ck}) < Middle 80% Low (${item.step2Min})`}
+                                >
+                                  <Compass className="w-3 h-3 text-purple-600" />
+                                  <span>Reach</span>
+                                </span>
+                              )
                             ) : (
-                              <span
-                                className="inline-flex items-center gap-1 px-2 py-1 rounded-md text-[11px] font-bold bg-purple-100 text-purple-800 border border-purple-300 shadow-2xs shrink-0"
-                                title={`Reach: Applicant score (${applicantStep2Ck}) < Program 25th percentile (${item.step2Min})`}
+                              <a
+                                href="https://www.residencyexplorer.org/?utm_source=gemini"
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-[10px] text-sky-600 hover:text-sky-800 italic hover:underline inline-flex items-center gap-0.5"
+                                title="Enter Middle 80% Low & High from Residency Explorer"
                               >
-                                <Compass className="w-3.5 h-3.5 text-purple-600" />
-                                <span>Reach</span>
-                              </span>
-                            )
-                          ) : (
-                            <a
-                              href="https://www.residencyexplorer.org/?utm_source=gemini"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="text-[10px] text-sky-600 hover:text-sky-800 italic hover:underline inline-flex items-center gap-0.5 shrink-0"
-                              title="Enter 25th–75th percentiles from Residency Explorer"
-                            >
-                              <span>Enter Range</span>
-                              <ExternalLink className="w-2.5 h-2.5" />
-                            </a>
-                          )}
+                                <span>Lookup Range</span>
+                                <ExternalLink className="w-2.5 h-2.5" />
+                              </a>
+                            )}
+                          </div>
                         </div>
                       </td>
 
-                      {/* Yield Rates & Multipliers (Item 9) */}
-                      <td className="py-3 px-4">
-                        <div className="space-y-2">
+                      {/* Yield Rates & Strategy (Consolidated to prevent horizontal scrolling) */}
+                      <td className="py-2.5 px-3 align-top">
+                        <div className="space-y-1.5">
+                          {/* If not entered yet */}
                           {item.yieldNoSignal === undefined &&
-                          item.yieldSilver === undefined &&
-                          item.yieldGold === undefined ? (
+                            item.yieldSilver === undefined &&
+                            (rule.signalType === 'single_tier' || item.yieldGold === undefined) ? (
                             <button
                               onClick={() => setEditingYieldId(editingYieldId === item.id ? null : item.id)}
-                              className="text-xs text-sky-700 hover:text-sky-900 font-semibold flex items-center gap-1 bg-sky-50 hover:bg-sky-100 px-2.5 py-1.5 rounded-md border border-sky-200 transition-colors"
+                              className="text-[11px] text-sky-700 hover:text-sky-900 font-semibold flex items-center gap-1 bg-sky-50 hover:bg-sky-100 px-2 py-1 rounded-md border border-sky-200 transition-colors"
                             >
-                              <Plus className="w-3.5 h-3.5 text-sky-600" />
+                              <Plus className="w-3 h-3 text-sky-600" />
                               + Enter Yield Rates (Residency Explorer)
                             </button>
                           ) : (
-                            <div className="space-y-1.5">
-                              {/* Prominent Multiplier Badges in Large High-Contrast Font */}
-                              <div className="flex items-center gap-2">
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-black bg-slate-900 text-white shadow-xs">
-                                  <Award className="w-3.5 h-3.5 text-slate-300" />
-                                  <span className="text-[13px] tracking-tight">{recommendation.silverMultiplier || '1.0x'}</span>
-                                  <span className="text-slate-300 text-[11px] font-bold">Silver</span>
-                                </span>
+                            <div className="space-y-1">
+                              {/* Multiplier Badges + Strategy Label */}
+                              <div className="flex flex-wrap items-center gap-1.5">
+                                {rule.signalType === 'single_tier' ? (
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[11px] font-black bg-sky-900 text-white shadow-2xs">
+                                    <Award className="w-3 h-3 text-sky-200" />
+                                    <span>{recommendation.signalMultiplier || recommendation.silverMultiplier || '1.0x'}</span>
+                                    <span className="text-sky-200 text-[10px] font-bold">Signal</span>
+                                  </span>
+                                ) : (
+                                  <>
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-black bg-slate-900 text-white shadow-2xs">
+                                      <Award className="w-3 h-3 text-slate-300" />
+                                      <span>{recommendation.silverMultiplier || '1.0x'}</span>
+                                      <span className="text-slate-300 text-[10px] font-bold">Silv</span>
+                                    </span>
+                                    <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[11px] font-black bg-amber-600 text-white shadow-2xs">
+                                      <Award className="w-3 h-3 text-amber-200" />
+                                      <span>{recommendation.goldMultiplier || '1.0x'}</span>
+                                      <span className="text-amber-200 text-[10px] font-bold">Gold</span>
+                                    </span>
+                                  </>
+                                )}
 
-                                <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-black bg-amber-600 text-white shadow-xs">
-                                  <Award className="w-3.5 h-3.5 text-amber-200" />
-                                  <span className="text-[13px] tracking-tight">{recommendation.goldMultiplier || '1.0x'}</span>
-                                  <span className="text-amber-200 text-[11px] font-bold">Gold</span>
+                                <span className={`inline-block px-1.5 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider border ${recommendation.badgeClass}`}>
+                                  {recommendation.label}
                                 </span>
 
                                 <button
                                   onClick={() => setEditingYieldId(editingYieldId === item.id ? null : item.id)}
-                                  className="text-[11px] text-sky-700 hover:text-sky-900 font-bold hover:underline ml-1"
+                                  className="text-[10px] text-sky-700 hover:text-sky-900 font-bold hover:underline ml-auto"
                                 >
                                   {editingYieldId === item.id ? 'Close' : 'Edit'}
                                 </button>
                               </div>
 
-                              {/* Clean Yield Rates with Visual Breathing Room */}
-                              <div className="flex items-center gap-2 text-[11px] text-slate-600 font-medium">
-                                <span>No Signal: <strong className="font-mono text-slate-900">{item.yieldNoSignal ?? 0}%</strong></span>
-                                <span className="text-slate-300">&bull;</span>
-                                <span>Silver: <strong className="font-mono text-slate-900">{item.yieldSilver ?? 0}%</strong></span>
-                                <span className="text-slate-300">&bull;</span>
-                                <span>Gold: <strong className="font-mono text-slate-900">{item.yieldGold ?? 0}%</strong></span>
-                              </div>
+                              {/* Rates summary */}
+                              {rule.signalType === 'single_tier' ? (
+                                <div className="flex items-center gap-2 text-[10px] text-slate-600">
+                                  <span>No Signal: <strong className="font-mono text-slate-900">{item.yieldNoSignal ?? 0}%</strong></span>
+                                  <span className="text-slate-300">&bull;</span>
+                                  <span>Signaled: <strong className="font-mono text-slate-900">{item.yieldSilver ?? 0}%</strong></span>
+                                </div>
+                              ) : (
+                                <div className="flex items-center gap-1.5 text-[10px] text-slate-600">
+                                  <span>No: <strong className="font-mono text-slate-900">{item.yieldNoSignal ?? 0}%</strong></span>
+                                  <span className="text-slate-300">&bull;</span>
+                                  <span>Silv: <strong className="font-mono text-slate-900">{item.yieldSilver ?? 0}%</strong></span>
+                                  <span className="text-slate-300">&bull;</span>
+                                  <span>Gold: <strong className="font-mono text-slate-900">{item.yieldGold ?? 0}%</strong></span>
+                                </div>
+                              )}
+
+                              <p className="text-[10px] text-slate-500 leading-tight">
+                                {recommendation.explanation}
+                              </p>
                             </div>
                           )}
 
-                          {/* Inline Yield Input Box */}
+                          {/* Inline Yield Input Box (Adaptive: Single-tier free text box vs two-tier) */}
                           {editingYieldId === item.id && (
-                            <div className="p-2.5 bg-slate-50 rounded-lg border border-slate-200 flex flex-wrap items-center gap-2 text-xs mt-2 animate-fade-in shadow-xs">
+                            <div className="p-2 bg-slate-50 rounded-lg border border-slate-200 flex flex-wrap items-center gap-2 text-xs mt-1 shadow-2xs animate-fade-in">
                               <div className="flex items-center gap-1">
-                                <span className="text-slate-600 font-medium">No Signal %:</span>
+                                <span className="text-slate-600 text-[11px] font-medium">No Signal %:</span>
                                 <input
                                   type="number"
                                   value={item.yieldNoSignal ?? ''}
@@ -971,58 +1054,67 @@ export function SchoolListMatrix({
                                       yieldNoSignal: e.target.value !== '' ? Number(e.target.value) : undefined,
                                     })
                                   }
-                                  className="w-14 p-1 rounded border border-slate-300 bg-white font-mono text-xs focus:ring-1 focus:ring-sky-500"
+                                  className="w-12 p-1 rounded border border-slate-300 bg-white font-mono text-xs focus:ring-1 focus:ring-sky-500"
                                   placeholder="%"
                                 />
                               </div>
-                              <div className="flex items-center gap-1">
-                                <span className="text-slate-600 font-medium">Silver %:</span>
-                                <input
-                                  type="number"
-                                  value={item.yieldSilver ?? ''}
-                                  onChange={(e) =>
-                                    handleUpdateItem(item.id, {
-                                      yieldSilver: e.target.value !== '' ? Number(e.target.value) : undefined,
-                                    })
-                                  }
-                                  className="w-14 p-1 rounded border border-slate-300 bg-white font-mono text-xs focus:ring-1 focus:ring-sky-500"
-                                  placeholder="%"
-                                />
-                              </div>
-                              <div className="flex items-center gap-1">
-                                <span className="text-slate-600 font-medium">Gold %:</span>
-                                <input
-                                  type="number"
-                                  value={item.yieldGold ?? ''}
-                                  onChange={(e) =>
-                                    handleUpdateItem(item.id, {
-                                      yieldGold: e.target.value !== '' ? Number(e.target.value) : undefined,
-                                    })
-                                  }
-                                  className="w-14 p-1 rounded border border-slate-300 bg-white font-mono text-xs focus:ring-1 focus:ring-sky-500"
-                                  placeholder="%"
-                                />
-                              </div>
+
+                              {rule.signalType === 'single_tier' ? (
+                                <div className="flex items-center gap-1">
+                                  <span className="text-slate-600 text-[11px] font-medium">Signaled %:</span>
+                                  <input
+                                    type="number"
+                                    value={item.yieldSilver ?? ''}
+                                    onChange={(e) =>
+                                      handleUpdateItem(item.id, {
+                                        yieldSilver: e.target.value !== '' ? Number(e.target.value) : undefined,
+                                      })
+                                    }
+                                    className="w-12 p-1 rounded border border-slate-300 bg-white font-mono text-xs focus:ring-1 focus:ring-sky-500"
+                                    placeholder="%"
+                                  />
+                                </div>
+                              ) : (
+                                <>
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-slate-600 text-[11px] font-medium">Silver %:</span>
+                                    <input
+                                      type="number"
+                                      value={item.yieldSilver ?? ''}
+                                      onChange={(e) =>
+                                        handleUpdateItem(item.id, {
+                                          yieldSilver: e.target.value !== '' ? Number(e.target.value) : undefined,
+                                        })
+                                      }
+                                      className="w-12 p-1 rounded border border-slate-300 bg-white font-mono text-xs focus:ring-1 focus:ring-sky-500"
+                                      placeholder="%"
+                                    />
+                                  </div>
+                                  <div className="flex items-center gap-1">
+                                    <span className="text-slate-600 text-[11px] font-medium">Gold %:</span>
+                                    <input
+                                      type="number"
+                                      value={item.yieldGold ?? ''}
+                                      onChange={(e) =>
+                                        handleUpdateItem(item.id, {
+                                          yieldGold: e.target.value !== '' ? Number(e.target.value) : undefined,
+                                        })
+                                      }
+                                      className="w-12 p-1 rounded border border-slate-300 bg-white font-mono text-xs focus:ring-1 focus:ring-sky-500"
+                                      placeholder="%"
+                                    />
+                                  </div>
+                                </>
+                              )}
+
                               <button
                                 onClick={() => setEditingYieldId(null)}
-                                className="px-2.5 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded text-xs font-semibold shadow-2xs"
+                                className="px-2 py-1 bg-sky-600 hover:bg-sky-700 text-white rounded text-[11px] font-semibold shadow-2xs ml-auto"
                               >
                                 Save
                               </button>
                             </div>
                           )}
-                        </div>
-                      </td>
-
-                      {/* Dedicated Recommended Signal Strategy Column (Item 9) */}
-                      <td className="py-3 px-4">
-                        <div className="space-y-1">
-                          <span className={`inline-block px-2.5 py-1 rounded-md text-xs font-bold uppercase tracking-wider border shadow-2xs ${recommendation.badgeClass}`}>
-                            {recommendation.label}
-                          </span>
-                          <p className="text-[11px] text-slate-600 leading-tight">
-                            {recommendation.explanation}
-                          </p>
                         </div>
                       </td>
 
@@ -1061,7 +1153,7 @@ export function SchoolListMatrix({
             <div className="flex items-center justify-between pb-3 border-b border-slate-100">
               <div>
                 <h3 className="text-base font-bold text-slate-900">
-                  Universal Residency Database (4,039 ACGME Programs)
+                  Universal Residency Database (5,996 ACGME Programs)
                 </h3>
                 <p className="text-xs text-slate-500">
                   Search across verified accredited programs to add directly to your school list.
@@ -1087,6 +1179,20 @@ export function SchoolListMatrix({
                   className="w-full pl-9 pr-3 py-2 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
                 />
               </div>
+
+              {/* Specialty Filter for Browse Modal */}
+              <select
+                value={dbSpecialtyFilter}
+                onChange={(e) => setDbSpecialtyFilter(e.target.value)}
+                className="text-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 font-semibold"
+              >
+                <option value="All">All Specialties</option>
+                {CANONICAL_SPECIALTIES.map((spec) => (
+                  <option key={spec} value={spec}>
+                    {spec}
+                  </option>
+                ))}
+              </select>
 
               <select
                 value={dbRegionFilter}
@@ -1117,7 +1223,7 @@ export function SchoolListMatrix({
                       className="bg-white p-3 rounded-lg border border-slate-200 flex items-center justify-between gap-3 hover:border-sky-300 transition-colors"
                     >
                       <div className="min-w-0 flex-1">
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 flex-wrap">
                           <h4 className="text-xs font-bold text-slate-900 truncate">{prog.name}</h4>
                           <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-slate-100 text-slate-700 border border-slate-200">
                             #{prog.programNumber || prog.id}
@@ -1125,6 +1231,16 @@ export function SchoolListMatrix({
                           <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-sky-50 text-sky-800 border border-sky-200">
                             {prog.region}
                           </span>
+                          {prog.step2ScoreRange && (
+                            <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200" title="Residency Explorer Middle 80% Step 2 CK Range">
+                              Middle 80%: {prog.step2ScoreRange}
+                            </span>
+                          )}
+                          {prog.silverSignal !== undefined && prog.goldSignal !== undefined && (
+                            <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-amber-50 text-amber-900 border border-amber-200" title="Interview yield rates with Silver and Gold signals">
+                              Yield: {prog.silverSignal}% Silver / {prog.goldSignal}% Gold
+                            </span>
+                          )}
                         </div>
                         <div className="text-[11px] text-slate-500 mt-1 space-y-0.5">
                           <div className="flex items-center gap-1 text-slate-600 truncate">
@@ -1145,11 +1261,10 @@ export function SchoolListMatrix({
                       <button
                         onClick={() => handleAddFromDatabase(prog)}
                         disabled={isAdded}
-                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition-colors ${
-                          isAdded
+                        className={`px-3 py-1.5 rounded-lg text-xs font-semibold shrink-0 transition-colors ${isAdded
                             ? 'bg-slate-100 text-slate-400 cursor-not-allowed'
                             : 'bg-sky-600 hover:bg-sky-700 text-white shadow-xs'
-                        }`}
+                          }`}
                       >
                         {isAdded ? 'Added' : '+ Add to List'}
                       </button>
@@ -1216,9 +1331,28 @@ export function SchoolListMatrix({
                   <span className="text-slate-900">{detailItem.region}</span>
                 </div>
                 <div>
-                  <strong className="text-slate-700">Step 2 CK Score Range:</strong>{' '}
-                  <span className="font-semibold text-slate-900">{detailItem.step2ScoreRange || 'Not Recorded'}</span>
+                  <strong className="text-slate-700">Step 2 CK Middle 80% Range:</strong>{' '}
+                  <span className="font-semibold text-slate-900">
+                    {detailItem.step2ScoreRange ||
+                      (detailItem.step2Ck25th && detailItem.step2Ck75th
+                        ? `${detailItem.step2Ck25th} - ${detailItem.step2Ck75th}`
+                        : 'Not Recorded')}
+                  </span>
                 </div>
+                {(detailItem.noSignal !== undefined || detailItem.silverSignal !== undefined || detailItem.goldSignal !== undefined) && (
+                  <div>
+                    <strong className="text-slate-700">Interview Yield Rates (Residency Explorer):</strong>{' '}
+                    <span className="font-semibold text-slate-900">
+                      {[
+                        detailItem.noSignal !== undefined ? `No Signal: ${detailItem.noSignal}%` : null,
+                        detailItem.silverSignal !== undefined ? `Silver: ${detailItem.silverSignal}%` : null,
+                        detailItem.goldSignal !== undefined ? `Gold: ${detailItem.goldSignal}%` : null,
+                      ]
+                        .filter(Boolean)
+                        .join(' • ')}
+                    </span>
+                  </div>
+                )}
                 <div>
                   <strong className="text-slate-700">Program Director:</strong>{' '}
                   <span className="text-slate-900">{detailItem.programDirector || 'Department Leadership'}</span>
@@ -1231,6 +1365,14 @@ export function SchoolListMatrix({
                   <strong className="text-slate-700">Current Assigned Signal:</strong>{' '}
                   <span className="capitalize font-bold text-slate-900">{detailItem.signal}</span>
                 </div>
+                {(detailItem.signalExplanation || rule.explanationRequired) && (
+                  <div className="col-span-full pt-1">
+                    <strong className="text-slate-700 block mb-1">Signal Explanation:</strong>
+                    <div className="p-2.5 bg-amber-50/70 border border-amber-200 rounded-lg text-xs text-slate-800 font-mono whitespace-pre-wrap">
+                      {detailItem.signalExplanation || <em className="text-slate-400">No explanation entered yet.</em>}
+                    </div>
+                  </div>
+                )}
               </div>
 
               {/* Verified School Alumni */}
@@ -1286,6 +1428,212 @@ export function SchoolListMatrix({
               <button
                 onClick={() => setDetailItem(null)}
                 className="px-4 py-2 rounded-lg text-xs font-semibold bg-slate-800 hover:bg-slate-900 text-white"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Automated Tiering System Educational Modal */}
+      {showTieringInfoModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-scale-in">
+            <div className="flex items-start justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold">
+                  <Info className="w-4 h-4" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Automated Tiering System</h3>
+                  <p className="text-xs text-slate-500">Based on Residency Explorer Middle 80% Range</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowTieringInfoModal(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-700 leading-relaxed space-y-3">
+              <p>
+                Residency Explorer reports the <strong>Middle 80% range</strong> (10th percentile Low to 90th percentile High) of Step 2 CK scores among all applicants invited to interview.
+              </p>
+              <p>
+                Inputting or loading the <strong>Middle 80% range (Low to High)</strong> allows the system to automatically evaluate where your <strong>Step 2 CK score</strong> stands with respect to that institution:
+              </p>
+
+              <div className="space-y-2 pt-1">
+                <div className="p-3 rounded-lg bg-sky-50/80 border border-sky-200 flex items-start gap-2.5">
+                  <Target className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-sky-900 block font-bold">Target</strong>
+                    <span className="text-sky-950 text-[11px]">
+                      Falling within the <strong>Middle 80% range (between Low and High)</strong> makes the school a <strong>Target</strong>.
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg bg-purple-50/80 border border-purple-200 flex items-start gap-2.5">
+                  <Compass className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-purple-900 block font-bold">Reach</strong>
+                    <span className="text-purple-950 text-[11px]">
+                      If your score puts you <strong>below the Middle 80% Low cutoff</strong> for that school, it is categorized as a <strong>Reach</strong>.
+                    </span>
+                  </div>
+                </div>
+
+                <div className="p-3 rounded-lg bg-emerald-50/80 border border-emerald-200 flex items-start gap-2.5">
+                  <Shield className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                  <div>
+                    <strong className="text-emerald-900 block font-bold">Safety</strong>
+                    <span className="text-emerald-950 text-[11px]">
+                      If your score puts you <strong>above the Middle 80% High cutoff</strong> for that school, this makes the school a <strong>Safety</strong>.
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                onClick={() => setShowTieringInfoModal(false)}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Yield Rates & Strategy Educational Modal */}
+      {showStrategyInfoModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 space-y-4 max-h-[90vh] overflow-y-auto animate-scale-in">
+            <div className="flex items-start justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold">
+                  <Award className="w-4 h-4 text-sky-700" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">
+                    Signaling Recommendation Engine
+                  </h3>
+                  <p className="text-xs text-slate-500">
+                    Algorithmic strategy breakdown based on Residency Explorer interview yield %
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowStrategyInfoModal(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-700 leading-relaxed space-y-4">
+              <p>
+                When you input interview yield percentages reported on <strong>Residency Explorer</strong>, our engine recommends the highest-efficiency signaling strategy.
+              </p>
+
+              {/* Two-Tiered Section */}
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-bold text-slate-900 text-xs flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+                    Two-Tiered Specialties (Gold vs. Silver vs. No Signal)
+                  </h4>
+                  <span className="text-[10px] font-mono text-slate-500">
+                    Internal Medicine, Anesthesia, Derm, Rad, OB/GYN, EM
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                  <div className="p-2.5 bg-white rounded-lg border border-slate-200 space-y-1">
+                    <strong className="text-amber-800 font-bold block">⭐ Gold High Yield</strong>
+                    <p className="text-slate-600">
+                      Triggered when Gold produces a <strong>&ge; 15% interview surge</strong> over Silver. Prime target for your limited Gold tokens.
+                    </p>
+                  </div>
+
+                  <div className="p-2.5 bg-white rounded-lg border border-slate-200 space-y-1">
+                    <strong className="text-slate-800 font-bold block">🥈 Silver Optimal</strong>
+                    <p className="text-slate-600">
+                      Triggered when Silver captures most of the signal gain (<strong>+12%+</strong>) and Gold adds only marginal return (&lt; 10%). Conserves Gold.
+                    </p>
+                  </div>
+
+                  <div className="p-2.5 bg-white rounded-lg border border-slate-200 space-y-1">
+                    <strong className="text-emerald-800 font-bold block">🛡️ No Signal Needed</strong>
+                    <p className="text-slate-600">
+                      Baseline yield without signal is already <strong>&ge; 35%</strong> (e.g., strong home/regional pipeline). Save tokens for reach programs.
+                    </p>
+                  </div>
+
+                  <div className="p-2.5 bg-white rounded-lg border border-slate-200 space-y-1">
+                    <strong className="text-red-700 font-bold block">⚠️ Signal Inefficient</strong>
+                    <p className="text-slate-600">
+                      Signals produce minimal gain (<strong>&lt; 5%</strong> with low overall yield). Tokens yield little interview leverage here.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Single-Tier Section */}
+              <div className="p-3.5 bg-sky-50/70 rounded-xl border border-sky-200 space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-bold text-sky-950 text-xs flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-sky-600"></span>
+                    Single-Tier Specialties (Signaled vs. No Signal)
+                  </h4>
+                  <span className="text-[10px] font-mono text-sky-800">
+                    General Surgery, Ortho, ENT, Peds, PM&amp;R, Psych, TY
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-[11px]">
+                  <div className="p-2.5 bg-white rounded-lg border border-sky-200 space-y-1">
+                    <strong className="text-sky-900 font-bold block">🎯 High Yield Signal</strong>
+                    <p className="text-slate-600">
+                      Signaling creates a <strong>&ge; 10% jump</strong> in interview rate over no signal. High-priority program for your signal budget.
+                    </p>
+                  </div>
+
+                  <div className="p-2.5 bg-white rounded-lg border border-sky-200 space-y-1">
+                    <strong className="text-emerald-800 font-bold block">🛡️ No Signal Needed</strong>
+                    <p className="text-slate-600">
+                      High organic interview yield (<strong>&ge; 35%</strong> without a signal). Conserve signals for target or reach programs.
+                    </p>
+                  </div>
+
+                  <div className="p-2.5 bg-white rounded-lg border border-sky-200 space-y-1">
+                    <strong className="text-slate-800 font-bold block">✓ Recommended Signal</strong>
+                    <p className="text-slate-600">
+                      Provides steady positive interview enhancement (<strong>+5% to +9%</strong>). Solid target for signal assignment.
+                    </p>
+                  </div>
+
+                  <div className="p-2.5 bg-white rounded-lg border border-sky-200 space-y-1">
+                    <strong className="text-red-700 font-bold block">⚠️ Signal Inefficient</strong>
+                    <p className="text-slate-600">
+                      Signal produces marginal change (<strong>&lt; 5%</strong> with overall yield &lt; 15%). Signal has minimal impact.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-end">
+              <button
+                onClick={() => setShowStrategyInfoModal(false)}
+                className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold transition-colors"
               >
                 Close
               </button>

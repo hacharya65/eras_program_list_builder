@@ -115,6 +115,15 @@ export interface ResidencyProgramRecord {
   offersPreliminary?: boolean;
   residencyExplorerUrl?: string;
   doximityUrl?: string;
+  // Residency Explorer middle 80% & interview yield data
+  step2CkLow?: number;
+  step2CkHigh?: number;
+  step2ScoreRange?: string;
+  silverSignal?: number;
+  goldSignal?: number;
+  noSignal?: number;
+  level2CeRange?: string;
+  mdApplicantYield?: number;
 }
 
 export interface SearchProgramsQuery {
@@ -128,6 +137,10 @@ const typedPrograms: ResidencyProgramRecord[] = residencyData as ResidencyProgra
 
 export function getAllResidencyPrograms(): ResidencyProgramRecord[] {
   return typedPrograms;
+}
+
+export function getProgramsForSpecialty(specialty: string): ResidencyProgramRecord[] {
+  return typedPrograms.filter((p) => p.specialty.toLowerCase() === specialty.toLowerCase());
 }
 
 export function searchResidencyPrograms(query: SearchProgramsQuery): ResidencyProgramRecord[] {

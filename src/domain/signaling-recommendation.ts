@@ -15,13 +15,91 @@ export interface SignalingRecommendation {
   deltaSilverNone: number;
   silverMultiplier?: string; // e.g. "2.4x"
   goldMultiplier?: string;   // e.g. "14.5x"
+  signalMultiplier?: string; // e.g. "2.4x" for single-tier programs
 }
 
 export function computeSignalingRecommendation(
   yieldNoSignal?: number, // e.g. 5 (%)
-  yieldSilver?: number,   // e.g. 25 (%)
-  yieldGold?: number      // e.g. 45 (%)
+  yieldSilver?: number,   // e.g. 25 (%) - also used as yieldSignal in single-tier
+  yieldGold?: number,     // e.g. 45 (%)
+  signalType: 'tiered' | 'single_tier' = 'tiered'
 ): SignalingRecommendation {
+  if (signalType === 'single_tier') {
+    if (yieldNoSignal === undefined || yieldSilver === undefined) {
+      return {
+        recommendation: 'NEEDS_INPUT',
+        recommendedSignal: 'none',
+        label: 'Enter Yield Data',
+        badgeClass: 'bg-slate-100 text-slate-600 border-slate-200',
+        explanation: 'Enter Residency Explorer interview yield % to receive algorithmic signal recommendation.',
+        deltaGoldSilver: 0,
+        deltaSilverNone: 0,
+      };
+    }
+
+    const deltaSignalNone = yieldSilver - yieldNoSignal;
+    const signalMultiplier =
+      yieldNoSignal > 0
+        ? `${(yieldSilver / yieldNoSignal).toFixed(1)}x`
+        : yieldSilver > 0
+        ? `+${yieldSilver}%`
+        : '1.0x';
+
+    if (yieldNoSignal >= 35) {
+      return {
+        recommendation: 'NO_SIGNAL_SUFFICIENT',
+        recommendedSignal: 'none',
+        label: 'No Signal Needed',
+        badgeClass: 'bg-emerald-100 text-emerald-800 border-emerald-300 font-semibold',
+        explanation: `High baseline yield (${yieldNoSignal}% without signal). Conserve your signals for reach or out-of-region programs.`,
+        deltaGoldSilver: 0,
+        deltaSilverNone: deltaSignalNone,
+        signalMultiplier,
+        silverMultiplier: signalMultiplier,
+      };
+    }
+
+    if (deltaSignalNone >= 10) {
+      return {
+        recommendation: 'SILVER_OPTIMAL',
+        recommendedSignal: 'silver',
+        label: 'High Yield Signal',
+        badgeClass: 'bg-sky-100 text-sky-800 border-sky-300 font-bold',
+        explanation: `Signaling produces a +${deltaSignalNone}% interview jump over no signal (${yieldSilver}% vs ${yieldNoSignal}%). High-value signal target.`,
+        deltaGoldSilver: 0,
+        deltaSilverNone: deltaSignalNone,
+        signalMultiplier,
+        silverMultiplier: signalMultiplier,
+      };
+    }
+
+    if (deltaSignalNone < 5 && yieldSilver < 15) {
+      return {
+        recommendation: 'SIGNAL_INEFFICIENT',
+        recommendedSignal: 'none',
+        label: 'Signal Inefficient',
+        badgeClass: 'bg-red-50 text-red-700 border-red-200',
+        explanation: `Low overall yield gain (+${deltaSignalNone}% with signal). Token yields limited interview advantage at this program.`,
+        deltaGoldSilver: 0,
+        deltaSilverNone: deltaSignalNone,
+        signalMultiplier,
+        silverMultiplier: signalMultiplier,
+      };
+    }
+
+    return {
+      recommendation: 'SILVER_OPTIMAL',
+      recommendedSignal: 'silver',
+      label: 'Recommended Signal',
+      badgeClass: 'bg-sky-100 text-sky-800 border-sky-300 font-bold',
+      explanation: `Program signal offers positive yield advantage (+${deltaSignalNone}%).`,
+      deltaGoldSilver: 0,
+      deltaSilverNone: deltaSignalNone,
+      signalMultiplier,
+      silverMultiplier: signalMultiplier,
+    };
+  }
+
   if (yieldNoSignal === undefined || yieldSilver === undefined || yieldGold === undefined) {
     return {
       recommendation: 'NEEDS_INPUT',

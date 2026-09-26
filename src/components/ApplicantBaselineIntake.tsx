@@ -284,19 +284,19 @@ export function ApplicantBaselineIntake({
             <div className="space-y-1.5 text-[11px] text-slate-300">
               <div className="flex items-center gap-1.5">
                 <Shield className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span><strong>Safety:</strong> Your Step 2 &gt; Program 75th</span>
+                <span><strong>Safety:</strong> Your Step 2 &gt; Middle 80% High</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Target className="w-3.5 h-3.5 text-sky-400 shrink-0" />
-                <span><strong>Target:</strong> Within 25th–75th Percentile</span>
+                <span><strong>Target:</strong> Within Middle 80% Range</span>
               </div>
               <div className="flex items-center gap-1.5">
                 <Compass className="w-3.5 h-3.5 text-purple-400 shrink-0" />
-                <span><strong>Reach:</strong> Your Step 2 &lt; Program 25th</span>
+                <span><strong>Reach:</strong> Your Step 2 &lt; Middle 80% Low</span>
               </div>
             </div>
             <div className="text-[10px] text-slate-400 border-t border-slate-700/60 pt-2">
-              Automatically updates program tier labels across your School List Matrix upon score change.
+              Automatically updates program tier labels based on Residency Explorer middle 80% range across your School List Matrix.
             </div>
           </div>
         </div>

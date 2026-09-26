@@ -119,6 +119,7 @@ export default function HomePage() {
             onOpenReview={handleOpenReview}
             onSubmitFeedback={handleSubmitFeedback}
             getSnapshotContent={(id) => service.getSnapshot(id)}
+            getPreviousSnapshot={(id) => service.getPreviousSnapshot(id)}
             onViewingEntry={handleViewingEntry}
           />
         )}

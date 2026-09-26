@@ -8,9 +8,15 @@ import { OrderTracker } from './OrderTracker';
 import { StudentFeedbackViewer } from './StudentFeedbackViewer';
 import { SchoolListMatrix } from './SchoolListMatrix';
 import { CompetitivenessCalculator } from './CompetitivenessCalculator';
-import { ApplicantBaselineIntake } from './ApplicantBaselineIntake';
+import { ApplicantProfileModal } from './ApplicantProfileModal';
 import { AlumniResidentDirectory } from './AlumniResidentDirectory';
 import { ErasTransferKit } from './ErasTransferKit';
+import {
+  CANONICAL_SPECIALTIES,
+  getStoredTargetSpecialty,
+  setStoredTargetSpecialty,
+  SPECIALTY_SIGNALING_RULES,
+} from '@/domain/school-list-models';
 import {
   FileText,
   Briefcase,
@@ -24,7 +30,8 @@ import {
   Sparkles,
   BarChart3,
   Users,
-  ClipboardCopy
+  ClipboardCopy,
+  Pencil
 } from 'lucide-react';
 
 interface StudentPortalProps {
@@ -47,7 +54,20 @@ export function StudentPortal({
   onCreateRevision,
 }: StudentPortalProps) {
   const [activeView, setActiveView] = useState<'overview' | 'personal_statement' | 'experiences' | 'scholarly_works' | 'school_list' | 'competitiveness' | 'alumni_directory' | 'transfer_kit'>('overview');
+  const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const { student, personalStatement, experiences, assignedAdvisors } = context;
+
+  // Student Target Specialty State (persisted & propagates across entire portal)
+  const [targetSpecialty, setTargetSpecialty] = useState<string>(() => {
+    return getStoredTargetSpecialty() || student.specialty || 'Internal Medicine';
+  });
+
+  const handleSpecialtyChange = (newSpecialty: string) => {
+    setTargetSpecialty(newSpecialty);
+    setStoredTargetSpecialty(newSpecialty);
+  };
+
+  const specialtyRule = SPECIALTY_SIGNALING_RULES[targetSpecialty] || SPECIALTY_SIGNALING_RULES['Internal Medicine'];
 
   // Real-time synced counts across modules
   const [scholarlyStats, setScholarlyStats] = useState({ count: 2, meaningful: 2 });
@@ -124,6 +144,7 @@ export function StudentPortal({
         onSaveExperience={(id, updates) => onUpdateExperience?.(id, updates)}
         onDeleteExperience={(id) => {}}
         onBack={() => setActiveView('overview')}
+        targetSpecialty={targetSpecialty}
       />
     );
   }
@@ -139,7 +160,7 @@ export function StudentPortal({
   if (activeView === 'school_list') {
     return (
       <SchoolListMatrix
-        specialty={student.specialty}
+        specialty={targetSpecialty}
         onBack={() => setActiveView('overview')}
       />
     );
@@ -148,7 +169,7 @@ export function StudentPortal({
   if (activeView === 'competitiveness') {
     return (
       <CompetitivenessCalculator
-        initialSpecialty={student.specialty}
+        initialSpecialty={targetSpecialty}
         onBack={() => setActiveView('overview')}
       />
     );
@@ -158,7 +179,7 @@ export function StudentPortal({
     return (
       <AlumniResidentDirectory
         studentName={student.name}
-        initialSpecialty={student.specialty}
+        initialSpecialty={targetSpecialty}
         onBack={() => setActiveView('overview')}
       />
     );
@@ -184,56 +205,63 @@ export function StudentPortal({
             </span>
             <span className="text-xs text-slate-500">ERAS 2027 Cycle</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 mt-1">
-            Welcome back, {student.name.split(' ')[0]}
+          <h1 className="text-2xl font-bold text-slate-900 mt-1 flex items-center gap-2">
+            <span>Welcome back, {student.name.split(' ')[0]}</span>
+            <button
+              id="edit-profile-metrics-btn"
+              onClick={() => setIsProfileModalOpen(true)}
+              className="p-1.5 text-slate-400 hover:text-sky-600 hover:bg-slate-100 rounded-lg transition-colors inline-flex items-center"
+              title="Edit Academic & Portfolio Metrics"
+              aria-label="Edit Academic & Portfolio Metrics"
+            >
+              <Pencil className="w-4 h-4" />
+            </button>
           </h1>
-          <p className="text-sm text-slate-600 mt-0.5">
-            Target Specialty: <span className="font-semibold text-slate-800">{student.specialty}</span> | Medical School: <span className="text-slate-700">Apex School of Medicine</span>
-          </p>
+          <div className="flex flex-wrap items-center gap-2 mt-1.5 text-xs text-slate-600">
+            <label htmlFor="student-specialty-select" className="font-semibold text-slate-700 whitespace-nowrap">
+              Target Applying Specialty:
+            </label>
+            <select
+              id="student-specialty-select"
+              value={targetSpecialty}
+              onChange={(e) => handleSpecialtyChange(e.target.value)}
+              className="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs cursor-pointer hover:border-slate-400 transition-colors"
+            >
+              {CANONICAL_SPECIALTIES.map((spec) => (
+                <option key={spec} value={spec}>
+                  {spec}
+                </option>
+              ))}
+            </select>
+            <span className="text-slate-300 hidden sm:inline">|</span>
+            <span className="text-slate-500">Medical School: <strong className="text-slate-700">Apex School of Medicine</strong></span>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3">
-          {/* Doximity Residency Search Direct Link */}
-          <a
-            href="https://www.doximity.com/residency/programs?specialtyKey=&sortByKey=reputation&trainingEnvironmentKey=&intendedFellowshipKey="
-            target="_blank"
-            rel="noopener noreferrer"
-            className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-sm transition-all"
-            title="Search Residency Programs on Doximity"
-          >
-            <ExternalLink className="w-3.5 h-3.5 text-slate-500" />
-            Doximity Programs
-          </a>
-
-          {/* 1-Click Transfer Kit CTA */}
-          <button
-            onClick={() => setActiveView('transfer_kit')}
-            className="px-4 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm transition-all"
-          >
-            <ClipboardCopy className="w-4 h-4 text-emerald-100" />
-            1-Click ERAS Transfer Kit
-          </button>
-
+        <div className="flex flex-col items-end gap-1.5 shrink-0">
           {/* Assigned Advisor Card */}
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs flex items-center gap-3">
-            <div className="w-9 h-9 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-sm">
+          <div className="bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
               MC
             </div>
             <div>
-              <div className="text-[11px] text-slate-500 font-medium uppercase tracking-wider">Primary Faculty Advisor</div>
-              <div className="font-semibold text-slate-900">{assignedAdvisors[0]?.name || 'Dr. Marcus Chen'}</div>
-              <div className="text-slate-500">{assignedAdvisors[0]?.specialty} | Apex Health</div>
+              <div className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Primary Faculty Advisor</div>
+              <div className="font-semibold text-slate-900 leading-tight">{assignedAdvisors[0]?.name || 'Dr. Marcus Chen'}</div>
+              <div className="text-[11px] text-slate-500">{assignedAdvisors[0]?.specialty} | Apex Health</div>
             </div>
           </div>
+
+          {/* 1-Click Transfer Kit CTA (Compact under advisor card) */}
+          <button
+            onClick={() => setActiveView('transfer_kit')}
+            className="w-full px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1.5 shadow-2xs transition-all"
+            title="Export clean plain-text copy-paste blocks for MyERAS"
+          >
+            <ClipboardCopy className="w-3.5 h-3.5 text-emerald-100" />
+            <span>1-Click ERAS Transfer Kit</span>
+          </button>
         </div>
       </div>
-
-      {/* Primary Intake: Multimodal Competitiveness Engine (Ticket Candidate 8) */}
-      <ApplicantBaselineIntake
-        specialty={student.specialty}
-        onOpenFullCompetitiveness={() => setActiveView('competitiveness')}
-        onOpenSchoolList={() => setActiveView('school_list')}
-      />
 
       {/* 5-Stage Clinical Order Pipeline Tracker with Multi-Part Application Progress */}
       {(() => {
@@ -252,7 +280,7 @@ export function StudentPortal({
             scholarlyMeaningfulCount={scholarlyStats.meaningful}
             schoolListCount={schoolListStats.count}
             schoolListSignalsAssigned={schoolListStats.signalsAssigned}
-            schoolListSignalsBudget={15}
+            schoolListSignalsBudget={specialtyRule.totalSignals}
           />
         );
       })()}
@@ -364,7 +392,7 @@ export function StudentPortal({
                 <Sparkles className="w-5 h-5" />
               </div>
               <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-700 border border-amber-200">
-                Specialty: {student.specialty} (15 Signals Budget)
+                Specialty: {targetSpecialty} ({specialtyRule.totalSignals} Signals Budget)
               </span>
             </div>
             <div className="flex items-center justify-between mt-4">
@@ -383,7 +411,7 @@ export function StudentPortal({
             </p>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
               <span>Programs Saved: <strong className="text-slate-700">{schoolListStats.count} programs</strong></span>
-              <span>Tokens Remaining: <strong className="text-amber-700 font-bold">{Math.max(0, 15 - schoolListStats.signalsAssigned)} total</strong></span>
+              <span>Tokens Remaining: <strong className="text-amber-700 font-bold">{Math.max(0, specialtyRule.totalSignals - schoolListStats.signalsAssigned)} total</strong></span>
             </div>
           </div>
           <button
@@ -450,6 +478,18 @@ export function StudentPortal({
           </button>
         </div>
       </div>
+
+      {/* Applicant Profile Questionnaire Modal (Ticket Candidate 9) */}
+      <ApplicantProfileModal
+        isOpen={isProfileModalOpen}
+        onClose={() => setIsProfileModalOpen(false)}
+        studentName={student.name}
+        specialty={targetSpecialty}
+        onOpenCompetitivenessEngine={() => {
+          setIsProfileModalOpen(false);
+          setActiveView('competitiveness');
+        }}
+      />
     </div>
   );
 }

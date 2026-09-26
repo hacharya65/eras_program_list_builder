@@ -202,4 +202,47 @@ describe('Ticket 16: Advisor Live Document Editing & Annotations', () => {
     expect(spans[1].annotation?.id).toBe('a1');
     expect(spans[2].text).toBe(' Gamma Delta');
   });
+
+  it('preserves text integrity without duplication when annotations overlap', () => {
+    const text = 'My grandfather, or dada as we called him, came to the United States in 1991';
+    
+    // Two overlapping annotations starting at offset 0 (like [0, 5] "My gr" and [0, 6] "My gra")
+    const ann1: DocumentAnnotation = {
+      id: 'a1',
+      documentId: 'doc1',
+      authorId: 'adv',
+      authorName: 'Advisor',
+      authorRole: 'advisor',
+      startOffset: 0,
+      endOffset: 5,
+      anchorText: 'My gr',
+      type: 'highlight',
+      color: 'yellow',
+      status: 'active',
+      createdAt: new Date().toISOString(),
+    };
+
+    const ann2: DocumentAnnotation = {
+      id: 'a2',
+      documentId: 'doc1',
+      authorId: 'adv',
+      authorName: 'Advisor',
+      authorRole: 'advisor',
+      startOffset: 0,
+      endOffset: 6,
+      anchorText: 'My gra',
+      type: 'highlight',
+      color: 'yellow',
+      status: 'active',
+      createdAt: new Date().toISOString(),
+    };
+
+    const spans = segmentDocumentText(text, [ann1, ann2]);
+    const reconstructed = spans.map((s) => s.text).join('');
+
+    // Must NOT produce "My gr My gra ndfather..."
+    expect(reconstructed).not.toContain('My gr My gra');
+    expect(reconstructed).toBe(text);
+  });
 });
+

@@ -86,6 +86,8 @@ const SPECIALTY_ALIASES: Record<string, string> = {
   'obstetrics and gynecology': 'OBSTETRICS AND GYNECOLOGY',
   'obgyn': 'OBSTETRICS AND GYNECOLOGY',
   'ob/gyn': 'OBSTETRICS AND GYNECOLOGY',
+  'ophthalmology': 'SURGERY-GENERAL',
+  'ophtho': 'SURGERY-GENERAL',
   'orthopaedic surgery': 'ORTHOPAEDIC SURGERY',
   'ortho': 'ORTHOPAEDIC SURGERY',
   'orthopedics': 'ORTHOPAEDIC SURGERY',
@@ -116,6 +118,9 @@ const SPECIALTY_ALIASES: Record<string, string> = {
   'thoracic surgery': 'THORACIC SURGERY (INTEGRATED)',
   'vascular surgery (integrated)': 'VASCULAR SURGERY (INTEGRATED)',
   'vascular surgery': 'VASCULAR SURGERY (INTEGRATED)',
+  'transitional year': 'INTERNAL MEDICINE',
+  'urology': 'SURGERY-GENERAL',
+  'orthopedic surgery': 'ORTHOPAEDIC SURGERY',
 };
 
 const benchmarksMap: Record<string, SpecialtyBenchmark> = summaryStatsData as unknown as Record<string, SpecialtyBenchmark>;

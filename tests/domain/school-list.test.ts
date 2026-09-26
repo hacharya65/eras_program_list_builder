@@ -173,17 +173,35 @@ describe('Ticket 07: Strategic School List Matrix & Dynamic Specialty Signaling'
       expect(result.silverMultiplier).toBe('2.4x');
       expect(result.goldMultiplier).toBe('14.5x');
     });
+
+    it('computes recommendations and multipliers for single-tier signaling programs', async () => {
+      const { computeSignalingRecommendation } = await import('@/domain/signaling-recommendation');
+      // Single-tier: No signal: 4%, Signaled: 24%
+      const result = computeSignalingRecommendation(4, 24, undefined, 'single_tier');
+      expect(result.signalMultiplier).toBe('6.0x');
+      expect(result.label).toContain('High Yield Signal');
+      expect(result.recommendedSignal).toBe('silver');
+
+      // Single-tier: High baseline (40%)
+      const highBaseline = computeSignalingRecommendation(40, 50, undefined, 'single_tier');
+      expect(highBaseline.recommendation).toBe('NO_SIGNAL_SUFFICIENT');
+      expect(highBaseline.recommendedSignal).toBe('none');
+
+      // Single-tier: Needs input
+      const needsInput = computeSignalingRecommendation(undefined, undefined, undefined, 'single_tier');
+      expect(needsInput.recommendation).toBe('NEEDS_INPUT');
+    });
   });
 
-  describe('Item 13 & 14 / Ticket Candidate 8: Step 2 CK Intake & Automated Tiering Engine', () => {
-    it('evaluates Safety tier when applicant Step 2 CK exceeds program 75th percentile', async () => {
+  describe('Item 13 & 14 / Ticket Candidate 8: Step 2 CK Intake & Automated Tiering Engine (Residency Explorer Middle 80%)', () => {
+    it('evaluates Safety tier when applicant Step 2 CK exceeds program Middle 80% High', async () => {
       const { evaluateProgramTier } = await import('@/domain/school-list-models');
       // Applicant 254 vs program range 230 - 245 -> Safety
       const tier = evaluateProgramTier(254, 230, 245);
       expect(tier).toBe('safety');
     });
 
-    it('evaluates Target tier when applicant Step 2 CK falls within program 25th–75th percentile', async () => {
+    it('evaluates Target tier when applicant Step 2 CK falls within program Middle 80% range', async () => {
       const { evaluateProgramTier } = await import('@/domain/school-list-models');
       // Applicant 254 vs program range 250 - 259 -> Target
       const tier = evaluateProgramTier(254, 250, 259);
@@ -195,7 +213,7 @@ describe('Ticket 07: Strategic School List Matrix & Dynamic Specialty Signaling'
       expect(evaluateProgramTier(259, 250, 259)).toBe('target');
     });
 
-    it('evaluates Reach tier when applicant Step 2 CK is below program 25th percentile', async () => {
+    it('evaluates Reach tier when applicant Step 2 CK is below program Middle 80% Low', async () => {
       const { evaluateProgramTier } = await import('@/domain/school-list-models');
       // Applicant 254 vs program range 260 - 270 -> Reach
       const tier = evaluateProgramTier(254, 260, 270);
@@ -209,13 +227,44 @@ describe('Ticket 07: Strategic School List Matrix & Dynamic Specialty Signaling'
       expect(evaluateProgramTier(NaN, 240, 260)).toBeNull();
     });
 
-    it('parses numeric 25th and 75th percentiles from diverse range strings', async () => {
+    it('parses numeric Middle 80% Low and High bounds from diverse range strings', async () => {
       const { parseScoreRange } = await import('@/domain/school-list-models');
       expect(parseScoreRange('250 - 259')).toEqual({ min: 250, max: 259 });
       expect(parseScoreRange('240-249')).toEqual({ min: 240, max: 249 });
       expect(parseScoreRange('< 220')).toEqual({ min: 200, max: 219 });
       expect(parseScoreRange('270+')).toEqual({ min: 270, max: 300 });
       expect(parseScoreRange('')).toEqual({});
+    });
+
+    it('verifies Internal Medicine database programs are enriched with Step 2 CK Middle 80% and signal yield rates', async () => {
+      const { getProgramsForSpecialty } = await import('@/domain/residency-database');
+      const imPrograms = getProgramsForSpecialty('Internal Medicine');
+      expect(imPrograms.length).toBeGreaterThan(600);
+
+      // Check specific top programs from IM_Res_ex.csv
+      const mgh = imPrograms.find((p) => p.name.includes('Massachusetts General Hospital'));
+      expect(mgh).toBeDefined();
+      expect(mgh?.step2CkLow).toBe(249);
+      expect(mgh?.step2CkHigh).toBe(275);
+      expect(mgh?.step2ScoreRange).toBe('249 - 275');
+
+      const brigham = imPrograms.find((p) => p.name.includes('Brigham and Women'));
+      expect(brigham).toBeDefined();
+      expect(brigham?.step2CkLow).toBe(248);
+      expect(brigham?.step2CkHigh).toBe(274);
+      expect(brigham?.noSignal).toBe(1);
+      expect(brigham?.silverSignal).toBe(20);
+      expect(brigham?.goldSignal).toBe(42);
+
+      const uw = imPrograms.find(
+        (p) => p.name.includes('University of Washington Program') && p.city === 'Seattle'
+      );
+      expect(uw).toBeDefined();
+      expect(uw?.step2CkLow).toBe(241);
+      expect(uw?.step2CkHigh).toBe(275);
+      expect(uw?.noSignal).toBe(0);
+      expect(uw?.silverSignal).toBe(29);
+      expect(uw?.goldSignal).toBe(47);
     });
 
     it('persists and retrieves applicant Step 2 CK baseline score', async () => {
@@ -231,6 +280,95 @@ describe('Ticket 07: Strategic School List Matrix & Dynamic Specialty Signaling'
 
       // Clean up
       setStoredApplicantStep2Ck(DEFAULT_APPLICANT_STEP2_CK);
+    });
+  });
+
+  describe('Specialty Sample Programs Auto-Population & Consistency', () => {
+    it('auto-populates sample programs consistent with the selected specialty', async () => {
+      const {
+        getSampleProgramsForSpecialty,
+        CANONICAL_SPECIALTIES,
+      } = await import('@/domain/school-list-models');
+
+      // Test Transitional Year
+      const tyItems = getSampleProgramsForSpecialty('Transitional Year');
+      expect(tyItems.length).toBeGreaterThanOrEqual(1);
+      tyItems.forEach((item) => {
+        expect(item.specialty).toBe('Transitional Year');
+      });
+
+      // Test Anesthesiology
+      const anesthItems = getSampleProgramsForSpecialty('Anesthesiology');
+      expect(anesthItems.length).toBe(5);
+      anesthItems.forEach((item) => {
+        expect(item.specialty).toBe('Anesthesiology');
+      });
+
+      // Test Emergency Medicine
+      const emItems = getSampleProgramsForSpecialty('Emergency Medicine');
+      expect(emItems.length).toBe(5);
+      emItems.forEach((item) => {
+        expect(item.specialty).toBe('Emergency Medicine');
+      });
+
+      // Test General Surgery
+      const gsItems = getSampleProgramsForSpecialty('General Surgery');
+      expect(gsItems.length).toBe(5);
+      gsItems.forEach((item) => {
+        expect(item.specialty).toBe('General Surgery');
+      });
+
+      // Test Internal Medicine
+      const imItems = getSampleProgramsForSpecialty('Internal Medicine');
+      expect(imItems.length).toBe(5);
+      imItems.forEach((item) => {
+        expect(item.specialty).toBe('Internal Medicine');
+      });
+
+      // Guarantee across ALL 25 canonical specialties that auto-populated items are 100% consistent with selected specialty
+      for (const spec of CANONICAL_SPECIALTIES) {
+        const sampleList = getSampleProgramsForSpecialty(spec);
+        expect(sampleList.length).toBeGreaterThanOrEqual(1);
+        sampleList.forEach((prog) => {
+          expect(prog.specialty.toLowerCase()).toBe(spec.toLowerCase());
+        });
+      }
+    });
+
+    it('assigns appropriate signal types for single-tier vs tiered specialties', async () => {
+      const { getSampleProgramsForSpecialty } = await import('@/domain/school-list-models');
+
+      // Single-tier (e.g. Transitional Year, General Surgery) should only have 'silver' or 'none', NEVER 'gold'
+      const tyItems = getSampleProgramsForSpecialty('Transitional Year');
+      tyItems.forEach((item) => {
+        expect(['silver', 'none']).toContain(item.signal);
+      });
+
+      const gsItems = getSampleProgramsForSpecialty('General Surgery');
+      gsItems.forEach((item) => {
+        expect(['silver', 'none']).toContain(item.signal);
+      });
+
+      // Tiered (e.g. Internal Medicine, Anesthesiology) can have 'gold', 'silver', 'none'
+      const imItems = getSampleProgramsForSpecialty('Internal Medicine');
+      const hasGold = imItems.some((item) => item.signal === 'gold');
+      expect(hasGold).toBe(true);
+    });
+
+    it('loadItemsForSpecialty retrieves specialty-consistent items and avoids defaulting to Internal Medicine', async () => {
+      const { loadItemsForSpecialty } = await import('@/domain/school-list-models');
+
+      const dermItems = loadItemsForSpecialty('Dermatology');
+      expect(dermItems.length).toBeGreaterThan(0);
+      dermItems.forEach((item) => {
+        expect(item.specialty).toBe('Dermatology');
+      });
+
+      const orthoItems = loadItemsForSpecialty('Orthopedic Surgery');
+      expect(orthoItems.length).toBeGreaterThan(0);
+      orthoItems.forEach((item) => {
+        expect(item.specialty).toBe('Orthopedic Surgery');
+      });
     });
   });
 });

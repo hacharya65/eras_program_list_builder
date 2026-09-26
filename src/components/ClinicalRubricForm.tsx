@@ -84,7 +84,7 @@ export function ClinicalRubricForm({
         <div>
           <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
             <Stethoscope className="w-5 h-5 text-emerald-600" />
-            4-Pillar Clinical Advising Rubric
+            Standardized Rubric Evaluation
           </h3>
           <p className="text-xs text-slate-500">
             Evaluating {studentName}'s Personal Statement v{versionNumber}

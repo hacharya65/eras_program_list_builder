@@ -1,11 +1,12 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SAMPLE_ALUMNI_ROSTER,
   AlumniResident,
   getNonRoboticOutreachGuide,
 } from '@/domain/alumni-models';
+import { CANONICAL_SPECIALTIES } from '@/domain/school-list-models';
 import {
   Users,
   Search,
@@ -40,10 +41,27 @@ export function AlumniResidentDirectory({
   const [selectedResident, setSelectedResident] = useState<AlumniResident | null>(null);
   const [copiedDraft, setCopiedDraft] = useState(false);
 
+  // Sync state whenever initialSpecialty updates from parent
+  useEffect(() => {
+    if (initialSpecialty) {
+      setSelectedSpecialty(initialSpecialty);
+    }
+  }, [initialSpecialty]);
+
   // Filter alumni
+  const normalize = (s: string) => s.toLowerCase().replace(/[^a-z]/g, '');
+
   const filteredAlumni = SAMPLE_ALUMNI_ROSTER.filter((alum) => {
-    if (selectedSpecialty !== 'ALL' && alum.specialty.toLowerCase() !== selectedSpecialty.toLowerCase()) {
-      return false;
+    if (selectedSpecialty !== 'ALL') {
+      const targetNorm = normalize(selectedSpecialty);
+      const alumNorm = normalize(alum.specialty);
+      const matchesSpecialty =
+        alumNorm === targetNorm ||
+        alumNorm.includes(targetNorm) ||
+        targetNorm.includes(alumNorm);
+      if (!matchesSpecialty) {
+        return false;
+      }
     }
     if (mentorsOnly && !alum.isAvailableForMentorship) {
       return false;
@@ -120,9 +138,11 @@ export function AlumniResidentDirectory({
             className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-violet-500"
           >
             <option value="ALL">All Specialties</option>
-            <option value="Internal Medicine">Internal Medicine</option>
-            <option value="Orthopaedic Surgery">Orthopaedic Surgery</option>
-            <option value="Dermatology">Dermatology</option>
+            {CANONICAL_SPECIALTIES.map((spec) => (
+              <option key={spec} value={spec}>
+                {spec}
+              </option>
+            ))}
           </select>
 
           <label className="flex items-center gap-1.5 text-xs font-medium text-slate-700 cursor-pointer bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200">
@@ -198,8 +218,16 @@ export function AlumniResidentDirectory({
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
-              {filteredAlumni.map((alum) => (
-                <tr key={alum.id} className="hover:bg-slate-50/70 transition-colors">
+              {filteredAlumni.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="py-12 text-center text-slate-400 text-xs">
+                    <p className="font-semibold text-slate-600">No alumni residents found for {selectedSpecialty}.</p>
+                    <p className="mt-1">Try switching to &quot;All Specialties&quot; or clearing your search filters.</p>
+                  </td>
+                </tr>
+              ) : (
+                filteredAlumni.map((alum) => (
+                  <tr key={alum.id} className="hover:bg-slate-50/70 transition-colors">
                   {/* Resident Name & Class */}
                   <td className="px-4 py-3">
                     <div className="font-bold text-slate-900">{alum.name}</div>
@@ -267,7 +295,7 @@ export function AlumniResidentDirectory({
                     )}
                   </td>
                 </tr>
-              ))}
+              )))}
             </tbody>
           </table>
         </div>

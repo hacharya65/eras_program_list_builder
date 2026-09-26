@@ -6,6 +6,8 @@ export type UserRole = 'advisor' | 'applicant';
 export interface DocumentAnnotation {
   id: string;
   documentId: string;
+  documentVersionId?: string;
+  document_version_id?: string;
   studentId?: string;
   authorId: string;
   authorName: string;
@@ -32,6 +34,8 @@ export interface CommentMessage {
 export interface CommentThread {
   id: string;
   documentId: string;
+  documentVersionId?: string;
+  document_version_id?: string;
   annotationId?: string;
   startOffset: number;
   endOffset: number;
@@ -44,6 +48,8 @@ export interface CommentThread {
 
 export function createAnnotation(params: {
   documentId: string;
+  documentVersionId?: string;
+  document_version_id?: string;
   authorId: string;
   authorName: string;
   authorRole: UserRole;
@@ -56,6 +62,8 @@ export function createAnnotation(params: {
 }): DocumentAnnotation {
   const {
     documentId,
+    documentVersionId,
+    document_version_id,
     authorId,
     authorName,
     authorRole,
@@ -71,9 +79,13 @@ export function createAnnotation(params: {
     throw new Error('Invalid character offset range');
   }
 
+  const resolvedVersionId = documentVersionId || document_version_id;
+
   return {
     id: `ann-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     documentId,
+    documentVersionId: resolvedVersionId,
+    document_version_id: resolvedVersionId,
     authorId,
     authorName,
     authorRole,
@@ -90,6 +102,8 @@ export function createAnnotation(params: {
 
 export function createCommentThread(params: {
   documentId: string;
+  documentVersionId?: string;
+  document_version_id?: string;
   authorId: string;
   authorName: string;
   authorRole: UserRole;
@@ -101,6 +115,8 @@ export function createCommentThread(params: {
 }): CommentThread {
   const {
     documentId,
+    documentVersionId,
+    document_version_id,
     authorId,
     authorName,
     authorRole,
@@ -111,10 +127,13 @@ export function createCommentThread(params: {
     annotationId,
   } = params;
 
+  const resolvedVersionId = documentVersionId || document_version_id;
   const now = new Date().toISOString();
   return {
     id: `thread-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
     documentId,
+    documentVersionId: resolvedVersionId,
+    document_version_id: resolvedVersionId,
     annotationId,
     startOffset,
     endOffset,
@@ -222,10 +241,10 @@ export function segmentDocumentText(
 ): TextSpan[] {
   if (!fullText) return [];
 
-  // Active annotations only
+  // Active annotations only, sorted by startOffset then endOffset
   const activeAnnotations = annotations
     .filter((a) => a.status === 'active')
-    .sort((a, b) => a.startOffset - b.startOffset);
+    .sort((a, b) => a.startOffset - b.startOffset || a.endOffset - b.endOffset);
 
   if (activeAnnotations.length === 0) {
     return [{ text: fullText }];
@@ -238,14 +257,18 @@ export function segmentDocumentText(
     const start = Math.max(0, Math.min(ann.startOffset, fullText.length));
     const end = Math.max(start, Math.min(ann.endOffset, fullText.length));
 
+    // Emit unannotated text preceding this annotation
     if (start > currentIndex) {
       spans.push({ text: fullText.slice(currentIndex, start) });
+      currentIndex = start;
     }
 
-    if (end > start) {
+    // Determine the non-overlapping segment for this annotation
+    const segStart = Math.max(currentIndex, start);
+    if (end > segStart) {
       const matchingThread = threads.find((t) => t.annotationId === ann.id);
       spans.push({
-        text: fullText.slice(start, end),
+        text: fullText.slice(segStart, end),
         annotation: ann,
         thread: matchingThread,
       });
@@ -253,6 +276,7 @@ export function segmentDocumentText(
     }
   }
 
+  // Trailing unannotated text
   if (currentIndex < fullText.length) {
     spans.push({ text: fullText.slice(currentIndex) });
   }
@@ -260,44 +284,152 @@ export function segmentDocumentText(
   return spans;
 }
 
-// Local storage sync helpers
+// Local storage sync helpers with strict version-scoping
 const ANNOTATIONS_STORAGE_KEY = 'eras_doc_annotations';
 const THREADS_STORAGE_KEY = 'eras_doc_comment_threads';
 
-export function loadStoredAnnotations(documentId: string): DocumentAnnotation[] {
-  if (typeof window === 'undefined') return [];
+const inMemoryAnnotationsStore: Record<string, string> = {};
+const inMemoryThreadsStore: Record<string, string> = {};
+
+export function clearInMemoryAnnotationStores(): void {
+  for (const k of Object.keys(inMemoryAnnotationsStore)) {
+    delete inMemoryAnnotationsStore[k];
+  }
+  for (const k of Object.keys(inMemoryThreadsStore)) {
+    delete inMemoryThreadsStore[k];
+  }
+}
+
+export function getScopedStorageKey(baseKey: string, documentId: string, versionId?: string): string {
+  if (!versionId) return `${baseKey}_${documentId}`;
+  return `${baseKey}_${documentId}_${versionId}`;
+}
+
+export function loadStoredAnnotations(documentId: string, documentVersionId?: string): DocumentAnnotation[] {
   try {
-    const raw = localStorage.getItem(`${ANNOTATIONS_STORAGE_KEY}_${documentId}`);
-    return raw ? JSON.parse(raw) : [];
+    const scopedKey = getScopedStorageKey(ANNOTATIONS_STORAGE_KEY, documentId, documentVersionId);
+    let raw: string | null = null;
+    if (typeof localStorage !== 'undefined') {
+      raw = localStorage.getItem(scopedKey);
+      if (!raw && documentVersionId) {
+        raw = localStorage.getItem(`${ANNOTATIONS_STORAGE_KEY}_${documentId}-${documentVersionId}`) ||
+              localStorage.getItem(`${ANNOTATIONS_STORAGE_KEY}_ps-${documentVersionId}`);
+      } else if (!raw && !documentVersionId) {
+        raw = localStorage.getItem(`${ANNOTATIONS_STORAGE_KEY}_${documentId}`);
+      }
+    }
+    if (!raw && inMemoryAnnotationsStore[scopedKey]) {
+      raw = inMemoryAnnotationsStore[scopedKey];
+    }
+
+    const items: DocumentAnnotation[] = raw ? JSON.parse(raw) : [];
+
+    // Strict version isolation filter: ensure no historical annotations from other drafts leak through
+    if (documentVersionId) {
+      return items.filter((a) => {
+        const itemVer = a.documentVersionId || a.document_version_id;
+        return !itemVer ? documentVersionId === 'v1' : itemVer === documentVersionId;
+      });
+    }
+    return items;
   } catch {
     return [];
   }
 }
 
-export function saveStoredAnnotations(documentId: string, annotations: DocumentAnnotation[]): void {
-  if (typeof window === 'undefined') return;
+export function saveStoredAnnotations(
+  documentId: string,
+  annotations: DocumentAnnotation[],
+  documentVersionId?: string
+): void {
   try {
-    localStorage.setItem(`${ANNOTATIONS_STORAGE_KEY}_${documentId}`, JSON.stringify(annotations));
+    const scopedKey = getScopedStorageKey(ANNOTATIONS_STORAGE_KEY, documentId, documentVersionId);
+    const json = JSON.stringify(annotations);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(scopedKey, json);
+    }
+    inMemoryAnnotationsStore[scopedKey] = json;
   } catch (e) {
     console.error('Failed to save annotations to localStorage', e);
   }
 }
 
-export function loadStoredThreads(documentId: string): CommentThread[] {
-  if (typeof window === 'undefined') return [];
+export function loadStoredThreads(documentId: string, documentVersionId?: string): CommentThread[] {
   try {
-    const raw = localStorage.getItem(`${THREADS_STORAGE_KEY}_${documentId}`);
-    return raw ? JSON.parse(raw) : [];
+    const scopedKey = getScopedStorageKey(THREADS_STORAGE_KEY, documentId, documentVersionId);
+    let raw: string | null = null;
+    if (typeof localStorage !== 'undefined') {
+      raw = localStorage.getItem(scopedKey);
+      if (!raw && documentVersionId) {
+        raw = localStorage.getItem(`${THREADS_STORAGE_KEY}_${documentId}-${documentVersionId}`) ||
+              localStorage.getItem(`${THREADS_STORAGE_KEY}_ps-${documentVersionId}`);
+      } else if (!raw && !documentVersionId) {
+        raw = localStorage.getItem(`${THREADS_STORAGE_KEY}_${documentId}`);
+      }
+    }
+    if (!raw && inMemoryThreadsStore[scopedKey]) {
+      raw = inMemoryThreadsStore[scopedKey];
+    }
+
+    const items: CommentThread[] = raw ? JSON.parse(raw) : [];
+
+    // Strict version isolation filter: ensure no historical threads from other drafts leak through
+    if (documentVersionId) {
+      return items.filter((t) => {
+        const itemVer = t.documentVersionId || t.document_version_id;
+        return !itemVer ? documentVersionId === 'v1' : itemVer === documentVersionId;
+      });
+    }
+    return items;
   } catch {
     return [];
   }
 }
 
-export function saveStoredThreads(documentId: string, threads: CommentThread[]): void {
-  if (typeof window === 'undefined') return;
+export function saveStoredThreads(
+  documentId: string,
+  threads: CommentThread[],
+  documentVersionId?: string
+): void {
   try {
-    localStorage.setItem(`${THREADS_STORAGE_KEY}_${documentId}`, JSON.stringify(threads));
+    const scopedKey = getScopedStorageKey(THREADS_STORAGE_KEY, documentId, documentVersionId);
+    const json = JSON.stringify(threads);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.setItem(scopedKey, json);
+    }
+    inMemoryThreadsStore[scopedKey] = json;
   } catch (e) {
     console.error('Failed to save comment threads to localStorage', e);
   }
+}
+
+export interface HistoricalDraftAnnotationLog {
+  versionNumber: number;
+  versionId: string;
+  annotations: DocumentAnnotation[];
+  threads: CommentThread[];
+}
+
+export function loadHistoricalDraftAnnotations(
+  documentId: string,
+  currentVersionNumber: number
+): HistoricalDraftAnnotationLog[] {
+  if (currentVersionNumber <= 1) return [];
+  const history: HistoricalDraftAnnotationLog[] = [];
+
+  for (let v = 1; v < currentVersionNumber; v++) {
+    const vId = `v${v}`;
+    const ann = loadStoredAnnotations(documentId, vId);
+    const thr = loadStoredThreads(documentId, vId);
+    if (ann.length > 0 || thr.length > 0) {
+      history.push({
+        versionNumber: v,
+        versionId: vId,
+        annotations: ann,
+        threads: thr,
+      });
+    }
+  }
+
+  return history;
 }
