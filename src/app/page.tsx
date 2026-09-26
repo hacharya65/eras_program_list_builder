@@ -74,22 +74,26 @@ export default function HomePage() {
     setRefreshKey((k) => k + 1);
   };
 
-  const handleCreateRevision = () => {
-    storage.personalStatement.currentVersionNumber += 1;
+  const handleCreateRevision = (targetVersion?: number) => {
+    if (targetVersion && targetVersion > storage.personalStatement.currentVersionNumber) {
+      storage.personalStatement.currentVersionNumber = targetVersion;
+    } else if (!targetVersion) {
+      storage.personalStatement.currentVersionNumber += 1;
+    }
     storage.personalStatement.stage = 'drafting';
     setRefreshKey((k) => k + 1);
-  };
-
-  const getAdvisorFeedback = () => {
-    const req = storage.reviewRequests.find(
-      r => r.studentId === studentContext.student.id && (r.stage === 'revisions_requested' || r.stage === 'endorsed')
-    );
-    return req ? service.getFeedbackForReview(req.id) : undefined;
   };
 
   const studentContext = service.getStudentDashboardContext();
   const advisorContext = service.getAdvisorDashboardContext();
   const adminContext = service.getAdminCohortContext();
+
+  const latestPSFeedback = service.getLatestPersonalStatementFeedback(studentContext.student.id);
+  const psFeedbackHistory = service.getPersonalStatementFeedbackHistory(studentContext.student.id);
+
+  const getAdvisorFeedback = () => {
+    return latestPSFeedback?.feedback;
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-slate-100/60">
@@ -110,6 +114,8 @@ export default function HomePage() {
             onUpdateExperience={handleUpdateExp}
             onSubmitExperiences={handleSubmitExperiences}
             getAdvisorFeedback={getAdvisorFeedback}
+            latestPSFeedback={latestPSFeedback}
+            psFeedbackHistory={psFeedbackHistory}
             onCreateRevision={handleCreateRevision}
           />
         )}

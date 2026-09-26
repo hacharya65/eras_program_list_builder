@@ -66,6 +66,14 @@ export interface ReviewFeedback {
   submittedAt: string;
 }
 
+export interface DocumentFeedbackSummary {
+  feedback: ReviewFeedback;
+  reviewRequest: ReviewRequest;
+  snapshot: DocumentSnapshot;
+  advisor: UserProfile;
+  versionNumber: number;
+}
+
 export interface DocumentSnapshot {
   id: string;
   documentType: 'personal_statement' | 'experience_portfolio';

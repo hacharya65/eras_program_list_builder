@@ -5,7 +5,8 @@ import {
   AdminCohortContext,
   RubricEvaluation,
   ReviewFeedback,
-  DocumentSnapshot
+  DocumentSnapshot,
+  DocumentFeedbackSummary
 } from './types';
 import { InMemoryStorageAdapter } from './storage/in-memory-adapter';
 import { validateExperiencesSubmission } from './experience-validation';
@@ -157,6 +158,51 @@ export class AdvisingPlatformService {
 
   getFeedbackForReview(reviewRequestId: string): ReviewFeedback | undefined {
     return this.storage.reviewFeedbacks.find(f => f.reviewRequestId === reviewRequestId);
+  }
+
+  getLatestPersonalStatementFeedback(studentId: string): DocumentFeedbackSummary | undefined {
+    const history = this.getPersonalStatementFeedbackHistory(studentId);
+    return history.length > 0 ? history[0] : undefined;
+  }
+
+  getPersonalStatementFeedbackHistory(studentId: string): DocumentFeedbackSummary[] {
+    const defaultAdvisor = this.storage.personas.advisor;
+
+    const reviewedRequests = this.storage.reviewRequests.filter(
+      r =>
+        r.studentId === studentId &&
+        r.documentType === 'personal_statement' &&
+        (r.stage === 'revisions_requested' || r.stage === 'endorsed')
+    );
+
+    const summaries: DocumentFeedbackSummary[] = [];
+
+    for (const req of reviewedRequests) {
+      const feedback = this.storage.reviewFeedbacks.find(f => f.reviewRequestId === req.id);
+      if (!feedback) continue;
+
+      const snapshot = this.storage.snapshots.find(s => s.id === req.snapshotId);
+      const versionNumber = snapshot ? snapshot.versionNumber : 1;
+      const adv = Object.values(this.storage.personas).find(p => p.id === req.advisorId) || defaultAdvisor;
+
+      summaries.push({
+        feedback,
+        reviewRequest: req,
+        snapshot: snapshot || {
+          id: req.snapshotId,
+          documentType: 'personal_statement',
+          documentId: this.storage.personalStatement.id,
+          versionNumber,
+          content: this.storage.personalStatement.content,
+          submittedAt: req.submittedAt,
+        },
+        advisor: adv,
+        versionNumber,
+      });
+    }
+
+    // Sort descending by version number so the most recent reviewed revision is first
+    return summaries.sort((a, b) => b.versionNumber - a.versionNumber);
   }
 
   updateExperience(id: string, updates: any) {
