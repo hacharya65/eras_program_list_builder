@@ -95,6 +95,7 @@ export function StudentPortal({
   // Real-time synced counts across modules
   const [scholarlyStats, setScholarlyStats] = useState({ count: 2, meaningful: 2 });
   const [schoolListStats, setSchoolListStats] = useState({ count: 0, signalsAssigned: 0 });
+  const [alumniSearchFilter, setAlumniSearchFilter] = useState('');
 
   // Re-read storage whenever returning to overview or mounting
   useEffect(() => {
@@ -207,6 +208,11 @@ export function StudentPortal({
     return (
       <SchoolListMatrix
         specialty={targetSpecialty}
+        alumniResidents={alumniResidents}
+        onNavigateToAlumni={(programName) => {
+          setAlumniSearchFilter(programName);
+          setActiveView('alumni_directory');
+        }}
         onBack={() => setActiveView('overview')}
       />
     );
@@ -226,8 +232,12 @@ export function StudentPortal({
       <AlumniResidentDirectory
         studentName={student.name}
         initialSpecialty={targetSpecialty}
+        initialSearchQuery={alumniSearchFilter}
         alumniResidents={alumniResidents}
-        onBack={() => setActiveView('overview')}
+        onBack={() => {
+          setAlumniSearchFilter('');
+          setActiveView('overview');
+        }}
       />
     );
   }

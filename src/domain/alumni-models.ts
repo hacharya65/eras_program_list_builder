@@ -2,7 +2,7 @@ export interface AlumniResident {
   id: string;
   name: string;
   graduationYear: number;
-  currentPgy: 'PGY-1' | 'PGY-2' | 'PGY-3' | 'PGY-4' | 'PGY-5' | 'Chief';
+  currentPgy: string;
   medicalSchool: string;
   institutionName: string;
   specialty: string;
@@ -13,7 +13,74 @@ export interface AlumniResident {
   email: string;
   doximityProfileUrl?: string;
   adviceQuote?: string;
-  signalStrategyUsed?: 'Gold' | 'Silver' | 'No Signal';
+  acgmeProgramId?: string;
+  pgyOverride?: string;
+  verificationStatus?: 'verified' | 're_attestation_pending';
+  lastVerifiedPeriod?: string;
+  lastVerifiedAt?: string;
+}
+
+export const SPECIALTY_TRAINING_YEARS: Record<string, number> = {
+  'Internal Medicine': 3,
+  'Pediatrics': 3,
+  'Family Medicine': 3,
+  'Emergency Medicine': 3,
+  'Psychiatry': 4,
+  'Obstetrics and Gynecology': 4,
+  'Anesthesiology': 4,
+  'Pathology': 4,
+  'Neurology': 4,
+  'Diagnostic Radiology': 5,
+  'General Surgery': 5,
+  'Orthopedic Surgery': 5,
+  'Otolaryngology': 5,
+  'Urology': 5,
+  'Plastic Surgery (Integrated)': 6,
+  'Neurological Surgery': 7,
+  'Thoracic Surgery (Integrated)': 6,
+  'Vascular Surgery (Integrated)': 5,
+};
+
+/**
+ * Perpetually calculates the training stage / PGY of an alumnus
+ * based on graduation year, current date, and July 1st academic rollover.
+ */
+export function calculateCurrentPgy(
+  graduationYear: number,
+  currentDate: Date = new Date(),
+  override?: string,
+  specialty?: string
+): string {
+  if (override && override.trim()) {
+    return override.trim();
+  }
+
+  const currentYear = currentDate.getFullYear();
+  // July 1 of current year
+  const julyFirstCurrentYear = new Date(currentYear, 6, 1);
+  const isAfterJulyFirst = currentDate.getTime() >= julyFirstCurrentYear.getTime();
+
+  // If student is graduating this year before July 1 or graduating in future years
+  if (graduationYear > currentYear || (graduationYear === currentYear && !isAfterJulyFirst)) {
+    return 'Incoming PGY-1';
+  }
+
+  // Calculate elapsed academic years starting from July 1 of graduation year
+  let pgyNumber = currentYear - graduationYear;
+  if (isAfterJulyFirst) {
+    pgyNumber += 1;
+  }
+
+  if (pgyNumber <= 0) {
+    return 'Incoming PGY-1';
+  }
+
+  const trainingLength = (specialty && SPECIALTY_TRAINING_YEARS[specialty]) || 3;
+  if (pgyNumber > trainingLength) {
+    return 'Fellow / Attending';
+  }
+
+  return `PGY-${pgyNumber}`;
 }
 
 export interface ProgramAlumniSummary {
@@ -48,8 +115,10 @@ export const SAMPLE_ALUMNI_ROSTER: AlumniResident[] = [
     contactPreference: 'virtual_coffee',
     email: 'sjenkins@mgh.harvard.edu',
     doximityProfileUrl: 'https://www.doximity.com/pub/sarah-jenkins-md',
-    adviceQuote: 'MGH values distinct scholarly curiosity. If you send a Gold signal, reach out early to the APD in your subspecialty of interest.',
-    signalStrategyUsed: 'Gold',
+    adviceQuote: 'MGH values distinct scholarly curiosity. If you are reaching out, connect early with the APD in your subspecialty of interest.',
+    verificationStatus: 'verified',
+    lastVerifiedPeriod: '2025–2026 Academic Year',
+    lastVerifiedAt: '2025-07-01',
   },
   {
     id: 'alum-2',
@@ -63,14 +132,16 @@ export const SAMPLE_ALUMNI_ROSTER: AlumniResident[] = [
     programState: 'MA',
     isAvailableForMentorship: true,
     contactPreference: 'email',
-    email: 'dokafor@partners.org',
+    email: 'dokafor@mgh.harvard.edu',
     doximityProfileUrl: 'https://www.doximity.com/pub/david-okafor-md',
-    adviceQuote: 'The culture is surprisingly collegial. Make sure your Most Meaningful experiences highlight genuine bedside humility.',
-    signalStrategyUsed: 'Gold',
+    adviceQuote: 'The clinical autonomy here is incredible. Make sure your personal statement highlights specific clinical scenarios where you took ownership.',
+    verificationStatus: 'verified',
+    lastVerifiedPeriod: '2025–2026 Academic Year',
+    lastVerifiedAt: '2025-07-01',
   },
   {
     id: 'alum-3',
-    name: 'Dr. Elena Rostova',
+    name: 'Dr. Emily Chen',
     graduationYear: 2025,
     currentPgy: 'PGY-1',
     medicalSchool: 'Apex School of Medicine',
@@ -79,11 +150,13 @@ export const SAMPLE_ALUMNI_ROSTER: AlumniResident[] = [
     programCity: 'Boston',
     programState: 'MA',
     isAvailableForMentorship: true,
-    contactPreference: 'residency_chat',
-    email: 'erostova@bwh.harvard.edu',
-    doximityProfileUrl: 'https://www.doximity.com/pub/elena-rostova-md',
-    adviceQuote: 'Firm system here creates amazing camaraderie among interns. Do not hesitate to send your Silver signal if you have geographic ties.',
-    signalStrategyUsed: 'Silver',
+    contactPreference: 'email',
+    email: 'echen@bwh.harvard.edu',
+    doximityProfileUrl: 'https://www.doximity.com/pub/emily-chen-md',
+    adviceQuote: 'BWH has a warm, supportive resident culture. Focus on describing team collaboration and health equity passions in your experiences.',
+    verificationStatus: 're_attestation_pending',
+    lastVerifiedPeriod: '2024–2025 Academic Year',
+    lastVerifiedAt: '2024-07-01',
   },
   {
     id: 'alum-4',
@@ -91,39 +164,24 @@ export const SAMPLE_ALUMNI_ROSTER: AlumniResident[] = [
     graduationYear: 2024,
     currentPgy: 'PGY-2',
     medicalSchool: 'Apex School of Medicine',
-    institutionName: 'Johns Hopkins Hospital',
+    institutionName: 'Brigham and Women’s Hospital',
     specialty: 'Internal Medicine',
-    programCity: 'Baltimore',
-    programState: 'MD',
-    isAvailableForMentorship: true,
+    programCity: 'Boston',
+    programState: 'MA',
+    isAvailableForMentorship: false,
     contactPreference: 'email',
-    email: 'mvance@jhmi.edu',
+    email: 'mvance@bwh.harvard.edu',
     doximityProfileUrl: 'https://www.doximity.com/pub/marcus-vance-md',
-    adviceQuote: 'Osler medical service is rigorous but transformative. Focus your personal statement on concrete patient ownership.',
-    signalStrategyUsed: 'Gold',
+    adviceQuote: 'Prepare well for clinical reasoning questions during social dinners and virtual interviews.',
+    verificationStatus: 'verified',
+    lastVerifiedPeriod: '2025–2026 Academic Year',
+    lastVerifiedAt: '2025-07-01',
   },
   {
     id: 'alum-5',
-    name: 'Dr. Priya Patel',
+    name: 'Dr. Jessica Taylor',
     graduationYear: 2023,
     currentPgy: 'PGY-3',
-    medicalSchool: 'Apex School of Medicine',
-    institutionName: 'University of Washington',
-    specialty: 'Internal Medicine',
-    programCity: 'Seattle',
-    programState: 'WA',
-    isAvailableForMentorship: false,
-    contactPreference: 'email',
-    email: 'ppatel@uw.edu',
-    doximityProfileUrl: 'https://www.doximity.com/pub/priya-patel-md',
-    adviceQuote: 'WWAMI region focus is real. Highlighting rural or primary care experiences is huge.',
-    signalStrategyUsed: 'Silver',
-  },
-  {
-    id: 'alum-6',
-    name: 'Dr. Jason Miller',
-    graduationYear: 2024,
-    currentPgy: 'PGY-2',
     medicalSchool: 'Apex School of Medicine',
     institutionName: 'Beth Israel Deaconess Medical Center',
     specialty: 'Internal Medicine',
@@ -131,61 +189,88 @@ export const SAMPLE_ALUMNI_ROSTER: AlumniResident[] = [
     programState: 'MA',
     isAvailableForMentorship: true,
     contactPreference: 'virtual_coffee',
-    email: 'jmiller@bidmc.harvard.edu',
-    doximityProfileUrl: 'https://www.doximity.com/pub/jason-miller-md',
-    adviceQuote: 'Outstanding teaching climate. Silver signals are treated with great respect here.',
-    signalStrategyUsed: 'Silver',
+    email: 'jtaylor@bidmc.harvard.edu',
+    doximityProfileUrl: 'https://www.doximity.com/pub/jessica-taylor-md',
+    adviceQuote: 'BIDMC has phenomenal teaching attendings. Mention enthusiasm for bedside clinical ultrasound and cardiology research.',
+    verificationStatus: 'verified',
+    lastVerifiedPeriod: '2025–2026 Academic Year',
+    lastVerifiedAt: '2025-07-01',
+  },
+  {
+    id: 'alum-6',
+    name: 'Dr. Anthony Ramos',
+    graduationYear: 2025,
+    currentPgy: 'PGY-1',
+    medicalSchool: 'Apex School of Medicine',
+    institutionName: 'Beth Israel Deaconess Medical Center',
+    specialty: 'Internal Medicine',
+    programCity: 'Boston',
+    programState: 'MA',
+    isAvailableForMentorship: true,
+    contactPreference: 'text',
+    email: 'aramos@bidmc.harvard.edu',
+    doximityProfileUrl: 'https://www.doximity.com/pub/anthony-ramos-md',
+    adviceQuote: 'Happy to answer questions via text! Interview format was very conversational and values authentic advocacy work.',
+    verificationStatus: 'verified',
+    lastVerifiedPeriod: '2025–2026 Academic Year',
+    lastVerifiedAt: '2025-07-01',
   },
   {
     id: 'alum-7',
-    name: 'Dr. Rachel Chang',
-    graduationYear: 2022,
-    currentPgy: 'Chief',
-    medicalSchool: 'Apex School of Medicine',
-    institutionName: 'Hospital of the University of Pennsylvania',
-    specialty: 'Internal Medicine',
-    programCity: 'Philadelphia',
-    programState: 'PA',
-    isAvailableForMentorship: true,
-    contactPreference: 'email',
-    email: 'rchang@pennmedicine.upenn.edu',
-    doximityProfileUrl: 'https://www.doximity.com/pub/rachel-chang-md',
-    adviceQuote: 'As chief resident, I review files. What stands out is authenticity and clear reasons why Penn aligns with your 5-year vision.',
-    signalStrategyUsed: 'Gold',
-  },
-  {
-    id: 'alum-8',
-    name: 'Dr. Kevin Thorne',
-    graduationYear: 2023,
-    currentPgy: 'PGY-3',
-    medicalSchool: 'Apex School of Medicine',
-    institutionName: 'Northwestern University McGaw Medical Center',
-    specialty: 'Orthopaedic Surgery',
-    programCity: 'Chicago',
-    programState: 'IL',
-    isAvailableForMentorship: true,
-    contactPreference: 'virtual_coffee',
-    email: 'kthorne@nm.org',
-    doximityProfileUrl: 'https://www.doximity.com/pub/kevin-thorne-md',
-    adviceQuote: 'Sub-I performance and department champion backing are 90% of the game. Always signal programs where you rotated.',
-    signalStrategyUsed: 'Gold',
-  },
-  {
-    id: 'alum-9',
-    name: 'Dr. Maya Lin',
+    name: 'Dr. Rachel Kim',
     graduationYear: 2024,
     currentPgy: 'PGY-2',
     medicalSchool: 'Apex School of Medicine',
-    institutionName: 'NYU Grossman School of Medicine',
-    specialty: 'Dermatology',
+    institutionName: 'NewYork-Presbyterian / Columbia University',
+    specialty: 'Internal Medicine',
+    programCity: 'New York',
+    programState: 'NY',
+    isAvailableForMentorship: true,
+    contactPreference: 'virtual_coffee',
+    email: 'rkim@nyp.org',
+    doximityProfileUrl: 'https://www.doximity.com/pub/rachel-kim-md',
+    adviceQuote: 'High acuity, fast-paced pathology. Show your resilience and dedication to urban underserved populations.',
+    verificationStatus: 'verified',
+    lastVerifiedPeriod: '2025–2026 Academic Year',
+    lastVerifiedAt: '2025-07-01',
+  },
+  {
+    id: 'alum-8',
+    name: 'Dr. Samuel Brooks',
+    graduationYear: 2022,
+    currentPgy: 'Chief',
+    medicalSchool: 'Apex School of Medicine',
+    institutionName: 'NewYork-Presbyterian / Weill Cornell',
+    specialty: 'Internal Medicine',
     programCity: 'New York',
     programState: 'NY',
     isAvailableForMentorship: true,
     contactPreference: 'email',
-    email: 'mlin@nyulangone.org',
-    doximityProfileUrl: 'https://www.doximity.com/pub/maya-lin-md',
-    adviceQuote: 'Research fellowship connection and mentorship letters carry immense weight. Be prepared to talk deeply about your first-author papers.',
-    signalStrategyUsed: 'Gold',
+    email: 'sbrooks@nyp.org',
+    doximityProfileUrl: 'https://www.doximity.com/pub/samuel-brooks-md',
+    adviceQuote: 'Serving as Chief Medical Resident this year. Reach out early if you have an interest in our clinician-educator pathway.',
+    verificationStatus: 'verified',
+    lastVerifiedPeriod: '2025–2026 Academic Year',
+    lastVerifiedAt: '2025-07-01',
+  },
+  {
+    id: 'alum-9',
+    name: 'Dr. Olivia Martinez',
+    graduationYear: 2025,
+    currentPgy: 'PGY-1',
+    medicalSchool: 'Apex School of Medicine',
+    institutionName: 'UPMC Medical Education',
+    specialty: 'Internal Medicine',
+    programCity: 'Pittsburgh',
+    programState: 'PA',
+    isAvailableForMentorship: true,
+    contactPreference: 'virtual_coffee',
+    email: 'omartinez@upmc.edu',
+    doximityProfileUrl: 'https://www.doximity.com/pub/olivia-martinez-md',
+    adviceQuote: 'Pittsburgh is affordable with an outstanding biomedical research campus. UPMC loves applicants passionate about translational science.',
+    verificationStatus: 'verified',
+    lastVerifiedPeriod: '2025–2026 Academic Year',
+    lastVerifiedAt: '2025-07-01',
   }
 ];
 
@@ -258,7 +343,7 @@ Hope you are having a wonderful week and that residency at ${programName} is tre
 
 My name is ${studentName}, and I am a current MS4 at Apex School of Medicine applying into ${specialty} this cycle. I saw through our alumni directory that you matched at ${programName}, and I’ve been admiring the program’s clinical training and strong culture.
 
-If you have 10–15 minutes sometime in the coming weeks, I would love to hear a little about your transition from Apex to ${programName} and how you navigated the signaling and match process. Absolutely no worries if your clinical schedule is too packed right now!
+If you have 10–15 minutes sometime in the coming weeks, I would love to hear a little about your transition from Apex to ${programName} and how you navigated the match process. Absolutely no worries if your clinical schedule is too packed right now!
 
 Thank you so much for your time and for paving the way for Apex grads.
 

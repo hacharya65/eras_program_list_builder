@@ -32,7 +32,6 @@ describe('Dean of Student Affairs Alumni Management & Student View Sync', () => 
       isAvailableForMentorship: true,
       contactPreference: 'virtual_coffee',
       email: 'mpatel@stanford.edu',
-      signalStrategyUsed: 'Gold',
       adviceQuote: 'Stanford values research inquiry and leadership in health equity.',
     });
 
@@ -58,7 +57,7 @@ describe('Dean of Student Affairs Alumni Management & Student View Sync', () => 
     expect(service.getAlumniByProgram('Stanford Health Care').some((a) => a.name === 'Dr. Maya Patel')).toBe(false);
   });
 
-  it('renders Alumni Resident Management in AdminPortal for the Dean', () => {
+  it('renders Alumni Resident Management with rollover banner, import button, and no signal strategy in AdminPortal for the Dean', () => {
     const adminContext = service.getAdminCohortContext();
     const html = renderToStaticMarkup(
       React.createElement(AdminPortal, {
@@ -68,7 +67,12 @@ describe('Dean of Student Affairs Alumni Management & Student View Sync', () => 
 
     expect(html).toContain('Alumni Residency Network');
     expect(html).toContain('Add Matched Alumnus');
+    expect(html).toContain('Import Match Day Roster');
+    expect(html).toContain('Academic Year Rollover Active');
     expect(html).toContain('Dr. Sarah Jenkins');
+    // Must NOT contain signal strategy
+    expect(html).not.toContain('Signal Strategy');
+    expect(html).not.toContain('Gold Signal');
   });
 
   it('synchronizes Dean modifications directly into AlumniResidentDirectory in Student view', () => {
@@ -85,7 +89,6 @@ describe('Dean of Student Affairs Alumni Management & Student View Sync', () => 
       isAvailableForMentorship: true,
       contactPreference: 'email',
       email: 'jordan.lee@ucsf.edu',
-      signalStrategyUsed: 'Gold',
       adviceQuote: 'Feel free to reach out about UCSF primary care track!',
     });
 
@@ -118,7 +121,6 @@ describe('Dean of Student Affairs Alumni Management & Student View Sync', () => 
         isAvailableForMentorship: true,
         contactPreference: 'email',
         email: 'doc@ucsf.edu',
-        signalStrategyUsed: 'Gold',
       });
     }).toThrow(/Full name is required/);
 
@@ -136,7 +138,6 @@ describe('Dean of Student Affairs Alumni Management & Student View Sync', () => 
         isAvailableForMentorship: true,
         contactPreference: 'email',
         email: 'invalid-email-format',
-        signalStrategyUsed: 'Gold',
       });
     }).toThrow(/Valid contact email is required/);
   });

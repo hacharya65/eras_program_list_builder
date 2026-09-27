@@ -28,6 +28,7 @@ interface AlumniResidentDirectoryProps {
   studentName?: string;
   initialSpecialty?: string;
   studentSpecialty?: string;
+  initialSearchQuery?: string;
   alumniResidents?: AlumniResident[];
   onBack?: () => void;
 }
@@ -36,15 +37,22 @@ export function AlumniResidentDirectory({
   studentName = 'Alex Rivera',
   initialSpecialty,
   studentSpecialty,
+  initialSearchQuery = '',
   alumniResidents = SAMPLE_ALUMNI_ROSTER,
   onBack,
 }: AlumniResidentDirectoryProps) {
   const defaultSpecialty = initialSpecialty || studentSpecialty || 'Internal Medicine';
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState(initialSearchQuery);
   const [selectedSpecialty, setSelectedSpecialty] = useState<string>(defaultSpecialty);
   const [mentorsOnly, setMentorsOnly] = useState<boolean>(false);
   const [selectedResident, setSelectedResident] = useState<AlumniResident | null>(null);
   const [copiedDraft, setCopiedDraft] = useState(false);
+
+  useEffect(() => {
+    if (initialSearchQuery) {
+      setSearchQuery(initialSearchQuery);
+    }
+  }, [initialSearchQuery]);
 
   // Sync state whenever initialSpecialty updates from parent
   useEffect(() => {
@@ -240,11 +248,31 @@ export function AlumniResidentDirectory({
                     <div className="text-[11px] text-slate-500">Class of {alum.graduationYear}</div>
                   </td>
 
-                  {/* PGY Level */}
+                  {/* PGY Level & Verification Status */}
                   <td className="px-4 py-3">
-                    <span className="px-2 py-0.5 rounded font-bold text-[11px] bg-slate-100 text-slate-700">
-                      {alum.currentPgy}
-                    </span>
+                    <div className="flex flex-col gap-1 items-start">
+                      <span className="px-2 py-0.5 rounded font-bold text-[11px] bg-slate-100 text-slate-700">
+                        {alum.currentPgy}
+                      </span>
+                      {alum.verificationStatus === 're_attestation_pending' ? (
+                        <div className="flex flex-col text-[10px]">
+                          {alum.lastVerifiedPeriod && (
+                            <span className="text-slate-500 font-medium">
+                              Verified: {alum.lastVerifiedPeriod}
+                            </span>
+                          )}
+                          <span className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-50 text-amber-800 border border-amber-200 inline-flex items-center gap-1 mt-0.5">
+                            <span>⏳ Annual Re-attestation Pending</span>
+                          </span>
+                        </div>
+                      ) : (
+                        alum.lastVerifiedPeriod && (
+                          <span className="text-[10px] text-slate-400">
+                            Verified: {alum.lastVerifiedPeriod}
+                          </span>
+                        )
+                      )}
+                    </div>
                   </td>
 
                   {/* Specialty */}
@@ -309,18 +337,25 @@ export function AlumniResidentDirectory({
 
       {/* Non-Robotic Outreach Guide Modal */}
       {selectedResident && outreachGuide && (
-        <div className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="outreach-modal-title"
+          className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+        >
           <div className="bg-white rounded-2xl max-w-2xl w-full p-6 shadow-2xl border border-slate-200 max-h-[90vh] overflow-y-auto space-y-5">
             <div className="flex items-center justify-between border-b border-slate-100 pb-4">
               <div>
                 <span className="text-xs font-bold text-violet-600 uppercase tracking-wider">
                   Internal Alumni Mentorship Outreach
                 </span>
-                <h3 className="text-lg font-bold text-slate-900 mt-0.5">
+                <h3 id="outreach-modal-title" className="text-lg font-bold text-slate-900 mt-0.5">
                   Connect with {selectedResident.name} ({selectedResident.institutionName})
                 </h3>
               </div>
               <button
+                type="button"
+                aria-label="Close dialog"
                 onClick={() => setSelectedResident(null)}
                 className="text-slate-400 hover:text-slate-600 text-xl font-bold p-1"
               >
