@@ -9,7 +9,6 @@ import {
   RotateCcw,
   CheckCircle2,
   Clock,
-  FileText,
   Briefcase,
   BookOpen,
   Sparkles,
@@ -99,7 +98,6 @@ export function OrderTracker({
 
   // Percentages for individual component progress bars
   const expPercent = Math.min(Math.round((experiencesCount / 10) * 100), 100);
-  const psPercent = Math.min(Math.round((personalStatementChars / 5300) * 100), 100);
   const scholarlyPercent = Math.min(Math.round((scholarlyCount / 5) * 100), 100);
   const schoolListPercent = Math.min(
     Math.round((schoolListSignalsAssigned / (schoolListSignalsBudget || 15)) * 100),
@@ -114,7 +112,7 @@ export function OrderTracker({
           <div className="flex items-center gap-2">
             <Clock className="w-4 h-4 text-sky-600" />
             <h3 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-              Clinical Order Pipeline Tracking
+              Personal Statement Document Review Pipeline
             </h3>
           </div>
           <span className="text-[11px] font-medium text-slate-500">
@@ -186,7 +184,7 @@ export function OrderTracker({
           <span className="text-[11px] text-slate-500">Live ERAS Readiness Bars</span>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
           {/* Component 1: Selected Experiences */}
           <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
             <div className="flex items-center justify-between">
@@ -253,31 +251,6 @@ export function OrderTracker({
             <div className="flex items-center justify-between text-[10px] text-slate-500">
               <span>{schoolListSignalsAssigned} / {schoolListSignalsBudget} Tokens Assigned</span>
               <span className="font-semibold text-amber-800">{schoolListPercent}% Budget</span>
-            </div>
-          </div>
-
-          {/* Component 4: Personal Statement */}
-          <div className="bg-slate-50 p-3.5 rounded-xl border border-slate-200 space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-xs font-bold text-sky-900 flex items-center gap-1.5">
-                <FileText className="w-4 h-4 text-sky-600" />
-                Personal Statement
-              </span>
-              <span className="text-xs font-mono font-bold text-sky-700">
-                v{personalStatementVersion}
-              </span>
-            </div>
-            <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
-              <div
-                className={`h-full rounded-full transition-all duration-300 ${
-                  personalStatementChars > 5300 ? 'bg-red-500' : 'bg-sky-500'
-                }`}
-                style={{ width: `${psPercent}%` }}
-              />
-            </div>
-            <div className="flex items-center justify-between text-[10px] text-slate-500">
-              <span>{personalStatementChars.toLocaleString()} / 5,300 Chars</span>
-              <span className="font-semibold text-sky-800">{psPercent}% of 1 Page</span>
             </div>
           </div>
         </div>

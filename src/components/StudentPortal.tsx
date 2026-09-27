@@ -320,7 +320,7 @@ export function StudentPortal({
         </div>
       </div>
 
-      {/* 5-Stage Clinical Order Pipeline Tracker with Multi-Part Application Progress */}
+      {/* 5-Stage Personal Statement Document Review Pipeline Tracker with Multi-Part Application Progress */}
       {(() => {
         const psReview = context.activeReviewRequests?.find((r) => r.documentType === 'personal_statement');
         return (
