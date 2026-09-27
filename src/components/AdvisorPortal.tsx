@@ -53,12 +53,85 @@ export function AdvisorPortal({
     for (const rev of pendingReviews) {
       const key = `${rev.studentId}_${rev.documentType}`;
       const existing = latestMap.get(key);
-      if (!existing || new Date(rev.submittedAt).getTime() > new Date(existing.submittedAt).getTime()) {
+      if (!existing) {
         latestMap.set(key, rev);
+      } else {
+        const timeDiff = new Date(rev.submittedAt).getTime() - new Date(existing.submittedAt).getTime();
+        if (timeDiff > 0) {
+          latestMap.set(key, rev);
+        } else if (timeDiff === 0) {
+          const existingSnap = getSnapshotContent ? getSnapshotContent(existing.snapshotId) : context.snapshots?.find((s) => s.id === existing.snapshotId);
+          const revSnap = getSnapshotContent ? getSnapshotContent(rev.snapshotId) : context.snapshots?.find((s) => s.id === rev.snapshotId);
+          if ((revSnap?.versionNumber ?? 0) >= (existingSnap?.versionNumber ?? 0)) {
+            latestMap.set(key, rev);
+          }
+        }
       }
     }
     return Array.from(latestMap.values());
-  }, [pendingReviews]);
+  }, [pendingReviews, getSnapshotContent, context.snapshots]);
+
+  const getAdviseeStatus = (adviseeId: string): string => {
+    // 1. Check pending reviews for this advisee
+    const adviseeReviews = pendingReviews.filter((r) => r.studentId === adviseeId);
+    if (adviseeReviews.length > 0) {
+      const sorted = [...adviseeReviews].sort((a, b) => {
+        const timeDiff = new Date(b.submittedAt).getTime() - new Date(a.submittedAt).getTime();
+        if (timeDiff !== 0) return timeDiff;
+        const snapA = getSnapshotContent?.(a.snapshotId) || context.snapshots?.find((s) => s.id === a.snapshotId);
+        const snapB = getSnapshotContent?.(b.snapshotId) || context.snapshots?.find((s) => s.id === b.snapshotId);
+        return (snapB?.versionNumber ?? 0) - (snapA?.versionNumber ?? 0);
+      });
+      const latestRev = sorted[0];
+      const revSnap = getSnapshotContent?.(latestRev.snapshotId) ||
+        context.snapshots?.find((s) => s.id === latestRev.snapshotId);
+      const ver = revSnap?.versionNumber ?? 1;
+
+      if (latestRev.stage === 'in_review') {
+        return `In Review v${ver}`;
+      }
+      return `Submitted v${ver}`;
+    }
+
+    // 2. Check if context has snapshots for this advisee's personal statement
+    if (context.snapshots && context.snapshots.length > 0) {
+      const studentSnaps = context.snapshots
+        .filter((s) => s.documentType === 'personal_statement')
+        .sort((a, b) => b.versionNumber - a.versionNumber);
+      if (studentSnaps.length > 0) {
+        const latestSnap = studentSnaps[0];
+        if (context.personalStatement?.stage === 'in_review') {
+          return `In Review v${latestSnap.versionNumber}`;
+        }
+        if (context.personalStatement?.stage === 'revisions_requested') {
+          return `Revisions Requested (v${latestSnap.versionNumber})`;
+        }
+        if (context.personalStatement?.stage === 'endorsed') {
+          return `Endorsed (v${latestSnap.versionNumber})`;
+        }
+        return `Submitted v${latestSnap.versionNumber}`;
+      }
+    }
+
+    // 3. Check personalStatement in context if applicable
+    if (context.personalStatement && context.personalStatement.studentId === adviseeId) {
+      if (context.personalStatement.stage === 'submitted') {
+        return `Submitted v${context.personalStatement.currentVersionNumber}`;
+      }
+      if (context.personalStatement.stage === 'in_review') {
+        return `In Review v${context.personalStatement.currentVersionNumber}`;
+      }
+      if (context.personalStatement.stage === 'revisions_requested') {
+        return `Revisions Requested (v${context.personalStatement.currentVersionNumber})`;
+      }
+      if (context.personalStatement.stage === 'endorsed') {
+        return `Endorsed (v${context.personalStatement.currentVersionNumber})`;
+      }
+      return `Drafting v${context.personalStatement.currentVersionNumber}`;
+    }
+
+    return 'Drafting v1';
+  };
 
   if (selectedReview && snapshot) {
     // Check if this is an experience_portfolio review
@@ -390,6 +463,8 @@ export function AdvisorPortal({
               <div className="divide-y divide-slate-100">
                 {latestPendingReviews.map((rev) => {
                   const sla = calculateSlaStatus(rev, 14);
+                  const revSnapshot = getSnapshotContent ? getSnapshotContent(rev.snapshotId) : context.snapshots?.find((s) => s.id === rev.snapshotId);
+                  const versionNum = revSnapshot?.versionNumber ?? 1;
                   return (
                     <div key={rev.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                       <div>
@@ -397,6 +472,9 @@ export function AdvisorPortal({
                           {rev.studentName}
                           <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800 uppercase">
                             {rev.stage.replace('_', ' ')}
+                          </span>
+                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200" title={`Version ${versionNum}`}>
+                            v{versionNum}
                           </span>
                           <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
                             Latest Version
@@ -440,21 +518,24 @@ export function AdvisorPortal({
           </div>
 
           <div className="space-y-3">
-            {advisees.map((advisee) => (
-              <div key={advisee.id} className="p-3 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors">
-                <div className="flex items-center justify-between">
-                  <div className="font-semibold text-slate-900 text-sm">{advisee.name}</div>
-                  <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200">
-                    {advisee.specialty}
-                  </span>
+            {advisees.map((advisee) => {
+              const statusText = getAdviseeStatus(advisee.id);
+              return (
+                <div key={advisee.id} className="p-3 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="font-semibold text-slate-900 text-sm">{advisee.name}</div>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200">
+                      {advisee.specialty}
+                    </span>
+                  </div>
+                  <div className="text-xs text-slate-500 mt-1">{advisee.email}</div>
+                  <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-600">
+                    <span>Status: <strong className="text-slate-800">{statusText}</strong></span>
+                    <span className="text-sky-600 hover:underline cursor-pointer">View Details &rarr;</span>
+                  </div>
                 </div>
-                <div className="text-xs text-slate-500 mt-1">{advisee.email}</div>
-                <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-600">
-                  <span>Status: <strong className="text-slate-800">Drafting v1</strong></span>
-                  <span className="text-sky-600 hover:underline cursor-pointer">View Details &rarr;</span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       </div>

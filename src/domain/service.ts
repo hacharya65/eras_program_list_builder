@@ -231,6 +231,8 @@ export class AdvisingPlatformService {
       institution: this.storage.institution,
       pendingReviews: this.storage.reviewRequests.filter(r => r.advisorId === advisor.id),
       advisees: [student],
+      personalStatement: this.storage.personalStatement,
+      snapshots: this.storage.snapshots,
     };
   }
 

@@ -114,6 +114,8 @@ export interface AdvisorDashboardContext {
   institution: Institution;
   pendingReviews: ReviewRequest[];
   advisees: UserProfile[];
+  personalStatement?: PersonalStatementDraft;
+  snapshots?: DocumentSnapshot[];
 }
 
 export interface CohortSummary {
