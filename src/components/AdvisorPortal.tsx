@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { AdvisorDashboardContext } from '@/domain/types';
+import { AdvisorDashboardContext, ReviewRequest, DocumentSnapshot } from '@/domain/types';
 import {
   Inbox,
   Clock,
@@ -54,6 +54,35 @@ export function AdvisorPortal({
   const snapshot = selectedReview ? getSnapshotContent?.(selectedReview.snapshotId) : null;
   const previousSnapshot = snapshot && snapshot.versionNumber >= 2 ? getPreviousSnapshot?.(snapshot.id) : null;
 
+function deduplicateLatestReviews(
+  reviews: ReviewRequest[],
+  getSnapshotContent?: (id: string) => DocumentSnapshot | null,
+  snapshots?: DocumentSnapshot[]
+): ReviewRequest[] {
+  const latestMap = new Map<string, ReviewRequest>();
+  for (const rev of reviews) {
+    const key = `${rev.studentId}_${rev.documentType}`;
+    const existing = latestMap.get(key);
+    if (!existing) {
+      latestMap.set(key, rev);
+    } else {
+      const existingTime = new Date(existing.completedAt || existing.submittedAt).getTime();
+      const revTime = new Date(rev.completedAt || rev.submittedAt).getTime();
+      const timeDiff = revTime - existingTime;
+      if (timeDiff > 0) {
+        latestMap.set(key, rev);
+      } else if (timeDiff === 0) {
+        const existingSnap = getSnapshotContent ? getSnapshotContent(existing.snapshotId) : snapshots?.find((s) => s.id === existing.snapshotId);
+        const revSnap = getSnapshotContent ? getSnapshotContent(rev.snapshotId) : snapshots?.find((s) => s.id === rev.snapshotId);
+        if ((revSnap?.versionNumber ?? 0) >= (existingSnap?.versionNumber ?? 0)) {
+          latestMap.set(key, rev);
+        }
+      }
+    }
+  }
+  return Array.from(latestMap.values());
+}
+
   // Separate active pending reviews from completed / signed-off reviews
   const pendingReviewsOnly = React.useMemo(() => {
     return pendingReviews.filter(
@@ -63,60 +92,22 @@ export function AdvisorPortal({
 
   const completedReviewsOnly = React.useMemo(() => {
     return pendingReviews.filter(
-      (r) => r.stage === 'endorsed' || r.stage === 'revisions_requested' || Boolean(r.completedAt)
+      (r) => r.stage === 'endorsed' || (Boolean(r.completedAt) && r.stage !== 'revisions_requested')
     );
   }, [pendingReviews]);
 
   // Filter faculty pending submission list so only the latest submitted version is displayed per student document
   const latestPendingReviews = React.useMemo(() => {
-    const latestMap = new Map<string, typeof pendingReviews[0]>();
-    for (const rev of pendingReviewsOnly) {
-      const key = `${rev.studentId}_${rev.documentType}`;
-      const existing = latestMap.get(key);
-      if (!existing) {
-        latestMap.set(key, rev);
-      } else {
-        const timeDiff = new Date(rev.submittedAt).getTime() - new Date(existing.submittedAt).getTime();
-        if (timeDiff > 0) {
-          latestMap.set(key, rev);
-        } else if (timeDiff === 0) {
-          const existingSnap = getSnapshotContent ? getSnapshotContent(existing.snapshotId) : context.snapshots?.find((s) => s.id === existing.snapshotId);
-          const revSnap = getSnapshotContent ? getSnapshotContent(rev.snapshotId) : context.snapshots?.find((s) => s.id === rev.snapshotId);
-          if ((revSnap?.versionNumber ?? 0) >= (existingSnap?.versionNumber ?? 0)) {
-            latestMap.set(key, rev);
-          }
-        }
-      }
-    }
-    return Array.from(latestMap.values());
+    return deduplicateLatestReviews(pendingReviewsOnly, getSnapshotContent, context.snapshots);
   }, [pendingReviewsOnly, getSnapshotContent, context.snapshots]);
 
   // Filter completed reviews so the latest review per student document is triaged cleanly
   const latestCompletedReviews = React.useMemo(() => {
-    const latestMap = new Map<string, typeof pendingReviews[0]>();
-    for (const rev of completedReviewsOnly) {
-      const key = `${rev.studentId}_${rev.documentType}`;
-      const existing = latestMap.get(key);
-      if (!existing) {
-        latestMap.set(key, rev);
-      } else {
-        const timeDiff = new Date(rev.completedAt || rev.submittedAt).getTime() - new Date(existing.completedAt || existing.submittedAt).getTime();
-        if (timeDiff > 0) {
-          latestMap.set(key, rev);
-        } else if (timeDiff === 0) {
-          const existingSnap = getSnapshotContent ? getSnapshotContent(existing.snapshotId) : context.snapshots?.find((s) => s.id === existing.snapshotId);
-          const revSnap = getSnapshotContent ? getSnapshotContent(rev.snapshotId) : context.snapshots?.find((s) => s.id === rev.snapshotId);
-          if ((revSnap?.versionNumber ?? 0) >= (existingSnap?.versionNumber ?? 0)) {
-            latestMap.set(key, rev);
-          }
-        }
-      }
-    }
-    return Array.from(latestMap.values());
+    return deduplicateLatestReviews(completedReviewsOnly, getSnapshotContent, context.snapshots);
   }, [completedReviewsOnly, getSnapshotContent, context.snapshots]);
 
   const getAdviseeStatus = (adviseeId: string): string => {
-    // 1. Check pending reviews for this advisee
+    // 1. Check pending/completed reviews for this advisee
     const adviseeReviews = pendingReviews.filter((r) => r.studentId === adviseeId);
     if (adviseeReviews.length > 0) {
       const sorted = [...adviseeReviews].sort((a, b) => {
@@ -131,8 +122,14 @@ export function AdvisorPortal({
         context.snapshots?.find((s) => s.id === latestRev.snapshotId);
       const ver = revSnap?.versionNumber ?? 1;
 
+      if (latestRev.stage === 'endorsed') {
+        return `ERAS Ready v${ver}`;
+      }
       if (latestRev.stage === 'in_review') {
         return `In Review v${ver}`;
+      }
+      if (latestRev.stage === 'revisions_requested') {
+        return `Revisions Requested v${ver}`;
       }
       return `Submitted v${ver}`;
     }
@@ -144,14 +141,14 @@ export function AdvisorPortal({
         .sort((a, b) => b.versionNumber - a.versionNumber);
       if (studentSnaps.length > 0) {
         const latestSnap = studentSnaps[0];
+        if (context.personalStatement?.stage === 'endorsed') {
+          return `ERAS Ready v${latestSnap.versionNumber}`;
+        }
         if (context.personalStatement?.stage === 'in_review') {
           return `In Review v${latestSnap.versionNumber}`;
         }
         if (context.personalStatement?.stage === 'revisions_requested') {
           return `Revisions Requested (v${latestSnap.versionNumber})`;
-        }
-        if (context.personalStatement?.stage === 'endorsed') {
-          return `Endorsed (v${latestSnap.versionNumber})`;
         }
         return `Submitted v${latestSnap.versionNumber}`;
       }
@@ -159,6 +156,9 @@ export function AdvisorPortal({
 
     // 3. Check personalStatement in context if applicable
     if (context.personalStatement && context.personalStatement.studentId === adviseeId) {
+      if (context.personalStatement.stage === 'endorsed') {
+        return `ERAS Ready v${context.personalStatement.currentVersionNumber}`;
+      }
       if (context.personalStatement.stage === 'submitted') {
         return `Submitted v${context.personalStatement.currentVersionNumber}`;
       }
@@ -167,9 +167,6 @@ export function AdvisorPortal({
       }
       if (context.personalStatement.stage === 'revisions_requested') {
         return `Revisions Requested (v${context.personalStatement.currentVersionNumber})`;
-      }
-      if (context.personalStatement.stage === 'endorsed') {
-        return `Endorsed (v${context.personalStatement.currentVersionNumber})`;
       }
       return `Drafting v${context.personalStatement.currentVersionNumber}`;
     }
@@ -596,7 +593,7 @@ export function AdvisorPortal({
                   <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-2" />
                   <h3 className="text-sm font-semibold text-slate-800">No Completed Reviews Yet</h3>
                   <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-                    When you sign off on advisee personal statements as ERAS ready or request revisions, they will appear here with permanent audit trails.
+                    When you sign off on advisee personal statements as ERAS ready, they will appear here with permanent audit trails.
                   </p>
                 </div>
               ) : (
@@ -604,22 +601,25 @@ export function AdvisorPortal({
                   {latestCompletedReviews.map((rev) => {
                     const revSnapshot = getSnapshotContent ? getSnapshotContent(rev.snapshotId) : context.snapshots?.find((s) => s.id === rev.snapshotId);
                     const versionNum = revSnapshot?.versionNumber ?? 1;
-                    const isEndorsed = rev.stage === 'endorsed';
+                    const adviseeStudent = advisees.find((a) => a.id === rev.studentId);
                     return (
                       <div key={rev.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                         <div>
                           <div className="font-semibold text-slate-900 text-sm flex items-center gap-2">
-                            {rev.studentName}
-                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
-                              isEndorsed ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'
-                            }`}>
-                              {isEndorsed ? 'ERAS READY (LOCKED)' : 'REVISIONS REQUESTED'}
+                            <span>{rev.studentName}</span>
+                            {adviseeStudent && (
+                              <span className="text-xs text-slate-400 font-normal">
+                                ({adviseeStudent.specialty})
+                              </span>
+                            )}
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                              ERAS READY (SIGNED OFF)
                             </span>
                             <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200" title={`Version ${versionNum}`}>
                               v{versionNum}
                             </span>
                             <span className="px-2 py-0.5 rounded text-[10px] border bg-slate-50 text-slate-700 border-slate-200">
-                              Completed on {new Date(rev.completedAt || rev.submittedAt).toLocaleDateString()}
+                              Signed off on {new Date(rev.completedAt || rev.submittedAt).toLocaleDateString()}
                             </span>
                           </div>
                           <div className="text-xs text-slate-500 mt-1">
@@ -655,13 +655,14 @@ export function AdvisorPortal({
           <div className="space-y-3">
             {advisees.map((advisee) => {
               const statusText = getAdviseeStatus(advisee.id);
-              const adviseeExperiences = context.experiences || [];
-              const expCount = adviseeExperiences.length;
-              const expMeaningful = adviseeExperiences.filter((e) => e.isMostMeaningful).length;
-              const scholarlyCount = context.scholarlyStats?.count ?? 2;
-              const schoolListCount = context.schoolListStats?.count ?? 0;
-              const signalsAssigned = context.schoolListStats?.signalsAssigned ?? 0;
-              const signalsBudget = context.schoolListStats?.signalsBudget ?? 15;
+              const breakdown = context.adviseeComponentBreakdowns?.[advisee.id];
+              const adviseeExperiences = (context.experiences || []).filter((e) => !e.studentId || e.studentId === advisee.id);
+              const expCount = breakdown?.experiencesCount ?? adviseeExperiences.length;
+              const expMeaningful = breakdown?.experiencesMeaningful ?? adviseeExperiences.filter((e) => e.isMostMeaningful).length;
+              const scholarlyCount = breakdown?.scholarlyCount ?? (context.scholarlyStats?.count ?? 2);
+              const schoolListCount = breakdown?.schoolListCount ?? (context.schoolListStats?.count ?? 0);
+              const signalsAssigned = breakdown?.signalsAssigned ?? (context.schoolListStats?.signalsAssigned ?? 0);
+              const signalsBudget = breakdown?.signalsBudget ?? (context.schoolListStats?.signalsBudget ?? 15);
 
               return (
                 <div key={advisee.id} className="p-3.5 rounded-xl border border-slate-200 hover:border-slate-300 transition-colors bg-white space-y-3">
@@ -676,7 +677,7 @@ export function AdvisorPortal({
                   </div>
 
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-600">
-                    <span>Status: <strong className="text-slate-800">{statusText}</strong></span>
+                    <span>Personal Statement Status: <strong className="text-slate-800">{statusText}</strong></span>
                     <span className="text-[10px] font-semibold text-sky-600 hover:underline cursor-pointer">View Details &rarr;</span>
                   </div>
 

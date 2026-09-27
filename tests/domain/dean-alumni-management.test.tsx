@@ -102,4 +102,43 @@ describe('Dean of Student Affairs Alumni Management & Student View Sync', () => 
     expect(html).toContain('UCSF Medical Center');
     expect(html).toContain('Feel free to reach out about UCSF primary care track!');
   });
+
+  it('enforces validation invariants when adding and updating alumni in service', () => {
+    // Missing name
+    expect(() => {
+      service.addAlumniResident({
+        name: '',
+        graduationYear: 2025,
+        currentPgy: 'PGY-1',
+        medicalSchool: 'Apex School of Medicine',
+        institutionName: 'UCSF',
+        specialty: 'Internal Medicine',
+        programCity: 'SF',
+        programState: 'CA',
+        isAvailableForMentorship: true,
+        contactPreference: 'email',
+        email: 'doc@ucsf.edu',
+        signalStrategyUsed: 'Gold',
+      });
+    }).toThrow(/Full name is required/);
+
+    // Invalid email
+    expect(() => {
+      service.addAlumniResident({
+        name: 'Dr. Valid Name',
+        graduationYear: 2025,
+        currentPgy: 'PGY-1',
+        medicalSchool: 'Apex School of Medicine',
+        institutionName: 'UCSF',
+        specialty: 'Internal Medicine',
+        programCity: 'SF',
+        programState: 'CA',
+        isAvailableForMentorship: true,
+        contactPreference: 'email',
+        email: 'invalid-email-format',
+        signalStrategyUsed: 'Gold',
+      });
+    }).toThrow(/Valid contact email is required/);
+  });
 });
+

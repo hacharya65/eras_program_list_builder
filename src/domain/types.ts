@@ -109,6 +109,16 @@ export interface StudentDashboardContext {
   snapshots?: DocumentSnapshot[];
 }
 
+export interface AdviseeComponentBreakdown {
+  studentId: string;
+  experiencesCount: number;
+  experiencesMeaningful: number;
+  scholarlyCount: number;
+  schoolListCount: number;
+  signalsAssigned: number;
+  signalsBudget: number;
+}
+
 export interface AdvisorDashboardContext {
   advisor: UserProfile;
   institution: Institution;
@@ -119,6 +129,7 @@ export interface AdvisorDashboardContext {
   experiences?: ExperienceDraft[];
   scholarlyStats?: { count: number; meaningful: number };
   schoolListStats?: { count: number; signalsAssigned: number; signalsBudget?: number };
+  adviseeComponentBreakdowns?: Record<string, AdviseeComponentBreakdown>;
 }
 
 export interface CohortSummary {

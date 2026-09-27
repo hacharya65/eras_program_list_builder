@@ -242,16 +242,33 @@ export class AdvisingPlatformService {
   getAdvisorDashboardContext(): AdvisorDashboardContext {
     const advisor = this.storage.personas.advisor;
     const student = this.storage.personas.student;
+    const advisees = [student];
+
+    const adviseeComponentBreakdowns: Record<string, import('./types').AdviseeComponentBreakdown> = {};
+    for (const adv of advisees) {
+      const advExperiences = this.storage.experiences.filter((e) => !e.studentId || e.studentId === adv.id);
+      adviseeComponentBreakdowns[adv.id] = {
+        studentId: adv.id,
+        experiencesCount: advExperiences.length,
+        experiencesMeaningful: advExperiences.filter((e) => e.isMostMeaningful).length,
+        scholarlyCount: 2,
+        schoolListCount: 0,
+        signalsAssigned: 0,
+        signalsBudget: 15,
+      };
+    }
+
     return {
       advisor,
       institution: this.storage.institution,
       pendingReviews: this.storage.reviewRequests.filter(r => r.advisorId === advisor.id),
-      advisees: [student],
+      advisees,
       personalStatement: this.storage.personalStatement,
       snapshots: this.storage.snapshots,
       experiences: this.storage.experiences,
       scholarlyStats: { count: 2, meaningful: 2 },
       schoolListStats: { count: 0, signalsAssigned: 0, signalsBudget: 15 },
+      adviseeComponentBreakdowns,
     };
   }
 
@@ -274,22 +291,54 @@ export class AdvisingPlatformService {
   }
 
   addAlumniResident(resident: Omit<AlumniResident, 'id'>): AlumniResident {
-    return this.storage.addAlumniResident(resident);
+    if (!resident.name?.trim()) {
+      throw new Error('Alumni validation error: Full name is required.');
+    }
+    if (!resident.institutionName?.trim()) {
+      throw new Error('Alumni validation error: Residency program institution is required.');
+    }
+    if (!resident.specialty?.trim()) {
+      throw new Error('Alumni validation error: Specialty is required.');
+    }
+    if (!resident.email?.includes('@')) {
+      throw new Error('Alumni validation error: Valid contact email is required.');
+    }
+    if (resident.graduationYear && resident.graduationYear < 1950) {
+      throw new Error('Alumni validation error: Invalid graduation year.');
+    }
+    return this.storage.addAlumniResident({
+      ...resident,
+      name: resident.name.trim(),
+      institutionName: resident.institutionName.trim(),
+      specialty: resident.specialty.trim(),
+      email: resident.email.trim(),
+    });
   }
 
   updateAlumniResident(id: string, updates: Partial<AlumniResident>): AlumniResident | null {
+    if (!id?.trim()) {
+      throw new Error('Alumni validation error: Resident ID is required.');
+    }
+    if (updates.email && !updates.email.includes('@')) {
+      throw new Error('Alumni validation error: Valid contact email is required.');
+    }
     return this.storage.updateAlumniResident(id, updates);
   }
 
   deleteAlumniResident(id: string): boolean {
+    if (!id?.trim()) {
+      throw new Error('Alumni validation error: Resident ID is required.');
+    }
     return this.storage.deleteAlumniResident(id);
   }
 
   getAlumniByProgram(programName: string): AlumniResident[] {
+    if (!programName?.trim()) return [];
     return this.storage.getAlumniByProgram(programName);
   }
 
   getAlumniBySpecialty(specialty: string): AlumniResident[] {
+    if (!specialty?.trim()) return [];
     return this.storage.getAlumniBySpecialty(specialty);
   }
 }

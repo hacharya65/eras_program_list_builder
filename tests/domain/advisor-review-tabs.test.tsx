@@ -78,5 +78,43 @@ describe('Advisor Review Queue Tab Split (Pending vs Completed)', () => {
     expect(html).toContain('Your Review Queue is Clear!');
     // Completed tab should indicate 1 completed review
     expect(html).toContain('Completed (1)');
+    // Advisee status displays ERAS Ready v1
+    expect(html).toContain('Personal Statement Status: <strong class="text-slate-800">ERAS Ready v1</strong>');
+  });
+
+  it('keeps review request out of Completed tab when revisions are requested', () => {
+    storage.personalStatement.content = 'Draft needing work.';
+    const req = service.submitPersonalStatementForReview({
+      studentId: 'usr-student-1',
+      advisorId: 'usr-advisor-1',
+      changelogNote: 'Draft 1 submission',
+    });
+
+    // Advisor requests revisions
+    service.submitAdvisorFeedback({
+      reviewRequestId: req.id,
+      advisorId: 'usr-advisor-1',
+      evaluation: {
+        narrativeMotivation: 2,
+        clinicalReflection: 2,
+        toneAndFit: 3,
+        structureAndMechanics: 3,
+        overallVerdict: 'revisions_requested',
+        generalNotes: 'Needs deeper clinical reflection before ERAS sign-off.',
+      },
+    });
+
+    const advisorContext = service.getAdvisorDashboardContext();
+    const html = renderToStaticMarkup(
+      React.createElement(AdvisorPortal, {
+        context: advisorContext,
+        getSnapshotContent: (id) => service.getSnapshot(id),
+      })
+    );
+
+    // Completed tab should have 0 completed reviews
+    expect(html).toContain('Completed (0)');
+    // Advisee status should reflect Revisions Requested
+    expect(html).toContain('Revisions Requested');
   });
 });
