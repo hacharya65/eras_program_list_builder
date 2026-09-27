@@ -116,6 +116,9 @@ export interface AdvisorDashboardContext {
   advisees: UserProfile[];
   personalStatement?: PersonalStatementDraft;
   snapshots?: DocumentSnapshot[];
+  experiences?: ExperienceDraft[];
+  scholarlyStats?: { count: number; meaningful: number };
+  schoolListStats?: { count: number; signalsAssigned: number; signalsBudget?: number };
 }
 
 export interface CohortSummary {
@@ -133,4 +136,5 @@ export interface AdminCohortContext {
   institution: Institution;
   cohortSummary: CohortSummary;
   overdueReviews: ReviewRequest[];
+  alumniResidents?: import('./alumni-models').AlumniResident[];
 }

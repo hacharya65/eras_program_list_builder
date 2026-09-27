@@ -56,6 +56,11 @@ export default function HomePage() {
     setRefreshKey((k) => k + 1);
   };
 
+  const handleEndorseReview = (reviewId: string) => {
+    service.endorseReview(reviewId, advisorContext.advisor.id);
+    setRefreshKey((k) => k + 1);
+  };
+
   const handleSubmitExperiences = (changelog: string) => {
     try {
       service.submitExperiencesForReview({
@@ -81,6 +86,21 @@ export default function HomePage() {
       storage.personalStatement.currentVersionNumber += 1;
     }
     storage.personalStatement.stage = 'drafting';
+    setRefreshKey((k) => k + 1);
+  };
+
+  const handleAddAlumnus = (resident: any) => {
+    service.addAlumniResident(resident);
+    setRefreshKey((k) => k + 1);
+  };
+
+  const handleUpdateAlumnus = (id: string, updates: any) => {
+    service.updateAlumniResident(id, updates);
+    setRefreshKey((k) => k + 1);
+  };
+
+  const handleDeleteAlumnus = (id: string) => {
+    service.deleteAlumniResident(id);
     setRefreshKey((k) => k + 1);
   };
 
@@ -117,6 +137,7 @@ export default function HomePage() {
             latestPSFeedback={latestPSFeedback}
             psFeedbackHistory={psFeedbackHistory}
             onCreateRevision={handleCreateRevision}
+            alumniResidents={service.getAlumniResidents()}
           />
         )}
         {currentRole === 'advisor' && (
@@ -124,12 +145,20 @@ export default function HomePage() {
             context={advisorContext}
             onOpenReview={handleOpenReview}
             onSubmitFeedback={handleSubmitFeedback}
+            onEndorseReview={handleEndorseReview}
             getSnapshotContent={(id) => service.getSnapshot(id)}
             getPreviousSnapshot={(id) => service.getPreviousSnapshot(id)}
             onViewingEntry={handleViewingEntry}
           />
         )}
-        {currentRole === 'admin' && <AdminPortal context={adminContext} />}
+        {currentRole === 'admin' && (
+          <AdminPortal
+            context={adminContext}
+            onAddAlumnus={handleAddAlumnus}
+            onUpdateAlumnus={handleUpdateAlumnus}
+            onDeleteAlumnus={handleDeleteAlumnus}
+          />
+        )}
       </main>
 
       {/* Footer */}

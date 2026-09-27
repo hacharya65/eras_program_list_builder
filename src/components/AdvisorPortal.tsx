@@ -12,7 +12,11 @@ import {
   FileCheck,
   Stethoscope,
   MessageSquare,
-  Highlighter
+  Highlighter,
+  Briefcase,
+  BookOpen,
+  Sparkles,
+  FileText
 } from 'lucide-react';
 import { VisualDiffViewer } from './VisualDiffViewer';
 import { ClinicalRubricForm } from './ClinicalRubricForm';
@@ -24,6 +28,7 @@ interface AdvisorPortalProps {
   context: AdvisorDashboardContext;
   onOpenReview?: (reviewId: string) => void;
   onSubmitFeedback?: (reviewId: string, evaluation: RubricEvaluation) => void;
+  onEndorseReview?: (reviewId: string) => void;
   getSnapshotContent?: (snapshotId: string) => any;
   getPreviousSnapshot?: (snapshotId: string) => any;
   onViewingEntry?: (reviewId: string, entryIndex: number) => void;
@@ -33,6 +38,7 @@ export function AdvisorPortal({
   context,
   onOpenReview,
   onSubmitFeedback,
+  onEndorseReview,
   getSnapshotContent,
   getPreviousSnapshot,
   onViewingEntry,
@@ -42,15 +48,29 @@ export function AdvisorPortal({
   const [activeEntryIndex, setActiveEntryIndex] = React.useState<number>(1);
   const [psReviewTab, setPsReviewTab] = React.useState<'live_annotations' | 'rubric'>('live_annotations');
   const [expReviewTab, setExpReviewTab] = React.useState<'live_annotations' | 'standard'>('live_annotations');
+  const [reviewQueueTab, setReviewQueueTab] = React.useState<'pending' | 'completed'>('pending');
 
   const selectedReview = pendingReviews.find((r) => r.id === selectedReviewId);
   const snapshot = selectedReview ? getSnapshotContent?.(selectedReview.snapshotId) : null;
   const previousSnapshot = snapshot && snapshot.versionNumber >= 2 ? getPreviousSnapshot?.(snapshot.id) : null;
 
-  // Filter faculty submission list so only the latest submitted version is displayed per student document, preventing draft clutter
+  // Separate active pending reviews from completed / signed-off reviews
+  const pendingReviewsOnly = React.useMemo(() => {
+    return pendingReviews.filter(
+      (r) => (r.stage === 'submitted' || r.stage === 'in_review') && !r.completedAt
+    );
+  }, [pendingReviews]);
+
+  const completedReviewsOnly = React.useMemo(() => {
+    return pendingReviews.filter(
+      (r) => r.stage === 'endorsed' || r.stage === 'revisions_requested' || Boolean(r.completedAt)
+    );
+  }, [pendingReviews]);
+
+  // Filter faculty pending submission list so only the latest submitted version is displayed per student document
   const latestPendingReviews = React.useMemo(() => {
     const latestMap = new Map<string, typeof pendingReviews[0]>();
-    for (const rev of pendingReviews) {
+    for (const rev of pendingReviewsOnly) {
       const key = `${rev.studentId}_${rev.documentType}`;
       const existing = latestMap.get(key);
       if (!existing) {
@@ -69,7 +89,31 @@ export function AdvisorPortal({
       }
     }
     return Array.from(latestMap.values());
-  }, [pendingReviews, getSnapshotContent, context.snapshots]);
+  }, [pendingReviewsOnly, getSnapshotContent, context.snapshots]);
+
+  // Filter completed reviews so the latest review per student document is triaged cleanly
+  const latestCompletedReviews = React.useMemo(() => {
+    const latestMap = new Map<string, typeof pendingReviews[0]>();
+    for (const rev of completedReviewsOnly) {
+      const key = `${rev.studentId}_${rev.documentType}`;
+      const existing = latestMap.get(key);
+      if (!existing) {
+        latestMap.set(key, rev);
+      } else {
+        const timeDiff = new Date(rev.completedAt || rev.submittedAt).getTime() - new Date(existing.completedAt || existing.submittedAt).getTime();
+        if (timeDiff > 0) {
+          latestMap.set(key, rev);
+        } else if (timeDiff === 0) {
+          const existingSnap = getSnapshotContent ? getSnapshotContent(existing.snapshotId) : context.snapshots?.find((s) => s.id === existing.snapshotId);
+          const revSnap = getSnapshotContent ? getSnapshotContent(rev.snapshotId) : context.snapshots?.find((s) => s.id === rev.snapshotId);
+          if ((revSnap?.versionNumber ?? 0) >= (existingSnap?.versionNumber ?? 0)) {
+            latestMap.set(key, rev);
+          }
+        }
+      }
+    }
+    return Array.from(latestMap.values());
+  }, [completedReviewsOnly, getSnapshotContent, context.snapshots]);
 
   const getAdviseeStatus = (adviseeId: string): string => {
     // 1. Check pending reviews for this advisee
@@ -173,6 +217,18 @@ export function AdvisorPortal({
             <div className="flex items-center gap-2">
               <button
                 onClick={() => {
+                  if (onEndorseReview) {
+                    onEndorseReview(selectedReview.id);
+                  } else if (onSubmitFeedback) {
+                    onSubmitFeedback(selectedReview.id, {
+                      narrativeMotivation: 4,
+                      clinicalReflection: 4,
+                      toneAndFit: 4,
+                      structureAndMechanics: 4,
+                      overallVerdict: 'ready_to_lock',
+                      generalNotes: '10 Selected Experiences endorsed as ERAS ready.',
+                    });
+                  }
                   alert(`Endorsed! 10 Selected Experiences for ${selectedReview.studentName} marked ERAS ready.`);
                   setSelectedReviewId(null);
                 }}
@@ -450,62 +506,141 @@ export function AdvisorPortal({
             </span>
           </div>
 
+          {/* Review Queue Tab Switcher */}
+          <div className="flex items-center gap-2 border-b border-slate-200 px-6 bg-slate-50/50">
+            <button
+              onClick={() => setReviewQueueTab('pending')}
+              className={`py-2.5 px-3 text-xs font-semibold border-b-2 transition-colors flex items-center gap-1.5 ${
+                reviewQueueTab === 'pending'
+                  ? 'border-sky-600 text-sky-900 bg-white'
+                  : 'border-transparent text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <Clock className="w-3.5 h-3.5 text-slate-400" />
+              <span>Pending Reviews ({latestPendingReviews.length})</span>
+            </button>
+            <button
+              onClick={() => setReviewQueueTab('completed')}
+              className={`py-2.5 px-3 text-xs font-semibold border-b-2 transition-colors flex items-center gap-1.5 ${
+                reviewQueueTab === 'completed'
+                  ? 'border-emerald-600 text-emerald-900 bg-white'
+                  : 'border-transparent text-slate-500 hover:text-slate-700'
+              }`}
+            >
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+              <span>Completed ({latestCompletedReviews.length})</span>
+            </button>
+          </div>
+
           <div className="p-6">
-            {latestPendingReviews.length === 0 ? (
-              <div className="text-center py-10 border-2 border-dashed border-slate-200 rounded-xl">
-                <FileCheck className="w-10 h-10 text-slate-400 mx-auto mb-2" />
-                <h3 className="text-sm font-semibold text-slate-800">Your Review Queue is Clear!</h3>
-                <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-                  When advisees submit personal statements or 10-experience portfolios, they will appear here with automated 14-day SLA tracking.
-                </p>
-              </div>
-            ) : (
-              <div className="divide-y divide-slate-100">
-                {latestPendingReviews.map((rev) => {
-                  const sla = calculateSlaStatus(rev, 14);
-                  const revSnapshot = getSnapshotContent ? getSnapshotContent(rev.snapshotId) : context.snapshots?.find((s) => s.id === rev.snapshotId);
-                  const versionNum = revSnapshot?.versionNumber ?? 1;
-                  return (
-                    <div key={rev.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                      <div>
-                        <div className="font-semibold text-slate-900 text-sm flex items-center gap-2">
-                          {rev.studentName}
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800 uppercase">
-                            {rev.stage.replace('_', ' ')}
-                          </span>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200" title={`Version ${versionNum}`}>
-                            v{versionNum}
-                          </span>
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
-                            Latest Version
-                          </span>
-                          <span className={`px-2 py-0.5 rounded text-[10px] border ${sla.badgeClass}`}>
-                            {sla.label}
-                          </span>
-                        </div>
-                        <div className="text-xs text-slate-500 mt-1">
-                          Document: {rev.documentType === 'experience_portfolio' ? '10 Selected Experiences Portfolio' : 'Personal Statement'} &bull; Submitted on {new Date(rev.submittedAt).toLocaleDateString()}
-                        </div>
-                        {sla.shouldNudgeAdvisor && (
-                          <div className="mt-2 text-[11px] text-amber-800 bg-amber-50 p-2 rounded-md border border-amber-200 flex items-center gap-1.5">
-                            <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
-                            <span>System Nudge: This review has been in queue for {sla.daysElapsed} days (SLA target: 14 days).</span>
+            {reviewQueueTab === 'pending' ? (
+              latestPendingReviews.length === 0 ? (
+                <div className="text-center py-10 border-2 border-dashed border-slate-200 rounded-xl">
+                  <FileCheck className="w-10 h-10 text-slate-400 mx-auto mb-2" />
+                  <h3 className="text-sm font-semibold text-slate-800">Your Review Queue is Clear!</h3>
+                  <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                    When advisees submit personal statements or 10-experience portfolios, they will appear here with automated 14-day SLA tracking.
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {latestPendingReviews.map((rev) => {
+                    const sla = calculateSlaStatus(rev, 14);
+                    const revSnapshot = getSnapshotContent ? getSnapshotContent(rev.snapshotId) : context.snapshots?.find((s) => s.id === rev.snapshotId);
+                    const versionNum = revSnapshot?.versionNumber ?? 1;
+                    return (
+                      <div key={rev.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                          <div className="font-semibold text-slate-900 text-sm flex items-center gap-2">
+                            {rev.studentName}
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-sky-100 text-sky-800 uppercase">
+                              {rev.stage.replace('_', ' ')}
+                            </span>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200" title={`Version ${versionNum}`}>
+                              v{versionNum}
+                            </span>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                              Latest Version
+                            </span>
+                            <span className={`px-2 py-0.5 rounded text-[10px] border ${sla.badgeClass}`}>
+                              {sla.label}
+                            </span>
                           </div>
-                        )}
+                          <div className="text-xs text-slate-500 mt-1">
+                            Document: {rev.documentType === 'experience_portfolio' ? '10 Selected Experiences Portfolio' : 'Personal Statement'} &bull; Submitted on {new Date(rev.submittedAt).toLocaleDateString()}
+                          </div>
+                          {sla.shouldNudgeAdvisor && (
+                            <div className="mt-2 text-[11px] text-amber-800 bg-amber-50 p-2 rounded-md border border-amber-200 flex items-center gap-1.5">
+                              <Clock className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                              <span>System Nudge: This review has been in queue for {sla.daysElapsed} days (SLA target: 14 days).</span>
+                            </div>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => {
+                            onOpenReview?.(rev.id);
+                            setSelectedReviewId(rev.id);
+                          }}
+                          className="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs rounded-lg font-medium shadow-sm transition-colors shrink-0"
+                        >
+                          {rev.documentType === 'experience_portfolio' ? 'Review Portfolio' : 'Open Review & Diff'}
+                        </button>
                       </div>
-                      <button
-                        onClick={() => {
-                          onOpenReview?.(rev.id);
-                          setSelectedReviewId(rev.id);
-                        }}
-                        className="px-3.5 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-xs rounded-lg font-medium shadow-sm transition-colors shrink-0"
-                      >
-                        {rev.documentType === 'experience_portfolio' ? 'Review Portfolio' : 'Open Review & Diff'}
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
+                    );
+                  })}
+                </div>
+              )
+            ) : (
+              latestCompletedReviews.length === 0 ? (
+                <div className="text-center py-10 border-2 border-dashed border-slate-200 rounded-xl">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-400 mx-auto mb-2" />
+                  <h3 className="text-sm font-semibold text-slate-800">No Completed Reviews Yet</h3>
+                  <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+                    When you sign off on advisee personal statements as ERAS ready or request revisions, they will appear here with permanent audit trails.
+                  </p>
+                </div>
+              ) : (
+                <div className="divide-y divide-slate-100">
+                  {latestCompletedReviews.map((rev) => {
+                    const revSnapshot = getSnapshotContent ? getSnapshotContent(rev.snapshotId) : context.snapshots?.find((s) => s.id === rev.snapshotId);
+                    const versionNum = revSnapshot?.versionNumber ?? 1;
+                    const isEndorsed = rev.stage === 'endorsed';
+                    return (
+                      <div key={rev.id} className="py-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                          <div className="font-semibold text-slate-900 text-sm flex items-center gap-2">
+                            {rev.studentName}
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                              isEndorsed ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-amber-100 text-amber-800 border border-amber-300'
+                            }`}>
+                              {isEndorsed ? 'ERAS READY (LOCKED)' : 'REVISIONS REQUESTED'}
+                            </span>
+                            <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-200" title={`Version ${versionNum}`}>
+                              v{versionNum}
+                            </span>
+                            <span className="px-2 py-0.5 rounded text-[10px] border bg-slate-50 text-slate-700 border-slate-200">
+                              Completed on {new Date(rev.completedAt || rev.submittedAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                          <div className="text-xs text-slate-500 mt-1">
+                            Document: {rev.documentType === 'experience_portfolio' ? '10 Selected Experiences Portfolio' : 'Personal Statement'} &bull; Submitted on {new Date(rev.submittedAt).toLocaleDateString()}
+                          </div>
+                        </div>
+                        <button
+                          onClick={() => {
+                            onOpenReview?.(rev.id);
+                            setSelectedReviewId(rev.id);
+                          }}
+                          className="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs rounded-lg font-medium border border-slate-300 transition-colors shrink-0 flex items-center gap-1.5"
+                        >
+                          <FileCheck className="w-3.5 h-3.5 text-slate-600" />
+                          <span>View Review &amp; Evaluation</span>
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )
             )}
           </div>
         </div>
@@ -520,18 +655,72 @@ export function AdvisorPortal({
           <div className="space-y-3">
             {advisees.map((advisee) => {
               const statusText = getAdviseeStatus(advisee.id);
+              const adviseeExperiences = context.experiences || [];
+              const expCount = adviseeExperiences.length;
+              const expMeaningful = adviseeExperiences.filter((e) => e.isMostMeaningful).length;
+              const scholarlyCount = context.scholarlyStats?.count ?? 2;
+              const schoolListCount = context.schoolListStats?.count ?? 0;
+              const signalsAssigned = context.schoolListStats?.signalsAssigned ?? 0;
+              const signalsBudget = context.schoolListStats?.signalsBudget ?? 15;
+
               return (
-                <div key={advisee.id} className="p-3 rounded-lg border border-slate-200 hover:border-slate-300 transition-colors">
+                <div key={advisee.id} className="p-3.5 rounded-xl border border-slate-200 hover:border-slate-300 transition-colors bg-white space-y-3">
                   <div className="flex items-center justify-between">
-                    <div className="font-semibold text-slate-900 text-sm">{advisee.name}</div>
+                    <div>
+                      <div className="font-semibold text-slate-900 text-sm">{advisee.name}</div>
+                      <div className="text-xs text-slate-500 mt-0.5">{advisee.email}</div>
+                    </div>
                     <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200">
                       {advisee.specialty}
                     </span>
                   </div>
-                  <div className="text-xs text-slate-500 mt-1">{advisee.email}</div>
-                  <div className="mt-3 pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-600">
+
+                  <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-600">
                     <span>Status: <strong className="text-slate-800">{statusText}</strong></span>
-                    <span className="text-sky-600 hover:underline cursor-pointer">View Details &rarr;</span>
+                    <span className="text-[10px] font-semibold text-sky-600 hover:underline cursor-pointer">View Details &rarr;</span>
+                  </div>
+
+                  {/* Condensed Core Application Components Progress */}
+                  <div className="bg-slate-50 rounded-lg p-2.5 border border-slate-200/80 text-[11px] space-y-2">
+                    <div className="text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                      Core Application Components
+                    </div>
+                    <div className="space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-600 flex items-center gap-1.5">
+                          <FileText className="w-3.5 h-3.5 text-sky-600 shrink-0" />
+                          <span>Personal Statement:</span>
+                        </span>
+                        <span className="font-semibold text-slate-900">{statusText}</span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-600 flex items-center gap-1.5">
+                          <Briefcase className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                          <span>Selected Experiences:</span>
+                        </span>
+                        <span className="font-semibold text-slate-900">
+                          {expCount}/10 Complete &bull; {expMeaningful}/3 Starred
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-600 flex items-center gap-1.5">
+                          <BookOpen className="w-3.5 h-3.5 text-indigo-600 shrink-0" />
+                          <span>Scholarly Works:</span>
+                        </span>
+                        <span className="font-semibold text-slate-900">
+                          {scholarlyCount} Recorded
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-slate-600 flex items-center gap-1.5">
+                          <Sparkles className="w-3.5 h-3.5 text-amber-600 shrink-0" />
+                          <span>Strategic School List:</span>
+                        </span>
+                        <span className="font-semibold text-slate-900">
+                          {schoolListCount} Programs &bull; {signalsAssigned}/{signalsBudget} Signals
+                        </span>
+                      </div>
+                    </div>
                   </div>
                 </div>
               );

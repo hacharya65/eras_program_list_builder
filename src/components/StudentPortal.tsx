@@ -50,6 +50,7 @@ interface StudentPortalProps {
   latestPSFeedback?: DocumentFeedbackSummary;
   psFeedbackHistory?: DocumentFeedbackSummary[];
   onCreateRevision?: (targetVersion?: number) => void;
+  alumniResidents?: import('@/domain/alumni-models').AlumniResident[];
 }
 
 export function StudentPortal({
@@ -62,6 +63,7 @@ export function StudentPortal({
   latestPSFeedback,
   psFeedbackHistory = [],
   onCreateRevision,
+  alumniResidents,
 }: StudentPortalProps) {
   const [activeView, setActiveView] = useState<
     | 'overview'
@@ -224,6 +226,7 @@ export function StudentPortal({
       <AlumniResidentDirectory
         studentName={student.name}
         initialSpecialty={targetSpecialty}
+        alumniResidents={alumniResidents}
         onBack={() => setActiveView('overview')}
       />
     );

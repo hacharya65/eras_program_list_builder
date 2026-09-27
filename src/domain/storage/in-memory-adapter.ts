@@ -9,6 +9,7 @@ import {
   ReviewFeedback,
   CohortSummary
 } from '../types';
+import { AlumniResident, SAMPLE_ALUMNI_ROSTER } from '../alumni-models';
 
 export class InMemoryStorageAdapter {
   institution: Institution = {
@@ -62,6 +63,49 @@ export class InMemoryStorageAdapter {
 
   reviewRequests: ReviewRequest[] = [];
   reviewFeedbacks: ReviewFeedback[] = [];
+
+  alumniResidents: AlumniResident[] = [...SAMPLE_ALUMNI_ROSTER];
+
+  getAlumniResidents(): AlumniResident[] {
+    return this.alumniResidents;
+  }
+
+  addAlumniResident(resident: Omit<AlumniResident, 'id'>): AlumniResident {
+    const newResident: AlumniResident = {
+      ...resident,
+      id: `alum-${Date.now()}-${Math.random().toString(36).substr(2, 4)}`,
+    };
+    this.alumniResidents.push(newResident);
+    return newResident;
+  }
+
+  updateAlumniResident(id: string, updates: Partial<AlumniResident>): AlumniResident | null {
+    const index = this.alumniResidents.findIndex((a) => a.id === id);
+    if (index === -1) return null;
+    this.alumniResidents[index] = { ...this.alumniResidents[index], ...updates };
+    return this.alumniResidents[index];
+  }
+
+  deleteAlumniResident(id: string): boolean {
+    const initialLen = this.alumniResidents.length;
+    this.alumniResidents = this.alumniResidents.filter((a) => a.id !== id);
+    return this.alumniResidents.length < initialLen;
+  }
+
+  getAlumniByProgram(programName: string): AlumniResident[] {
+    const query = programName.toLowerCase().trim();
+    return this.alumniResidents.filter(
+      (a) =>
+        a.institutionName.toLowerCase().includes(query) ||
+        query.includes(a.institutionName.toLowerCase())
+    );
+  }
+
+  getAlumniBySpecialty(specialty: string): AlumniResident[] {
+    return this.alumniResidents.filter(
+      (a) => a.specialty.toLowerCase() === specialty.toLowerCase()
+    );
+  }
 
   setExperienceApprovalStatus(id: string, status: 'drafting' | 'approved' | 'revisions_needed', note?: string): ExperienceDraft | null {
     const exp = this.experiences.find(e => e.id === id);

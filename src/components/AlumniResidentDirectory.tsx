@@ -27,31 +27,37 @@ import {
 interface AlumniResidentDirectoryProps {
   studentName?: string;
   initialSpecialty?: string;
-  onBack: () => void;
+  studentSpecialty?: string;
+  alumniResidents?: AlumniResident[];
+  onBack?: () => void;
 }
 
 export function AlumniResidentDirectory({
   studentName = 'Alex Rivera',
-  initialSpecialty = 'Internal Medicine',
+  initialSpecialty,
+  studentSpecialty,
+  alumniResidents = SAMPLE_ALUMNI_ROSTER,
   onBack,
 }: AlumniResidentDirectoryProps) {
+  const defaultSpecialty = initialSpecialty || studentSpecialty || 'Internal Medicine';
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedSpecialty, setSelectedSpecialty] = useState<string>(initialSpecialty);
+  const [selectedSpecialty, setSelectedSpecialty] = useState<string>(defaultSpecialty);
   const [mentorsOnly, setMentorsOnly] = useState<boolean>(false);
   const [selectedResident, setSelectedResident] = useState<AlumniResident | null>(null);
   const [copiedDraft, setCopiedDraft] = useState(false);
 
   // Sync state whenever initialSpecialty updates from parent
   useEffect(() => {
-    if (initialSpecialty) {
-      setSelectedSpecialty(initialSpecialty);
+    const spec = initialSpecialty || studentSpecialty;
+    if (spec) {
+      setSelectedSpecialty(spec);
     }
-  }, [initialSpecialty]);
+  }, [initialSpecialty, studentSpecialty]);
 
   // Filter alumni
   const normalize = (s: string) => s.toLowerCase().replace(/[^a-z]/g, '');
 
-  const filteredAlumni = SAMPLE_ALUMNI_ROSTER.filter((alum) => {
+  const filteredAlumni = (alumniResidents || SAMPLE_ALUMNI_ROSTER).filter((alum) => {
     if (selectedSpecialty !== 'ALL') {
       const targetNorm = normalize(selectedSpecialty);
       const alumNorm = normalize(alum.specialty);

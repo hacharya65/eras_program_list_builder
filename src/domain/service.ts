@@ -11,6 +11,7 @@ import {
 import { InMemoryStorageAdapter } from './storage/in-memory-adapter';
 import { validateExperiencesSubmission } from './experience-validation';
 import { saveStoredAnnotations, saveStoredThreads } from './annotation-models';
+import { AlumniResident } from './alumni-models';
 
 export class AdvisingPlatformService {
   constructor(private storage: InMemoryStorageAdapter) {}
@@ -152,6 +153,21 @@ export class AdvisingPlatformService {
     return feedback;
   }
 
+  endorseReview(reviewRequestId: string, advisorId: string): ReviewFeedback {
+    return this.submitAdvisorFeedback({
+      reviewRequestId,
+      advisorId,
+      evaluation: {
+        narrativeMotivation: 4,
+        clinicalReflection: 4,
+        toneAndFit: 4,
+        structureAndMechanics: 4,
+        overallVerdict: 'ready_to_lock',
+        generalNotes: 'Endorsed as ERAS ready.',
+      },
+    });
+  }
+
   setExperienceApprovalStatus(id: string, status: 'drafting' | 'approved' | 'revisions_needed', note?: string) {
     return this.storage.setExperienceApprovalStatus(id, status, note);
   }
@@ -233,6 +249,9 @@ export class AdvisingPlatformService {
       advisees: [student],
       personalStatement: this.storage.personalStatement,
       snapshots: this.storage.snapshots,
+      experiences: this.storage.experiences,
+      scholarlyStats: { count: 2, meaningful: 2 },
+      schoolListStats: { count: 0, signalsAssigned: 0, signalsBudget: 15 },
     };
   }
 
@@ -246,6 +265,31 @@ export class AdvisingPlatformService {
         // e.g. status submitted and overdue
         return r.stage === 'submitted';
       }),
+      alumniResidents: this.storage.alumniResidents,
     };
+  }
+
+  getAlumniResidents(): AlumniResident[] {
+    return this.storage.getAlumniResidents();
+  }
+
+  addAlumniResident(resident: Omit<AlumniResident, 'id'>): AlumniResident {
+    return this.storage.addAlumniResident(resident);
+  }
+
+  updateAlumniResident(id: string, updates: Partial<AlumniResident>): AlumniResident | null {
+    return this.storage.updateAlumniResident(id, updates);
+  }
+
+  deleteAlumniResident(id: string): boolean {
+    return this.storage.deleteAlumniResident(id);
+  }
+
+  getAlumniByProgram(programName: string): AlumniResident[] {
+    return this.storage.getAlumniByProgram(programName);
+  }
+
+  getAlumniBySpecialty(specialty: string): AlumniResident[] {
+    return this.storage.getAlumniBySpecialty(specialty);
   }
 }
