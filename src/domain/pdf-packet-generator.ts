@@ -6,7 +6,8 @@ import { CompiledApplicationPacket } from './transfer-kit-models';
  * for the Dean's Office and MSPE letter writers.
  */
 export async function generateApplicationPacketPdf(
-  packet: CompiledApplicationPacket
+  packet: CompiledApplicationPacket,
+  options?: { compress?: boolean }
 ): Promise<Buffer> {
   return new Promise<Buffer>((resolve, reject) => {
     try {
@@ -14,6 +15,7 @@ export async function generateApplicationPacketPdf(
         size: 'LETTER',
         margins: { top: 45, bottom: 45, left: 45, right: 45 },
         bufferPages: true,
+        compress: options?.compress ?? true,
         info: {
           Title: `ERAS Application Dossier - ${packet.student.name}`,
           Author: 'Apex School of Medicine - Office of Student Affairs',
@@ -33,9 +35,16 @@ export async function generateApplicationPacketPdf(
       // Helper: Draw Section Header
       const drawSectionHeader = (title: string, sub?: string) => {
         doc.moveDown(0.8);
-        doc.font('Helvetica-Bold').fontSize(11).fillColor('#0f172a').text(title, { characterSpacing: 0.5 });
+        doc.x = leftMargin;
+        doc.font('Helvetica-Bold').fontSize(11).fillColor('#0f172a').text(title, leftMargin, doc.y, {
+          characterSpacing: 0.5,
+          width: pageWidth,
+        });
         if (sub) {
-          doc.font('Helvetica').fontSize(8).fillColor('#64748b').text(sub);
+          doc.x = leftMargin;
+          doc.font('Helvetica').fontSize(8).fillColor('#64748b').text(sub, leftMargin, doc.y, {
+            width: pageWidth,
+          });
         }
         const currentY = doc.y + 3;
         doc
@@ -44,23 +53,26 @@ export async function generateApplicationPacketPdf(
           .moveTo(leftMargin, currentY)
           .lineTo(leftMargin + pageWidth, currentY)
           .stroke();
+        doc.x = leftMargin;
         doc.y = currentY + 6;
       };
 
       // -------------------------------------------------------------
       // 1. Institutional Header Banner
       // -------------------------------------------------------------
+      doc.x = leftMargin;
       doc
         .font('Helvetica-Bold')
         .fontSize(16)
         .fillColor('#0f172a')
-        .text('APEX SCHOOL OF MEDICINE', { characterSpacing: 1 });
+        .text('APEX SCHOOL OF MEDICINE', leftMargin, doc.y, { characterSpacing: 1, width: pageWidth });
 
+      doc.x = leftMargin;
       doc
         .font('Helvetica')
         .fontSize(8.5)
         .fillColor('#475569')
-        .text('Office of Student Affairs & Residency Advising • Official MSPE / Dean\'s Office Application Dossier');
+        .text('Office of Student Affairs & Residency Advising • Official MSPE / Dean\'s Office Application Dossier', leftMargin, doc.y, { width: pageWidth });
 
       const dateStr = new Date(packet.generatedAt).toLocaleDateString('en-US', {
         month: 'short',
@@ -76,6 +88,7 @@ export async function generateApplicationPacketPdf(
         .lineTo(leftMargin + pageWidth, headerLineY)
         .stroke();
 
+      doc.x = leftMargin;
       doc.y = headerLineY + 8;
 
       // -------------------------------------------------------------
@@ -117,6 +130,8 @@ export async function generateApplicationPacketPdf(
       doc.text(`Endorsed by: ${packet.advisorEndorsement?.advisorName || 'Dr. Marcus Chen'} (${packet.advisorEndorsement?.advisorSpecialty || 'Internal Medicine'})`, rightColX, metaBoxY + 38);
       doc.text(`4-Pillar Rubric Score: ${packet.advisorEndorsement?.rubricScore || 15}/16 (Standard Exceeded)`, rightColX, metaBoxY + 52);
 
+      // Explicitly reset cursor to left margin for following sections
+      doc.x = leftMargin;
       doc.y = metaBoxY + 82;
 
       // -------------------------------------------------------------
@@ -128,15 +143,18 @@ export async function generateApplicationPacketPdf(
       );
 
       doc.moveDown(0.4);
+      doc.x = leftMargin;
       doc
         .font('Times-Roman')
         .fontSize(9.5)
         .fillColor('#1e293b')
-        .text(packet.personalStatement.content || 'No content recorded.', {
+        .text(packet.personalStatement.content || 'No content recorded.', leftMargin, doc.y, {
           align: 'justify',
           lineGap: 3.5,
           paragraphGap: 6,
+          width: pageWidth,
         });
+      doc.x = leftMargin;
 
       // -------------------------------------------------------------
       // 4. Section II: 10 Selected Experiences
@@ -214,6 +232,7 @@ export async function generateApplicationPacketPdf(
       // -------------------------------------------------------------
       if (doc.y > 600) {
         doc.addPage();
+        doc.x = leftMargin;
       }
 
       drawSectionHeader(
@@ -221,21 +240,29 @@ export async function generateApplicationPacketPdf(
         'AAMC Standardized Citations & Starred Most Meaningful Research'
       );
 
+      doc.x = leftMargin;
       if (packet.scholarlyWorks.length === 0) {
-        doc.font('Helvetica-Oblique').fontSize(8.5).fillColor('#64748b').text('No scholarly works recorded.');
+        doc.font('Helvetica-Oblique').fontSize(8.5).fillColor('#64748b').text('No scholarly works recorded.', leftMargin, doc.y, { width: pageWidth });
       } else {
         packet.scholarlyWorks.forEach((work, idx) => {
-          if (doc.y > 700) doc.addPage();
+          if (doc.y > 700) {
+            doc.addPage();
+            doc.x = leftMargin;
+          }
 
+          doc.x = leftMargin;
           doc.font('Helvetica-Bold').fontSize(9).fillColor('#0f172a');
-          doc.text(`${idx + 1}. ${work.title}`);
+          doc.text(`${idx + 1}. ${work.title}`, leftMargin, doc.y, { width: pageWidth });
 
+          doc.x = leftMargin;
           doc.font('Helvetica').fontSize(8).fillColor('#475569');
-          doc.text(`Type: ${work.type}${work.isMostMeaningful ? '   •   ★ Starred Meaningful' : ''}`);
+          doc.text(`Type: ${work.type}${work.isMostMeaningful ? '   •   ★ Starred Meaningful' : ''}`, leftMargin, doc.y, { width: pageWidth });
 
+          doc.x = leftMargin;
           doc.font('Times-Roman').fontSize(8.5).fillColor('#1e293b');
-          doc.text(work.citation, { lineGap: 1.5 });
+          doc.text(work.citation, leftMargin, doc.y, { lineGap: 1.5, width: pageWidth });
           doc.moveDown(0.5);
+          doc.x = leftMargin;
         });
       }
 
@@ -244,6 +271,7 @@ export async function generateApplicationPacketPdf(
       // -------------------------------------------------------------
       if (doc.y > 550) {
         doc.addPage();
+        doc.x = leftMargin;
       }
 
       drawSectionHeader(
@@ -251,8 +279,9 @@ export async function generateApplicationPacketPdf(
         'Reach, Target, Safety distribution with official ERAS Gold & Silver signaling allocations'
       );
 
+      doc.x = leftMargin;
       if (packet.schoolList.length === 0) {
-        doc.font('Helvetica-Oblique').fontSize(8.5).fillColor('#64748b').text('No programs added to the strategic matrix.');
+        doc.font('Helvetica-Oblique').fontSize(8.5).fillColor('#64748b').text('No programs added to the strategic matrix.', leftMargin, doc.y, { width: pageWidth });
       } else {
         // Table Header
         const tableY = doc.y + 4;
@@ -264,11 +293,13 @@ export async function generateApplicationPacketPdf(
         doc.text('TIER', leftMargin + 370, tableY + 4);
         doc.text('SIGNAL TIER', leftMargin + 440, tableY + 4);
 
+        doc.x = leftMargin;
         doc.y = tableY + 18;
 
         packet.schoolList.forEach((school, i) => {
           if (doc.y > 720) {
             doc.addPage();
+            doc.x = leftMargin;
             // Re-render header on new page
             const subTableY = doc.y;
             doc.rect(leftMargin, subTableY, pageWidth, 16).fill('#f1f5f9');
@@ -277,6 +308,7 @@ export async function generateApplicationPacketPdf(
             doc.text('LOCATION', leftMargin + 260, subTableY + 4);
             doc.text('TIER', leftMargin + 370, subTableY + 4);
             doc.text('SIGNAL TIER', leftMargin + 440, subTableY + 4);
+            doc.x = leftMargin;
             doc.y = subTableY + 18;
           }
 
@@ -309,21 +341,29 @@ export async function generateApplicationPacketPdf(
             doc.font('Helvetica').fillColor('#94a3b8').text('No Signal', leftMargin + 440, rowY);
           }
 
+          doc.x = leftMargin;
           doc.y = rowY + 16;
         });
       }
+
+      // Explicitly reset cursor to left margin after school list table
+      doc.x = leftMargin;
 
       // -------------------------------------------------------------
       // 7. Section V: Hobbies & Outside Interests
       // -------------------------------------------------------------
       if (doc.y > 640) {
         doc.addPage();
+        doc.x = leftMargin;
       }
 
       drawSectionHeader('V. HOBBIES & OUTSIDE INTERESTS', 'Official ERAS 300-Character Description');
-      doc.font('Helvetica').fontSize(8.5).fillColor('#1e293b').text(packet.hobbies || 'None specified.', {
+      doc.x = leftMargin;
+      doc.font('Helvetica').fontSize(8.5).fillColor('#1e293b').text(packet.hobbies || 'None specified.', leftMargin, doc.y, {
         lineGap: 2,
+        width: pageWidth,
       });
+      doc.x = leftMargin;
 
       // -------------------------------------------------------------
       // 8. Running Page Numbers & Document Footer

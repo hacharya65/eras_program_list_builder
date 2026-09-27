@@ -152,4 +152,53 @@ describe('Ticket 07 / Speed B: Compiled Institutional PDF Packet Generator', () 
     expect(pdfBuffer.length).toBeGreaterThan(10000);
     expect(pdfBuffer.subarray(0, 4).toString('ascii')).toBe('%PDF');
   });
+
+  it('contains all finalized sections including Personal Statement, Experiences, Scholarly Works, School List, and Hobbies', async () => {
+    // Generate uncompressed PDF for direct stream inspection
+    const pdfBuffer = await generateApplicationPacketPdf(samplePacket, { compress: false });
+    const rawPdf = pdfBuffer.toString('latin1');
+
+    // Extract text from PDF TJ operators and Tj operators
+    let extractedText = rawPdf.replace(/\[([\s\S]*?)\]\s*TJ/g, (_, tjContent) => {
+      let result = '';
+      const tokenRegex = /<([0-9a-fA-F]+)>|\(([\s\S]*?)\)/g;
+      let match;
+      while ((match = tokenRegex.exec(tjContent)) !== null) {
+        if (match[1]) {
+          result += Buffer.from(match[1], 'hex').toString('latin1');
+        } else if (match[2]) {
+          result += match[2];
+        }
+      }
+      return result;
+    });
+
+    // Also replace standalone hex tokens or string tokens
+    extractedText = extractedText.replace(/<([0-9a-fA-F]+)>/g, (_, hex) =>
+      Buffer.from(hex, 'hex').toString('latin1')
+    );
+
+    const normalizedText = extractedText.replace(/\s+/g, ' ');
+
+    // Section I: Personal Statement
+    expect(normalizedText).toContain('I. APPROVED PERSONAL STATEMENT');
+    expect(normalizedText).toContain('mechanical ventilator in room 402');
+
+    // Section II: Selected Experiences & Reflections
+    expect(normalizedText).toContain('II. SELECTED EXPERIENCES & MEANINGFUL REFLECTIONS');
+    expect(normalizedText).toContain('Sub-Intern in Medical Intensive Care');
+    expect(normalizedText).toContain('Navigating complex family goals-of-care conferences');
+
+    // Section III: Scholarly Works
+    expect(normalizedText).toContain('III. SCHOLARLY WORKS & ACADEMIC CONTRIBUTIONS');
+    expect(normalizedText).toContain('Serum Biomarkers in Right Ventricular Remodeling');
+
+    // Section IV: Strategic School List
+    expect(normalizedText).toContain('IV. STRATEGIC SCHOOL LIST & ERAS SIGNALING MATRIX');
+    expect(normalizedText).toContain('Massachusetts General Hospital');
+
+    // Section V: Hobbies & Outside Interests
+    expect(normalizedText).toContain('V. HOBBIES & OUTSIDE INTERESTS');
+    expect(normalizedText).toContain('Distance trail running');
+  });
 });

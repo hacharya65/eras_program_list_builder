@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { StudentDashboardContext } from '@/domain/types';
 import {
   generateTransferFields,
@@ -28,6 +28,7 @@ import {
   GraduationCap,
   Download,
   Loader2,
+  Eye,
 } from 'lucide-react';
 
 interface ErasTransferKitProps {
@@ -66,6 +67,16 @@ export function ErasTransferKit({ context, onBack }: ErasTransferKitProps) {
   const [activeFilter, setActiveFilter] = useState<'all' | 'personal_statement' | 'experiences' | 'reflections' | 'hobbies' | 'scholarly_works'>('all');
   const [showPacketModal, setShowPacketModal] = useState<boolean>(false);
   const [isGeneratingPdf, setIsGeneratingPdf] = useState<boolean>(false);
+  const [pdfPreviewBlobUrl, setPdfPreviewBlobUrl] = useState<string | null>(null);
+  const [previewTab, setPreviewTab] = useState<'dossier' | 'pdf'>('dossier');
+
+  useEffect(() => {
+    return () => {
+      if (pdfPreviewBlobUrl) {
+        window.URL.revokeObjectURL(pdfPreviewBlobUrl);
+      }
+    };
+  }, [pdfPreviewBlobUrl]);
 
   const validation = validateTransferPayloads(fields);
   const totalCount = fields.length;
@@ -78,7 +89,8 @@ export function ErasTransferKit({ context, onBack }: ErasTransferKitProps) {
     schoolList
   );
 
-  const handleDownloadPdf = async () => {
+  const generatePdfBlob = async (): Promise<string> => {
+    if (pdfPreviewBlobUrl) return pdfPreviewBlobUrl;
     setIsGeneratingPdf(true);
     try {
       const res = await fetch('/api/export-packet-pdf', {
@@ -93,20 +105,45 @@ export function ErasTransferKit({ context, onBack }: ErasTransferKitProps) {
 
       const blob = await res.blob();
       const url = window.URL.createObjectURL(blob);
+      setPdfPreviewBlobUrl(url);
+      return url;
+    } catch (err) {
+      console.error('PDF export failed:', err);
+      throw err;
+    } finally {
+      setIsGeneratingPdf(false);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    try {
+      const url = await generatePdfBlob();
+      // Present preview immediately
+      setPreviewTab('pdf');
+
       const link = document.createElement('a');
       link.href = url;
       const sanitizedName = (packet.student.name || 'Applicant').replace(/\s+/g, '_');
       link.download = `Apex_ERAS_Dossier_${sanitizedName}_2027.pdf`;
       document.body.appendChild(link);
       link.click();
-      window.URL.revokeObjectURL(url);
       document.body.removeChild(link);
     } catch (err) {
       console.error('PDF export failed:', err);
       alert('Unable to generate high-resolution PDF dossier. Opening print fallback view.');
       window.print();
-    } finally {
-      setIsGeneratingPdf(false);
+    }
+  };
+
+  const handleOpenPdfPreview = async () => {
+    setShowPacketModal(true);
+    setPreviewTab('pdf');
+    if (!pdfPreviewBlobUrl) {
+      try {
+        await generatePdfBlob();
+      } catch {
+        setPreviewTab('dossier');
+      }
     }
   };
 
@@ -157,14 +194,28 @@ export function ErasTransferKit({ context, onBack }: ErasTransferKitProps) {
           </div>
         </div>
 
-        {/* Export Institutional PDF Packet Button */}
-        <button
-          onClick={() => setShowPacketModal(true)}
-          className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm transition-all"
-        >
-          <Printer className="w-4 h-4 text-emerald-400" />
-          Compiled Institutional PDF Packet
-        </button>
+        {/* Export Institutional PDF Packet Buttons */}
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              setShowPacketModal(true);
+              setPreviewTab('dossier');
+            }}
+            className="px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-semibold flex items-center gap-2 border border-slate-200 shadow-sm transition-all"
+            title="Preview formatted dossier layout"
+          >
+            <Eye className="w-4 h-4 text-slate-500" />
+            Dossier Preview
+          </button>
+          <button
+            onClick={handleOpenPdfPreview}
+            className="px-4 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-sm transition-all"
+            title="Preview and download official PDF dossier"
+          >
+            <Download className="w-4 h-4 text-emerald-400" />
+            Preview &amp; Download PDF
+          </button>
+        </div>
       </div>
 
       {/* Progress & Validation Banner */}
@@ -311,17 +362,56 @@ export function ErasTransferKit({ context, onBack }: ErasTransferKitProps) {
 
       {/* Institutional Application Packet Modal */}
       {showPacketModal && (
-        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4">
+        <div
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="dossier-modal-title"
+          className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+        >
           <div className="bg-white rounded-2xl max-w-4xl w-full max-h-[92vh] overflow-y-auto shadow-2xl border border-slate-200 p-8 space-y-6">
             {/* Modal Controls */}
-            <div className="flex items-center justify-between border-b border-slate-200 pb-4 print:hidden">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 border-b border-slate-200 pb-4 print:hidden">
               <div className="flex items-center gap-2">
                 <GraduationCap className="w-6 h-6 text-slate-800" />
-                <span className="text-sm font-bold text-slate-900">
-                  Apex School of Medicine &bull; Dean's Office / MSPE Application Dossier
-                </span>
+                <div>
+                  <span id="dossier-modal-title" className="text-sm font-bold text-slate-900 block">
+                    Apex School of Medicine &bull; Dean's Office / MSPE Application Dossier
+                  </span>
+                  <span className="text-[11px] text-slate-500">
+                    Official ERAS 2027 institutional application portfolio preview
+                  </span>
+                </div>
               </div>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2.5">
+                {/* View Mode Toggle: Interactive Dossier vs Live PDF */}
+                <div className="inline-flex bg-slate-100 p-0.5 rounded-lg border border-slate-200 text-xs">
+                  <button
+                    onClick={() => setPreviewTab('dossier')}
+                    className={`px-3 py-1 rounded-md font-semibold transition-all flex items-center gap-1.5 ${
+                      previewTab === 'dossier'
+                        ? 'bg-white text-slate-900 shadow-sm'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <FileText className="w-3.5 h-3.5 text-slate-500" />
+                    Dossier Layout
+                  </button>
+                  <button
+                    onClick={() => {
+                      setPreviewTab('pdf');
+                      if (!pdfPreviewBlobUrl) generatePdfBlob();
+                    }}
+                    className={`px-3 py-1 rounded-md font-semibold transition-all flex items-center gap-1.5 ${
+                      previewTab === 'pdf'
+                        ? 'bg-white text-slate-900 shadow-sm'
+                        : 'text-slate-600 hover:text-slate-900'
+                    }`}
+                  >
+                    <Printer className="w-3.5 h-3.5 text-slate-500" />
+                    Live PDF Preview
+                  </button>
+                </div>
+
                 <button
                   onClick={handleDownloadPdf}
                   disabled={isGeneratingPdf}
@@ -330,11 +420,11 @@ export function ErasTransferKit({ context, onBack }: ErasTransferKitProps) {
                 >
                   {isGeneratingPdf ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Rendering PDF Dossier...
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" /> Rendering...
                     </>
                   ) : (
                     <>
-                      <Download className="w-3.5 h-3.5" /> Download Official PDF Dossier
+                      <Download className="w-3.5 h-3.5" /> Download PDF
                     </>
                   )}
                 </button>
@@ -343,9 +433,11 @@ export function ErasTransferKit({ context, onBack }: ErasTransferKitProps) {
                   className="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg text-xs font-medium flex items-center gap-1 border border-slate-200"
                   title="Quick browser print view"
                 >
-                  <Printer className="w-3.5 h-3.5 text-slate-500" /> Quick Print
+                  <Printer className="w-3.5 h-3.5 text-slate-500" /> Print
                 </button>
                 <button
+                  type="button"
+                  aria-label="Close dialog"
                   onClick={() => setShowPacketModal(false)}
                   className="p-1 text-slate-400 hover:text-slate-600 font-bold text-lg"
                 >
@@ -354,10 +446,68 @@ export function ErasTransferKit({ context, onBack }: ErasTransferKitProps) {
               </div>
             </div>
 
-            {/* Printable Application Packet Content */}
-            <div className="space-y-6 text-slate-900">
-              {/* Institution Header */}
-              <div className="border-b-2 border-slate-900 pb-4 flex items-start justify-between">
+            {previewTab === 'pdf' ? (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-200">
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    <span className="font-semibold text-slate-800">
+                      Official PDF Document Preview (Strict Left-Aligned, All Sections Included)
+                    </span>
+                    <span className="text-slate-500">
+                      &bull; {packet.student.name} ({packet.student.specialty})
+                    </span>
+                  </div>
+                  {pdfPreviewBlobUrl && (
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={handleDownloadPdf}
+                        className="px-3 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-md text-xs font-semibold flex items-center gap-1 shadow-sm"
+                      >
+                        <Download className="w-3.5 h-3.5" /> Save PDF File
+                      </button>
+                      <a
+                        href={pdfPreviewBlobUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="px-3 py-1 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 rounded-md text-xs font-semibold flex items-center gap-1 shadow-sm"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5 text-slate-500" /> Fullscreen
+                      </a>
+                    </div>
+                  )}
+                </div>
+
+                {isGeneratingPdf ? (
+                  <div className="h-[65vh] flex flex-col items-center justify-center bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                    <Loader2 className="w-8 h-8 text-emerald-600 animate-spin" />
+                    <p className="text-xs font-semibold text-slate-600">
+                      Rendering high-resolution multi-page PDF dossier...
+                    </p>
+                  </div>
+                ) : pdfPreviewBlobUrl ? (
+                  <iframe
+                    src={pdfPreviewBlobUrl}
+                    className="w-full h-[68vh] rounded-xl border border-slate-300 shadow-inner bg-slate-100"
+                    title="Official PDF Dossier Preview"
+                  />
+                ) : (
+                  <div className="h-[60vh] flex flex-col items-center justify-center bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+                    <p className="text-xs text-slate-500">Click below to generate and display the official PDF document preview.</p>
+                    <button
+                      onClick={generatePdfBlob}
+                      className="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 shadow-sm"
+                    >
+                      <Download className="w-3.5 h-3.5" /> Generate PDF Preview
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              /* Printable Application Packet Content */
+              <div className="space-y-6 text-slate-900">
+                {/* Institution Header */}
+                <div className="border-b-2 border-slate-900 pb-4 flex items-start justify-between">
                 <div>
                   <h1 className="text-xl font-bold tracking-tight text-slate-900">
                     APEX SCHOOL OF MEDICINE
@@ -543,9 +693,10 @@ export function ErasTransferKit({ context, onBack }: ErasTransferKitProps) {
                 </p>
               </div>
             </div>
-          </div>
+          )}
         </div>
-      )}
-    </div>
+      </div>
+    )}
+  </div>
   );
 }
