@@ -187,23 +187,102 @@ export function StudentPortal({
 
   const psStage = stageLabels[personalStatement.stage];
 
-  const applicantNavTabs = [
-    { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+  type MainTabKey = 'dashboard' | 'programs' | 'application' | 'documents';
+
+  const getMainTabForView = (view: typeof activeView): MainTabKey => {
+    switch (view) {
+      case 'overview':
+        return 'dashboard';
+      case 'school_list':
+      case 'intake':
+      case 'competitiveness':
+      case 'alumni_directory':
+        return 'programs';
+      case 'personal_statement':
+      case 'personal_statement_feedback':
+      case 'experiences':
+      case 'scholarly_works':
+        return 'application';
+      case 'letters':
+      case 'transfer_kit':
+        return 'documents';
+      default:
+        return 'dashboard';
+    }
+  };
+
+  const activeMainTab = getMainTabForView(activeView);
+
+  interface SubSectionItem {
+    id: typeof activeView;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    badge?: string;
+  }
+
+  interface MainNavigationTab {
+    id: MainTabKey;
+    label: string;
+    icon: React.ComponentType<{ className?: string }>;
+    defaultView: typeof activeView;
+    badge?: string;
+    subSections?: SubSectionItem[];
+  }
+
+  const mainNavigationTabs: MainNavigationTab[] = [
     {
-      id: 'intake',
-      label: 'Advising Intake',
-      icon: FileCheck,
-      badge: advisingIntake.isCompleted ? 'Complete' : 'In Progress',
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: LayoutDashboard,
+      defaultView: 'overview',
     },
-    { id: 'competitiveness', label: 'Specialty Appraisal', icon: TrendingUp },
-    { id: 'school_list', label: 'Program List & Signals', icon: Compass },
-    { id: 'personal_statement', label: 'Personal Statement', icon: FileText, badge: psStage.label },
-    { id: 'letters', label: 'Letters of Rec', icon: MailCheck },
-    { id: 'experiences', label: 'Experiences', icon: Briefcase },
-    { id: 'scholarly_works', label: 'Scholarly Works', icon: BookOpen },
-    { id: 'transfer_kit', label: 'Packet & Exports', icon: Download },
-    { id: 'alumni_directory', label: 'Alumni Network', icon: GraduationCap },
+    {
+      id: 'programs',
+      label: 'Programs & Strategy',
+      icon: Compass,
+      defaultView: 'school_list',
+      subSections: [
+        { id: 'school_list', label: 'Program List & Signals', icon: Compass },
+        {
+          id: 'intake',
+          label: 'Advising Intake',
+          icon: FileCheck,
+          badge: advisingIntake.isCompleted ? 'Complete' : 'In Progress',
+        },
+        { id: 'competitiveness', label: 'Specialty Appraisal', icon: TrendingUp },
+        { id: 'alumni_directory', label: 'Alumni Network', icon: GraduationCap },
+      ],
+    },
+    {
+      id: 'application',
+      label: 'Application Materials',
+      icon: FileText,
+      defaultView: 'personal_statement',
+      badge: psStage.label,
+      subSections: [
+        {
+          id: 'personal_statement',
+          label: 'Personal Statement',
+          icon: FileText,
+          badge: psStage.label,
+        },
+        { id: 'experiences', label: '10 Selected Experiences', icon: Briefcase },
+        { id: 'scholarly_works', label: 'Scholarly Works', icon: BookOpen },
+      ],
+    },
+    {
+      id: 'documents',
+      label: 'Documents & Packet',
+      icon: MailCheck,
+      defaultView: 'letters',
+      subSections: [
+        { id: 'letters', label: 'Letters of Recommendation', icon: MailCheck },
+        { id: 'transfer_kit', label: 'Packet & Exports', icon: Download },
+      ],
+    },
   ];
+
+  const currentMainTabConfig = mainNavigationTabs.find((t) => t.id === activeMainTab);
 
   const renderViewContent = () => {
     if (activeView === 'intake') {
@@ -837,44 +916,35 @@ export function StudentPortal({
 };
 
   return (
-    <div className="space-y-6">
-      {/* Persistent Institutional Sub-Navigation (AAMC MyERAS / Thalamus Pattern) */}
+    <div className="space-y-3">
+      {/* Level 1: Primary 4-Tab Navigation (AAMC MyERAS / Thalamus Pattern) */}
       <nav
-        aria-label="Applicant Sections"
+        aria-label="Applicant Main Navigation"
         className="bg-white rounded-2xl border border-neutral-200/90 shadow-2xs p-1.5 flex items-center gap-1 overflow-x-auto scrollbar-none"
       >
-        {applicantNavTabs.map((tab) => {
-          const isActive =
-            activeView === tab.id ||
-            (tab.id === 'personal_statement' &&
-              (activeView === 'personal_statement' || activeView === 'personal_statement_feedback'));
+        {mainNavigationTabs.map((tab) => {
+          const isTabActive = activeMainTab === tab.id;
           return (
             <button
               key={tab.id}
               onClick={() => {
-                if (tab.id === 'personal_statement') {
-                  setActiveView('personal_statement');
-                } else {
-                  setActiveView(tab.id as any);
+                if (activeMainTab !== tab.id) {
+                  setActiveView(tab.defaultView);
                 }
               }}
-              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
-                isActive
+              className={`flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                isTabActive
                   ? 'bg-[#1F3A30] text-white shadow-xs font-bold'
                   : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/80'
               }`}
             >
-              <tab.icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-neutral-500'}`} />
+              <tab.icon className={`w-4 h-4 ${isTabActive ? 'text-white' : 'text-neutral-500'}`} />
               <span>{tab.label}</span>
               {tab.badge && (
                 <span
-                  className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
-                    isActive
+                  className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                    isTabActive
                       ? 'bg-white/20 text-white'
-                      : tab.badge === 'Complete'
-                      ? 'bg-emerald-100 text-emerald-800'
-                      : tab.badge === 'In Progress'
-                      ? 'bg-amber-100 text-amber-800'
                       : 'bg-neutral-100 text-neutral-700'
                   }`}
                 >
@@ -885,6 +955,54 @@ export function StudentPortal({
           );
         })}
       </nav>
+
+      {/* Level 2: Sub-Navigation Pills for Nested Sections */}
+      {currentMainTabConfig && 'subSections' in currentMainTabConfig && currentMainTabConfig.subSections && (
+        <nav
+          aria-label={`${currentMainTabConfig.label} Sub-sections`}
+          className="bg-[#F2F4F2]/80 backdrop-blur-xs rounded-xl border border-neutral-200/70 p-1 flex items-center gap-1 overflow-x-auto scrollbar-none"
+        >
+          {currentMainTabConfig.subSections.map((sub) => {
+            const isSubActive =
+              activeView === sub.id ||
+              (sub.id === 'personal_statement' &&
+                (activeView === 'personal_statement' || activeView === 'personal_statement_feedback'));
+            return (
+              <button
+                key={sub.id}
+                onClick={() => {
+                  if (sub.id === 'personal_statement') {
+                    setActiveView('personal_statement');
+                  } else {
+                    setActiveView(sub.id as any);
+                  }
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all ${
+                  isSubActive
+                    ? 'bg-white text-[#1F3A30] shadow-xs font-semibold border border-neutral-200/80'
+                    : 'text-neutral-600 hover:text-neutral-900 hover:bg-white/60'
+                }`}
+              >
+                <sub.icon className={`w-3.5 h-3.5 ${isSubActive ? 'text-[#1F3A30]' : 'text-neutral-500'}`} />
+                <span>{sub.label}</span>
+                {sub.badge && (
+                  <span
+                    className={`text-[9px] px-1.5 py-0.5 rounded-full font-semibold ${
+                      isSubActive
+                        ? 'bg-emerald-100 text-emerald-800'
+                        : sub.badge === 'Complete'
+                        ? 'bg-emerald-100/70 text-emerald-800'
+                        : 'bg-neutral-200 text-neutral-700'
+                    }`}
+                  >
+                    {sub.badge}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </nav>
+      )}
 
       {/* Main Subview Content */}
       {renderViewContent()}
