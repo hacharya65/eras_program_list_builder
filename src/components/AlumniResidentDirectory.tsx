@@ -122,7 +122,7 @@ export function AlumniResidentDirectory({
           <div>
             <div className="flex items-center gap-2">
               <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-violet-100 text-violet-800 flex items-center gap-1">
-                <ShieldCheck className="w-3.5 h-3.5" /> Apex Alumni Network
+                <ShieldCheck className="w-3.5 h-3.5" /> Geisinger Alumni Network
               </span>
               <span className="text-xs text-slate-500">Classes of 2022–2025</span>
             </div>
@@ -179,7 +179,7 @@ export function AlumniResidentDirectory({
           </div>
           <div>
             <div className="text-xl font-bold text-slate-900">100%</div>
-            <div className="text-xs text-slate-500">Verified Apex Alumni</div>
+            <div className="text-xs text-slate-500">Verified Geisinger Alumni</div>
           </div>
         </div>
 

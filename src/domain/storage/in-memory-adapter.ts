@@ -14,8 +14,8 @@ import { AlumniResident, SAMPLE_ALUMNI_ROSTER } from '../alumni-models';
 export class InMemoryStorageAdapter {
   institution: Institution = {
     id: 'inst-1',
-    name: 'Apex School of Medicine',
-    domain: 'apex.med.edu',
+    name: 'Geisinger Commonwealth School of Medicine',
+    domain: 'som.geisinger.edu',
     defaultSlaDays: 14,
   };
 

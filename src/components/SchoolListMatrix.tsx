@@ -1408,7 +1408,7 @@ export function SchoolListMatrix({
                     <div className="font-bold text-indigo-900 flex items-center justify-between">
                       <div className="flex items-center gap-1.5">
                         <Users className="w-3.5 h-3.5 text-indigo-600" />
-                        <span>Apex Medical School Alumni Network ({alumni.length} Matches)</span>
+                        <span>Geisinger Commonwealth Alumni Network ({alumni.length} Matches)</span>
                       </div>
                     </div>
                     {alumni.length > 0 ? (

@@ -40,6 +40,7 @@ interface SpecialtyAdvisingFormModalProps {
   studentId?: string;
   isAdvisorReviewMode?: boolean;
   onSaved?: (updated: SpecialtyAdvisingIntake) => void;
+  isEmbedded?: boolean;
 }
 
 export function SpecialtyAdvisingFormModal({
@@ -48,20 +49,21 @@ export function SpecialtyAdvisingFormModal({
   studentId = 'usr-student-1',
   isAdvisorReviewMode = false,
   onSaved,
+  isEmbedded = false,
 }: SpecialtyAdvisingFormModalProps) {
   const [formData, setFormData] = useState<SpecialtyAdvisingIntake>(() => loadStudentAdvisingIntake(studentId));
   const [activeTab, setActiveTab] = useState<'editor' | 'printable_preview'>('editor');
   const [saveSuccess, setSaveSuccess] = useState(false);
 
-  // Re-read storage on open
+  // Re-read storage on open or when studentId changes
   useEffect(() => {
-    if (isOpen) {
+    if (isOpen || isEmbedded) {
       const data = loadStudentAdvisingIntake(studentId);
       setFormData(data);
     }
-  }, [isOpen, studentId]);
+  }, [isOpen, isEmbedded, studentId]);
 
-  if (!isOpen) return null;
+  if (!isOpen && !isEmbedded) return null;
 
   const honorsCount = calculateClerkshipHonorsCount(formData.clerkshipGrades);
   const geoMismatch = checkStateDivisionsMismatch(
@@ -132,73 +134,67 @@ export function SpecialtyAdvisingFormModal({
     onSaved?.(updated);
   };
 
-  return (
-    <div
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="intake-modal-title"
-      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4 sm:p-6 overflow-y-auto"
-    >
-      <div className="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh] flex flex-col border border-[#D6E5DF] overflow-hidden">
-        {/* Modal Header */}
-        <div className="bg-[#1F3A30] text-white px-6 py-4 flex items-center justify-between shrink-0 border-b border-[#2D5949]">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-[#264639] border border-[#7EAE9B]/30 flex items-center justify-center p-1 overflow-hidden shrink-0">
-              <img
-                src="/ethmoid-square.jpeg"
-                alt="Ethmoid Mark"
-                className="w-full h-full object-contain filter brightness-110"
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded bg-[#7EAE9B]/20 text-[#A3D9C5] border border-[#7EAE9B]/40">
-                  Geisinger Commonwealth Form
-                </span>
-                <span className="text-xs text-emerald-200/80">Ethmoid Clinical Governance</span>
-              </div>
-              <h2 id="intake-modal-title" className="text-lg font-bold text-white tracking-tight">
-                Specialty Advising Intake Form
-              </h2>
-            </div>
+  const modalContent = (
+    <div className={`bg-white ${isEmbedded ? 'w-full shadow-xs' : 'rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh]'} flex flex-col border border-neutral-200/90 overflow-hidden`}>
+      {/* Modal Header */}
+      <div className="bg-[#1F3A30] text-white px-6 py-4 flex items-center justify-between shrink-0 border-b border-[#2D5949]">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-[#264639] border border-[#7EAE9B]/30 flex items-center justify-center p-1 overflow-hidden shrink-0">
+            <img
+              src="/ethmoid-square.jpeg"
+              alt="Ethmoid Mark"
+              className="w-full h-full object-contain filter brightness-110"
+            />
           </div>
-
-          <div className="flex items-center gap-2">
-            <div className="bg-[#142720] p-1 rounded-lg flex items-center gap-1 border border-[#2D5949] text-xs">
-              <button
-                type="button"
-                onClick={() => setActiveTab('editor')}
-                className={`px-3 py-1 rounded font-semibold transition-all ${
-                  activeTab === 'editor'
-                    ? 'bg-[#7EAE9B] text-[#142720] shadow-xs'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                Interactive Form
-              </button>
-              <button
-                type="button"
-                onClick={() => setActiveTab('printable_preview')}
-                className={`px-3 py-1 rounded font-semibold transition-all ${
-                  activeTab === 'printable_preview'
-                    ? 'bg-[#7EAE9B] text-[#142720] shadow-xs'
-                    : 'text-slate-300 hover:text-white'
-                }`}
-              >
-                Official Printable View
-              </button>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded bg-[#7EAE9B]/20 text-[#A3D9C5] border border-[#7EAE9B]/40">
+                Geisinger Commonwealth Form
+              </span>
+              <span className="text-xs text-emerald-200/80">Ethmoid Clinical Governance</span>
             </div>
-
-            <button
-              onClick={onClose}
-              className="p-1.5 text-emerald-200/70 hover:text-white hover:bg-[#264639] rounded-lg transition-colors"
-              title="Close modal"
-              aria-label="Close"
-            >
-              <X className="w-5 h-5" />
-            </button>
+            <h2 id="intake-modal-title" className="text-lg font-bold text-white tracking-tight">
+              Specialty Advising Intake Form
+            </h2>
           </div>
         </div>
+
+        <div className="flex items-center gap-2">
+          <div className="bg-[#142720] p-1 rounded-lg flex items-center gap-1 border border-[#2D5949] text-xs">
+            <button
+              type="button"
+              onClick={() => setActiveTab('editor')}
+              className={`px-3 py-1 rounded font-semibold transition-all ${
+                activeTab === 'editor'
+                  ? 'bg-[#7EAE9B] text-[#142720] shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              Interactive Form
+            </button>
+            <button
+              type="button"
+              onClick={() => setActiveTab('printable_preview')}
+              className={`px-3 py-1 rounded font-semibold transition-all ${
+                activeTab === 'printable_preview'
+                  ? 'bg-[#7EAE9B] text-[#142720] shadow-xs'
+                  : 'text-slate-300 hover:text-white'
+              }`}
+            >
+              Official Printable View
+            </button>
+          </div>
+
+          <button
+            onClick={onClose}
+            className="p-1.5 text-emerald-200/70 hover:text-white hover:bg-[#264639] rounded-lg transition-colors"
+            title="Close modal"
+            aria-label="Close"
+          >
+            <X className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
 
         {/* Modal Scrollable Body */}
         <div className="flex-1 overflow-y-auto p-6 bg-[#F4F8F6]/60">
@@ -982,7 +978,21 @@ export function SpecialtyAdvisingFormModal({
             </div>
           )}
         </div>
-      </div>
+    </div>
+  );
+
+  if (isEmbedded) {
+    return modalContent;
+  }
+
+  return (
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="intake-modal-title"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/70 backdrop-blur-xs p-4 sm:p-6 overflow-y-auto"
+    >
+      {modalContent}
     </div>
   );
 }

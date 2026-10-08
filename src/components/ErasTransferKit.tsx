@@ -124,7 +124,7 @@ export function ErasTransferKit({ context, onBack }: ErasTransferKitProps) {
       const link = document.createElement('a');
       link.href = url;
       const sanitizedName = (packet.student.name || 'Applicant').replace(/\s+/g, '_');
-      link.download = `Apex_ERAS_Dossier_${sanitizedName}_2027.pdf`;
+      link.download = `Geisinger_ERAS_Dossier_${sanitizedName}_2027.pdf`;
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
@@ -375,7 +375,7 @@ export function ErasTransferKit({ context, onBack }: ErasTransferKitProps) {
                 <GraduationCap className="w-6 h-6 text-slate-800" />
                 <div>
                   <span id="dossier-modal-title" className="text-sm font-bold text-slate-900 block">
-                    Apex School of Medicine &bull; Dean's Office / MSPE Application Dossier
+                    Geisinger Commonwealth School of Medicine &bull; Dean's Office / MSPE Application Dossier
                   </span>
                   <span className="text-[11px] text-slate-500">
                     Official ERAS 2027 institutional application portfolio preview
@@ -510,7 +510,7 @@ export function ErasTransferKit({ context, onBack }: ErasTransferKitProps) {
                 <div className="border-b-2 border-slate-900 pb-4 flex items-start justify-between">
                 <div>
                   <h1 className="text-xl font-bold tracking-tight text-slate-900">
-                    APEX SCHOOL OF MEDICINE
+                    GEISINGER COMMONWEALTH SCHOOL OF MEDICINE
                   </h1>
                   <p className="text-xs text-slate-600 mt-0.5">
                     Office of Student Affairs &bull; Residency Match Advising Portfolio &bull; ERAS 2027

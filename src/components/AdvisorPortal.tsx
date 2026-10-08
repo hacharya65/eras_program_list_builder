@@ -468,7 +468,7 @@ function deduplicateLatestReviews(
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
               Faculty Advisor Portal
             </span>
-            <span className="text-xs text-slate-500">Apex Health Internal Medicine</span>
+            <span className="text-xs text-neutral-500">Geisinger Commonwealth School of Medicine &bull; Department of Internal Medicine</span>
           </div>
           <h1 className="text-2xl font-bold text-slate-900 mt-1">
             Welcome, {advisor.name}

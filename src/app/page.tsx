@@ -116,7 +116,7 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-slate-100/60">
+    <div className="min-h-screen flex flex-col bg-[#F8F8F5] text-neutral-800">
       {/* Dev Persona Switcher Bar */}
       <DevPersonaSwitcher
         currentRole={currentRole}
@@ -161,15 +161,17 @@ export default function HomePage() {
         )}
       </main>
 
-      {/* Footer */}
-      <footer className="border-t border-[#D6E5DF] bg-white py-4 text-center text-xs text-slate-500">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-[#1F3A30]">Ethmoid</span>
-            <span>&bull;</span>
-            <span>Geisinger Commonwealth School of Medicine</span>
+      {/* Institutional Footer */}
+      <footer className="border-t border-neutral-200/80 bg-white py-5 text-center text-xs text-neutral-500">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <span className="font-bold text-[#1F3A30] text-sm">Ethmoid</span>
+            <span className="text-neutral-300">&bull;</span>
+            <span className="font-medium text-neutral-700">Geisinger Commonwealth School of Medicine</span>
           </div>
-          <span className="text-slate-400">Grounded in 2026/2027 AAMC ERAS &amp; NRMP Match Specifications &bull; Fictional Demonstration</span>
+          <span className="text-neutral-400 text-[11px]">
+            Grounded in 2026/2027 AAMC ERAS &amp; NRMP Match Specifications &bull; Fictional Demonstration
+          </span>
         </div>
       </footer>
     </div>

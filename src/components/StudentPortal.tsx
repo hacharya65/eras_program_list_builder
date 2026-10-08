@@ -52,6 +52,11 @@ import {
   ArrowRight,
   Mail,
   FileCheck,
+  LayoutDashboard,
+  Compass,
+  MailCheck,
+  TrendingUp,
+  Download,
 } from 'lucide-react';
 
 interface StudentPortalProps {
@@ -81,6 +86,7 @@ export function StudentPortal({
 }: StudentPortalProps) {
   const [activeView, setActiveView] = useState<
     | 'overview'
+    | 'intake'
     | 'personal_statement'
     | 'personal_statement_feedback'
     | 'experiences'
@@ -181,165 +187,201 @@ export function StudentPortal({
 
   const psStage = stageLabels[personalStatement.stage];
 
-  if (activeView === 'personal_statement_feedback') {
-    return (
-      <StudentFeedbackHub
-        latestFeedback={latestPSFeedback}
-        feedbackHistory={psFeedbackHistory.length > 0 ? psFeedbackHistory : (latestPSFeedback ? [latestPSFeedback] : [])}
-        currentDraftVersion={personalStatement.currentVersionNumber}
-        personalStatementStage={personalStatement.stage}
-        onBack={() => setActiveView('overview')}
-        onStartRevision={(targetVersion) => {
-          onCreateRevision?.(targetVersion);
-        }}
-        onOpenEditor={(initialMode = 'split') => {
-          setPsEditorMode(initialMode);
-          setActiveView('personal_statement');
-        }}
-      />
-    );
-  }
+  const applicantNavTabs = [
+    { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+    {
+      id: 'intake',
+      label: 'Advising Intake',
+      icon: FileCheck,
+      badge: advisingIntake.isCompleted ? 'Complete' : 'In Progress',
+    },
+    { id: 'competitiveness', label: 'Specialty Appraisal', icon: TrendingUp },
+    { id: 'school_list', label: 'Program List & Signals', icon: Compass },
+    { id: 'personal_statement', label: 'Personal Statement', icon: FileText, badge: psStage.label },
+    { id: 'letters', label: 'Letters of Rec', icon: MailCheck },
+    { id: 'experiences', label: 'Experiences', icon: Briefcase },
+    { id: 'scholarly_works', label: 'Scholarly Works', icon: BookOpen },
+    { id: 'transfer_kit', label: 'Packet & Exports', icon: Download },
+    { id: 'alumni_directory', label: 'Alumni Network', icon: GraduationCap },
+  ];
 
-  if (activeView === 'personal_statement') {
-    return (
-      <PersonalStatementEditor
-        draft={personalStatement}
-        assignedAdvisor={assignedAdvisors[0]}
-        snapshots={context.snapshots}
-        latestFeedback={latestPSFeedback}
-        feedbackHistory={psFeedbackHistory}
-        initialViewMode={psEditorMode}
-        onNavigateToFeedback={() => setActiveView('personal_statement_feedback')}
-        onSave={(newContent) => onUpdatePersonalStatement?.(newContent)}
-        onSubmitForReview={(changelog) => {
-          onSubmitPersonalStatement?.(changelog);
-          setActiveView('overview');
-        }}
-        onBack={() => setActiveView('overview')}
-      />
-    );
-  }
+  const renderViewContent = () => {
+    if (activeView === 'intake') {
+      return (
+        <SpecialtyAdvisingFormModal
+          isOpen={true}
+          isEmbedded={true}
+          onClose={() => setActiveView('overview')}
+          studentId={student.id}
+          onSaved={(updated) => {
+            setAdvisingIntake(updated);
+            if (updated.applyingSpecialty && updated.applyingSpecialty !== targetSpecialty) {
+              applySpecialtySwitch(updated.applyingSpecialty);
+            }
+          }}
+        />
+      );
+    }
 
-  if (activeView === 'experiences') {
-    const activeExpReview = context.activeReviewRequests.find(r => r.documentType === 'experience_portfolio');
-    return (
-      <ExperiencesManager
-        experiences={experiences}
-        assignedAdvisor={assignedAdvisors[0]}
-        activeReviewRequest={activeExpReview}
-        onSubmitForReview={onSubmitExperiences}
-        onSaveExperience={(id, updates) => onUpdateExperience?.(id, updates)}
-        onDeleteExperience={(id) => {}}
-        onBack={() => setActiveView('overview')}
-        targetSpecialty={targetSpecialty}
-      />
-    );
-  }
+    if (activeView === 'personal_statement_feedback') {
+      return (
+        <StudentFeedbackHub
+          latestFeedback={latestPSFeedback}
+          feedbackHistory={psFeedbackHistory.length > 0 ? psFeedbackHistory : (latestPSFeedback ? [latestPSFeedback] : [])}
+          currentDraftVersion={personalStatement.currentVersionNumber}
+          personalStatementStage={personalStatement.stage}
+          onBack={() => setActiveView('overview')}
+          onStartRevision={(targetVersion) => {
+            onCreateRevision?.(targetVersion);
+          }}
+          onOpenEditor={(initialMode = 'split') => {
+            setPsEditorMode(initialMode);
+            setActiveView('personal_statement');
+          }}
+        />
+      );
+    }
 
-  if (activeView === 'scholarly_works') {
-    return (
-      <ScholarlyWorksManager
-        onBack={() => setActiveView('overview')}
-      />
-    );
-  }
+    if (activeView === 'personal_statement') {
+      return (
+        <PersonalStatementEditor
+          draft={personalStatement}
+          assignedAdvisor={assignedAdvisors[0]}
+          snapshots={context.snapshots}
+          latestFeedback={latestPSFeedback}
+          feedbackHistory={psFeedbackHistory}
+          initialViewMode={psEditorMode}
+          onNavigateToFeedback={() => setActiveView('personal_statement_feedback')}
+          onSave={(newContent) => onUpdatePersonalStatement?.(newContent)}
+          onSubmitForReview={(changelog) => {
+            onSubmitPersonalStatement?.(changelog);
+            setActiveView('overview');
+          }}
+          onBack={() => setActiveView('overview')}
+        />
+      );
+    }
 
-  if (activeView === 'school_list') {
-    return (
-      <SchoolListMatrix
-        specialty={targetSpecialty}
-        alumniResidents={alumniResidents}
-        onNavigateToAlumni={(programName) => {
-          setAlumniSearchFilter(programName);
-          setActiveView('alumni_directory');
-        }}
-        onBack={() => setActiveView('overview')}
-      />
-    );
-  }
+    if (activeView === 'experiences') {
+      const activeExpReview = context.activeReviewRequests.find(r => r.documentType === 'experience_portfolio');
+      return (
+        <ExperiencesManager
+          experiences={experiences}
+          assignedAdvisor={assignedAdvisors[0]}
+          activeReviewRequest={activeExpReview}
+          onSubmitForReview={onSubmitExperiences}
+          onSaveExperience={(id, updates) => onUpdateExperience?.(id, updates)}
+          onDeleteExperience={(id) => {}}
+          onBack={() => setActiveView('overview')}
+          targetSpecialty={targetSpecialty}
+        />
+      );
+    }
 
-  if (activeView === 'competitiveness') {
-    return (
-      <CompetitivenessCalculator
-        initialSpecialty={targetSpecialty}
-        onBack={() => setActiveView('overview')}
-      />
-    );
-  }
+    if (activeView === 'scholarly_works') {
+      return (
+        <ScholarlyWorksManager
+          onBack={() => setActiveView('overview')}
+        />
+      );
+    }
 
-  if (activeView === 'alumni_directory') {
-    return (
-      <AlumniResidentDirectory
-        studentName={student.name}
-        initialSpecialty={targetSpecialty}
-        initialSearchQuery={alumniSearchFilter}
-        alumniResidents={alumniResidents}
-        onBack={() => {
-          setAlumniSearchFilter('');
-          setActiveView('overview');
-        }}
-      />
-    );
-  }
+    if (activeView === 'school_list') {
+      return (
+        <SchoolListMatrix
+          specialty={targetSpecialty}
+          alumniResidents={alumniResidents}
+          onNavigateToAlumni={(programName) => {
+            setAlumniSearchFilter(programName);
+            setActiveView('alumni_directory');
+          }}
+          onBack={() => setActiveView('overview')}
+        />
+      );
+    }
 
-  if (activeView === 'transfer_kit') {
-    return (
-      <ErasTransferKit
-        context={context}
-        onBack={() => setActiveView('overview')}
-      />
-    );
-  }
+    if (activeView === 'competitiveness') {
+      return (
+        <CompetitivenessCalculator
+          initialSpecialty={targetSpecialty}
+          onBack={() => setActiveView('overview')}
+        />
+      );
+    }
 
-  if (activeView === 'letters') {
+    if (activeView === 'alumni_directory') {
+      return (
+        <AlumniResidentDirectory
+          studentName={student.name}
+          initialSpecialty={targetSpecialty}
+          initialSearchQuery={alumniSearchFilter}
+          alumniResidents={alumniResidents}
+          onBack={() => {
+            setAlumniSearchFilter('');
+            setActiveView('overview');
+          }}
+        />
+      );
+    }
+
+    if (activeView === 'transfer_kit') {
+      return (
+        <ErasTransferKit
+          context={context}
+          onBack={() => setActiveView('overview')}
+        />
+      );
+    }
+
+    if (activeView === 'letters') {
+      return (
+        <div className="space-y-6">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => setActiveView('overview')}
+              className="flex items-center gap-1.5 text-xs font-semibold text-[#1F3A30] hover:text-[#142720] bg-white border border-[#D6E5DF] px-3 py-1.5 rounded-lg shadow-2xs transition-colors"
+            >
+              &larr; Back to Student Hub
+            </button>
+          </div>
+          <LetterOfRecommendationTracker
+            specialty={targetSpecialty}
+            onOpenSchoolList={() => setActiveView('school_list')}
+          />
+        </div>
+      );
+    }
+
     return (
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
-          <button
-            onClick={() => setActiveView('overview')}
-            className="flex items-center gap-1.5 text-xs font-semibold text-[#1F3A30] hover:text-[#142720] bg-white border border-[#D6E5DF] px-3 py-1.5 rounded-lg shadow-2xs transition-colors"
-          >
-            &larr; Back to Student Hub
-          </button>
-        </div>
-        <LetterOfRecommendationTracker
-          specialty={targetSpecialty}
-          onOpenSchoolList={() => setActiveView('school_list')}
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div className="space-y-6">
       {/* Ethmoid Onboarding Sequence Intake Alert Banner */}
       {!advisingIntake.isCompleted && (
-        <div className="bg-[#EAF2EE] border-2 border-[#7EAE9B] rounded-2xl p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-amber-50/80 border-l-4 border-amber-600 rounded-r-2xl p-5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-[#7EAE9B] text-[#142720] flex items-center justify-center shrink-0 font-bold shadow-xs">
-              <FileCheck className="w-6 h-6" />
+            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 font-bold">
+              <FileCheck className="w-5 h-5 text-amber-700" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-[#1F3A30]">
+                <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
                   Required Advising Baseline
                 </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-200 text-amber-900">
                   Intake Incomplete
                 </span>
               </div>
-              <h3 className="text-base font-bold text-[#1F3A30] mt-0.5">
+              <h3 className="text-base font-bold text-neutral-900 mt-0.5">
                 Complete Your Specialty Advising Intake Form
               </h3>
-              <p className="text-xs text-slate-700 mt-1 max-w-2xl">
+              <p className="text-xs text-neutral-700 mt-1 max-w-2xl">
                 Grounded in the Geisinger Commonwealth School of Medicine specialty advising form. Establishes your clinical baseline,
                 verifies 7 core clerkships, discloses rotation schedules, and initializes your faculty advising relationship.
               </p>
             </div>
           </div>
           <button
-            onClick={() => setIsIntakeModalOpen(true)}
-            className="px-5 py-2.5 bg-[#1F3A30] hover:bg-[#142720] text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 shrink-0"
+            onClick={() => setActiveView('intake')}
+            className="px-5 py-2.5 bg-[#1F3A30] hover:bg-[#162D25] text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-2 shrink-0"
           >
             <span>Complete Advising Intake</span>
             <ArrowRight className="w-4 h-4 text-[#7EAE9B]" />
@@ -348,13 +390,13 @@ export function StudentPortal({
       )}
 
       {/* Student Welcome Header */}
-      <div className="bg-white rounded-xl border border-[#D6E5DF] p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white rounded-2xl border border-neutral-200/90 p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
             <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#EAF2EE] text-[#1F3A30] border border-[#7EAE9B]/30">
               MS4 Applicant
             </span>
-            <span className="text-xs text-slate-500">ERAS 2027 Cycle</span>
+            <span className="text-xs text-neutral-500">ERAS 2027 Cycle</span>
           </div>
           <div className="flex flex-wrap items-center gap-3 mt-1">
             <h1 className="text-2xl font-bold text-[#1F3A30] flex items-center gap-2">
@@ -362,7 +404,7 @@ export function StudentPortal({
               <button
                 id="edit-profile-metrics-btn"
                 onClick={() => setIsProfileModalOpen(true)}
-                className="p-1.5 text-slate-400 hover:text-[#4E8773] hover:bg-slate-100 rounded-lg transition-colors inline-flex items-center"
+                className="p-1.5 text-neutral-400 hover:text-[#4E8773] hover:bg-neutral-100 rounded-lg transition-colors inline-flex items-center"
                 title="Edit Academic & Portfolio Metrics"
                 aria-label="Edit Academic & Portfolio Metrics"
               >
@@ -372,7 +414,7 @@ export function StudentPortal({
 
             {/* Specialty Advising Form Header Action */}
             <button
-              onClick={() => setIsIntakeModalOpen(true)}
+              onClick={() => setActiveView('intake')}
               className="px-3 py-1.5 rounded-xl border border-[#7EAE9B] bg-[#EAF2EE] hover:bg-[#D6E5DF] text-[#1F3A30] text-xs font-bold flex items-center gap-2 shadow-2xs transition-colors"
               title="Open full Geisinger Specialty Advising Intake Form"
             >
@@ -389,15 +431,15 @@ export function StudentPortal({
               )}
             </button>
           </div>
-          <div className="flex flex-wrap items-center gap-2 mt-1.5 text-xs text-slate-600">
-            <label htmlFor="student-specialty-select" className="font-semibold text-slate-700 whitespace-nowrap">
+          <div className="flex flex-wrap items-center gap-2 mt-1.5 text-xs text-neutral-600">
+            <label htmlFor="student-specialty-select" className="font-semibold text-neutral-700 whitespace-nowrap">
               Target Applying Specialty:
             </label>
             <select
               id="student-specialty-select"
               value={targetSpecialty}
               onChange={(e) => handleSpecialtyChange(e.target.value)}
-              className="bg-white border border-slate-300 rounded-lg px-2.5 py-1 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500 shadow-2xs cursor-pointer hover:border-slate-400 transition-colors"
+              className="bg-white border border-neutral-300 rounded-lg px-2.5 py-1 text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#7EAE9B] shadow-2xs cursor-pointer hover:border-neutral-400 transition-colors"
             >
               {CANONICAL_SPECIALTIES.map((spec) => (
                 <option key={spec} value={spec}>
@@ -405,31 +447,31 @@ export function StudentPortal({
                 </option>
               ))}
             </select>
-            <span className="text-slate-300 hidden sm:inline">|</span>
-            <span className="text-slate-500">Medical School: <strong className="text-slate-700">Apex School of Medicine</strong></span>
+            <span className="text-neutral-300 hidden sm:inline">|</span>
+            <span className="text-neutral-500">Medical School: <strong className="text-neutral-700">Geisinger Commonwealth School of Medicine</strong></span>
           </div>
         </div>
 
         <div className="flex flex-col items-end gap-1.5 shrink-0">
           {/* Assigned Advisor Card */}
-          <div className="bg-slate-50 border border-slate-200 rounded-lg p-2.5 text-xs flex items-center gap-2.5">
+          <div className="bg-neutral-50 border border-neutral-200/80 rounded-xl p-2.5 text-xs flex items-center gap-2.5">
             <div className="w-8 h-8 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-xs">
               MC
             </div>
             <div>
-              <div className="text-[10px] text-slate-500 font-medium uppercase tracking-wider">Primary Faculty Advisor</div>
-              <div className="font-semibold text-slate-900 leading-tight">{assignedAdvisors[0]?.name || 'Dr. Marcus Chen'}</div>
-              <div className="text-[11px] text-slate-500">{assignedAdvisors[0]?.specialty} | Apex Health</div>
+              <div className="text-[10px] text-neutral-500 font-medium uppercase tracking-wider">Primary Faculty Advisor</div>
+              <div className="font-semibold text-neutral-900 leading-tight">{assignedAdvisors[0]?.name || 'Dr. Marcus Chen'}</div>
+              <div className="text-[11px] text-neutral-500">{assignedAdvisors[0]?.specialty} | Geisinger Health System</div>
             </div>
           </div>
 
-          {/* 1-Click Transfer Kit CTA (Compact under advisor card) */}
+          {/* 1-Click Transfer Kit CTA */}
           <button
             onClick={() => setActiveView('transfer_kit')}
-            className="w-full px-3 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1.5 shadow-2xs transition-all"
+            className="w-full px-3 py-1.5 bg-[#1F3A30] hover:bg-[#162D25] text-white rounded-lg text-[11px] font-semibold flex items-center justify-center gap-1.5 shadow-2xs transition-all"
             title="Export clean plain-text copy-paste blocks for MyERAS"
           >
-            <ClipboardCopy className="w-3.5 h-3.5 text-emerald-100" />
+            <ClipboardCopy className="w-3.5 h-3.5 text-[#7EAE9B]" />
             <span>1-Click ERAS Transfer Kit</span>
           </button>
         </div>
@@ -747,7 +789,7 @@ export function StudentPortal({
             </div>
             <h2 className="text-lg font-bold text-slate-900 mt-4">Alumni Resident Roster</h2>
             <p className="text-xs text-slate-600 mt-1">
-              Connect with Apex graduates training at target hospitals, browse match history, and launch outreach emails.
+              Connect with Geisinger Commonwealth graduates training at target hospitals, browse match history, and launch outreach emails.
             </p>
             <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
               <span>Match History: <strong className="text-slate-700">2022–2025</strong></span>
@@ -790,6 +832,62 @@ export function StudentPortal({
           </button>
         </div>
       </div>
+    </div>
+  );
+};
+
+  return (
+    <div className="space-y-6">
+      {/* Persistent Institutional Sub-Navigation (AAMC MyERAS / Thalamus Pattern) */}
+      <nav
+        aria-label="Applicant Sections"
+        className="bg-white rounded-2xl border border-neutral-200/90 shadow-2xs p-1.5 flex items-center gap-1 overflow-x-auto scrollbar-none"
+      >
+        {applicantNavTabs.map((tab) => {
+          const isActive =
+            activeView === tab.id ||
+            (tab.id === 'personal_statement' &&
+              (activeView === 'personal_statement' || activeView === 'personal_statement_feedback'));
+          return (
+            <button
+              key={tab.id}
+              onClick={() => {
+                if (tab.id === 'personal_statement') {
+                  setActiveView('personal_statement');
+                } else {
+                  setActiveView(tab.id as any);
+                }
+              }}
+              className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-semibold whitespace-nowrap transition-all ${
+                isActive
+                  ? 'bg-[#1F3A30] text-white shadow-xs font-bold'
+                  : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100/80'
+              }`}
+            >
+              <tab.icon className={`w-3.5 h-3.5 ${isActive ? 'text-white' : 'text-neutral-500'}`} />
+              <span>{tab.label}</span>
+              {tab.badge && (
+                <span
+                  className={`text-[9px] px-1.5 py-0.5 rounded-full font-bold ${
+                    isActive
+                      ? 'bg-white/20 text-white'
+                      : tab.badge === 'Complete'
+                      ? 'bg-emerald-100 text-emerald-800'
+                      : tab.badge === 'In Progress'
+                      ? 'bg-amber-100 text-amber-800'
+                      : 'bg-neutral-100 text-neutral-700'
+                  }`}
+                >
+                  {tab.badge}
+                </span>
+              )}
+            </button>
+          );
+        })}
+      </nav>
+
+      {/* Main Subview Content */}
+      {renderViewContent()}
 
       {/* Specialty Advising Form Modal (Geisinger Intake) */}
       <SpecialtyAdvisingFormModal

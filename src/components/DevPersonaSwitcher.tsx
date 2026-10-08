@@ -40,56 +40,66 @@ export function DevPersonaSwitcher({
   ];
 
   return (
-    <div className="bg-[#1F3A30] border-b border-[#2D5949] text-emerald-100 px-4 py-2 text-xs font-medium sticky top-0 z-50 shadow-md">
-      <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-        {/* Left: Brand & Institution Identity */}
-        <div className="flex items-center gap-3">
-          <div className="w-7 h-7 rounded-lg bg-[#264639] border border-[#7EAE9B]/40 flex items-center justify-center p-0.5 overflow-hidden shrink-0 shadow-inner">
+    <div className="sticky top-0 z-50 shadow-xs">
+      {/* Level 0: Top Demonstration Strip (Solid Dark Spruce #1F3A30) */}
+      <div className="bg-[#1F3A30] text-white py-1 px-4 text-center text-xs sm:text-[13px] font-medium tracking-wide">
+        Demonstration — fictional applicant records
+      </div>
+
+      {/* Level 1: Main Institutional Navigation Header (Pure White #FFFFFF) */}
+      <header className="bg-white border-b border-neutral-200/90">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+          {/* Left: Ethmoid Logo & School Name */}
+          <div className="flex items-center gap-3">
             <img
               src="/ethmoid-square.jpeg"
-              alt="Ethmoid"
-              className="w-full h-full object-contain filter brightness-110"
+              alt="Ethmoid logo"
+              className="h-9 w-9 object-contain"
             />
+            <div className="flex items-center gap-2.5">
+              <span className="text-xl font-bold tracking-tight text-neutral-900">
+                Ethmoid
+              </span>
+              <span className="h-4 w-px bg-neutral-300 hidden sm:block" />
+              <span className="text-xs sm:text-sm font-semibold text-neutral-600 hidden sm:block">
+                {institutionName || 'Geisinger Commonwealth School of Medicine'}
+              </span>
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <span className="font-extrabold text-white tracking-tight text-sm">
-              Ethmoid
-            </span>
-            <span className="text-[#7EAE9B] font-semibold text-[11px] hidden sm:inline">
-              &bull; {institutionName}
-            </span>
-          </div>
-          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#142720] text-[#7EAE9B] border border-[#7EAE9B]/30 tracking-wide uppercase">
-            Demonstration &bull; Fictional Records
-          </span>
-        </div>
 
-        {/* Right: Quick-switch persona buttons */}
-        <div className="flex items-center gap-2">
-          <span className="text-emerald-200/70 mr-1 text-[11px] uppercase tracking-wider hidden md:inline">
-            Active Persona:
-          </span>
-          {personas.map((p) => {
-            const isActive = currentRole === p.role;
-            return (
-              <button
-                key={p.role}
-                onClick={() => onSelectRole(p.role)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all ${
-                  isActive
-                    ? 'bg-[#7EAE9B] text-[#142720] border-[#7EAE9B] font-bold shadow-sm'
-                    : 'bg-[#264639] hover:bg-[#2D5949] text-emerald-100 border-[#2D5949] hover:text-white'
-                }`}
-                title={`Switch to ${p.title}`}
-              >
-                {p.icon}
-                <span>{p.name}</span>
-                <span className="text-[10px] opacity-75 hidden lg:inline">({p.title})</span>
-              </button>
-            );
-          })}
+          {/* Right: Institutional Persona Quick-Switcher */}
+          <div className="flex items-center gap-1.5 sm:gap-2">
+            <span className="text-neutral-400 text-[11px] font-medium uppercase tracking-wider hidden md:inline mr-1">
+              Active Persona:
+            </span>
+            <div className="flex items-center bg-neutral-100 p-1 rounded-xl border border-neutral-200/80">
+              {personas.map((p) => {
+                const isActive = currentRole === p.role;
+                return (
+                  <button
+                    key={p.role}
+                    onClick={() => onSelectRole(p.role)}
+                    className={`flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                      isActive
+                        ? 'bg-[#1F3A30] text-white shadow-xs font-bold'
+                        : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
+                    }`}
+                    title={`Switch view to ${p.name} (${p.title})`}
+                  >
+                    <span className={isActive ? 'text-white' : 'text-neutral-500'}>
+                      {p.icon}
+                    </span>
+                    <span className="hidden sm:inline">{p.name.split(' ')[0]}</span>
+                    <span className="text-[10px] opacity-80 hidden lg:inline">
+                      ({p.title.split(' ')[0]})
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
         </div>
-      </div>
+      </header>
     </div>
   );
 }
