@@ -16,6 +16,7 @@ import { SpecialtySwitchingSafetyModal } from './SpecialtySwitchingSafetyModal';
 import { AlumniResidentDirectory } from './AlumniResidentDirectory';
 import { ErasTransferKit } from './ErasTransferKit';
 import { StudentDashboardHome } from './StudentDashboardHome';
+import { ProfileManagementView } from './ProfileManagementView';
 import {
   CANONICAL_SPECIALTIES,
   getStoredTargetSpecialty,
@@ -88,6 +89,7 @@ export function StudentPortal({
 }: StudentPortalProps) {
   const [activeView, setActiveView] = useState<
     | 'overview'
+    | 'profile'
     | 'intake'
     | 'personal_statement'
     | 'personal_statement_feedback'
@@ -117,7 +119,7 @@ export function StudentPortal({
     student.specialty || 'Internal Medicine'
   );
 
-  // Sync client-persisted localStorage after hydration mount
+  // Sync client-persisted localStorage after hydration mount and listen for custom nav events
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedSpec = getStoredTargetSpecialty();
@@ -129,6 +131,20 @@ export function StudentPortal({
         setAdvisingIntake(storedIntake);
       }
     }
+
+    const handleNavProfile = () => setActiveView('profile');
+    const handleNavTransfer = () => setActiveView('transfer_kit');
+    const handleNavIntake = () => setActiveView('intake');
+
+    window.addEventListener('navigate_to_profile_management', handleNavProfile);
+    window.addEventListener('navigate_to_transfer_kit', handleNavTransfer);
+    window.addEventListener('navigate_to_intake', handleNavIntake);
+
+    return () => {
+      window.removeEventListener('navigate_to_profile_management', handleNavProfile);
+      window.removeEventListener('navigate_to_transfer_kit', handleNavTransfer);
+      window.removeEventListener('navigate_to_intake', handleNavIntake);
+    };
   }, [student.id]);
 
   const handleSpecialtyChange = (newSpecialty: string) => {
@@ -210,6 +226,7 @@ export function StudentPortal({
   const getMainTabForView = (view: typeof activeView): MainTabKey => {
     switch (view) {
       case 'overview':
+      case 'profile':
         return 'dashboard';
       case 'school_list':
       case 'intake':
@@ -449,6 +466,22 @@ export function StudentPortal({
       );
     }
 
+    if (activeView === 'profile') {
+      const assignedAdvisor = assignedAdvisors && assignedAdvisors.length > 0 ? assignedAdvisors[0] : undefined;
+      return (
+        <ProfileManagementView
+          student={student}
+          targetSpecialty={targetSpecialty}
+          onSpecialtyChange={handleSpecialtyChange}
+          advisingIntake={advisingIntake}
+          onOpenIntake={() => setIsIntakeModalOpen(true)}
+          onOpenTransferKit={() => setActiveView('transfer_kit')}
+          onBack={() => setActiveView('overview')}
+          assignedAdvisor={assignedAdvisor}
+        />
+      );
+    }
+
     return (
       <StudentDashboardHome
         context={context}
@@ -457,7 +490,7 @@ export function StudentPortal({
         onSpecialtyChange={handleSpecialtyChange}
         advisingIntake={advisingIntake}
         onOpenIntake={() => setIsIntakeModalOpen(true)}
-        onOpenProfile={() => setIsProfileModalOpen(true)}
+        onOpenProfile={() => setActiveView('profile')}
         personalStatement={personalStatement}
         latestPSFeedback={latestPSFeedback}
         experiences={experiences}

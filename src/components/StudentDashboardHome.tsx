@@ -8,14 +8,12 @@ import {
   DocumentFeedbackSummary,
   StudentDashboardContext,
 } from '@/domain/types';
-import { OrderTracker } from './OrderTracker';
 import { SpecialtyAdvisingIntake } from '@/domain/advising-intake-models';
 import {
   CANONICAL_SPECIALTIES,
   SPECIALTY_SIGNALING_RULES,
   SchoolListItem,
   loadItemsForSpecialty,
-  getStoredApplicantStep2Ck,
 } from '@/domain/school-list-models';
 import {
   LetterWriterRequest,
@@ -24,6 +22,12 @@ import {
   saveLetterWriterRequests,
   INITIAL_MOCK_LETTER_WRITERS,
 } from '@/domain/lor-models';
+import {
+  ExperienceJournalEntry,
+  loadExperienceJournalEntries,
+  saveExperienceJournalEntries,
+  INITIAL_MOCK_JOURNAL_ENTRIES,
+} from '@/domain/experience-journal-models';
 import {
   Compass,
   FileText,
@@ -54,6 +58,8 @@ import {
   Star,
   Pencil,
   FileCheck,
+  Copy,
+  BookOpen,
 } from 'lucide-react';
 
 interface StudentDashboardHomeProps {
@@ -75,6 +81,7 @@ interface StudentDashboardHomeProps {
     view:
       | 'overview'
       | 'intake'
+      | 'profile'
       | 'competitiveness'
       | 'school_list'
       | 'personal_statement'
@@ -108,14 +115,10 @@ export function StudentDashboardHome({
   onOpenSplitCanvas,
   alumniResidents,
 }: StudentDashboardHomeProps) {
-  // LOR State - Initial state uses INITIAL_MOCK_LETTER_WRITERS so SSR and client initial hydration render match byte-for-byte
+  // LOR State - Initial state uses INITIAL_MOCK_LETTER_WRITERS for identical SSR
   const [writers, setWriters] = useState<LetterWriterRequest[]>(INITIAL_MOCK_LETTER_WRITERS);
   const [isAddWriterModalOpen, setIsAddWriterModalOpen] = useState(false);
   const [editingWriterId, setEditingWriterId] = useState<string | null>(null);
-
-  useEffect(() => {
-    setWriters(loadLetterWriterRequests());
-  }, []);
 
   // Modal fields for LOR
   const [writerName, setWriterName] = useState('');
@@ -127,13 +130,18 @@ export function StudentDashboardHome({
   const [writerStatus, setWriterStatus] = useState<LetterRequestStatus>('asked');
   const [writerNotes, setWriterNotes] = useState('');
 
-  // Quick Experience Journal State
-  const [quickExpTitle, setQuickExpTitle] = useState('');
-  const [quickExpType, setQuickExpType] = useState('Patient Care');
-  const [quickExpOrg, setQuickExpOrg] = useState('');
-  const [quickExpDesc, setQuickExpDesc] = useState('');
-  const [quickExpMeaningful, setQuickExpMeaningful] = useState(false);
+  // Experience Journal Repository State (Completely decoupled from official 10 experiences)
+  const [journalEntries, setJournalEntries] = useState<ExperienceJournalEntry[]>(INITIAL_MOCK_JOURNAL_ENTRIES);
+  const [quickJournalTitle, setQuickJournalTitle] = useState('');
+  const [quickJournalCategory, setQuickJournalCategory] = useState<
+    'Clinical Encounter' | 'Patient Advocacy' | 'Research Breakthrough' | 'Teaching & Mentorship' | 'Leadership Moment' | 'Personal Reflection'
+  >('Clinical Encounter');
+  const [quickJournalSetting, setQuickJournalSetting] = useState('');
+  const [quickJournalObservation, setQuickJournalObservation] = useState('');
+  const [quickJournalTakeaway, setQuickJournalTakeaway] = useState('');
+  const [quickJournalKeyMemory, setQuickJournalKeyMemory] = useState(false);
   const [journalSuccessMessage, setJournalSuccessMessage] = useState<string | null>(null);
+  const [copiedJournalId, setCopiedJournalId] = useState<string | null>(null);
 
   // School List Preview State
   const [savedPrograms, setSavedPrograms] = useState<SchoolListItem[]>([]);
@@ -142,16 +150,13 @@ export function StudentDashboardHome({
 
   const specialtyRule = SPECIALTY_SIGNALING_RULES[targetSpecialty] || SPECIALTY_SIGNALING_RULES['Internal Medicine'];
 
-  // Load programs for the current specialty
+  // Client-side synchronization in useEffect to prevent hydration mismatches
   useEffect(() => {
+    setWriters(loadLetterWriterRequests());
+    setJournalEntries(loadExperienceJournalEntries(student.id));
     const progs = loadItemsForSpecialty(targetSpecialty);
     setSavedPrograms(progs);
-  }, [targetSpecialty]);
-
-  // Synchronize writers whenever storage updates or mounts
-  const refreshWriters = () => {
-    setWriters(loadLetterWriterRequests());
-  };
+  }, [student.id, targetSpecialty]);
 
   const handleOpenAddWriter = () => {
     setEditingWriterId(null);
@@ -220,37 +225,47 @@ export function StudentDashboardHome({
     saveLetterWriterRequests(updated);
   };
 
-  // Quick experience logging handler
-  const handleLogQuickExperience = (e: React.FormEvent) => {
+  // Dedicated Experience Journal save handler (does NOT mutate official 10 experiences)
+  const handleSaveJournalEntry = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!quickExpTitle.trim() || !quickExpDesc.trim()) return;
+    if (!quickJournalTitle.trim() || !quickJournalObservation.trim()) return;
 
-    const newId = `exp-${Date.now()}`;
-    const newEntry: Partial<ExperienceDraft> = {
-      id: newId,
+    const newEntry: ExperienceJournalEntry = {
+      id: `journal-${Date.now()}`,
       studentId: student.id,
-      title: quickExpTitle.trim(),
-      orgName: quickExpOrg.trim() || 'Geisinger Health System',
-      roleName: 'Student Clinician / Contributor',
-      experienceType: quickExpType,
-      frequency: 'Weekly',
-      startDate: new Date().toISOString().slice(0, 10),
-      isCurrent: true,
-      descriptionText: quickExpDesc.trim(),
-      isMostMeaningful: quickExpMeaningful,
+      title: quickJournalTitle.trim(),
+      category: quickJournalCategory,
+      date: new Date().toISOString().slice(0, 10),
+      setting: quickJournalSetting.trim() || 'Geisinger Health System',
+      notableObservation: quickJournalObservation.trim(),
+      keyTakeaway: quickJournalTakeaway.trim(),
+      isKeyMemory: quickJournalKeyMemory,
+      createdAt: new Date().toISOString(),
     };
 
-    onUpdateExperience?.(newId, newEntry);
+    const updated = [newEntry, ...journalEntries];
+    setJournalEntries(updated);
+    saveExperienceJournalEntries(student.id, updated);
 
-    setJournalSuccessMessage(`Successfully recorded "${quickExpTitle.trim()}" in your portfolio!`);
-    setQuickExpTitle('');
-    setQuickExpOrg('');
-    setQuickExpDesc('');
-    setQuickExpMeaningful(false);
+    setJournalSuccessMessage(`Saved "${quickJournalTitle.trim()}" to your Experience Journal bank!`);
+    setQuickJournalTitle('');
+    setQuickJournalSetting('');
+    setQuickJournalObservation('');
+    setQuickJournalTakeaway('');
+    setQuickJournalKeyMemory(false);
 
     setTimeout(() => {
       setJournalSuccessMessage(null);
     }, 4000);
+  };
+
+  const handleCopyJournalText = (entry: ExperienceJournalEntry) => {
+    const textToCopy = `Title: ${entry.title}\nSetting: ${entry.setting}\nCategory: ${entry.category}\nObservation: ${entry.notableObservation}\nKey Takeaway: ${entry.keyTakeaway}`;
+    if (navigator?.clipboard) {
+      navigator.clipboard.writeText(textToCopy);
+      setCopiedJournalId(entry.id);
+      setTimeout(() => setCopiedJournalId(null), 2500);
+    }
   };
 
   // Stage labels mapping
@@ -285,154 +300,42 @@ export function StudentDashboardHome({
   const silverUsed = savedPrograms.filter((p) => p.signal === 'silver').length;
 
   return (
-    <div className="space-y-6">
-      {/* 1. Ethmoid Advising Intake Required Alert Banner */}
-      {!advisingIntake.isCompleted && (
-        <div className="bg-amber-50/90 border-l-4 border-amber-600 rounded-r-2xl p-5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex items-start gap-3.5">
-            <div className="w-10 h-10 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0 font-bold">
-              <FileCheck className="w-5 h-5 text-amber-700" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-amber-900">
-                  Required Advising Baseline
-                </span>
-                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-200 text-amber-900">
-                  Intake Incomplete
-                </span>
-              </div>
-              <h3 className="text-base font-bold text-neutral-900 mt-0.5">
-                Complete Your Specialty Advising Intake Form
-              </h3>
-              <p className="text-xs text-neutral-700 mt-1 max-w-2xl">
-                Grounded in the Geisinger Commonwealth School of Medicine specialty advising form. Establishes your clinical baseline,
-                verifies 7 core clerkships, discloses rotation schedules, and initializes your faculty advising relationship.
-              </p>
-            </div>
-          </div>
-          <button
-            onClick={onOpenIntake}
-            className="px-5 py-2.5 bg-[#1F3A30] hover:bg-[#162D25] text-white font-bold text-xs rounded-xl shadow-xs transition-all flex items-center gap-2 shrink-0 cursor-pointer"
-          >
-            <span>Complete Advising Intake</span>
-            <ChevronRight className="w-4 h-4 text-[#7EAE9B]" />
-          </button>
-        </div>
-      )}
-
-      {/* 2. Welcome Bar & Target Specialty Selector */}
-      <div className="bg-white rounded-2xl border border-neutral-200/90 p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#EAF2EE] text-[#1F3A30] border border-[#7EAE9B]/30">
-              MS4 Applicant
-            </span>
-            <span className="text-xs text-neutral-500">ERAS 2027 Match Cycle</span>
-          </div>
-          <div className="flex flex-wrap items-center gap-3 mt-1.5">
-            <h1 className="text-xl sm:text-2xl font-bold text-[#1F3A30] flex items-center gap-2">
-              <span>Welcome back, {student.name.split(' ')[0]}</span>
-              <button
-                id="edit-profile-metrics-btn"
-                onClick={onOpenProfile}
-                className="p-1.5 text-neutral-400 hover:text-[#4E8773] hover:bg-neutral-100 rounded-lg transition-colors inline-flex items-center cursor-pointer"
-                title="Edit Academic & Portfolio Metrics"
-                aria-label="Edit Academic & Portfolio Metrics"
-              >
-                <Pencil className="w-4 h-4" />
-              </button>
-            </h1>
-
-            {/* Specialty Advising Form Button */}
-            <button
-              onClick={onOpenIntake}
-              className="px-3 py-1 rounded-xl border border-[#7EAE9B] bg-[#EAF2EE] hover:bg-[#D6E5DF] text-[#1F3A30] text-xs font-bold flex items-center gap-1.5 shadow-2xs transition-colors cursor-pointer"
-            >
-              <FileText className="w-3.5 h-3.5 text-[#4E8773]" />
-              <span>Specialty Advising Form</span>
-              {advisingIntake.isCompleted ? (
-                <span className="px-1.5 py-0.2 rounded text-[10px] bg-emerald-100 text-emerald-800 font-extrabold flex items-center gap-1">
-                  <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Complete
-                </span>
-              ) : (
-                <span className="px-1.5 py-0.2 rounded text-[10px] bg-amber-100 text-amber-800 font-extrabold">
-                  In Progress
-                </span>
-              )}
-            </button>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-2 mt-2 text-xs text-neutral-600">
-            <label htmlFor="student-specialty-select-home" className="font-semibold text-neutral-700 whitespace-nowrap">
-              Target Applying Specialty:
-            </label>
-            <select
-              id="student-specialty-select-home"
-              value={targetSpecialty}
-              onChange={(e) => onSpecialtyChange(e.target.value)}
-              className="bg-white border border-neutral-300 rounded-lg px-2.5 py-1 text-xs font-bold text-neutral-900 focus:outline-none focus:ring-2 focus:ring-[#7EAE9B] shadow-2xs cursor-pointer hover:border-neutral-400 transition-colors"
-            >
-              {CANONICAL_SPECIALTIES.map((spec) => (
-                <option key={spec} value={spec}>
-                  {spec}
-                </option>
-              ))}
-            </select>
-            <span className="text-neutral-300 hidden sm:inline">|</span>
-            <span className="text-neutral-500">
-              Institution: <strong className="text-neutral-700">Geisinger Commonwealth School of Medicine</strong>
-            </span>
-          </div>
+    <div className="space-y-5">
+      {/* 1. Abbreviated ERAS 2027 Key Deadlines Strip (High up near top, right below middle nav) */}
+      <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-2xs px-4 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
+        <div className="flex items-center gap-2 text-neutral-900 font-bold shrink-0">
+          <Calendar className="w-4 h-4 text-[#1F3A30]" />
+          <span>ERAS 2027 Season Milestones:</span>
         </div>
 
-        {/* Quick Action Badges */}
-        <div className="flex flex-wrap sm:flex-col items-start sm:items-end gap-2 shrink-0">
-          <div className="bg-neutral-50 border border-neutral-200/80 rounded-xl px-3 py-2 text-xs flex items-center gap-2.5">
-            <div className="w-7 h-7 rounded-full bg-[#1F3A30] text-white flex items-center justify-center font-bold text-xs">
-              MC
-            </div>
-            <div>
-              <div className="text-[10px] text-neutral-500 font-medium uppercase tracking-wider">Assigned Advisor</div>
-              <div className="font-semibold text-neutral-900 leading-tight">
-                {assignedAdvisors[0]?.name || 'Dr. Marcus Chen, MD'}
-              </div>
-            </div>
+        <div className="flex items-center gap-3 sm:gap-6 flex-wrap text-[11px]">
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
+            <span className="text-neutral-500">ERAS Tokens:</span>
+            <span className="font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.2 rounded">Active (Open)</span>
           </div>
 
-          <button
-            onClick={() => onNavigate('transfer_kit')}
-            className="px-3.5 py-2 bg-[#1F3A30] hover:bg-[#162D25] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
-          >
-            <Sparkles className="w-3.5 h-3.5 text-[#7EAE9B]" />
-            <span>1-Click ERAS Transfer Kit</span>
-          </button>
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span className="text-neutral-500">Submission Target:</span>
+            <strong className="text-neutral-900">Sep 24, 2026</strong>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+            <span className="text-neutral-500">MSPE Release:</span>
+            <strong className="text-neutral-900">Oct 1, 2026</strong>
+          </div>
+
+          <div className="flex items-center gap-1.5">
+            <span className="w-2 h-2 rounded-full bg-purple-500"></span>
+            <span className="text-neutral-500">Match Day:</span>
+            <strong className="text-neutral-900">Mar 19, 2027</strong>
+          </div>
         </div>
       </div>
 
-      {/* 5-Stage Personal Statement Review Pipeline & Multi-Part Progress Tracker */}
-      {(() => {
-        const psReview = context.activeReviewRequests?.find((r) => r.documentType === 'personal_statement');
-        return (
-          <OrderTracker
-            currentStage={personalStatement.stage}
-            submittedAt={psReview?.submittedAt}
-            inReviewAt={psReview?.inReviewAt}
-            completedAt={psReview?.completedAt}
-            personalStatementChars={personalStatement.content.length}
-            personalStatementVersion={personalStatement.currentVersionNumber}
-            experiencesCount={experiences.length}
-            experiencesMeaningfulCount={experiences.filter((e) => e.isMostMeaningful).length}
-            scholarlyCount={scholarlyStats.count}
-            scholarlyMeaningfulCount={scholarlyStats.meaningful}
-            schoolListCount={schoolListStats.count}
-            schoolListSignalsAssigned={schoolListStats.signalsAssigned}
-            schoolListSignalsBudget={specialtyRule.totalSignals}
-          />
-        );
-      })()}
-
-      {/* Faculty Feedback Action Banner */}
+      {/* 2. Faculty Feedback Action Banner (if revisions requested or endorsed) */}
       {latestPSFeedback && (personalStatement.stage === 'revisions_requested' || personalStatement.stage === 'endorsed') && (
         <div
           id="faculty-feedback-alert-banner"
@@ -524,7 +427,10 @@ export function StudentDashboardHome({
                     <Compass className="w-4 h-4 text-[#1F3A30]" />
                     <span>Program List &amp; Signaling Tracker</span>
                   </h2>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 font-semibold" suppressHydrationWarning>
+                  <span
+                    className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 font-semibold"
+                    suppressHydrationWarning
+                  >
                     {savedPrograms.length} saved
                   </span>
                 </div>
@@ -535,11 +441,17 @@ export function StudentDashboardHome({
 
               {/* Signals summary badges */}
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs px-2.5 py-1 rounded-lg bg-amber-50 text-amber-900 border border-amber-200/80 font-bold flex items-center gap-1" suppressHydrationWarning>
+                <span
+                  className="text-xs px-2.5 py-1 rounded-lg bg-amber-50 text-amber-900 border border-amber-200/80 font-bold flex items-center gap-1"
+                  suppressHydrationWarning
+                >
                   <span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
                   Gold: {goldUsed} / {specialtyRule.goldSignals}
                 </span>
-                <span className="text-xs px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-200 font-bold flex items-center gap-1" suppressHydrationWarning>
+                <span
+                  className="text-xs px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-200 font-bold flex items-center gap-1"
+                  suppressHydrationWarning
+                >
                   <span className="w-2 h-2 rounded-full bg-slate-400 inline-block"></span>
                   Silver: {silverUsed} / {specialtyRule.silverSignals}
                 </span>
@@ -673,25 +585,27 @@ export function StudentDashboardHome({
             )}
           </div>
 
-          {/* Card B: Quick Experience Journal / Log (Requirement 1 - Low effort home journaling) */}
+          {/* Card B: Remarkable Experiences Journal & Clinical Moments Repository (Separate Feature) */}
           <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-neutral-100">
               <div>
-                <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
-                  <Briefcase className="w-4 h-4 text-[#1F3A30]" />
-                  <span>Quick Experience Journal</span>
-                </h2>
+                <div className="flex items-center gap-2">
+                  <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
+                    <BookOpen className="w-4 h-4 text-[#1F3A30]" />
+                    <span>Experience Journal &amp; Clinical Moments Bank</span>
+                  </h2>
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
+                    Repository ({journalEntries.length} entries)
+                  </span>
+                </div>
                 <p className="text-xs text-neutral-500 mt-0.5">
-                  Low-friction capture for clinical encounters, research milestones, and leadership moments.
+                  Private scratchpad for capturing remarkable patient encounters, leadership moments, and raw observations for future reference.
                 </p>
               </div>
-              <button
-                onClick={() => onNavigate('experiences')}
-                className="text-xs text-[#1F3A30] hover:text-[#142720] font-bold flex items-center gap-1 hover:underline cursor-pointer"
-              >
-                <span>Full Portfolio ({experiences.length}/10)</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
+
+              <span className="text-[11px] text-neutral-400 italic">
+                Independent scratchpad &bull; reference anytime
+              </span>
             </div>
 
             {journalSuccessMessage && (
@@ -701,51 +615,51 @@ export function StudentDashboardHome({
               </div>
             )}
 
-            {/* Low-effort journal form */}
-            <form onSubmit={handleLogQuickExperience} className="mt-4 space-y-3.5">
+            {/* Low-effort journal entry form */}
+            <form onSubmit={handleSaveJournalEntry} className="mt-4 space-y-3.5">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                    Activity / Experience Title *
+                    Encounter / Moment Title *
                   </label>
                   <input
                     type="text"
                     required
-                    placeholder="e.g. ICU Night Float Sub-I Patient Advocate"
-                    value={quickExpTitle}
-                    onChange={(e) => setQuickExpTitle(e.target.value)}
+                    placeholder="e.g. Bedside discussion with pulmonary hypertension patient"
+                    value={quickJournalTitle}
+                    onChange={(e) => setQuickJournalTitle(e.target.value)}
                     className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B]"
                   />
                 </div>
 
                 <div>
                   <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                    Experience Type
+                    Category Tag
                   </label>
                   <select
-                    value={quickExpType}
-                    onChange={(e) => setQuickExpType(e.target.value)}
+                    value={quickJournalCategory}
+                    onChange={(e) => setQuickJournalCategory(e.target.value as any)}
                     className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B] cursor-pointer"
                   >
-                    <option value="Patient Care">Clinical / Patient Care</option>
-                    <option value="Research">Research &amp; Scholarly Work</option>
-                    <option value="Education/Teaching">Education / Teaching</option>
-                    <option value="Volunteer/Community Service">Volunteer / Community Service</option>
-                    <option value="Extracurricular Activities">Extracurricular &amp; Leadership</option>
-                    <option value="Work">Employment / Work</option>
+                    <option value="Clinical Encounter">Clinical Encounter</option>
+                    <option value="Patient Advocacy">Patient Advocacy</option>
+                    <option value="Research Breakthrough">Research Breakthrough</option>
+                    <option value="Teaching & Mentorship">Teaching &amp; Mentorship</option>
+                    <option value="Leadership Moment">Leadership Moment</option>
+                    <option value="Personal Reflection">Personal Reflection</option>
                   </select>
                 </div>
               </div>
 
               <div>
                 <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                  Setting / Organization
+                  Hospital / Clinical Setting
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Geisinger Community Medical Center (Scranton)"
-                  value={quickExpOrg}
-                  onChange={(e) => setQuickExpOrg(e.target.value)}
+                  placeholder="e.g. GMC Danville MICU / Scranton Regional Campus"
+                  value={quickJournalSetting}
+                  onChange={(e) => setQuickJournalSetting(e.target.value)}
                   className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B]"
                 />
               </div>
@@ -753,16 +667,29 @@ export function StudentDashboardHome({
               <div>
                 <div className="flex items-center justify-between mb-1">
                   <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider">
-                    Quick Reflection / Key Observation *
+                    Notable Observation &amp; Bedside Narrative *
                   </label>
-                  <span className="text-[10px] text-neutral-400">Low pressure &bull; polish anytime</span>
+                  <span className="text-[10px] text-neutral-400">Raw memory &bull; capture before you forget</span>
                 </div>
                 <textarea
                   rows={2}
                   required
-                  placeholder="Capture a brief 1-3 sentence clinical encounter, impact, or takeaway while it's fresh in your mind..."
-                  value={quickExpDesc}
-                  onChange={(e) => setQuickExpDesc(e.target.value)}
+                  placeholder="What specifically happened? What patient dynamic, procedural insight, or clinical nuance stood out?"
+                  value={quickJournalObservation}
+                  onChange={(e) => setQuickJournalObservation(e.target.value)}
+                  className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B]"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
+                  Key Takeaway / Why This Matters for Specialty Choice
+                </label>
+                <input
+                  type="text"
+                  placeholder="e.g. Reinforced passion for high-acuity physiology and empathetic family counseling."
+                  value={quickJournalTakeaway}
+                  onChange={(e) => setQuickJournalTakeaway(e.target.value)}
                   className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B]"
                 />
               </div>
@@ -771,11 +698,11 @@ export function StudentDashboardHome({
                 <label className="flex items-center gap-2 cursor-pointer text-xs text-neutral-700">
                   <input
                     type="checkbox"
-                    checked={quickExpMeaningful}
-                    onChange={(e) => setQuickExpMeaningful(e.target.checked)}
+                    checked={quickJournalKeyMemory}
+                    onChange={(e) => setQuickJournalKeyMemory(e.target.checked)}
                     className="w-4 h-4 rounded text-[#1F3A30] focus:ring-[#7EAE9B] cursor-pointer"
                   />
-                  <span>Mark as prospective <strong>Most Meaningful</strong> reflection</span>
+                  <span>Star as <strong>Pivotal Career Memory</strong></span>
                 </label>
 
                 <button
@@ -783,42 +710,63 @@ export function StudentDashboardHome({
                   className="px-4 py-2 bg-[#1F3A30] hover:bg-[#162D25] text-white font-bold text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Log Experience</span>
+                  <span>Save to Journal Repository</span>
                 </button>
               </div>
             </form>
 
-            {/* Recent 3 Logged Experiences Snapshot */}
-            {experiences.length > 0 && (
+            {/* Saved Journal Entries Bank */}
+            {journalEntries.length > 0 && (
               <div className="mt-5 pt-4 border-t border-neutral-100">
-                <div className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2.5">
-                  Recently Logged Entries ({experiences.length} total)
+                <div className="flex items-center justify-between mb-2.5">
+                  <div className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">
+                    Stored Journal Entries ({journalEntries.length})
+                  </div>
+                  <span className="text-[10px] text-neutral-400">
+                    Use these to draft official 750-char MyERAS descriptions
+                  </span>
                 </div>
-                <div className="space-y-2">
-                  {experiences.slice(0, 3).map((exp) => (
+
+                <div className="space-y-2.5">
+                  {journalEntries.slice(0, 3).map((entry) => (
                     <div
-                      key={exp.id}
-                      className="p-3 bg-neutral-50/80 hover:bg-neutral-100/70 border border-neutral-200/70 rounded-xl text-xs flex items-center justify-between gap-3 transition-colors"
+                      key={entry.id}
+                      className="p-3 bg-[#FBFBFA] border border-neutral-200/70 rounded-xl text-xs space-y-1.5 hover:border-neutral-300 transition-colors"
                     >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span className="font-semibold text-neutral-900 truncate">{exp.title}</span>
-                          {exp.isMostMeaningful && (
-                            <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800">
-                              ★ Meaningful
-                            </span>
-                          )}
+                      <div className="flex items-start justify-between gap-2">
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <span className="font-bold text-neutral-900">{entry.title}</span>
+                            {entry.isKeyMemory && (
+                              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800">
+                                ★ Pivotal
+                              </span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-neutral-500 mt-0.5">
+                            {entry.setting} &bull; <strong className="text-neutral-700">{entry.category}</strong> &bull; {entry.date}
+                          </div>
                         </div>
-                        <p className="text-[11px] text-neutral-500 truncate mt-0.5">
-                          {exp.orgName} &bull; {exp.experienceType}
-                        </p>
+
+                        <button
+                          onClick={() => handleCopyJournalText(entry)}
+                          className="px-2 py-1 bg-white hover:bg-neutral-100 border border-neutral-200 rounded-lg text-[10px] font-semibold text-neutral-700 flex items-center gap-1 shrink-0 cursor-pointer shadow-2xs"
+                          title="Copy raw observation text to clipboard for MyERAS drafting"
+                        >
+                          <Copy className="w-3 h-3" />
+                          <span>{copiedJournalId === entry.id ? 'Copied!' : 'Copy'}</span>
+                        </button>
                       </div>
-                      <button
-                        onClick={() => onNavigate('experiences')}
-                        className="text-[11px] font-semibold text-[#1F3A30] hover:underline shrink-0 cursor-pointer"
-                      >
-                        Edit &rarr;
-                      </button>
+
+                      <p className="text-neutral-700 text-[11px] line-clamp-2 leading-relaxed">
+                        {entry.notableObservation}
+                      </p>
+
+                      {entry.keyTakeaway && (
+                        <div className="text-[10px] text-neutral-500 italic bg-white p-1.5 rounded-lg border border-neutral-100">
+                          <strong>Takeaway:</strong> {entry.keyTakeaway}
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>
@@ -826,7 +774,7 @@ export function StudentDashboardHome({
             )}
           </div>
 
-          {/* Card C: Personal Statement Draft Preview (Requirement 5 - Live text excerpt & reminder) */}
+          {/* Card C: Personal Statement Draft Preview & Excerpt */}
           <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-neutral-100">
               <div>
@@ -898,108 +846,7 @@ export function StudentDashboardHome({
 
         {/* ==================== RIGHT SIDEBAR COLUMN (Col 8 to 12) ==================== */}
         <div className="lg:col-span-5 xl:col-span-4 space-y-6">
-          {/* Card D: Letters of Recommendation Tracker (Requirement 2 - Writers list & inline add) */}
-          <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-5">
-            <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
-              <div>
-                <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
-                  <MailCheck className="w-4 h-4 text-[#1F3A30]" />
-                  <span>Letters of Recommendation</span>
-                </h2>
-                <div className="text-xs text-neutral-500 mt-0.5" suppressHydrationWarning>
-                  {writers.filter((w) => w.status === 'submitted').length} of {writers.length} submitted
-                </div>
-              </div>
-              <button
-                onClick={handleOpenAddWriter}
-                className="px-2.5 py-1.5 bg-[#1F3A30] hover:bg-[#162D25] text-white rounded-xl text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Add Writer</span>
-              </button>
-            </div>
-
-            {/* Advising Tip Box */}
-            <div className="mt-3.5 p-3 bg-amber-50/80 border border-amber-200/80 rounded-xl text-xs text-amber-950 flex items-start gap-2">
-              <Sparkles className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-              <p className="leading-tight text-[11px]">
-                <strong>Geisinger Rule of Thumb:</strong> Target 3–4 letters by July 15. Ensure at least one Sub-I
-                attending letter in {targetSpecialty}.
-              </p>
-            </div>
-
-            {/* Writer List */}
-            <div className="mt-4 space-y-2.5">
-              {writers.length === 0 ? (
-                <div className="py-6 text-center text-xs text-neutral-400">
-                  No letter writers added yet. Click &quot;Add Writer&quot; above.
-                </div>
-              ) : (
-                writers.map((w) => (
-                  <div
-                    key={w.id}
-                    className="p-3 bg-neutral-50 border border-neutral-200/70 rounded-xl text-xs hover:border-neutral-300 transition-colors"
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <div className="font-bold text-neutral-900">{w.writerName}</div>
-                        <div className="text-[11px] text-neutral-500 leading-tight">
-                          {w.writerTitle} &bull; {w.institution}
-                        </div>
-                        <span className="mt-1 inline-block text-[10px] px-1.5 py-0.2 rounded bg-neutral-200/70 text-neutral-700 font-medium">
-                          {w.letterType}
-                        </span>
-                      </div>
-                      <button
-                        onClick={() => handleOpenEditWriter(w)}
-                        className="text-neutral-400 hover:text-neutral-700 p-1 cursor-pointer"
-                        title="Edit writer details"
-                      >
-                        <Edit2 className="w-3 h-3" />
-                      </button>
-                    </div>
-
-                    {/* Status Pill Selector */}
-                    <div className="mt-2.5 pt-2 border-t border-neutral-200/60 flex items-center justify-between">
-                      <span className="text-[10px] text-neutral-400 uppercase tracking-wider font-semibold">
-                        Status:
-                      </span>
-                      <select
-                        value={w.status}
-                        onChange={(e) => handleQuickStatusChange(w.id, e.target.value as LetterRequestStatus)}
-                        className={`text-[10px] font-bold rounded-lg px-2 py-0.5 border cursor-pointer ${
-                          w.status === 'submitted'
-                            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
-                            : w.status === 'initiated_eras'
-                            ? 'bg-blue-100 text-blue-800 border-blue-300'
-                            : w.status === 'asked'
-                            ? 'bg-amber-100 text-amber-800 border-amber-300'
-                            : 'bg-neutral-100 text-neutral-700 border-neutral-300'
-                        }`}
-                      >
-                        <option value="pending_ask">Pending Ask</option>
-                        <option value="asked">Asked</option>
-                        <option value="initiated_eras">Initiated in ERAS</option>
-                        <option value="submitted">Submitted to ERAS</option>
-                      </select>
-                    </div>
-                  </div>
-                ))
-              )}
-            </div>
-
-            <div className="mt-4 pt-3 border-t border-neutral-100 text-center">
-              <button
-                onClick={() => onNavigate('letters')}
-                className="text-xs text-[#1F3A30] hover:text-[#142720] font-bold hover:underline flex items-center justify-center gap-1 mx-auto cursor-pointer"
-              >
-                <span>Audit Program Letter Gaps &amp; Requirements</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Card E: Institutional Advising & Deans Contact Directory (Requirement 4) */}
+          {/* Card D: Geisinger Advising Leadership Directory (Moved to TOP of Sidebar as requested) */}
           <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-5">
             <div className="pb-3 border-b border-neutral-100">
               <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
@@ -1117,37 +964,104 @@ export function StudentDashboardHome({
             </div>
           </div>
 
-          {/* Card F: Key Match Milestones & Deadlines */}
+          {/* Card E: Letters of Recommendation Tracker (With inline add & quick status) */}
           <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-5">
-            <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2 pb-3 border-b border-neutral-100">
-              <Calendar className="w-4 h-4 text-[#1F3A30]" />
-              <span>ERAS 2027 Key Deadlines</span>
-            </h2>
-
-            <div className="mt-3.5 space-y-2.5 text-xs">
-              <div className="flex items-center justify-between p-2 rounded-lg bg-neutral-50">
-                <div>
-                  <div className="font-semibold text-neutral-900">ERAS Tokens Open</div>
-                  <div className="text-[10px] text-neutral-500">Profile &amp; Personal Statement Drafting</div>
+            <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
+              <div>
+                <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
+                  <MailCheck className="w-4 h-4 text-[#1F3A30]" />
+                  <span>Letters of Recommendation</span>
+                </h2>
+                <div className="text-xs text-neutral-500 mt-0.5" suppressHydrationWarning>
+                  {writers.filter((w) => w.status === 'submitted').length} of {writers.length} submitted
                 </div>
-                <span className="text-[11px] font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded">Active</span>
               </div>
+              <button
+                onClick={handleOpenAddWriter}
+                className="px-2.5 py-1.5 bg-[#1F3A30] hover:bg-[#162D25] text-white rounded-xl text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Writer</span>
+              </button>
+            </div>
 
-              <div className="flex items-center justify-between p-2 rounded-lg bg-neutral-50">
-                <div>
-                  <div className="font-semibold text-neutral-900">Application Submission Target</div>
-                  <div className="text-[10px] text-neutral-500">All 10 Experiences &amp; LORs verified</div>
-                </div>
-                <span className="text-[11px] font-bold text-amber-700 bg-amber-50 px-2 py-0.5 rounded">Sep 24, 2026</span>
-              </div>
+            {/* Advising Tip Box */}
+            <div className="mt-3.5 p-3 bg-amber-50/80 border border-amber-200/80 rounded-xl text-xs text-amber-950 flex items-start gap-2">
+              <Sparkles className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
+              <p className="leading-tight text-[11px]">
+                <strong>Geisinger Rule of Thumb:</strong> Target 3–4 letters by July 15. Ensure at least one Sub-I
+                attending letter in {targetSpecialty}.
+              </p>
+            </div>
 
-              <div className="flex items-center justify-between p-2 rounded-lg bg-neutral-50">
-                <div>
-                  <div className="font-semibold text-neutral-900">MSPE (Dean&apos;s Letter) Release</div>
-                  <div className="text-[10px] text-neutral-500">Transmitted to residency programs</div>
+            {/* Writer List */}
+            <div className="mt-4 space-y-2.5">
+              {writers.length === 0 ? (
+                <div className="py-6 text-center text-xs text-neutral-400">
+                  No letter writers added yet. Click &quot;Add Writer&quot; above.
                 </div>
-                <span className="text-[11px] font-bold text-neutral-700 bg-neutral-100 px-2 py-0.5 rounded">Oct 1, 2026</span>
-              </div>
+              ) : (
+                writers.map((w) => (
+                  <div
+                    key={w.id}
+                    className="p-3 bg-neutral-50 border border-neutral-200/70 rounded-xl text-xs hover:border-neutral-300 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="font-bold text-neutral-900">{w.writerName}</div>
+                        <div className="text-[11px] text-neutral-500 leading-tight">
+                          {w.writerTitle} &bull; {w.institution}
+                        </div>
+                        <span className="mt-1 inline-block text-[10px] px-1.5 py-0.2 rounded bg-neutral-200/70 text-neutral-700 font-medium">
+                          {w.letterType}
+                        </span>
+                      </div>
+                      <button
+                        onClick={() => handleOpenEditWriter(w)}
+                        className="text-neutral-400 hover:text-neutral-700 p-1 cursor-pointer"
+                        title="Edit writer details"
+                      >
+                        <Edit2 className="w-3 h-3" />
+                      </button>
+                    </div>
+
+                    {/* Status Pill Selector */}
+                    <div className="mt-2.5 pt-2 border-t border-neutral-200/60 flex items-center justify-between">
+                      <span className="text-[10px] text-neutral-400 uppercase tracking-wider font-semibold">
+                        Status:
+                      </span>
+                      <select
+                        value={w.status}
+                        onChange={(e) => handleQuickStatusChange(w.id, e.target.value as LetterRequestStatus)}
+                        className={`text-[10px] font-bold rounded-lg px-2 py-0.5 border cursor-pointer ${
+                          w.status === 'submitted'
+                            ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
+                            : w.status === 'initiated_eras'
+                            ? 'bg-blue-100 text-blue-800 border-blue-300'
+                            : w.status === 'asked'
+                            ? 'bg-amber-100 text-amber-800 border-amber-300'
+                            : 'bg-neutral-100 text-neutral-700 border-neutral-300'
+                        }`}
+                      >
+                        <option value="pending_ask">Pending Ask</option>
+                        <option value="asked">Asked</option>
+                        <option value="initiated_eras">Initiated in ERAS</option>
+                        <option value="submitted">Submitted to ERAS</option>
+                      </select>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+
+            <div className="mt-4 pt-3 border-t border-neutral-100 text-center">
+              <button
+                onClick={() => onNavigate('letters')}
+                className="text-xs text-[#1F3A30] hover:text-[#142720] font-bold hover:underline flex items-center justify-center gap-1 mx-auto cursor-pointer"
+              >
+                <span>Audit Program Letter Gaps &amp; Requirements</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
             </div>
           </div>
         </div>
