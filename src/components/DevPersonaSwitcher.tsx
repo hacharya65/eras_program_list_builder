@@ -40,25 +40,35 @@ export function DevPersonaSwitcher({
   ];
 
   return (
-    <div className="bg-slate-900 border-b border-slate-800 text-slate-200 px-4 py-2.5 text-xs font-medium sticky top-0 z-50 shadow-md">
+    <div className="bg-[#1F3A30] border-b border-[#2D5949] text-emerald-100 px-4 py-2 text-xs font-medium sticky top-0 z-50 shadow-md">
       <div className="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
-        {/* Left: Indicator */}
-        <div className="flex items-center gap-2">
-          <span className="flex h-2 w-2 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+        {/* Left: Brand & Institution Identity */}
+        <div className="flex items-center gap-3">
+          <div className="w-7 h-7 rounded-lg bg-[#264639] border border-[#7EAE9B]/40 flex items-center justify-center p-0.5 overflow-hidden shrink-0 shadow-inner">
+            <img
+              src="/ethmoid-square.jpeg"
+              alt="Ethmoid"
+              className="w-full h-full object-contain filter brightness-110"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-extrabold text-white tracking-tight text-sm">
+              Ethmoid
+            </span>
+            <span className="text-[#7EAE9B] font-semibold text-[11px] hidden sm:inline">
+              &bull; {institutionName}
+            </span>
+          </div>
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#142720] text-[#7EAE9B] border border-[#7EAE9B]/30 tracking-wide uppercase">
+            Demonstration &bull; Fictional Records
           </span>
-          <span className="font-semibold text-slate-100 flex items-center gap-1.5 tracking-wide uppercase text-[11px]">
-            <Building2 className="w-3.5 h-3.5 text-slate-400" />
-            {institutionName}
-          </span>
-          <span className="text-slate-500">|</span>
-          <span className="text-slate-400 hidden sm:inline">Testing Toolbar: Instant Persona Switcher</span>
         </div>
 
-        {/* Right: Quick-switch buttons */}
+        {/* Right: Quick-switch persona buttons */}
         <div className="flex items-center gap-2">
-          <span className="text-slate-400 mr-1 text-[11px] uppercase tracking-wider hidden md:inline">View As:</span>
+          <span className="text-emerald-200/70 mr-1 text-[11px] uppercase tracking-wider hidden md:inline">
+            Active Persona:
+          </span>
           {personas.map((p) => {
             const isActive = currentRole === p.role;
             return (
@@ -67,8 +77,8 @@ export function DevPersonaSwitcher({
                 onClick={() => onSelectRole(p.role)}
                 className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg border transition-all ${
                   isActive
-                    ? `${p.badgeClass} ring-2 ring-sky-500/40 font-semibold shadow-inner`
-                    : 'bg-slate-800/80 hover:bg-slate-800 text-slate-400 border-slate-700 hover:text-slate-200'
+                    ? 'bg-[#7EAE9B] text-[#142720] border-[#7EAE9B] font-bold shadow-sm'
+                    : 'bg-[#264639] hover:bg-[#2D5949] text-emerald-100 border-[#2D5949] hover:text-white'
                 }`}
                 title={`Switch to ${p.title}`}
               >

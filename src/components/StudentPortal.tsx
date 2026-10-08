@@ -10,6 +10,9 @@ import { StudentFeedbackHub } from './StudentFeedbackHub';
 import { SchoolListMatrix } from './SchoolListMatrix';
 import { CompetitivenessCalculator } from './CompetitivenessCalculator';
 import { ApplicantProfileModal } from './ApplicantProfileModal';
+import { SpecialtyAdvisingFormModal } from './SpecialtyAdvisingFormModal';
+import { LetterOfRecommendationTracker } from './LetterOfRecommendationTracker';
+import { SpecialtySwitchingSafetyModal } from './SpecialtySwitchingSafetyModal';
 import { AlumniResidentDirectory } from './AlumniResidentDirectory';
 import { ErasTransferKit } from './ErasTransferKit';
 import {
@@ -17,7 +20,16 @@ import {
   getStoredTargetSpecialty,
   setStoredTargetSpecialty,
   SPECIALTY_SIGNALING_RULES,
+  loadItemsForSpecialty,
+  getStorageKeyForSpecialty,
 } from '@/domain/school-list-models';
+import {
+  SpecialtyAdvisingIntake,
+  loadStudentAdvisingIntake,
+  saveStudentAdvisingIntake,
+  getDefaultAdvisorForSpecialty,
+  calculateClerkshipHonorsCount,
+} from '@/domain/advising-intake-models';
 import {
   FileText,
   Briefcase,
@@ -38,6 +50,8 @@ import {
   Columns,
   MessageSquare,
   ArrowRight,
+  Mail,
+  FileCheck,
 } from 'lucide-react';
 
 interface StudentPortalProps {
@@ -75,10 +89,18 @@ export function StudentPortal({
     | 'competitiveness'
     | 'alumni_directory'
     | 'transfer_kit'
+    | 'letters'
   >('overview');
   const [psEditorMode, setPsEditorMode] = useState<'editor' | 'annotations' | 'split'>('split');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
+  const [isIntakeModalOpen, setIsIntakeModalOpen] = useState(false);
   const { student, personalStatement, experiences, assignedAdvisors } = context;
+
+  // Specialty Advising Intake State (Ethmoid Governance)
+  const [advisingIntake, setAdvisingIntake] = useState<SpecialtyAdvisingIntake>(() =>
+    loadStudentAdvisingIntake(student.id)
+  );
+  const [pendingSpecialtySwitch, setPendingSpecialtySwitch] = useState<string | null>(null);
 
   // Student Target Specialty State (persisted & propagates across entire portal)
   const [targetSpecialty, setTargetSpecialty] = useState<string>(() => {
@@ -86,8 +108,26 @@ export function StudentPortal({
   });
 
   const handleSpecialtyChange = (newSpecialty: string) => {
+    if (newSpecialty === targetSpecialty) return;
+    const currentProgs = loadItemsForSpecialty(targetSpecialty);
+    if (currentProgs && currentProgs.length > 0) {
+      setPendingSpecialtySwitch(newSpecialty);
+    } else {
+      applySpecialtySwitch(newSpecialty);
+    }
+  };
+
+  const applySpecialtySwitch = (newSpecialty: string) => {
     setTargetSpecialty(newSpecialty);
     setStoredTargetSpecialty(newSpecialty);
+    const updatedIntake: SpecialtyAdvisingIntake = {
+      ...advisingIntake,
+      applyingSpecialty: newSpecialty,
+      specialtyAdvisorName: getDefaultAdvisorForSpecialty(newSpecialty),
+    };
+    setAdvisingIntake(updatedIntake);
+    saveStudentAdvisingIntake(updatedIntake);
+    setPendingSpecialtySwitch(null);
   };
 
   const specialtyRule = SPECIALTY_SIGNALING_RULES[targetSpecialty] || SPECIALTY_SIGNALING_RULES['Internal Medicine'];
@@ -251,29 +291,104 @@ export function StudentPortal({
     );
   }
 
+  if (activeView === 'letters') {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <button
+            onClick={() => setActiveView('overview')}
+            className="flex items-center gap-1.5 text-xs font-semibold text-[#1F3A30] hover:text-[#142720] bg-white border border-[#D6E5DF] px-3 py-1.5 rounded-lg shadow-2xs transition-colors"
+          >
+            &larr; Back to Student Hub
+          </button>
+        </div>
+        <LetterOfRecommendationTracker
+          specialty={targetSpecialty}
+          onOpenSchoolList={() => setActiveView('school_list')}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
+      {/* Ethmoid Onboarding Sequence Intake Alert Banner */}
+      {!advisingIntake.isCompleted && (
+        <div className="bg-[#EAF2EE] border-2 border-[#7EAE9B] rounded-2xl p-5 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div className="flex items-start gap-3.5">
+            <div className="w-10 h-10 rounded-xl bg-[#7EAE9B] text-[#142720] flex items-center justify-center shrink-0 font-bold shadow-xs">
+              <FileCheck className="w-6 h-6" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold uppercase tracking-wider text-[#1F3A30]">
+                  Required Advising Baseline
+                </span>
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800 border border-amber-300">
+                  Intake Incomplete
+                </span>
+              </div>
+              <h3 className="text-base font-bold text-[#1F3A30] mt-0.5">
+                Complete Your Specialty Advising Intake Form
+              </h3>
+              <p className="text-xs text-slate-700 mt-1 max-w-2xl">
+                Grounded in the Geisinger Commonwealth School of Medicine specialty advising form. Establishes your clinical baseline,
+                verifies 7 core clerkships, discloses rotation schedules, and initializes your faculty advising relationship.
+              </p>
+            </div>
+          </div>
+          <button
+            onClick={() => setIsIntakeModalOpen(true)}
+            className="px-5 py-2.5 bg-[#1F3A30] hover:bg-[#142720] text-white font-bold text-xs rounded-xl shadow-md transition-all flex items-center gap-2 shrink-0"
+          >
+            <span>Complete Advising Intake</span>
+            <ArrowRight className="w-4 h-4 text-[#7EAE9B]" />
+          </button>
+        </div>
+      )}
+
       {/* Student Welcome Header */}
-      <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div className="bg-white rounded-xl border border-[#D6E5DF] p-6 shadow-xs flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-sky-100 text-sky-800">
+            <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-[#EAF2EE] text-[#1F3A30] border border-[#7EAE9B]/30">
               MS4 Applicant
             </span>
             <span className="text-xs text-slate-500">ERAS 2027 Cycle</span>
           </div>
-          <h1 className="text-2xl font-bold text-slate-900 mt-1 flex items-center gap-2">
-            <span>Welcome back, {student.name.split(' ')[0]}</span>
+          <div className="flex flex-wrap items-center gap-3 mt-1">
+            <h1 className="text-2xl font-bold text-[#1F3A30] flex items-center gap-2">
+              <span>Welcome back, {student.name.split(' ')[0]}</span>
+              <button
+                id="edit-profile-metrics-btn"
+                onClick={() => setIsProfileModalOpen(true)}
+                className="p-1.5 text-slate-400 hover:text-[#4E8773] hover:bg-slate-100 rounded-lg transition-colors inline-flex items-center"
+                title="Edit Academic & Portfolio Metrics"
+                aria-label="Edit Academic & Portfolio Metrics"
+              >
+                <Pencil className="w-4 h-4" />
+              </button>
+            </h1>
+
+            {/* Specialty Advising Form Header Action */}
             <button
-              id="edit-profile-metrics-btn"
-              onClick={() => setIsProfileModalOpen(true)}
-              className="p-1.5 text-slate-400 hover:text-sky-600 hover:bg-slate-100 rounded-lg transition-colors inline-flex items-center"
-              title="Edit Academic & Portfolio Metrics"
-              aria-label="Edit Academic & Portfolio Metrics"
+              onClick={() => setIsIntakeModalOpen(true)}
+              className="px-3 py-1.5 rounded-xl border border-[#7EAE9B] bg-[#EAF2EE] hover:bg-[#D6E5DF] text-[#1F3A30] text-xs font-bold flex items-center gap-2 shadow-2xs transition-colors"
+              title="Open full Geisinger Specialty Advising Intake Form"
             >
-              <Pencil className="w-4 h-4" />
+              <FileText className="w-4 h-4 text-[#4E8773]" />
+              <span>Specialty Advising Form</span>
+              {advisingIntake.isCompleted ? (
+                <span className="px-1.5 py-0.5 rounded text-[10px] bg-emerald-100 text-emerald-800 font-extrabold flex items-center gap-1">
+                  <CheckCircle2 className="w-3 h-3 text-emerald-600" /> Complete
+                </span>
+              ) : (
+                <span className="px-1.5 py-0.5 rounded text-[10px] bg-amber-100 text-amber-800 font-extrabold">
+                  In Progress
+                </span>
+              )}
             </button>
-          </h1>
+          </div>
           <div className="flex flex-wrap items-center gap-2 mt-1.5 text-xs text-slate-600">
             <label htmlFor="student-specialty-select" className="font-semibold text-slate-700 whitespace-nowrap">
               Target Applying Specialty:
@@ -646,9 +761,69 @@ export function StudentPortal({
             Explore Alumni Network <ChevronRight className="w-4 h-4" />
           </button>
         </div>
+
+        {/* Module 7: Letters of Recommendation (LOR) Pipeline */}
+        <div className="bg-white rounded-xl border border-[#D6E5DF] p-5 shadow-sm hover:border-[#7EAE9B] transition-all flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between">
+              <div className="w-10 h-10 rounded-lg bg-[#EAF2EE] text-[#1F3A30] flex items-center justify-center">
+                <Mail className="w-5 h-5 text-[#4E8773]" />
+              </div>
+              <span className="px-2.5 py-1 rounded-md text-xs font-semibold bg-[#EAF2EE] text-[#1F3A30] border border-[#7EAE9B]/30">
+                2027 ERAS Protocol
+              </span>
+            </div>
+            <h2 className="text-lg font-bold text-slate-900 mt-4">Letters of Recommendation</h2>
+            <p className="text-xs text-slate-600 mt-1">
+              Track faculty letter writers, input program requirements manually from program websites, and identify letter coverage gaps.
+            </p>
+            <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-500">
+              <span>Pipeline: <strong className="text-slate-700">4 Writer Stages</strong></span>
+              <span>Website Audit: <strong className="text-[#4E8773] font-bold">Enabled</strong></span>
+            </div>
+          </div>
+          <button
+            onClick={() => setActiveView('letters')}
+            className="mt-5 w-full py-2 px-3 bg-[#1F3A30] hover:bg-[#142720] text-white rounded-lg text-xs font-semibold flex items-center justify-center gap-1.5 transition-colors"
+          >
+            Track Letters &amp; Audit Gaps <ChevronRight className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
-      {/* Applicant Profile Questionnaire Modal (Ticket Candidate 9) */}
+      {/* Specialty Advising Form Modal (Geisinger Intake) */}
+      <SpecialtyAdvisingFormModal
+        isOpen={isIntakeModalOpen}
+        onClose={() => setIsIntakeModalOpen(false)}
+        studentId={student.id}
+        onSaved={(updated) => {
+          setAdvisingIntake(updated);
+          if (updated.applyingSpecialty && updated.applyingSpecialty !== targetSpecialty) {
+            setTargetSpecialty(updated.applyingSpecialty);
+          }
+        }}
+      />
+
+      {/* Specialty Switching Safety Hand-off Modal */}
+      <SpecialtySwitchingSafetyModal
+        isOpen={Boolean(pendingSpecialtySwitch)}
+        onClose={() => setPendingSpecialtySwitch(null)}
+        currentSpecialty={targetSpecialty}
+        newSpecialty={pendingSpecialtySwitch || ''}
+        savedPrograms={loadItemsForSpecialty(targetSpecialty)}
+        onConfirmSwitch={() => {
+          if (pendingSpecialtySwitch) {
+            if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+              const key = getStorageKeyForSpecialty(targetSpecialty);
+              localStorage.removeItem(key);
+            }
+            setSchoolListStats({ count: 0, signalsAssigned: 0 });
+            applySpecialtySwitch(pendingSpecialtySwitch);
+          }
+        }}
+      />
+
+      {/* Applicant Profile Questionnaire Modal (Legacy Metrics) */}
       <ApplicantProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}

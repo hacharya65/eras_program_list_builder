@@ -19,6 +19,8 @@ This backlog tracks the next cycle of feature requests, enhancements, and bugfix
 | **[#19](.scratch/eras-advising/issues/19-homepage-feedback-gateway-redesign.md)** | Homepage Feedback Gateway & Alert Banner Redesign | UI / Workflow | Low | #18 | `Completed` |
 | **[#20](.scratch/eras-advising/issues/20-dedicated-student-feedback-analysis-hub.md)** | Dedicated Student Feedback & Analysis Hub (Full-Spectrum Review Studio) | Workflow / UX Redesign | Medium | #18, #19 | `Completed` |
 | **[#21](.scratch/eras-advising/issues/21-split-screen-iteration-canvas.md)** | Split-Screen Iteration Canvas (Live Drafting with Synchronized Notes & Comments) | UI / Interactive Drafting | Medium | #18, #20 | `Completed` |
+| **[#22](.scratch/eras-advising/issues/22-multi-campus-institution-disambiguation.md)** | Multi-Campus & Identical-Name Institution Disambiguation | Data / UI Search | Medium | None | `Completed` |
+| **[#23](.scratch/eras-advising/issues/23-specialty-advising-intake-form.md)** | Specialty Advising Intake Form Integration & Streamlined Faculty Review | Intake / Advising Workflow | High | None | `ready-for-agent` |
 
 ---
 
@@ -105,6 +107,15 @@ This backlog tracks the next cycle of feature requests, enhancements, and bugfix
   - View switcher: Toggle between `Split View`, `Focus Canvas`, and `Full Feedback Studio`.
   - Interactive comment checklist: Track addressed comments while typing revisions.
   - Seamless version forking and changelog submission flow.
+
+### [Ticket 23: Specialty Advising Intake Form Integration & Streamlined Faculty Review](.scratch/eras-advising/issues/23-specialty-advising-intake-form.md)
+* **Summary:** Digitize and incorporate the paper/PDF institutional Specialty Advising Form directly into student onboarding and faculty advising workflows, eliminating redundant questions and providing advisors with an interactive pre-meeting intake dossier.
+* **Key Scope:**
+  - 13-question clinical intake schema (narrative interest, USMLE status, 7 core clerkships, academic flags, CAPS probation, leaves of absence, parallel plan, Sub-I schedule, external mentors, geographic goals).
+  - Deduplication: Auto-sync target specialty, consolidate Step pass/fail with score vs. anticipated date, auto-compute clerkship honors from core clerkship grades.
+  - Interactive student onboarding modal and persistent header edit trigger.
+  - Advisor Portal Advisee Dossier Modal with red-flag badges (LOA, parallel plan, academic flags) and private faculty advising notes.
+  - Standardized print/export layout matching the institutional form.
 
 ---
 

@@ -78,6 +78,46 @@ export function AdminPortal({
         </div>
       </div>
 
+      {/* Dean-Safe Intake Governance & Cohort Metrics */}
+      <div className="bg-white rounded-xl border border-[#D6E5DF] p-6 shadow-xs">
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-[#4E8773]" />
+            <h2 className="text-base font-bold text-[#1F3A30]">Specialty Advising Intake Governance (Dean Oversight)</h2>
+          </div>
+          <span className="text-[11px] text-slate-500 font-semibold hidden md:inline">
+            Confidential narrative text restricted to 1-on-1 faculty advisors per FERPA policy
+          </span>
+        </div>
+
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+          <div className="p-4 rounded-xl bg-[#F4F8F6] border border-[#D6E5DF]">
+            <div className="text-slate-600 font-medium">Intake Completion Rate</div>
+            <div className="text-2xl font-extrabold text-[#1F3A30] mt-1">94%</div>
+            <div className="text-[11px] text-emerald-700 mt-1 font-semibold flex items-center gap-1">
+              <CheckCircle className="w-3.5 h-3.5 text-emerald-600" />
+              112 of 119 MS4s Complete
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="text-slate-600 font-medium">Average Step 2 CK Cohort Benchmark</div>
+            <div className="text-2xl font-extrabold text-slate-900 mt-1">254.8</div>
+            <div className="text-[11px] text-slate-500 mt-1">
+              Range: 228 – 274 &bull; 89% Scores Reported
+            </div>
+          </div>
+
+          <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
+            <div className="text-slate-600 font-medium">Core Clerkship Honors Distribution</div>
+            <div className="text-2xl font-extrabold text-slate-900 mt-1">4.2 / 7</div>
+            <div className="text-[11px] text-slate-500 mt-1">
+              Median Honors across FM, IM, Surg, Peds, OB/GYN, Neuro, Psych
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Cohort Funnel Analytics */}
       <div className="bg-white rounded-xl border border-slate-200 p-6 shadow-sm">
         <div className="flex items-center justify-between mb-5">

@@ -21,6 +21,8 @@ import {
 import { VisualDiffViewer } from './VisualDiffViewer';
 import { ClinicalRubricForm } from './ClinicalRubricForm';
 import { AnnotatedDocumentViewer } from './collaborative/AnnotatedDocumentViewer';
+import { SpecialtyAdvisingFormModal } from './SpecialtyAdvisingFormModal';
+import { loadStudentAdvisingIntake, SpecialtyAdvisingIntake } from '@/domain/advising-intake-models';
 import { RubricEvaluation } from '@/domain/types';
 import { calculateSlaStatus } from '@/domain/sla-engine';
 
@@ -49,6 +51,7 @@ export function AdvisorPortal({
   const [psReviewTab, setPsReviewTab] = React.useState<'live_annotations' | 'rubric'>('live_annotations');
   const [expReviewTab, setExpReviewTab] = React.useState<'live_annotations' | 'standard'>('live_annotations');
   const [reviewQueueTab, setReviewQueueTab] = React.useState<'pending' | 'completed'>('pending');
+  const [reviewingAdviseeIntakeId, setReviewingAdviseeIntakeId] = React.useState<string | null>(null);
 
   const selectedReview = pendingReviews.find((r) => r.id === selectedReviewId);
   const snapshot = selectedReview ? getSnapshotContent?.(selectedReview.snapshotId) : null;
@@ -665,20 +668,72 @@ function deduplicateLatestReviews(
               const signalsBudget = breakdown?.signalsBudget ?? (context.schoolListStats?.signalsBudget ?? 15);
 
               return (
-                <div key={advisee.id} className="p-3.5 rounded-xl border border-slate-200 hover:border-slate-300 transition-colors bg-white space-y-3">
+                <div key={advisee.id} className="p-3.5 rounded-xl border border-slate-200 hover:border-[#7EAE9B] transition-colors bg-white space-y-3">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="font-semibold text-slate-900 text-sm">{advisee.name}</div>
                       <div className="text-xs text-slate-500 mt-0.5">{advisee.email}</div>
                     </div>
-                    <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200">
-                      {advisee.specialty}
-                    </span>
+                    <div className="flex flex-col items-end gap-1">
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-sky-50 text-sky-700 border border-sky-200">
+                        {advisee.specialty}
+                      </span>
+                      {(() => {
+                        const studentIntake = loadStudentAdvisingIntake(advisee.id);
+                        return studentIntake.isCompleted ? (
+                          <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-800 border border-emerald-200 flex items-center gap-0.5">
+                            <CheckCircle2 className="w-2.5 h-2.5 text-emerald-600" /> Intake Complete
+                          </span>
+                        ) : (
+                          <span className="text-[9px] font-extrabold px-1.5 py-0.5 rounded bg-amber-50 text-amber-800 border border-amber-200">
+                            Intake In Progress
+                          </span>
+                        );
+                      })()}
+                    </div>
                   </div>
+
+                  {/* High-yield Triage Badges */}
+                  {(() => {
+                    const studentIntake = loadStudentAdvisingIntake(advisee.id);
+                    const badges = [];
+                    if (studentIntake.hasLeaveOfAbsence) {
+                      badges.push(
+                        <span key="loa" className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-rose-100 text-rose-800 border border-rose-300">
+                          LOA Disclosed
+                        </span>
+                      );
+                    }
+                    if (studentIntake.consideringParallelPlan) {
+                      badges.push(
+                        <span key="parallel" className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-purple-100 text-purple-800 border border-purple-300">
+                          Parallel: {studentIntake.parallelPlanSpecialty || 'Active'}
+                        </span>
+                      );
+                    }
+                    if (
+                      studentIntake.hasStepFailures ||
+                      studentIntake.hasAcademicFailuresOrRepeats ||
+                      studentIntake.hasCapsOrProfessionalismConcerns
+                    ) {
+                      badges.push(
+                        <span key="flags" className="px-1.5 py-0.5 rounded text-[9px] font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                          Academic Flags
+                        </span>
+                      );
+                    }
+                    if (badges.length === 0) return null;
+                    return <div className="flex flex-wrap gap-1 pt-1">{badges}</div>;
+                  })()}
 
                   <div className="pt-2 border-t border-slate-100 flex items-center justify-between text-[11px] text-slate-600">
                     <span>Personal Statement Status: <strong className="text-slate-800">{statusText}</strong></span>
-                    <span className="text-[10px] font-semibold text-sky-600 hover:underline cursor-pointer">View Details &rarr;</span>
+                    <button
+                      onClick={() => setReviewingAdviseeIntakeId(advisee.id)}
+                      className="text-[11px] font-bold text-[#4E8773] hover:text-[#1F3A30] hover:underline flex items-center gap-0.5"
+                    >
+                      <span>View Advising Form &rarr;</span>
+                    </button>
                   </div>
 
                   {/* Condensed Core Application Components Progress */}
@@ -729,6 +784,14 @@ function deduplicateLatestReviews(
           </div>
         </div>
       </div>
+
+      {/* Advisee Specialty Advising Intake Dossier Modal (Advisor Mode) */}
+      <SpecialtyAdvisingFormModal
+        isOpen={Boolean(reviewingAdviseeIntakeId)}
+        onClose={() => setReviewingAdviseeIntakeId(null)}
+        studentId={reviewingAdviseeIntakeId || ''}
+        isAdvisorReviewMode={true}
+      />
     </div>
   );
 }

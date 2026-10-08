@@ -411,6 +411,20 @@ export function CompetitivenessCalculator({
                   ))}
                 </div>
               </div>
+
+              {/* Provenance Attribution & Ethical Guardrail Disclaimer */}
+              <div className="bg-[#F4F8F6] rounded-xl border border-[#D6E5DF] p-4 text-xs text-slate-600 space-y-1.5">
+                <div className="font-bold text-[#1F3A30] flex items-center gap-1.5">
+                  <Info className="w-4 h-4 text-[#4E8773]" />
+                  <span>Provenance &amp; Ethical Guardrails</span>
+                </div>
+                <p className="text-[11px] leading-relaxed">
+                  <strong>Citation:</strong> National Resident Matching Program. 2026. <em>Charting Outcomes™: Characteristics of Applicants Who Matched to Their Preferred Specialty, U.S. MD Seniors</em>, (Main Residency Match, 2026 Appointment Year).
+                </p>
+                <p className="text-[11px] text-slate-500 italic">
+                  Note: Historical reference values represent population associations from matched U.S. MD seniors and do not imply an admission probability, individual program requirement, or predicted Match outcome for the 2027 cycle.
+                </p>
+              </div>
             </>
           )}
         </div>

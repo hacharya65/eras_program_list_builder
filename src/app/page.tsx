@@ -162,10 +162,14 @@ export default function HomePage() {
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500">
+      <footer className="border-t border-[#D6E5DF] bg-white py-4 text-center text-xs text-slate-500">
         <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>Apex School of Medicine &bull; Pre-Season ERAS Advising Platform</span>
-          <span className="text-slate-400">Grounded in 2026/2027 AAMC ERAS &amp; NRMP Match Specifications</span>
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-[#1F3A30]">Ethmoid</span>
+            <span>&bull;</span>
+            <span>Geisinger Commonwealth School of Medicine</span>
+          </div>
+          <span className="text-slate-400">Grounded in 2026/2027 AAMC ERAS &amp; NRMP Match Specifications &bull; Fictional Demonstration</span>
         </div>
       </footer>
     </div>
