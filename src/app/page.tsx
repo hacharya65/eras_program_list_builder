@@ -16,9 +16,49 @@ const service = new AdvisingPlatformService(storage);
 export default function HomePage() {
   const [currentRole, setCurrentRole] = useState<UserRole>('student');
 
+  // Synchronize role with URL query parameter and scroll to top
+  React.useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const urlRole = params.get('role') as UserRole | null;
+      if (urlRole && ['student', 'advisor', 'admin'].includes(urlRole)) {
+        service.switchPersona(urlRole);
+        setCurrentRole(urlRole);
+      }
+    }
+
+    const handlePopState = () => {
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const urlRole = (params.get('role') || 'student') as UserRole;
+        if (['student', 'advisor', 'admin'].includes(urlRole)) {
+          service.switchPersona(urlRole);
+          setCurrentRole(urlRole);
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
   const handleSelectRole = (role: UserRole) => {
     service.switchPersona(role);
     setCurrentRole(role);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('role', role);
+        // Clear sub-view if changing role so student views don't clash with advisor/admin
+        if (role !== 'student') {
+          url.searchParams.delete('view');
+        }
+        window.history.pushState({ role }, '', url.toString());
+      } catch (e) {
+        // Fallback
+      }
+    }
   };
 
   const [refreshKey, setRefreshKey] = useState(0);

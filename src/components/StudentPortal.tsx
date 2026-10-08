@@ -121,7 +121,26 @@ export function StudentPortal({
     student.specialty || 'Internal Medicine'
   );
 
-  // Sync client-persisted localStorage after hydration mount and listen for custom nav events
+  // Scroll to top and synchronize URL search parameters on view navigation
+  const updateView = (newView: typeof activeView, replaceHistory = false) => {
+    setActiveView(newView);
+    if (typeof window !== 'undefined') {
+      window.scrollTo({ top: 0, behavior: 'instant' });
+      try {
+        const url = new URL(window.location.href);
+        url.searchParams.set('view', newView);
+        if (replaceHistory) {
+          window.history.replaceState({ view: newView }, '', url.toString());
+        } else {
+          window.history.pushState({ view: newView }, '', url.toString());
+        }
+      } catch (e) {
+        // Fallback
+      }
+    }
+  };
+
+  // Sync client-persisted localStorage after hydration mount and listen for custom nav events & browser popstate
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const storedSpec = getStoredTargetSpecialty();
@@ -132,20 +151,53 @@ export function StudentPortal({
       if (storedIntake) {
         setAdvisingIntake(storedIntake);
       }
+
+      // Check URL search params for deep linking
+      const params = new URLSearchParams(window.location.search);
+      const urlView = params.get('view') as typeof activeView | null;
+      const validViews = [
+        'overview',
+        'profile',
+        'intake',
+        'personal_statement',
+        'personal_statement_feedback',
+        'experiences',
+        'scholarly_works',
+        'journal',
+        'school_list',
+        'competitiveness',
+        'alumni_directory',
+        'transfer_kit',
+        'letters',
+      ];
+      if (urlView && validViews.includes(urlView)) {
+        setActiveView(urlView);
+      }
     }
 
-    const handleNavProfile = () => setActiveView('profile');
-    const handleNavTransfer = () => setActiveView('transfer_kit');
-    const handleNavIntake = () => setActiveView('intake');
+    const handleNavProfile = () => updateView('profile');
+    const handleNavTransfer = () => updateView('transfer_kit');
+    const handleNavIntake = () => updateView('intake');
+
+    const handlePopState = () => {
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const urlView = (params.get('view') || 'overview') as typeof activeView;
+        setActiveView(urlView);
+        window.scrollTo({ top: 0, behavior: 'instant' });
+      }
+    };
 
     window.addEventListener('navigate_to_profile_management', handleNavProfile);
     window.addEventListener('navigate_to_transfer_kit', handleNavTransfer);
     window.addEventListener('navigate_to_intake', handleNavIntake);
+    window.addEventListener('popstate', handlePopState);
 
     return () => {
       window.removeEventListener('navigate_to_profile_management', handleNavProfile);
       window.removeEventListener('navigate_to_transfer_kit', handleNavTransfer);
       window.removeEventListener('navigate_to_intake', handleNavIntake);
+      window.removeEventListener('popstate', handlePopState);
     };
   }, [student.id]);
 
@@ -329,7 +381,7 @@ export function StudentPortal({
         <SpecialtyAdvisingFormModal
           isOpen={true}
           isEmbedded={true}
-          onClose={() => setActiveView('overview')}
+          onClose={() => updateView('overview')}
           studentId={student.id}
           onSaved={(updated) => {
             setAdvisingIntake(updated);
@@ -348,13 +400,13 @@ export function StudentPortal({
           feedbackHistory={psFeedbackHistory.length > 0 ? psFeedbackHistory : (latestPSFeedback ? [latestPSFeedback] : [])}
           currentDraftVersion={personalStatement.currentVersionNumber}
           personalStatementStage={personalStatement.stage}
-          onBack={() => setActiveView('overview')}
+          onBack={() => updateView('overview')}
           onStartRevision={(targetVersion) => {
             onCreateRevision?.(targetVersion);
           }}
           onOpenEditor={(initialMode = 'split') => {
             setPsEditorMode(initialMode);
-            setActiveView('personal_statement');
+            updateView('personal_statement');
           }}
         />
       );
@@ -369,13 +421,13 @@ export function StudentPortal({
           latestFeedback={latestPSFeedback}
           feedbackHistory={psFeedbackHistory}
           initialViewMode={psEditorMode}
-          onNavigateToFeedback={() => setActiveView('personal_statement_feedback')}
+          onNavigateToFeedback={() => updateView('personal_statement_feedback')}
           onSave={(newContent) => onUpdatePersonalStatement?.(newContent)}
           onSubmitForReview={(changelog) => {
             onSubmitPersonalStatement?.(changelog);
-            setActiveView('overview');
+            updateView('overview');
           }}
-          onBack={() => setActiveView('overview')}
+          onBack={() => updateView('overview')}
         />
       );
     }
@@ -390,7 +442,7 @@ export function StudentPortal({
           onSubmitForReview={onSubmitExperiences}
           onSaveExperience={(id, updates) => onUpdateExperience?.(id, updates)}
           onDeleteExperience={(id) => {}}
-          onBack={() => setActiveView('overview')}
+          onBack={() => updateView('overview')}
           targetSpecialty={targetSpecialty}
         />
       );
@@ -399,7 +451,7 @@ export function StudentPortal({
     if (activeView === 'scholarly_works') {
       return (
         <ScholarlyWorksManager
-          onBack={() => setActiveView('overview')}
+          onBack={() => updateView('overview')}
         />
       );
     }
@@ -408,9 +460,9 @@ export function StudentPortal({
       return (
         <JournalRepositoryView
           student={student}
-          onBack={() => setActiveView('overview')}
-          onNavigateToExperiences={() => setActiveView('experiences')}
-          onNavigateToPersonalStatement={() => setActiveView('personal_statement')}
+          onBack={() => updateView('overview')}
+          onNavigateToExperiences={() => updateView('experiences')}
+          onNavigateToPersonalStatement={() => updateView('personal_statement')}
         />
       );
     }
@@ -422,9 +474,9 @@ export function StudentPortal({
           alumniResidents={alumniResidents}
           onNavigateToAlumni={(programName) => {
             setAlumniSearchFilter(programName);
-            setActiveView('alumni_directory');
+            updateView('alumni_directory');
           }}
-          onBack={() => setActiveView('overview')}
+          onBack={() => updateView('overview')}
         />
       );
     }
@@ -433,7 +485,7 @@ export function StudentPortal({
       return (
         <CompetitivenessCalculator
           initialSpecialty={targetSpecialty}
-          onBack={() => setActiveView('overview')}
+          onBack={() => updateView('overview')}
         />
       );
     }
@@ -447,7 +499,7 @@ export function StudentPortal({
           alumniResidents={alumniResidents}
           onBack={() => {
             setAlumniSearchFilter('');
-            setActiveView('overview');
+            updateView('overview');
           }}
         />
       );
@@ -457,7 +509,7 @@ export function StudentPortal({
       return (
         <ErasTransferKit
           context={context}
-          onBack={() => setActiveView('overview')}
+          onBack={() => updateView('overview')}
         />
       );
     }
@@ -467,7 +519,7 @@ export function StudentPortal({
         <div className="space-y-6">
           <div className="flex items-center justify-between">
             <button
-              onClick={() => setActiveView('overview')}
+              onClick={() => updateView('overview')}
               className="flex items-center gap-1.5 text-xs font-semibold text-[#1F3A30] hover:text-[#142720] bg-white border border-[#D6E5DF] px-3 py-1.5 rounded-lg shadow-2xs transition-colors"
             >
               &larr; Back to Student Hub
@@ -475,7 +527,7 @@ export function StudentPortal({
           </div>
           <LetterOfRecommendationTracker
             specialty={targetSpecialty}
-            onOpenSchoolList={() => setActiveView('school_list')}
+            onOpenSchoolList={() => updateView('school_list')}
           />
         </div>
       );
@@ -490,8 +542,8 @@ export function StudentPortal({
           onSpecialtyChange={handleSpecialtyChange}
           advisingIntake={advisingIntake}
           onOpenIntake={() => setIsIntakeModalOpen(true)}
-          onOpenTransferKit={() => setActiveView('transfer_kit')}
-          onBack={() => setActiveView('overview')}
+          onOpenTransferKit={() => updateView('transfer_kit')}
+          onBack={() => updateView('overview')}
           assignedAdvisor={assignedAdvisor}
         />
       );
@@ -505,7 +557,7 @@ export function StudentPortal({
         onSpecialtyChange={handleSpecialtyChange}
         advisingIntake={advisingIntake}
         onOpenIntake={() => setIsIntakeModalOpen(true)}
-        onOpenProfile={() => setActiveView('profile')}
+        onOpenProfile={() => updateView('profile')}
         personalStatement={personalStatement}
         latestPSFeedback={latestPSFeedback}
         experiences={experiences}
@@ -513,10 +565,10 @@ export function StudentPortal({
         assignedAdvisors={assignedAdvisors}
         scholarlyStats={scholarlyStats}
         schoolListStats={schoolListStats}
-        onNavigate={(view) => setActiveView(view)}
+        onNavigate={(view) => updateView(view)}
         onOpenSplitCanvas={() => {
           setPsEditorMode('split');
-          setActiveView('personal_statement');
+          updateView('personal_statement');
         }}
         alumniResidents={alumniResidents}
       />
@@ -538,7 +590,7 @@ export function StudentPortal({
                 key={tab.id}
                 onClick={() => {
                   if (activeMainTab !== tab.id) {
-                    setActiveView(tab.defaultView);
+                    updateView(tab.defaultView);
                   }
                 }}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
@@ -583,9 +635,9 @@ export function StudentPortal({
                   key={sub.id}
                   onClick={() => {
                     if (sub.id === 'personal_statement') {
-                      setActiveView('personal_statement');
+                      updateView('personal_statement');
                     } else {
-                      setActiveView(sub.id as any);
+                      updateView(sub.id as any);
                     }
                   }}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
@@ -659,7 +711,7 @@ export function StudentPortal({
         specialty={targetSpecialty}
         onOpenCompetitivenessEngine={() => {
           setIsProfileModalOpen(false);
-          setActiveView('competitiveness');
+          updateView('competitiveness');
         }}
       />
     </div>
