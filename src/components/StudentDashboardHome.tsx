@@ -22,6 +22,7 @@ import {
   LetterRequestStatus,
   loadLetterWriterRequests,
   saveLetterWriterRequests,
+  INITIAL_MOCK_LETTER_WRITERS,
 } from '@/domain/lor-models';
 import {
   Compass,
@@ -107,10 +108,14 @@ export function StudentDashboardHome({
   onOpenSplitCanvas,
   alumniResidents,
 }: StudentDashboardHomeProps) {
-  // LOR State
-  const [writers, setWriters] = useState<LetterWriterRequest[]>(() => loadLetterWriterRequests());
+  // LOR State - Initial state uses INITIAL_MOCK_LETTER_WRITERS so SSR and client initial hydration render match byte-for-byte
+  const [writers, setWriters] = useState<LetterWriterRequest[]>(INITIAL_MOCK_LETTER_WRITERS);
   const [isAddWriterModalOpen, setIsAddWriterModalOpen] = useState(false);
   const [editingWriterId, setEditingWriterId] = useState<string | null>(null);
+
+  useEffect(() => {
+    setWriters(loadLetterWriterRequests());
+  }, []);
 
   // Modal fields for LOR
   const [writerName, setWriterName] = useState('');
@@ -519,7 +524,7 @@ export function StudentDashboardHome({
                     <Compass className="w-4 h-4 text-[#1F3A30]" />
                     <span>Program List &amp; Signaling Tracker</span>
                   </h2>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 font-semibold">
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 font-semibold" suppressHydrationWarning>
                     {savedPrograms.length} saved
                   </span>
                 </div>
@@ -530,11 +535,11 @@ export function StudentDashboardHome({
 
               {/* Signals summary badges */}
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="text-xs px-2.5 py-1 rounded-lg bg-amber-50 text-amber-900 border border-amber-200/80 font-bold flex items-center gap-1">
+                <span className="text-xs px-2.5 py-1 rounded-lg bg-amber-50 text-amber-900 border border-amber-200/80 font-bold flex items-center gap-1" suppressHydrationWarning>
                   <span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
                   Gold: {goldUsed} / {specialtyRule.goldSignals}
                 </span>
-                <span className="text-xs px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-200 font-bold flex items-center gap-1">
+                <span className="text-xs px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-200 font-bold flex items-center gap-1" suppressHydrationWarning>
                   <span className="w-2 h-2 rounded-full bg-slate-400 inline-block"></span>
                   Silver: {silverUsed} / {specialtyRule.silverSignals}
                 </span>
@@ -901,7 +906,7 @@ export function StudentDashboardHome({
                   <MailCheck className="w-4 h-4 text-[#1F3A30]" />
                   <span>Letters of Recommendation</span>
                 </h2>
-                <div className="text-xs text-neutral-500 mt-0.5">
+                <div className="text-xs text-neutral-500 mt-0.5" suppressHydrationWarning>
                   {writers.filter((w) => w.status === 'submitted').length} of {writers.length} submitted
                 </div>
               </div>

@@ -30,6 +30,7 @@ import {
   saveStudentAdvisingIntake,
   getDefaultAdvisorForSpecialty,
   calculateClerkshipHonorsCount,
+  INITIAL_MOCK_INTAKE,
 } from '@/domain/advising-intake-models';
 import {
   FileText,
@@ -103,16 +104,32 @@ export function StudentPortal({
   const [isIntakeModalOpen, setIsIntakeModalOpen] = useState(false);
   const { student, personalStatement, experiences, assignedAdvisors } = context;
 
-  // Specialty Advising Intake State (Ethmoid Governance)
-  const [advisingIntake, setAdvisingIntake] = useState<SpecialtyAdvisingIntake>(() =>
-    loadStudentAdvisingIntake(student.id)
-  );
+  // Specialty Advising Intake State (Deterministic SSR initialization to prevent hydration mismatches)
+  const [advisingIntake, setAdvisingIntake] = useState<SpecialtyAdvisingIntake>({
+    ...INITIAL_MOCK_INTAKE,
+    studentId: student.id,
+    applyingSpecialty: student.specialty || 'Internal Medicine',
+  });
   const [pendingSpecialtySwitch, setPendingSpecialtySwitch] = useState<string | null>(null);
 
-  // Student Target Specialty State (persisted & propagates across entire portal)
-  const [targetSpecialty, setTargetSpecialty] = useState<string>(() => {
-    return getStoredTargetSpecialty() || student.specialty || 'Internal Medicine';
-  });
+  // Student Target Specialty State (Deterministic SSR initialization)
+  const [targetSpecialty, setTargetSpecialty] = useState<string>(
+    student.specialty || 'Internal Medicine'
+  );
+
+  // Sync client-persisted localStorage after hydration mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const storedSpec = getStoredTargetSpecialty();
+      if (storedSpec) {
+        setTargetSpecialty(storedSpec);
+      }
+      const storedIntake = loadStudentAdvisingIntake(student.id);
+      if (storedIntake) {
+        setAdvisingIntake(storedIntake);
+      }
+    }
+  }, [student.id]);
 
   const handleSpecialtyChange = (newSpecialty: string) => {
     if (newSpecialty === targetSpecialty) return;
