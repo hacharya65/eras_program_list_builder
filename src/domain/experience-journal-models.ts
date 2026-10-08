@@ -12,6 +12,15 @@ export type JournalCategory =
   | 'Leadership Moment'
   | 'Personal Reflection';
 
+export const JOURNAL_CATEGORIES: JournalCategory[] = [
+  'Clinical Encounter',
+  'Patient Advocacy',
+  'Teaching & Mentorship',
+  'Research Breakthrough',
+  'Leadership Moment',
+  'Personal Reflection',
+];
+
 export interface ExperienceJournalEntry {
   id: string;
   studentId: string;

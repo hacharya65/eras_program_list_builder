@@ -62,6 +62,8 @@ import {
   BookOpen,
 } from 'lucide-react';
 
+import { JournalEntriesDrawer } from './JournalEntriesDrawer';
+
 interface StudentDashboardHomeProps {
   context: StudentDashboardContext;
   student: UserProfile;
@@ -89,6 +91,7 @@ interface StudentDashboardHomeProps {
       | 'letters'
       | 'experiences'
       | 'scholarly_works'
+      | 'journal'
       | 'transfer_kit'
       | 'alumni_directory'
   ) => void;
@@ -138,6 +141,7 @@ export function StudentDashboardHome({
   >('Clinical Encounter');
   const [journalNotes, setJournalNotes] = useState('');
   const [journalSuccessMessage, setJournalSuccessMessage] = useState<string | null>(null);
+  const [isJournalDrawerOpen, setIsJournalDrawerOpen] = useState(false);
 
   // School List Preview State
   const [savedPrograms, setSavedPrograms] = useState<SchoolListItem[]>([]);
@@ -578,21 +582,30 @@ export function StudentDashboardHome({
                     <BookOpen className="w-4 h-4 text-[#1F3A30]" />
                     <span>Journal</span>
                   </h2>
-                  <span
-                    className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200/80"
+                  <button
+                    type="button"
+                    onClick={() => setIsJournalDrawerOpen(true)}
+                    className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold border border-emerald-200/80 flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                    title="Click to browse saved journal entries"
                     suppressHydrationWarning
                   >
-                    {journalEntries.length} saved entries
-                  </span>
+                    <span>{journalEntries.length} saved entries</span>
+                    <ChevronRight className="w-3 h-3 text-emerald-600" />
+                  </button>
                 </div>
                 <p className="text-xs text-neutral-500 mt-0.5">
                   Quickly capture patient encounters, clinical insights, and takeaways to draw from later.
                 </p>
               </div>
 
-              <span className="text-[11px] text-neutral-400 italic hidden sm:inline">
-                Independent scratchpad &bull; private notes
-              </span>
+              <button
+                type="button"
+                onClick={() => setIsJournalDrawerOpen(true)}
+                className="text-xs font-bold text-[#1F3A30] hover:underline flex items-center gap-1 cursor-pointer self-start sm:self-auto shrink-0"
+              >
+                <span>View Entries ({journalEntries.length})</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
             </div>
 
             {journalSuccessMessage && (
@@ -660,6 +673,20 @@ export function StudentDashboardHome({
                 </button>
               </div>
             </form>
+
+            <div className="mt-3 pt-3 border-t border-neutral-100 flex items-center justify-between text-xs">
+              <span className="text-[11px] text-neutral-400">
+                Private scratchpad &bull; not submitted to ERAS
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsJournalDrawerOpen(true)}
+                className="text-xs font-bold text-[#1F3A30] hover:underline flex items-center gap-1 cursor-pointer"
+              >
+                <span>Browse Saved Entries ({journalEntries.length})</span>
+                <ChevronRight className="w-3.5 h-3.5" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1009,6 +1036,17 @@ export function StudentDashboardHome({
           </div>
         </div>
       )}
+
+      {/* Slide-over Drawer for Journal Entries */}
+      <JournalEntriesDrawer
+        isOpen={isJournalDrawerOpen}
+        onClose={() => {
+          setIsJournalDrawerOpen(false);
+          setJournalEntries(loadExperienceJournalEntries(student.id));
+        }}
+        studentId={student.id}
+        onNavigateToFullPage={() => onNavigate('journal')}
+      />
     </div>
   );
 }

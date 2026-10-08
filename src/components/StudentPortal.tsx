@@ -17,6 +17,7 @@ import { AlumniResidentDirectory } from './AlumniResidentDirectory';
 import { ErasTransferKit } from './ErasTransferKit';
 import { StudentDashboardHome } from './StudentDashboardHome';
 import { ProfileManagementView } from './ProfileManagementView';
+import { JournalRepositoryView } from './JournalRepositoryView';
 import {
   CANONICAL_SPECIALTIES,
   getStoredTargetSpecialty,
@@ -95,6 +96,7 @@ export function StudentPortal({
     | 'personal_statement_feedback'
     | 'experiences'
     | 'scholarly_works'
+    | 'journal'
     | 'school_list'
     | 'competitiveness'
     | 'alumni_directory'
@@ -237,6 +239,7 @@ export function StudentPortal({
       case 'personal_statement_feedback':
       case 'experiences':
       case 'scholarly_works':
+      case 'journal':
         return 'application';
       case 'letters':
       case 'transfer_kit':
@@ -303,6 +306,7 @@ export function StudentPortal({
         },
         { id: 'experiences', label: '10 Selected Experiences', icon: Briefcase },
         { id: 'scholarly_works', label: 'Scholarly Works', icon: BookOpen },
+        { id: 'journal', label: 'Journal', icon: BookOpen },
       ],
     },
     {
@@ -396,6 +400,17 @@ export function StudentPortal({
       return (
         <ScholarlyWorksManager
           onBack={() => setActiveView('overview')}
+        />
+      );
+    }
+
+    if (activeView === 'journal') {
+      return (
+        <JournalRepositoryView
+          student={student}
+          onBack={() => setActiveView('overview')}
+          onNavigateToExperiences={() => setActiveView('experiences')}
+          onNavigateToPersonalStatement={() => setActiveView('personal_statement')}
         />
       );
     }
