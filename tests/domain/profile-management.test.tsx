@@ -32,6 +32,7 @@ describe('ProfileManagementView', () => {
     email: 'arivera@som.edu',
     role: 'student',
     specialty: 'Internal Medicine',
+    institutionId: 'geisinger',
   };
 
   const mockAdvisor: UserProfile = {
@@ -40,6 +41,7 @@ describe('ProfileManagementView', () => {
     email: 'mchen@som.edu',
     role: 'advisor',
     specialty: 'Internal Medicine',
+    institutionId: 'geisinger',
   };
 
   it('renders student profile details and academic metrics correctly', () => {

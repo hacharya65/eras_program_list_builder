@@ -132,16 +132,12 @@ export function StudentDashboardHome({
 
   // Experience Journal Repository State (Completely decoupled from official 10 experiences)
   const [journalEntries, setJournalEntries] = useState<ExperienceJournalEntry[]>(INITIAL_MOCK_JOURNAL_ENTRIES);
-  const [quickJournalTitle, setQuickJournalTitle] = useState('');
-  const [quickJournalCategory, setQuickJournalCategory] = useState<
+  const [journalTitle, setJournalTitle] = useState('');
+  const [journalCategory, setJournalCategory] = useState<
     'Clinical Encounter' | 'Patient Advocacy' | 'Research Breakthrough' | 'Teaching & Mentorship' | 'Leadership Moment' | 'Personal Reflection'
   >('Clinical Encounter');
-  const [quickJournalSetting, setQuickJournalSetting] = useState('');
-  const [quickJournalObservation, setQuickJournalObservation] = useState('');
-  const [quickJournalTakeaway, setQuickJournalTakeaway] = useState('');
-  const [quickJournalKeyMemory, setQuickJournalKeyMemory] = useState(false);
+  const [journalNotes, setJournalNotes] = useState('');
   const [journalSuccessMessage, setJournalSuccessMessage] = useState<string | null>(null);
-  const [copiedJournalId, setCopiedJournalId] = useState<string | null>(null);
 
   // School List Preview State
   const [savedPrograms, setSavedPrograms] = useState<SchoolListItem[]>([]);
@@ -225,21 +221,21 @@ export function StudentDashboardHome({
     saveLetterWriterRequests(updated);
   };
 
-  // Dedicated Experience Journal save handler (does NOT mutate official 10 experiences)
+  // Dedicated Journal save handler (does NOT mutate official 10 experiences)
   const handleSaveJournalEntry = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!quickJournalTitle.trim() || !quickJournalObservation.trim()) return;
+    if (!journalTitle.trim() || !journalNotes.trim()) return;
 
     const newEntry: ExperienceJournalEntry = {
       id: `journal-${Date.now()}`,
       studentId: student.id,
-      title: quickJournalTitle.trim(),
-      category: quickJournalCategory,
+      title: journalTitle.trim(),
+      category: journalCategory,
       date: new Date().toISOString().slice(0, 10),
-      setting: quickJournalSetting.trim() || 'Geisinger Health System',
-      notableObservation: quickJournalObservation.trim(),
-      keyTakeaway: quickJournalTakeaway.trim(),
-      isKeyMemory: quickJournalKeyMemory,
+      setting: 'Clinical Setting',
+      notableObservation: journalNotes.trim(),
+      keyTakeaway: '',
+      isKeyMemory: false,
       createdAt: new Date().toISOString(),
     };
 
@@ -247,25 +243,13 @@ export function StudentDashboardHome({
     setJournalEntries(updated);
     saveExperienceJournalEntries(student.id, updated);
 
-    setJournalSuccessMessage(`Saved "${quickJournalTitle.trim()}" to your Experience Journal bank!`);
-    setQuickJournalTitle('');
-    setQuickJournalSetting('');
-    setQuickJournalObservation('');
-    setQuickJournalTakeaway('');
-    setQuickJournalKeyMemory(false);
+    setJournalSuccessMessage(`Saved to your Journal!`);
+    setJournalTitle('');
+    setJournalNotes('');
 
     setTimeout(() => {
       setJournalSuccessMessage(null);
-    }, 4000);
-  };
-
-  const handleCopyJournalText = (entry: ExperienceJournalEntry) => {
-    const textToCopy = `Title: ${entry.title}\nSetting: ${entry.setting}\nCategory: ${entry.category}\nObservation: ${entry.notableObservation}\nKey Takeaway: ${entry.keyTakeaway}`;
-    if (navigator?.clipboard) {
-      navigator.clipboard.writeText(textToCopy);
-      setCopiedJournalId(entry.id);
-      setTimeout(() => setCopiedJournalId(null), 2500);
-    }
+    }, 3500);
   };
 
   // Stage labels mapping
@@ -585,26 +569,29 @@ export function StudentDashboardHome({
             )}
           </div>
 
-          {/* Card B: Remarkable Experiences Journal & Clinical Moments Repository (Separate Feature) */}
+          {/* Card B: Journal (Simplified Low-Friction Clinical Reflection Scratchpad) */}
           <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-neutral-100">
               <div>
                 <div className="flex items-center gap-2">
                   <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
                     <BookOpen className="w-4 h-4 text-[#1F3A30]" />
-                    <span>Experience Journal &amp; Clinical Moments Bank</span>
+                    <span>Journal</span>
                   </h2>
-                  <span className="text-xs px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
-                    Repository ({journalEntries.length} entries)
+                  <span
+                    className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200/80"
+                    suppressHydrationWarning
+                  >
+                    {journalEntries.length} saved entries
                   </span>
                 </div>
                 <p className="text-xs text-neutral-500 mt-0.5">
-                  Private scratchpad for capturing remarkable patient encounters, leadership moments, and raw observations for future reference.
+                  Quickly capture patient encounters, clinical insights, and takeaways to draw from later.
                 </p>
               </div>
 
-              <span className="text-[11px] text-neutral-400 italic">
-                Independent scratchpad &bull; reference anytime
+              <span className="text-[11px] text-neutral-400 italic hidden sm:inline">
+                Independent scratchpad &bull; private notes
               </span>
             </div>
 
@@ -615,232 +602,64 @@ export function StudentDashboardHome({
               </div>
             )}
 
-            {/* Low-effort journal entry form */}
+            {/* Simple, low-friction journaling form: Topic + Reflection + Category + Save */}
             <form onSubmit={handleSaveJournalEntry} className="mt-4 space-y-3.5">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                    Encounter / Moment Title *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Bedside discussion with pulmonary hypertension patient"
-                    value={quickJournalTitle}
-                    onChange={(e) => setQuickJournalTitle(e.target.value)}
-                    className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B]"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                    Category Tag
-                  </label>
-                  <select
-                    value={quickJournalCategory}
-                    onChange={(e) => setQuickJournalCategory(e.target.value as any)}
-                    className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B] cursor-pointer"
-                  >
-                    <option value="Clinical Encounter">Clinical Encounter</option>
-                    <option value="Patient Advocacy">Patient Advocacy</option>
-                    <option value="Research Breakthrough">Research Breakthrough</option>
-                    <option value="Teaching & Mentorship">Teaching &amp; Mentorship</option>
-                    <option value="Leadership Moment">Leadership Moment</option>
-                    <option value="Personal Reflection">Personal Reflection</option>
-                  </select>
-                </div>
-              </div>
-
               <div>
                 <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                  Hospital / Clinical Setting
+                  Topic or Encounter *
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. GMC Danville MICU / Scranton Regional Campus"
-                  value={quickJournalSetting}
-                  onChange={(e) => setQuickJournalSetting(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B]"
-                />
-              </div>
-
-              <div>
-                <div className="flex items-center justify-between mb-1">
-                  <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider">
-                    Notable Observation &amp; Bedside Narrative *
-                  </label>
-                  <span className="text-[10px] text-neutral-400">Raw memory &bull; capture before you forget</span>
-                </div>
-                <textarea
-                  rows={2}
                   required
-                  placeholder="What specifically happened? What patient dynamic, procedural insight, or clinical nuance stood out?"
-                  value={quickJournalObservation}
-                  onChange={(e) => setQuickJournalObservation(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B]"
+                  placeholder="e.g., ICU family meeting, night float consult, pediatric sedation debrief..."
+                  value={journalTitle}
+                  onChange={(e) => setJournalTitle(e.target.value)}
+                  className="w-full px-3.5 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B] shadow-2xs"
                 />
               </div>
 
               <div>
                 <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                  Key Takeaway / Why This Matters for Specialty Choice
+                  Reflection &amp; Notes *
                 </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Reinforced passion for high-acuity physiology and empathetic family counseling."
-                  value={quickJournalTakeaway}
-                  onChange={(e) => setQuickJournalTakeaway(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B]"
+                <textarea
+                  rows={3}
+                  required
+                  placeholder="What happened? What patient dynamics, procedural lessons, or personal reflections stood out? Jot them down while fresh..."
+                  value={journalNotes}
+                  onChange={(e) => setJournalNotes(e.target.value)}
+                  className="w-full px-3.5 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B] shadow-2xs"
                 />
               </div>
 
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                <label className="flex items-center gap-2 cursor-pointer text-xs text-neutral-700">
-                  <input
-                    type="checkbox"
-                    checked={quickJournalKeyMemory}
-                    onChange={(e) => setQuickJournalKeyMemory(e.target.checked)}
-                    className="w-4 h-4 rounded text-[#1F3A30] focus:ring-[#7EAE9B] cursor-pointer"
-                  />
-                  <span>Star as <strong>Pivotal Career Memory</strong></span>
-                </label>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
+                    Category:
+                  </span>
+                  <select
+                    value={journalCategory}
+                    onChange={(e) => setJournalCategory(e.target.value as any)}
+                    className="px-2.5 py-1.5 text-xs font-semibold border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-800 focus:outline-none focus:ring-2 focus:ring-[#7EAE9B] cursor-pointer"
+                  >
+                    <option value="Clinical Encounter">Clinical Encounter</option>
+                    <option value="Patient Advocacy">Patient Advocacy</option>
+                    <option value="Teaching & Mentorship">Teaching &amp; Mentorship</option>
+                    <option value="Research Breakthrough">Research Breakthrough</option>
+                    <option value="Leadership Moment">Leadership Moment</option>
+                    <option value="Personal Reflection">Personal Reflection</option>
+                  </select>
+                </div>
 
                 <button
                   type="submit"
                   className="px-4 py-2 bg-[#1F3A30] hover:bg-[#162D25] text-white font-bold text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
                 >
                   <Plus className="w-3.5 h-3.5" />
-                  <span>Save to Journal Repository</span>
+                  <span>Save Entry</span>
                 </button>
               </div>
             </form>
-
-            {/* Saved Journal Entries Bank */}
-            {journalEntries.length > 0 && (
-              <div className="mt-5 pt-4 border-t border-neutral-100">
-                <div className="flex items-center justify-between mb-2.5">
-                  <div className="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">
-                    Stored Journal Entries ({journalEntries.length})
-                  </div>
-                  <span className="text-[10px] text-neutral-400">
-                    Use these to draft official 750-char MyERAS descriptions
-                  </span>
-                </div>
-
-                <div className="space-y-2.5">
-                  {journalEntries.slice(0, 3).map((entry) => (
-                    <div
-                      key={entry.id}
-                      className="p-3 bg-[#FBFBFA] border border-neutral-200/70 rounded-xl text-xs space-y-1.5 hover:border-neutral-300 transition-colors"
-                    >
-                      <div className="flex items-start justify-between gap-2">
-                        <div>
-                          <div className="flex items-center gap-2">
-                            <span className="font-bold text-neutral-900">{entry.title}</span>
-                            {entry.isKeyMemory && (
-                              <span className="px-1.5 py-0.2 rounded-full text-[9px] font-bold bg-amber-100 text-amber-800">
-                                ★ Pivotal
-                              </span>
-                            )}
-                          </div>
-                          <div className="text-[11px] text-neutral-500 mt-0.5">
-                            {entry.setting} &bull; <strong className="text-neutral-700">{entry.category}</strong> &bull; {entry.date}
-                          </div>
-                        </div>
-
-                        <button
-                          onClick={() => handleCopyJournalText(entry)}
-                          className="px-2 py-1 bg-white hover:bg-neutral-100 border border-neutral-200 rounded-lg text-[10px] font-semibold text-neutral-700 flex items-center gap-1 shrink-0 cursor-pointer shadow-2xs"
-                          title="Copy raw observation text to clipboard for MyERAS drafting"
-                        >
-                          <Copy className="w-3 h-3" />
-                          <span>{copiedJournalId === entry.id ? 'Copied!' : 'Copy'}</span>
-                        </button>
-                      </div>
-
-                      <p className="text-neutral-700 text-[11px] line-clamp-2 leading-relaxed">
-                        {entry.notableObservation}
-                      </p>
-
-                      {entry.keyTakeaway && (
-                        <div className="text-[10px] text-neutral-500 italic bg-white p-1.5 rounded-lg border border-neutral-100">
-                          <strong>Takeaway:</strong> {entry.keyTakeaway}
-                        </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-
-          {/* Card C: Personal Statement Draft Preview & Excerpt */}
-          <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-neutral-100">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
-                    <FileText className="w-4 h-4 text-[#1F3A30]" />
-                    <span>Personal Statement Draft Preview</span>
-                  </h2>
-                  <span className={`px-2.5 py-0.5 rounded-full text-xs font-semibold border ${psStage.color}`}>
-                    {psStage.label}
-                  </span>
-                </div>
-                <p className="text-xs text-neutral-500 mt-0.5">
-                  Version v{personalStatement.currentVersionNumber} &bull; {personalStatement.content.length} characters
-                  (~{Math.round(personalStatement.content.split(/\s+/).filter(Boolean).length)} words)
-                </p>
-              </div>
-
-              <div className="flex items-center gap-2">
-                {latestPSFeedback && (
-                  <button
-                    onClick={() => onNavigate('personal_statement_feedback')}
-                    className="px-3 py-1.5 bg-purple-50 hover:bg-purple-100 text-purple-900 border border-purple-200 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
-                  >
-                    <MessageSquare className="w-3.5 h-3.5 text-purple-700" />
-                    <span>Feedback Notes</span>
-                  </button>
-                )}
-                <button
-                  onClick={onOpenSplitCanvas}
-                  className="px-3.5 py-1.5 bg-[#1F3A30] hover:bg-[#162D25] text-white rounded-xl text-xs font-semibold flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer"
-                >
-                  <Columns className="w-3.5 h-3.5 text-[#7EAE9B]" />
-                  <span>Open Split Canvas</span>
-                </button>
-              </div>
-            </div>
-
-            {/* Excerpt Box */}
-            <div className="mt-4 p-4 bg-[#FBFBFA] border border-neutral-200/80 rounded-xl relative overflow-hidden">
-              {personalStatement.content ? (
-                <>
-                  <p className="text-xs text-neutral-700 leading-relaxed italic line-clamp-4 font-serif">
-                    &ldquo;{personalStatement.content}&rdquo;
-                  </p>
-                  <div className="absolute inset-x-0 bottom-0 h-8 bg-gradient-to-t from-[#FBFBFA] to-transparent pointer-events-none" />
-                </>
-              ) : (
-                <div className="text-xs text-neutral-500 italic text-center py-2">
-                  No draft text entered yet. Begin writing your personal statement hook to start receiving faculty feedback.
-                </div>
-              )}
-            </div>
-
-            <div className="mt-3 flex items-center justify-between text-xs text-neutral-500">
-              <span className="text-[11px]">
-                Target Specialty: <strong className="text-neutral-700">{targetSpecialty}</strong>
-              </span>
-              <button
-                onClick={() => onNavigate('personal_statement')}
-                className="font-bold text-[#1F3A30] hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <span>Continue Drafting Sandbox</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
           </div>
         </div>
 
