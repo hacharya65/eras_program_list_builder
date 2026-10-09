@@ -132,15 +132,68 @@ export function deleteScholarlyCollection(
   return collections.filter(c => c.id !== collectionId);
 }
 
+export const SAMPLE_SCHOLARLY_WORKS: ScholarlyWork[] = [
+  {
+    id: 'sw-1',
+    studentId: 'student-1',
+    type: 'Journal Articles (peer reviewed)',
+    title: 'Longitudinal Pulmonary Function Trends Following ARDS in ICU Survivors',
+    authors: 'Rivera A, Chen M, Vance S',
+    isFirstAuthor: true,
+    publicationStatus: 'Published',
+    statusDate: '2024-05-12',
+    journalName: 'American Journal of Respiratory and Critical Care Medicine',
+    volume: '198',
+    pages: '412-420',
+    pmid: '38721904',
+    collectionId: 'col-1',
+    isMeaningful: true,
+  },
+  {
+    id: 'sw-2',
+    studentId: 'student-1',
+    type: 'Poster Presentation',
+    title: 'Community Health Worker Intervention for Uncontrolled Type 2 Diabetes',
+    authors: 'Patel P, Rivera A, Hayes R',
+    isFirstAuthor: false,
+    publicationStatus: 'Accepted/In-Press',
+    statusDate: '2023-11-18',
+    collectionId: 'col-2',
+    isMeaningful: true,
+    events: [
+      {
+        eventName: 'Society of General Internal Medicine Annual Meeting',
+        presentationDate: '2024-04-15',
+        city: 'Boston',
+        country: 'United States',
+        stateProvince: 'MA',
+      },
+    ],
+  },
+];
+
+export const SAMPLE_SCHOLARLY_COLLECTIONS: ScholarlyCollection[] = [
+  { id: 'col-1', studentId: 'student-1', title: 'Critical Care & Pulmonary Outcomes' },
+  { id: 'col-2', studentId: 'student-1', title: 'Community Health Interventions' },
+];
+
 export function serializeScholarlyPortfolio(
-  works: ScholarlyWork[],
-  collections: ScholarlyCollection[]
+  worksOrPayload: ScholarlyWork[] | { works: ScholarlyWork[]; collections?: ScholarlyCollection[]; lastUpdated?: string },
+  maybeCollections?: ScholarlyCollection[]
 ): string {
+  if (Array.isArray(worksOrPayload)) {
+    return JSON.stringify({
+      version: 1,
+      savedAt: new Date().toISOString(),
+      works: worksOrPayload,
+      collections: maybeCollections || [],
+    });
+  }
   return JSON.stringify({
     version: 1,
-    savedAt: new Date().toISOString(),
-    works,
-    collections,
+    savedAt: worksOrPayload.lastUpdated || new Date().toISOString(),
+    works: worksOrPayload.works || [],
+    collections: worksOrPayload.collections || [],
   });
 }
 
@@ -150,10 +203,10 @@ export function deserializeScholarlyPortfolio(
   if (!json) return null;
   try {
     const parsed = JSON.parse(json);
-    if (parsed && Array.isArray(parsed.works) && Array.isArray(parsed.collections)) {
+    if (parsed && Array.isArray(parsed.works)) {
       return {
         works: parsed.works,
-        collections: parsed.collections,
+        collections: Array.isArray(parsed.collections) ? parsed.collections : [],
       };
     }
     return null;
@@ -161,4 +214,5 @@ export function deserializeScholarlyPortfolio(
     return null;
   }
 }
+
 

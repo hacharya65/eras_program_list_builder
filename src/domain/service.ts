@@ -12,9 +12,36 @@ import { InMemoryStorageAdapter } from './storage/in-memory-adapter';
 import { validateExperiencesSubmission } from './experience-validation';
 import { saveStoredAnnotations, saveStoredThreads } from './annotation-models';
 import { AlumniResident } from './alumni-models';
+import {
+  PortfolioRepository,
+  InMemoryPortfolioAdapter,
+  StudentPortfolio,
+  PortfolioSummaryStats,
+  calculatePortfolioStats,
+} from './student-portfolio';
 
 export class AdvisingPlatformService {
-  constructor(private storage: InMemoryStorageAdapter) {}
+  constructor(
+    private storage: InMemoryStorageAdapter,
+    private portfolioRepo: PortfolioRepository = new InMemoryPortfolioAdapter()
+  ) {}
+
+  getStudentPortfolio(studentId: string): StudentPortfolio {
+    return this.portfolioRepo.loadPortfolio(studentId);
+  }
+
+  saveStudentPortfolio(portfolio: StudentPortfolio): void {
+    this.portfolioRepo.savePortfolio(portfolio);
+  }
+
+  updateStudentPortfolio(studentId: string, mutator: (p: StudentPortfolio) => void): StudentPortfolio {
+    return this.portfolioRepo.updatePortfolio(studentId, mutator);
+  }
+
+  getStudentPortfolioStats(studentId: string): PortfolioSummaryStats {
+    const p = this.getStudentPortfolio(studentId);
+    return calculatePortfolioStats(p);
+  }
 
   getAvailablePersonas(): UserProfile[] {
     return this.storage.getAvailablePersonas();
@@ -247,16 +274,22 @@ export class AdvisingPlatformService {
     const adviseeComponentBreakdowns: Record<string, import('./types').AdviseeComponentBreakdown> = {};
     for (const adv of advisees) {
       const advExperiences = this.storage.experiences.filter((e) => !e.studentId || e.studentId === adv.id);
+      const advPortfolio = this.portfolioRepo.loadPortfolio(adv.id, adv.specialty);
+      const advStats = calculatePortfolioStats(advPortfolio);
+
       adviseeComponentBreakdowns[adv.id] = {
         studentId: adv.id,
         experiencesCount: advExperiences.length,
         experiencesMeaningful: advExperiences.filter((e) => e.isMostMeaningful).length,
-        scholarlyCount: 2,
-        schoolListCount: 0,
-        signalsAssigned: 0,
-        signalsBudget: 15,
+        scholarlyCount: advStats.scholarlyStats.count,
+        schoolListCount: advStats.schoolListStats.count,
+        signalsAssigned: advStats.schoolListStats.signalsAssigned,
+        signalsBudget: advStats.schoolListStats.signalsBudget,
       };
     }
+
+    const primaryPortfolio = this.portfolioRepo.loadPortfolio(student.id, student.specialty);
+    const primaryStats = calculatePortfolioStats(primaryPortfolio);
 
     return {
       advisor,
@@ -266,8 +299,8 @@ export class AdvisingPlatformService {
       personalStatement: this.storage.personalStatement,
       snapshots: this.storage.snapshots,
       experiences: this.storage.experiences,
-      scholarlyStats: { count: 2, meaningful: 2 },
-      schoolListStats: { count: 0, signalsAssigned: 0, signalsBudget: 15 },
+      scholarlyStats: primaryStats.scholarlyStats,
+      schoolListStats: primaryStats.schoolListStats,
       adviseeComponentBreakdowns,
     };
   }

@@ -9,9 +9,12 @@ import { StudentPortal } from '@/components/StudentPortal';
 import { AdvisorPortal } from '@/components/AdvisorPortal';
 import { AdminPortal } from '@/components/AdminPortal';
 
-// Instantiate singleton service with in-memory adapter for immediate high-speed demo & testing
+import { BrowserStoragePortfolioAdapter } from '@/domain/student-portfolio';
+
+// Instantiate singleton service with in-memory adapter and browser storage portfolio adapter
 const storage = new InMemoryStorageAdapter();
-const service = new AdvisingPlatformService(storage);
+const portfolioRepo = new BrowserStoragePortfolioAdapter();
+const service = new AdvisingPlatformService(storage, portfolioRepo);
 
 export default function HomePage() {
   const [currentRole, setCurrentRole] = useState<UserRole>('student');
