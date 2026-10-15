@@ -100,6 +100,7 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
 
   const docContainerRef = useRef<HTMLDivElement>(null);
   const commentCardsRef = useRef<Record<string, HTMLDivElement | null>>({});
+  const passageSpansRef = useRef<Record<string, HTMLSpanElement | null>>({});
 
   // Strictly isolate annotations to this version ID and load historical draft log if version > 1
   useEffect(() => {
@@ -115,11 +116,39 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
       return true;
     });
 
+    // Reconcile threads that may not have an active annotation in the annotations list
+    const reconciledAnn = [...cleanedAnn];
+    for (const thr of loadedThr) {
+      if (thr.anchorText) {
+        const hasAnn = reconciledAnn.some(
+          (a) => a.id === thr.annotationId || (thr.anchorText && a.anchorText === thr.anchorText)
+        );
+        if (!hasAnn) {
+          const firstComment = thr.comments[0];
+          reconciledAnn.push({
+            id: thr.annotationId || `syn-${thr.id}`,
+            documentId: effectiveBaseDocId,
+            documentVersionId: effectiveVersionId,
+            authorId: firstComment?.authorId || 'advisor-01',
+            authorName: firstComment?.authorName || 'Faculty Advisor',
+            authorRole: firstComment?.authorRole || 'advisor',
+            startOffset: thr.startOffset,
+            endOffset: thr.endOffset,
+            anchorText: thr.anchorText,
+            type: 'highlight',
+            color: 'yellow',
+            status: 'active',
+            createdAt: thr.createdAt,
+          });
+        }
+      }
+    }
+
     if (cleanedAnn.length !== loadedAnn.length) {
       saveStoredAnnotations(effectiveBaseDocId, cleanedAnn, effectiveVersionId);
     }
 
-    setAnnotations(cleanedAnn);
+    setAnnotations(reconciledAnn);
     setThreads(loadedThr);
 
     const vNum = versionNumber || (parseInt(effectiveVersionId.replace('v', ''), 10) || 1);
@@ -467,28 +496,52 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
               }
 
               const ann = span.annotation;
-              const isSelected = selectedThreadId === span.thread?.id;
+              const linkedThread =
+                span.thread ||
+                threads.find(
+                  (t) => t.annotationId === ann.id || (ann.anchorText && t.anchorText === ann.anchorText)
+                );
+              const isSelected = Boolean(
+                selectedThreadId && linkedThread && selectedThreadId === linkedThread.id
+              );
 
-              let styleClasses = 'cursor-pointer transition-colors px-0.5 rounded ';
+              let styleClasses = 'cursor-pointer transition-all duration-200 px-1 py-0.5 rounded font-medium inline ';
               if (ann.type === 'strikethrough') {
-                styleClasses += 'bg-red-100 line-through text-red-800 decoration-red-600 font-medium ';
+                styleClasses += isSelected
+                  ? 'bg-red-200 line-through text-red-950 ring-2 ring-red-500 ring-offset-1 font-bold shadow-xs '
+                  : 'bg-red-100 line-through text-red-800 decoration-red-600 hover:bg-red-200 ';
               } else if (ann.type === 'replacement') {
-                styleClasses += 'bg-emerald-100 border-b-2 border-emerald-500 text-emerald-900 ';
+                styleClasses += isSelected
+                  ? 'bg-emerald-200 border-b-2 border-emerald-600 text-emerald-950 ring-2 ring-emerald-500 ring-offset-1 font-bold shadow-xs '
+                  : 'bg-emerald-100 border-b-2 border-emerald-500 text-emerald-900 hover:bg-emerald-200 ';
               } else {
-                // Comment anchor: clean sky accent with subtle underline, no yellow marker styling
-                styleClasses += 'bg-sky-50 border-b-2 border-sky-400 text-slate-900 hover:bg-sky-100 ';
-              }
-
-              if (isSelected) {
-                styleClasses += 'bg-sky-100 ring-2 ring-sky-300 font-medium ';
+                // Highly visible warm amber highlight with distinct bottom border; increases intensity on selection
+                styleClasses += isSelected
+                  ? 'bg-amber-300 text-amber-950 border-b-2 border-amber-600 ring-2 ring-amber-500 ring-offset-1 font-bold shadow-xs '
+                  : 'bg-amber-100/95 text-neutral-900 border-b-2 border-amber-400 hover:bg-amber-200 hover:border-amber-500 ';
               }
 
               return (
                 <span
                   key={idx}
-                  onClick={() => handleSpanClick(ann)}
+                  ref={(el) => {
+                    if (linkedThread) {
+                      passageSpansRef.current[linkedThread.id] = el;
+                    }
+                  }}
+                  onClick={() => {
+                    if (linkedThread) {
+                      setSelectedThreadId(linkedThread.id);
+                      commentCardsRef.current[linkedThread.id]?.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                      });
+                    } else {
+                      handleSpanClick(ann);
+                    }
+                  }}
                   className={styleClasses}
-                  title={`Comment/Markup by ${ann.authorName} (${ann.authorRole})`}
+                  title={`Comment/Markup by ${ann.authorName} (${ann.authorRole}): click to highlight and view comment card`}
                 >
                   {span.text}
                   {ann.type === 'replacement' && ann.suggestedText && (
@@ -604,7 +657,9 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
           ) : (
             filteredThreads.map((thread) => {
               const isSelected = selectedThreadId === thread.id;
-              const linkedAnn = annotations.find((a) => a.id === thread.annotationId);
+              const linkedAnn = annotations.find(
+                (a) => a.id === thread.annotationId || (thread.anchorText && a.anchorText === thread.anchorText)
+              );
               const isResolved = thread.status === 'resolved';
 
               return (
@@ -613,21 +668,39 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
                   ref={(el) => {
                     commentCardsRef.current[thread.id] = el;
                   }}
-                  className={`bg-white rounded-xl border transition-all p-4 shadow-sm space-y-3 ${
+                  onClick={() => {
+                    setSelectedThreadId(thread.id);
+                    const targetSpan = passageSpansRef.current[thread.id];
+                    if (targetSpan) {
+                      targetSpan.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'center',
+                      });
+                    }
+                  }}
+                  className={`bg-white rounded-xl border transition-all p-4 shadow-sm space-y-3 cursor-pointer ${
                     isSelected
-                      ? 'border-sky-500 ring-2 ring-sky-100 shadow-md'
+                      ? 'border-amber-500 ring-2 ring-amber-200 shadow-md bg-amber-50/20'
                       : isResolved
-                      ? 'border-slate-200 opacity-70 bg-slate-50/50'
-                      : 'border-slate-200 hover:border-slate-300'
+                      ? 'border-slate-200 opacity-70 bg-slate-50/50 hover:opacity-100 hover:border-slate-300'
+                      : 'border-slate-200 hover:border-amber-300 hover:shadow-xs'
                   }`}
                 >
                   {/* Anchor text snippet banner */}
-                  <div className="flex items-start justify-between gap-2 border-l-2 border-sky-500 pl-2.5 py-0.5 text-xs">
+                  <div
+                    className={`flex items-start justify-between gap-2 border-l-2 pl-2.5 py-0.5 text-xs ${
+                      isSelected ? 'border-amber-500' : 'border-slate-400'
+                    }`}
+                  >
                     <div>
                       <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">
                         Referenced Passage:
                       </span>
-                      <span className="italic text-slate-700 font-medium line-clamp-2">
+                      <span
+                        className={`italic font-medium line-clamp-2 ${
+                          isSelected ? 'text-amber-950 font-semibold' : 'text-slate-700'
+                        }`}
+                      >
                         &quot;{thread.anchorText}&quot;
                       </span>
                     </div>
@@ -636,6 +709,8 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
                       className={`text-[10px] font-bold px-1.5 py-0.5 rounded capitalize ${
                         isResolved
                           ? 'bg-slate-100 text-slate-600'
+                          : isSelected
+                          ? 'bg-amber-200 text-amber-900 border border-amber-300'
                           : 'bg-amber-100 text-amber-800'
                       }`}
                     >
@@ -665,7 +740,7 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
 
                       {/* Action buttons for applicant or advisor */}
                       {userRole === 'applicant' && linkedAnn.status === 'active' && (
-                        <div className="flex items-center gap-2 pt-1">
+                        <div className="flex items-center gap-2 pt-1" onClick={(e) => e.stopPropagation()}>
                           <button
                             onClick={() => handleAcceptSuggestion(linkedAnn.id)}
                             className="px-2.5 py-1 text-[11px] font-bold rounded bg-emerald-600 hover:bg-emerald-700 text-white flex items-center gap-1 shadow-xs transition-colors"
@@ -716,7 +791,7 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
                   </div>
 
                   {/* Reply Input Box */}
-                  <div className="pt-2 border-t border-slate-100 space-y-2">
+                  <div className="pt-2 border-t border-slate-100 space-y-2" onClick={(e) => e.stopPropagation()}>
                     <div className="flex items-center gap-2">
                       <input
                         type="text"
@@ -733,7 +808,7 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
                       <button
                         onClick={() => handleSendReply(thread.id)}
                         disabled={!replyTexts[thread.id]?.trim()}
-                        className="p-1.5 bg-sky-600 hover:bg-sky-700 disabled:opacity-40 text-white rounded-lg transition-colors"
+                        className="p-1.5 bg-sky-600 hover:bg-sky-700 disabled:opacity-40 text-white rounded-lg transition-colors cursor-pointer"
                         title="Send reply"
                       >
                         <Send className="w-3.5 h-3.5" />
@@ -744,7 +819,7 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
                     <div className="flex items-center justify-between text-[11px] pt-1">
                       <button
                         onClick={() => handleToggleResolve(thread.id)}
-                        className="text-slate-500 hover:text-slate-800 flex items-center gap-1 font-medium transition-colors"
+                        className="text-slate-500 hover:text-slate-800 flex items-center gap-1 font-medium transition-colors cursor-pointer"
                       >
                         <CheckCircle2 className="w-3 h-3 text-emerald-600" />
                         {isResolved ? 'Reopen Thread' : 'Mark Resolved'}
@@ -753,7 +828,7 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
                       {userRole === 'advisor' && linkedAnn && (
                         <button
                           onClick={() => handleDeleteAnnotation(linkedAnn.id)}
-                          className="text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors"
+                          className="text-red-500 hover:text-red-700 flex items-center gap-1 transition-colors cursor-pointer"
                           title="Delete annotation"
                         >
                           <Trash2 className="w-3 h-3" />

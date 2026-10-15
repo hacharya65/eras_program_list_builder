@@ -26,7 +26,7 @@ interface StudentFeedbackHubProps {
   personalStatementStage: ReviewStage;
   onBack: () => void;
   onStartRevision: (targetVersion: number) => void;
-  onOpenEditor: (initialMode?: 'split' | 'editor') => void;
+  onOpenEditor: (initialMode?: 'editor' | 'annotations') => void;
 }
 
 export function StudentFeedbackHub({
@@ -187,18 +187,18 @@ export function StudentFeedbackHub({
           </div>
         </div>
 
-        {/* Action Button: Start Next Iteration / Open Split Screen */}
+        {/* Action Button: Start Next Iteration / Open Focus Canvas */}
         <div className="flex items-center gap-2 shrink-0">
           {!isEndorsed && (
             <>
               {currentDraftVersion > versionNumber && personalStatementStage === 'drafting' ? (
                 <button
                   id="continue-revision-draft-btn"
-                  onClick={() => onOpenEditor('split')}
-                  className="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+                  onClick={() => onOpenEditor('editor')}
+                  className="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 transition-all transform hover:-translate-y-0.5 cursor-pointer"
                 >
-                  <Columns className="w-4 h-4" />
-                  <span>Resume v{currentDraftVersion} (Split-Screen)</span>
+                  <Edit3 className="w-4 h-4" />
+                  <span>Resume v{currentDraftVersion} (Focus Canvas)</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               ) : (
@@ -206,12 +206,12 @@ export function StudentFeedbackHub({
                   id="create-next-revision-btn"
                   onClick={() => {
                     onStartRevision(versionNumber + 1);
-                    onOpenEditor('split');
+                    onOpenEditor('editor');
                   }}
-                  className="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 transition-all transform hover:-translate-y-0.5"
+                  className="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-bold rounded-lg shadow-sm flex items-center gap-2 transition-all transform hover:-translate-y-0.5 cursor-pointer"
                 >
                   <Edit3 className="w-4 h-4" />
-                  <span>Create v{versionNumber + 1} Revision & Iterate</span>
+                  <span>Create v{versionNumber + 1} Revision &amp; Edit</span>
                   <ArrowRight className="w-4 h-4" />
                 </button>
               )}
@@ -422,11 +422,11 @@ export function StudentFeedbackHub({
                   if (currentDraftVersion <= versionNumber) {
                     onStartRevision(versionNumber + 1);
                   }
-                  onOpenEditor('split');
+                  onOpenEditor('editor');
                 }}
                 className="px-5 py-2.5 bg-purple-600 hover:bg-purple-700 text-white text-xs font-extrabold rounded-lg shadow-sm flex items-center justify-center gap-2 transition-all shrink-0 cursor-pointer"
               >
-                <span>Launch Split-Screen Iteration Canvas</span>
+                <span>Launch Focus Canvas &amp; Iterate</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
             </div>
@@ -442,10 +442,10 @@ export function StudentFeedbackHub({
               <strong>v{versionNumber}</strong>.
             </span>
             <button
-              onClick={() => onOpenEditor('split')}
-              className="text-xs font-bold text-purple-700 hover:text-purple-800 underline flex items-center gap-1"
+              onClick={() => onOpenEditor('editor')}
+              className="text-xs font-bold text-purple-700 hover:text-purple-800 underline flex items-center gap-1 cursor-pointer"
             >
-              Open Split-Screen Canvas <ArrowRight className="w-3.5 h-3.5" />
+              Open Focus Canvas <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 

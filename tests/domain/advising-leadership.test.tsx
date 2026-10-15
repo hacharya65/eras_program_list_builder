@@ -9,7 +9,12 @@ import { StudentDashboardContext } from '@/domain/types';
 
 describe('AdvisingLeadership Integration & Navigation', () => {
   const mockContext: StudentDashboardContext = {
-    institution: { id: 'geisinger', name: 'Geisinger Commonwealth School of Medicine' },
+    institution: {
+      id: 'geisinger',
+      name: 'Geisinger Commonwealth School of Medicine',
+      domain: 'som.geisinger.edu',
+      defaultSlaDays: 14,
+    },
     student: {
       id: 'student-alex-rivera',
       name: 'Alex Rivera',
@@ -31,13 +36,14 @@ describe('AdvisingLeadership Integration & Navigation', () => {
     personalStatement: {
       id: 'ps-1',
       studentId: 'student-alex-rivera',
-      version: 1,
+      specialty: 'Internal Medicine',
+      currentVersionNumber: 1,
       content: 'Draft content',
       updatedAt: '2026-09-01T12:00:00Z',
       stage: 'drafting',
     },
     experiences: [],
-    reviewRequests: [],
+    activeReviewRequests: [],
   };
 
   it('renders AdvisingLeadershipView with full directory leadership contacts and navigation', () => {
@@ -86,9 +92,10 @@ describe('AdvisingLeadership Integration & Navigation', () => {
         personalStatement={mockContext.personalStatement}
         experiences={[]}
         assignedAdvisors={mockContext.assignedAdvisors}
+        scholarlyStats={{ count: 0, meaningful: 0 }}
+        schoolListStats={{ count: 0, signalsAssigned: 0 }}
         onNavigate={() => {}}
         onOpenSplitCanvas={() => {}}
-        onOpenScholarlyWorks={() => {}}
       />
     );
 

@@ -105,7 +105,7 @@ export function StudentPortal({
     | 'letters'
     | 'advising_leadership'
   >('overview');
-  const [psEditorMode, setPsEditorMode] = useState<'editor' | 'annotations' | 'split'>('split');
+  const [psEditorMode, setPsEditorMode] = useState<'editor' | 'annotations'>('editor');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isIntakeModalOpen, setIsIntakeModalOpen] = useState(false);
   const { student, personalStatement, experiences, assignedAdvisors } = context;
@@ -410,8 +410,8 @@ export function StudentPortal({
           onStartRevision={(targetVersion) => {
             onCreateRevision?.(targetVersion);
           }}
-          onOpenEditor={(initialMode = 'split') => {
-            setPsEditorMode(initialMode);
+          onOpenEditor={(initialMode = 'editor') => {
+            setPsEditorMode(initialMode === 'annotations' ? 'annotations' : 'editor');
             updateView('personal_statement');
           }}
         />
@@ -582,7 +582,7 @@ export function StudentPortal({
         schoolListStats={schoolListStats}
         onNavigate={(view) => updateView(view)}
         onOpenSplitCanvas={() => {
-          setPsEditorMode('split');
+          setPsEditorMode('editor');
           updateView('personal_statement');
         }}
         alumniResidents={alumniResidents}

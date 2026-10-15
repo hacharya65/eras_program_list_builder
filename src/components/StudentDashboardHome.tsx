@@ -44,6 +44,7 @@ import {
   MessageSquare,
   Sparkles,
   Columns,
+  Edit3,
   Mail,
   UserCheck,
   Building,
@@ -394,8 +395,8 @@ export function StudentDashboardHome({
                 onClick={onOpenSplitCanvas}
                 className="px-3.5 py-2 text-xs font-bold rounded-xl bg-white border border-purple-300 text-purple-900 hover:bg-purple-50 flex items-center gap-1.5 transition-all cursor-pointer shadow-2xs"
               >
-                <Columns className="w-3.5 h-3.5 text-purple-600" />
-                <span>Split-Screen Draft</span>
+                <Edit3 className="w-3.5 h-3.5 text-purple-600" />
+                <span>Focus Canvas</span>
               </button>
             )}
           </div>

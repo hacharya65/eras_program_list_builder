@@ -241,21 +241,76 @@ export function segmentDocumentText(
 ): TextSpan[] {
   if (!fullText) return [];
 
-  // Active annotations only, sorted by startOffset then endOffset
-  const activeAnnotations = annotations
-    .filter((a) => a.status === 'active')
-    .sort((a, b) => a.startOffset - b.startOffset || a.endOffset - b.endOffset);
+  // Active annotations only
+  const reconciledAnnotations: DocumentAnnotation[] = [
+    ...annotations.filter((a) => a.status === 'active'),
+  ];
 
-  if (activeAnnotations.length === 0) {
+  // Reconcile threads that may not have an active annotation in the annotations list
+  for (const thr of threads) {
+    if (thr.status !== 'resolved' && thr.anchorText) {
+      const hasAnn = reconciledAnnotations.some(
+        (a) => a.id === thr.annotationId || (thr.anchorText && a.anchorText === thr.anchorText)
+      );
+      if (!hasAnn) {
+        const firstComment = thr.comments[0];
+        reconciledAnnotations.push({
+          id: thr.annotationId || `syn-${thr.id}`,
+          documentId: thr.documentId,
+          documentVersionId: thr.documentVersionId,
+          authorId: firstComment?.authorId || 'advisor-01',
+          authorName: firstComment?.authorName || 'Faculty Advisor',
+          authorRole: firstComment?.authorRole || 'advisor',
+          startOffset: thr.startOffset,
+          endOffset: thr.endOffset,
+          anchorText: thr.anchorText,
+          type: 'highlight',
+          color: 'yellow',
+          status: 'active',
+          createdAt: thr.createdAt,
+        });
+      }
+    }
+  }
+
+  // Resiliently validate character offsets against fullText and self-heal from anchorText if necessary
+  const validAnnotations = reconciledAnnotations
+    .map((ann) => {
+      let start = Math.max(0, Math.min(ann.startOffset, fullText.length));
+      let end = Math.max(start, Math.min(ann.endOffset, fullText.length));
+
+      if (ann.anchorText) {
+        const slice = fullText.slice(start, end);
+        if (slice !== ann.anchorText) {
+          const found = fullText.indexOf(ann.anchorText);
+          if (found !== -1) {
+            start = found;
+            end = found + ann.anchorText.length;
+          }
+        }
+      }
+
+      return {
+        ...ann,
+        startOffset: start,
+        endOffset: end,
+      };
+    })
+    .filter((a) => a.endOffset > a.startOffset);
+
+  if (validAnnotations.length === 0) {
     return [{ text: fullText }];
   }
+
+  // Sort by startOffset then endOffset
+  validAnnotations.sort((a, b) => a.startOffset - b.startOffset || a.endOffset - b.endOffset);
 
   const spans: TextSpan[] = [];
   let currentIndex = 0;
 
-  for (const ann of activeAnnotations) {
-    const start = Math.max(0, Math.min(ann.startOffset, fullText.length));
-    const end = Math.max(start, Math.min(ann.endOffset, fullText.length));
+  for (const ann of validAnnotations) {
+    const start = ann.startOffset;
+    const end = ann.endOffset;
 
     // Emit unannotated text preceding this annotation
     if (start > currentIndex) {
@@ -266,7 +321,9 @@ export function segmentDocumentText(
     // Determine the non-overlapping segment for this annotation
     const segStart = Math.max(currentIndex, start);
     if (end > segStart) {
-      const matchingThread = threads.find((t) => t.annotationId === ann.id);
+      const matchingThread = threads.find(
+        (t) => t.annotationId === ann.id || (ann.anchorText && t.anchorText === ann.anchorText)
+      );
       spans.push({
         text: fullText.slice(segStart, end),
         annotation: ann,
