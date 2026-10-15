@@ -36,6 +36,8 @@ import {
   saveStoredThreads,
   loadHistoricalDraftAnnotations,
   HistoricalDraftAnnotationLog,
+  findClosestOccurrence,
+  isThreadAnnotationMatch,
 } from '../../domain/annotation-models';
 
 interface AnnotatedDocumentViewerProps {
@@ -50,6 +52,122 @@ interface AnnotatedDocumentViewerProps {
   currentUserName: string;
   onTextUpdate?: (newText: string) => void;
   readOnly?: boolean;
+}
+
+export function getSelectionCharacterOffsets(
+  container: HTMLElement,
+  docFullText: string
+): { start: number; end: number; text: string; clientX: number; clientY: number } | null {
+  if (typeof window === 'undefined') return null;
+
+  const selection = window.getSelection();
+  if (!selection || selection.rangeCount === 0 || selection.isCollapsed) {
+    return null;
+  }
+
+  const range = selection.getRangeAt(0);
+  if (!container.contains(range.startContainer) || !container.contains(range.endContainer)) {
+    return null;
+  }
+
+  const selectedStr = selection.toString();
+  if (!selectedStr || !selectedStr.trim()) {
+    return null;
+  }
+
+  let startOffset = -1;
+  let endOffset = -1;
+  let currentOffset = 0;
+
+  const walker = document.createTreeWalker(
+    container,
+    NodeFilter.SHOW_TEXT,
+    {
+      acceptNode(node: Node) {
+        const el = node.parentElement;
+        if (el && el.closest('[data-ignore-selection="true"]')) {
+          return NodeFilter.FILTER_REJECT;
+        }
+        return NodeFilter.FILTER_ACCEPT;
+      },
+    }
+  );
+
+  let currentNode = walker.nextNode();
+  while (currentNode) {
+    const textLen = currentNode.nodeValue?.length || 0;
+
+    // Check startContainer
+    if (currentNode === range.startContainer) {
+      startOffset = currentOffset + range.startOffset;
+    } else if (
+      range.startContainer.nodeType === Node.ELEMENT_NODE &&
+      currentNode.parentNode === range.startContainer
+    ) {
+      const childIndex = Array.prototype.indexOf.call(range.startContainer.childNodes, currentNode);
+      if (childIndex === range.startOffset && startOffset === -1) {
+        startOffset = currentOffset;
+      }
+    }
+
+    // Check endContainer
+    if (currentNode === range.endContainer) {
+      endOffset = currentOffset + range.endOffset;
+    } else if (
+      range.endContainer.nodeType === Node.ELEMENT_NODE &&
+      currentNode.parentNode === range.endContainer
+    ) {
+      const childIndex = Array.prototype.indexOf.call(range.endContainer.childNodes, currentNode);
+      if (childIndex === range.endOffset && endOffset === -1) {
+        endOffset = currentOffset;
+      }
+    }
+
+    currentOffset += textLen;
+    currentNode = walker.nextNode();
+  }
+
+  if (startOffset === -1 && range.startContainer === container && range.startOffset === 0) {
+    startOffset = 0;
+  }
+  if (endOffset === -1 && range.endContainer === container && range.endOffset >= container.childNodes.length) {
+    endOffset = currentOffset;
+  }
+
+  if (startOffset !== -1 && (endOffset === -1 || endOffset < startOffset)) {
+    endOffset = startOffset + selectedStr.length;
+  }
+
+  let finalStart = startOffset;
+  let finalEnd = endOffset;
+
+  if (finalStart === -1) {
+    finalStart = findClosestOccurrence(docFullText, selectedStr, 0);
+    finalEnd = finalStart + selectedStr.length;
+  } else {
+    // Verify against docFullText and heal if needed
+    const slice = docFullText.slice(finalStart, finalEnd);
+    if (slice !== selectedStr) {
+      const closest = findClosestOccurrence(docFullText, selectedStr, finalStart);
+      if (closest !== -1) {
+        finalStart = closest;
+        finalEnd = closest + selectedStr.length;
+      }
+    }
+  }
+
+  if (finalStart < 0 || finalEnd <= finalStart) {
+    return null;
+  }
+
+  const rect = range.getBoundingClientRect();
+  return {
+    start: finalStart,
+    end: finalEnd,
+    text: docFullText.slice(finalStart, finalEnd),
+    clientX: rect.left + rect.width / 2,
+    clientY: rect.top - 10,
+  };
 }
 
 export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = ({
@@ -120,9 +238,7 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
     const reconciledAnn = [...cleanedAnn];
     for (const thr of loadedThr) {
       if (thr.anchorText) {
-        const hasAnn = reconciledAnn.some(
-          (a) => a.id === thr.annotationId || (thr.anchorText && a.anchorText === thr.anchorText)
-        );
+        const hasAnn = reconciledAnn.some((a) => isThreadAnnotationMatch(thr, a));
         if (!hasAnn) {
           const firstComment = thr.comments[0];
           reconciledAnn.push({
@@ -171,36 +287,17 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
     saveStoredThreads(effectiveBaseDocId, newThr, effectiveVersionId);
   };
 
-  // Selection detection for Advisor
+  // Selection detection for Advisor using exact DOM character offset tracking
   const handleMouseUp = () => {
-    if (userRole !== 'advisor' || readOnly) return;
+    if (userRole !== 'advisor' || readOnly || !docContainerRef.current) return;
 
-    const selection = window.getSelection();
-    if (!selection || selection.isCollapsed || !selection.toString().trim()) {
+    const offsetResult = getSelectionCharacterOffsets(docContainerRef.current, text);
+    if (!offsetResult) {
       setSelectionRange(null);
       return;
     }
 
-    const selectedStr = selection.toString();
-    const docText = text;
-    const start = docText.indexOf(selectedStr);
-
-    if (start === -1) {
-      setSelectionRange(null);
-      return;
-    }
-
-    const end = start + selectedStr.length;
-    const range = selection.getRangeAt(0);
-    const rect = range.getBoundingClientRect();
-
-    setSelectionRange({
-      start,
-      end,
-      text: selectedStr,
-      clientX: rect.left + rect.width / 2,
-      clientY: rect.top - 10,
-    });
+    setSelectionRange(offsetResult);
   };
 
   const handleAddStrikethrough = () => {
@@ -498,9 +595,7 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
               const ann = span.annotation;
               const linkedThread =
                 span.thread ||
-                threads.find(
-                  (t) => t.annotationId === ann.id || (ann.anchorText && t.anchorText === ann.anchorText)
-                );
+                threads.find((t) => isThreadAnnotationMatch(t, ann));
               const isSelected = Boolean(
                 selectedThreadId && linkedThread && selectedThreadId === linkedThread.id
               );
@@ -545,7 +640,10 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
                 >
                   {span.text}
                   {ann.type === 'replacement' && ann.suggestedText && (
-                    <span className="ml-1 inline-flex items-center text-[11px] font-bold text-emerald-700 bg-white px-1.5 py-0.2 rounded border border-emerald-300">
+                    <span
+                      data-ignore-selection="true"
+                      className="ml-1 inline-flex items-center text-[11px] font-bold text-emerald-700 bg-white px-1.5 py-0.2 rounded border border-emerald-300 select-none"
+                    >
                       &rarr; &quot;{ann.suggestedText}&quot;
                     </span>
                   )}
@@ -657,9 +755,7 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
           ) : (
             filteredThreads.map((thread) => {
               const isSelected = selectedThreadId === thread.id;
-              const linkedAnn = annotations.find(
-                (a) => a.id === thread.annotationId || (thread.anchorText && a.anchorText === thread.anchorText)
-              );
+              const linkedAnn = annotations.find((a) => isThreadAnnotationMatch(thread, a));
               const isResolved = thread.status === 'resolved';
 
               return (

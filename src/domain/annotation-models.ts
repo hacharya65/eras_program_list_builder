@@ -234,6 +234,59 @@ export interface TextSpan {
   thread?: CommentThread;
 }
 
+export function findClosestOccurrence(
+  fullText: string,
+  anchorText: string,
+  preferredOffset: number
+): number {
+  if (!fullText || !anchorText) return -1;
+
+  // Direct exact match at preferredOffset
+  if (
+    preferredOffset >= 0 &&
+    preferredOffset + anchorText.length <= fullText.length &&
+    fullText.slice(preferredOffset, preferredOffset + anchorText.length) === anchorText
+  ) {
+    return preferredOffset;
+  }
+
+  // Find all occurrences and choose the one closest to preferredOffset
+  let bestIndex = -1;
+  let minDistance = Infinity;
+
+  let pos = fullText.indexOf(anchorText);
+  while (pos !== -1) {
+    const distance = Math.abs(pos - preferredOffset);
+    if (distance < minDistance) {
+      minDistance = distance;
+      bestIndex = pos;
+    }
+    pos = fullText.indexOf(anchorText, pos + 1);
+  }
+
+  return bestIndex;
+}
+
+export function isThreadAnnotationMatch(
+  thr: { id: string; annotationId?: string; anchorText?: string; startOffset?: number; endOffset?: number },
+  ann: { id: string; anchorText?: string; startOffset: number; endOffset: number }
+): boolean {
+  if (thr.annotationId && thr.annotationId === ann.id) {
+    return true;
+  }
+  if (thr.anchorText && ann.anchorText && thr.anchorText === ann.anchorText) {
+    // If thread has 0 offsets and no specific annotationId, allow match
+    if (
+      (thr.startOffset === undefined || thr.startOffset === 0) &&
+      (thr.endOffset === undefined || thr.endOffset === 0)
+    ) {
+      return true;
+    }
+    return Math.abs((thr.startOffset ?? 0) - ann.startOffset) <= 10;
+  }
+  return false;
+}
+
 export function segmentDocumentText(
   fullText: string,
   annotations: DocumentAnnotation[],
@@ -249,9 +302,7 @@ export function segmentDocumentText(
   // Reconcile threads that may not have an active annotation in the annotations list
   for (const thr of threads) {
     if (thr.status !== 'resolved' && thr.anchorText) {
-      const hasAnn = reconciledAnnotations.some(
-        (a) => a.id === thr.annotationId || (thr.anchorText && a.anchorText === thr.anchorText)
-      );
+      const hasAnn = reconciledAnnotations.some((a) => isThreadAnnotationMatch(thr, a));
       if (!hasAnn) {
         const firstComment = thr.comments[0];
         reconciledAnnotations.push({
@@ -282,7 +333,7 @@ export function segmentDocumentText(
       if (ann.anchorText) {
         const slice = fullText.slice(start, end);
         if (slice !== ann.anchorText) {
-          const found = fullText.indexOf(ann.anchorText);
+          const found = findClosestOccurrence(fullText, ann.anchorText, start);
           if (found !== -1) {
             start = found;
             end = found + ann.anchorText.length;
@@ -321,9 +372,7 @@ export function segmentDocumentText(
     // Determine the non-overlapping segment for this annotation
     const segStart = Math.max(currentIndex, start);
     if (end > segStart) {
-      const matchingThread = threads.find(
-        (t) => t.annotationId === ann.id || (ann.anchorText && t.anchorText === ann.anchorText)
-      );
+      const matchingThread = threads.find((t) => isThreadAnnotationMatch(t, ann));
       spans.push({
         text: fullText.slice(segStart, end),
         annotation: ann,
