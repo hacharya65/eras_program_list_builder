@@ -4,6 +4,7 @@ import { renderToStaticMarkup } from 'react-dom/server';
 import { AdvisingPlatformService } from '@/domain/service';
 import { InMemoryStorageAdapter } from '@/domain/storage/in-memory-adapter';
 import { AdvisorPortal } from '@/components/AdvisorPortal';
+import { ClinicalRubricForm } from '@/components/ClinicalRubricForm';
 
 describe('Advisor Review Queue Tab Split (Pending vs Completed)', () => {
   let service: AdvisingPlatformService;
@@ -116,5 +117,52 @@ describe('Advisor Review Queue Tab Split (Pending vs Completed)', () => {
     expect(html).toContain('Completed (0)');
     // Advisee status should reflect Revisions Requested
     expect(html).toContain('Revisions Requested');
+  });
+
+  it('renders Rubric and Change Log on the bottom of the Live Document Markup page', () => {
+    storage.personalStatement.content = 'My journey into internal medicine.';
+    const req = service.submitPersonalStatementForReview({
+      studentId: 'usr-student-1',
+      advisorId: 'usr-advisor-1',
+      changelogNote: 'Initial draft',
+    });
+
+    // Advisor opens review
+    service.openReviewAsAdvisor(req.id, 'usr-advisor-1');
+    const advisorContext = service.getAdvisorDashboardContext();
+
+    const html = renderToStaticMarkup(
+      React.createElement(AdvisorPortal, {
+        context: advisorContext,
+        initialSelectedReviewId: req.id,
+        getSnapshotContent: (id) => service.getSnapshot(id),
+      })
+    );
+
+    // The page should have the top markup title AND the rubric and change log section together
+    expect(html).toContain('Live Document Markup &amp; Anchored Comments');
+    expect(html).toContain('Jump to Rubric &amp; Change Log');
+    expect(html).toContain('id="rubric-and-changelog"');
+    expect(html).toContain('Rubric and Change Log');
+    expect(html).toContain('Standardized Rubric Evaluation');
+  });
+
+  it('makes Faculty Advisor Clinical Guidance & Section Notes optional in ClinicalRubricForm', () => {
+    const html = renderToStaticMarkup(
+      React.createElement(ClinicalRubricForm, {
+        studentName: 'Alex Rivera',
+        versionNumber: 1,
+        onSubmit: () => {},
+      })
+    );
+
+    // Verify label says (Optional)
+    expect(html).toContain('Faculty Advisor Clinical Guidance &amp; Section Notes (Optional)');
+    expect(html).not.toContain('Faculty Advisor Clinical Guidance &amp; Section Notes (Required)');
+
+    // Verify textarea does not have required attribute
+    const textareaHtml = html.match(/<textarea[^>]*>/)?.[0];
+    expect(textareaHtml).toBeDefined();
+    expect(textareaHtml).not.toContain('required');
   });
 });

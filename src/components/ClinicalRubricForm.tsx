@@ -64,17 +64,13 @@ export function ClinicalRubricForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!generalNotes.trim()) {
-      alert('Please provide summary advice notes for the student.');
-      return;
-    }
     onSubmit({
       narrativeMotivation,
       clinicalReflection,
       toneAndFit,
       structureAndMechanics,
       overallVerdict,
-      generalNotes,
+      generalNotes: generalNotes.trim(),
     });
   };
 
@@ -173,15 +169,14 @@ export function ClinicalRubricForm({
       {/* Summary Notes */}
       <div>
         <label className="block text-xs font-bold text-slate-800 mb-1">
-          Faculty Advisor Clinical Guidance &amp; Section Notes (Required)
+          Faculty Advisor Clinical Guidance &amp; Section Notes (Optional)
         </label>
         <textarea
           value={generalNotes}
           onChange={(e) => setGeneralNotes(e.target.value)}
           rows={4}
           className="w-full p-3 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-emerald-500 focus:outline-none"
-          placeholder="Detail specific suggestions for narrative clarity, patient case emphasis, or paragraph restructuring..."
-          required
+          placeholder="Detail specific suggestions for narrative clarity, patient case emphasis, or paragraph restructuring (optional)..."
         />
       </div>
 

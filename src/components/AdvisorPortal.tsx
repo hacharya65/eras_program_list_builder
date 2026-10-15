@@ -34,6 +34,7 @@ interface AdvisorPortalProps {
   getSnapshotContent?: (snapshotId: string) => any;
   getPreviousSnapshot?: (snapshotId: string) => any;
   onViewingEntry?: (reviewId: string, entryIndex: number) => void;
+  initialSelectedReviewId?: string | null;
 }
 
 export function AdvisorPortal({
@@ -44,11 +45,11 @@ export function AdvisorPortal({
   getSnapshotContent,
   getPreviousSnapshot,
   onViewingEntry,
+  initialSelectedReviewId = null,
 }: AdvisorPortalProps) {
   const { advisor, advisees, pendingReviews } = context;
-  const [selectedReviewId, setSelectedReviewId] = React.useState<string | null>(null);
+  const [selectedReviewId, setSelectedReviewId] = React.useState<string | null>(initialSelectedReviewId);
   const [activeEntryIndex, setActiveEntryIndex] = React.useState<number>(1);
-  const [psReviewTab, setPsReviewTab] = React.useState<'live_annotations' | 'rubric'>('live_annotations');
   const [expReviewTab, setExpReviewTab] = React.useState<'live_annotations' | 'standard'>('live_annotations');
   const [reviewQueueTab, setReviewQueueTab] = React.useState<'pending' | 'completed'>('pending');
   const [reviewingAdviseeIntakeId, setReviewingAdviseeIntakeId] = React.useState<string | null>(null);
@@ -391,70 +392,87 @@ function deduplicateLatestReviews(
           </div>
         </div>
 
-        {/* Review Mode Tabs */}
-        <div className="flex items-center gap-2 border-b border-slate-200 pb-3">
+        {/* Quick Navigation Jump Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3 rounded-xl border border-slate-200 shadow-xs">
+          <div className="flex items-center gap-2">
+            <span className="px-3 py-1.5 rounded-lg text-xs font-bold bg-purple-100 text-purple-900 border border-purple-200 flex items-center gap-2">
+              <Highlighter className="w-3.5 h-3.5 text-purple-700" />
+              Live Document Markup &amp; Anchored Comments
+            </span>
+          </div>
           <button
-            onClick={() => setPsReviewTab('live_annotations')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
-              psReviewTab === 'live_annotations'
-                ? 'bg-purple-600 text-white shadow-sm'
-                : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300'
-            }`}
+            type="button"
+            onClick={() => {
+              document.getElementById('rubric-and-changelog')?.scrollIntoView({ behavior: 'smooth' });
+            }}
+            className="px-3.5 py-1.5 rounded-lg text-xs font-bold bg-sky-50 text-sky-800 border border-sky-200 hover:bg-sky-100 transition-all flex items-center gap-1.5 cursor-pointer shadow-2xs"
           >
-            <Highlighter className="w-3.5 h-3.5" />
-            Live Document Markup &amp; Anchored Comments
-          </button>
-          <button
-            onClick={() => setPsReviewTab('rubric')}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 ${
-              psReviewTab === 'rubric'
-                ? 'bg-sky-600 text-white shadow-sm'
-                : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300'
-            }`}
-          >
-            <FileCheck className="w-3.5 h-3.5" />
-            Rubric and Change Log
+            <FileCheck className="w-3.5 h-3.5 text-sky-600" />
+            Jump to Rubric &amp; Change Log &darr;
           </button>
         </div>
 
-        {psReviewTab === 'live_annotations' ? (
-          <AnnotatedDocumentViewer
-            documentId="personal_statement"
-            documentVersionId={`v${snapshot.versionNumber}`}
-            versionNumber={snapshot.versionNumber}
-            documentTitle={`${selectedReview.studentName}'s Personal Statement (v${snapshot.versionNumber})`}
-            documentSubtitle="Faculty Collaborative Review Mode — Select text with cursor to apply strikethrough or anchor margin comments."
-            text={snapshot.content}
-            userRole="advisor"
-            currentUserId={advisor.id}
-            currentUserName={advisor.name}
-          />
-        ) : (
-          <div className="space-y-6">
-            {/* Version comparison / Visual Diff engages strictly starting from V2 onwards */}
-            {snapshot.versionNumber >= 2 && (
-              <VisualDiffViewer
-                previousVersionTitle={`v${previousSnapshot ? previousSnapshot.versionNumber : snapshot.versionNumber - 1} Submitted Draft`}
-                previousContent={previousSnapshot ? previousSnapshot.content : ''}
-                newVersionTitle={`v${snapshot.versionNumber} Submitted Draft`}
-                newContent={snapshot.content}
-                changelogNote={snapshot.changelogNote || `Revisions submitted for v${snapshot.versionNumber}.`}
-                studentName={selectedReview.studentName}
-              />
-            )}
+        {/* Live Document Markup & Anchored Comments Top Section */}
+        <AnnotatedDocumentViewer
+          documentId="personal_statement"
+          documentVersionId={`v${snapshot.versionNumber}`}
+          versionNumber={snapshot.versionNumber}
+          documentTitle={`${selectedReview.studentName}'s Personal Statement (v${snapshot.versionNumber})`}
+          documentSubtitle="Faculty Collaborative Review Mode — Select text with cursor to apply strikethrough or anchor margin comments."
+          text={snapshot.content}
+          userRole="advisor"
+          currentUserId={advisor.id}
+          currentUserName={advisor.name}
+        />
 
-            {/* Standardized Rubric Evaluation Form */}
-            <ClinicalRubricForm
-              studentName={selectedReview.studentName}
-              versionNumber={snapshot.versionNumber}
-              onSubmit={(evaluation) => {
-                onSubmitFeedback?.(selectedReview.id, evaluation);
-                alert(`Evaluation submitted! Feedback returned to ${selectedReview.studentName}.`);
-                setSelectedReviewId(null);
-              }}
-            />
+        {/* Rubric and Change Log Bottom Section */}
+        <div id="rubric-and-changelog" className="space-y-6 pt-6 border-t border-slate-200 scroll-mt-6">
+          <div className="flex items-center justify-between bg-slate-50 p-4 rounded-xl border border-slate-200">
+            <div className="flex items-center gap-2.5">
+              <div className="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold">
+                <FileCheck className="w-4 h-4" />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold text-slate-900">Rubric and Change Log</h3>
+                <p className="text-xs text-slate-500">
+                  {snapshot.versionNumber >= 2
+                    ? `Compare changes against v${previousSnapshot ? previousSnapshot.versionNumber : snapshot.versionNumber - 1} and complete institutional rubric evaluation.`
+                    : 'Complete institutional rubric evaluation for initial submission.'}
+                </p>
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+              className="text-xs font-semibold text-slate-500 hover:text-slate-800 flex items-center gap-1 cursor-pointer"
+            >
+              &uarr; Back to Top Markup
+            </button>
           </div>
-        )}
+
+          {/* Version comparison / Visual Diff engages strictly starting from V2 onwards */}
+          {snapshot.versionNumber >= 2 && (
+            <VisualDiffViewer
+              previousVersionTitle={`v${previousSnapshot ? previousSnapshot.versionNumber : snapshot.versionNumber - 1} Submitted Draft`}
+              previousContent={previousSnapshot ? previousSnapshot.content : ''}
+              newVersionTitle={`v${snapshot.versionNumber} Submitted Draft`}
+              newContent={snapshot.content}
+              changelogNote={snapshot.changelogNote || `Revisions submitted for v${snapshot.versionNumber}.`}
+              studentName={selectedReview.studentName}
+            />
+          )}
+
+          {/* Standardized Rubric Evaluation Form */}
+          <ClinicalRubricForm
+            studentName={selectedReview.studentName}
+            versionNumber={snapshot.versionNumber}
+            onSubmit={(evaluation) => {
+              onSubmitFeedback?.(selectedReview.id, evaluation);
+              alert(`Evaluation submitted! Feedback returned to ${selectedReview.studentName}.`);
+              setSelectedReviewId(null);
+            }}
+          />
+        </div>
       </div>
     );
   }
