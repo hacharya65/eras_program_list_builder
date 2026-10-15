@@ -18,6 +18,7 @@ import { ErasTransferKit } from './ErasTransferKit';
 import { StudentDashboardHome } from './StudentDashboardHome';
 import { ProfileManagementView } from './ProfileManagementView';
 import { JournalRepositoryView } from './JournalRepositoryView';
+import { AdvisingLeadershipView } from './AdvisingLeadershipView';
 import {
   CANONICAL_SPECIALTIES,
   getStoredTargetSpecialty,
@@ -102,6 +103,7 @@ export function StudentPortal({
     | 'alumni_directory'
     | 'transfer_kit'
     | 'letters'
+    | 'advising_leadership'
   >('overview');
   const [psEditorMode, setPsEditorMode] = useState<'editor' | 'annotations' | 'split'>('split');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -169,6 +171,7 @@ export function StudentPortal({
         'alumni_directory',
         'transfer_kit',
         'letters',
+        'advising_leadership',
       ];
       if (urlView && validViews.includes(urlView)) {
         setActiveView(urlView);
@@ -178,6 +181,7 @@ export function StudentPortal({
     const handleNavProfile = () => updateView('profile');
     const handleNavTransfer = () => updateView('transfer_kit');
     const handleNavIntake = () => updateView('intake');
+    const handleNavLeadership = () => updateView('advising_leadership');
 
     const handlePopState = () => {
       if (typeof window !== 'undefined') {
@@ -191,12 +195,14 @@ export function StudentPortal({
     window.addEventListener('navigate_to_profile_management', handleNavProfile);
     window.addEventListener('navigate_to_transfer_kit', handleNavTransfer);
     window.addEventListener('navigate_to_intake', handleNavIntake);
+    window.addEventListener('navigate_to_advising_leadership', handleNavLeadership);
     window.addEventListener('popstate', handlePopState);
 
     return () => {
       window.removeEventListener('navigate_to_profile_management', handleNavProfile);
       window.removeEventListener('navigate_to_transfer_kit', handleNavTransfer);
       window.removeEventListener('navigate_to_intake', handleNavIntake);
+      window.removeEventListener('navigate_to_advising_leadership', handleNavLeadership);
       window.removeEventListener('popstate', handlePopState);
     };
   }, [student.id]);
@@ -545,6 +551,15 @@ export function StudentPortal({
           onOpenTransferKit={() => updateView('transfer_kit')}
           onBack={() => updateView('overview')}
           assignedAdvisor={assignedAdvisor}
+        />
+      );
+    }
+
+    if (activeView === 'advising_leadership') {
+      return (
+        <AdvisingLeadershipView
+          targetSpecialty={targetSpecialty}
+          onBack={() => updateView('overview')}
         />
       );
     }

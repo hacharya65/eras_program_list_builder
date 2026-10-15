@@ -12,6 +12,8 @@ import {
   ClipboardCopy,
   Settings,
   FileText,
+  Contact,
+  Mail,
 } from 'lucide-react';
 
 interface DevPersonaSwitcherProps {
@@ -21,6 +23,7 @@ interface DevPersonaSwitcherProps {
   userName?: string;
   userRoleTitle?: string;
   onOpenProfileManagement?: () => void;
+  onOpenAdvisingLeadership?: () => void;
 }
 
 export function DevPersonaSwitcher({
@@ -30,6 +33,7 @@ export function DevPersonaSwitcher({
   userName = 'Alex Rivera',
   userRoleTitle = 'MS4 Applicant',
   onOpenProfileManagement,
+  onOpenAdvisingLeadership,
 }: DevPersonaSwitcherProps) {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -85,6 +89,16 @@ export function DevPersonaSwitcher({
   const handleIntakeClick = () => {
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('navigate_to_intake'));
+    }
+    setIsProfileMenuOpen(false);
+  };
+
+  const handleLeadershipClick = () => {
+    if (onOpenAdvisingLeadership) {
+      onOpenAdvisingLeadership();
+    }
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('navigate_to_advising_leadership'));
     }
     setIsProfileMenuOpen(false);
   };
@@ -158,77 +172,99 @@ export function DevPersonaSwitcher({
             </div>
           </div>
 
-          {/* Right: Classic Profile Tab with User Name & Circular Picture */}
-          <div className="relative" ref={menuRef}>
+          {/* Right: Contact Directory Quick Icon & Classic Profile Tab */}
+          <div className="flex items-center gap-2">
+            {/* Newly integrated contact icon on the left of the user profile on the top bar */}
             <button
-              onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-              className="flex items-center gap-3 p-1.5 pl-2.5 rounded-2xl hover:bg-neutral-50 border border-neutral-200/80 transition-all cursor-pointer group"
-              aria-expanded={isProfileMenuOpen}
-              title="Open Profile Management"
+              onClick={handleLeadershipClick}
+              className="flex items-center justify-center w-9 h-9 rounded-2xl border border-neutral-200/80 bg-white hover:bg-[#EAF2EE] text-neutral-600 hover:text-[#1F3A30] hover:border-[#1F3A30]/30 transition-all cursor-pointer shadow-2xs group relative"
+              title="Geisinger Advising Leadership & Contact Directory"
+              aria-label="Geisinger Advising Leadership & Contact Directory"
             >
-              <div className="text-right hidden sm:block">
-                <div className="text-xs font-bold text-neutral-900 group-hover:text-[#1F3A30] transition-colors leading-tight">
-                  {activePersonaName}
-                </div>
-                <div className="text-[10px] text-neutral-500 font-medium">
-                  {activePersonaTitle} &bull; Geisinger
-                </div>
-              </div>
-
-              {/* User Avatar Circle */}
-              <div className="w-9 h-9 rounded-full bg-[#1F3A30] text-white flex items-center justify-center font-bold text-xs ring-2 ring-neutral-200 group-hover:ring-[#7EAE9B] transition-all shrink-0 shadow-2xs">
-                {activePersonaName
-                  .split(' ')
-                  .map((n) => n[0])
-                  .join('')
-                  .slice(0, 2)}
-              </div>
-
-              <ChevronDown
-                className={`w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-700 transition-transform ${
-                  isProfileMenuOpen ? 'rotate-180' : ''
-                }`}
-              />
+              <Contact className="w-4 h-4 text-neutral-600 group-hover:text-[#1F3A30] group-hover:scale-105 transition-all" />
+              <span className="sr-only">Geisinger Advising Leadership Directory</span>
             </button>
 
-            {/* Profile Dropdown Menu */}
-            {isProfileMenuOpen && (
-              <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl border border-neutral-200/90 shadow-lg p-2 z-50 text-xs">
-                <div className="p-3 border-b border-neutral-100">
-                  <div className="font-bold text-neutral-900 text-sm">{activePersonaName}</div>
-                  <div className="text-[11px] text-neutral-500">{activePersonaTitle}</div>
-                  <div className="text-[10px] text-neutral-400 mt-0.5">
-                    Geisinger Commonwealth School of Medicine
+            {/* Classic Profile Tab with User Name & Circular Picture */}
+            <div className="relative" ref={menuRef}>
+              <button
+                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                className="flex items-center gap-3 p-1.5 pl-2.5 rounded-2xl hover:bg-neutral-50 border border-neutral-200/80 transition-all cursor-pointer group"
+                aria-expanded={isProfileMenuOpen}
+                title="Open Profile Management"
+              >
+                <div className="text-right hidden sm:block">
+                  <div className="text-xs font-bold text-neutral-900 group-hover:text-[#1F3A30] transition-colors leading-tight">
+                    {activePersonaName}
+                  </div>
+                  <div className="text-[10px] text-neutral-500 font-medium">
+                    {activePersonaTitle} &bull; Geisinger
                   </div>
                 </div>
 
-                <div className="py-1.5 space-y-0.5">
-                  <button
-                    onClick={handleProfileClick}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
-                  >
-                    <User className="w-4 h-4 text-[#4E8773]" />
-                    <span>Profile Management &amp; Scores</span>
-                  </button>
-
-                  <button
-                    onClick={handleTransferKitClick}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
-                  >
-                    <ClipboardCopy className="w-4 h-4 text-[#4E8773]" />
-                    <span>1-Click ERAS Transfer Kit</span>
-                  </button>
-
-                  <button
-                    onClick={handleIntakeClick}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
-                  >
-                    <FileText className="w-4 h-4 text-[#4E8773]" />
-                    <span>Specialty Advising Form</span>
-                  </button>
+                {/* User Avatar Circle */}
+                <div className="w-9 h-9 rounded-full bg-[#1F3A30] text-white flex items-center justify-center font-bold text-xs ring-2 ring-neutral-200 group-hover:ring-[#7EAE9B] transition-all shrink-0 shadow-2xs">
+                  {activePersonaName
+                    .split(' ')
+                    .map((n) => n[0])
+                    .join('')
+                    .slice(0, 2)}
                 </div>
-              </div>
-            )}
+
+                <ChevronDown
+                  className={`w-3.5 h-3.5 text-neutral-400 group-hover:text-neutral-700 transition-transform ${
+                    isProfileMenuOpen ? 'rotate-180' : ''
+                  }`}
+                />
+              </button>
+
+              {/* Profile Dropdown Menu */}
+              {isProfileMenuOpen && (
+                <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl border border-neutral-200/90 shadow-lg p-2 z-50 text-xs">
+                  <div className="p-3 border-b border-neutral-100">
+                    <div className="font-bold text-neutral-900 text-sm">{activePersonaName}</div>
+                    <div className="text-[11px] text-neutral-500">{activePersonaTitle}</div>
+                    <div className="text-[10px] text-neutral-400 mt-0.5">
+                      Geisinger Commonwealth School of Medicine
+                    </div>
+                  </div>
+
+                  <div className="py-1.5 space-y-0.5">
+                    <button
+                      onClick={handleProfileClick}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
+                    >
+                      <User className="w-4 h-4 text-[#4E8773]" />
+                      <span>Profile Management &amp; Scores</span>
+                    </button>
+
+                    <button
+                      onClick={handleLeadershipClick}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
+                    >
+                      <Contact className="w-4 h-4 text-[#4E8773]" />
+                      <span>Advising Leadership Directory</span>
+                    </button>
+
+                    <button
+                      onClick={handleTransferKitClick}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
+                    >
+                      <ClipboardCopy className="w-4 h-4 text-[#4E8773]" />
+                      <span>1-Click ERAS Transfer Kit</span>
+                    </button>
+
+                    <button
+                      onClick={handleIntakeClick}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
+                    >
+                      <FileText className="w-4 h-4 text-[#4E8773]" />
+                      <span>Specialty Advising Form</span>
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </header>

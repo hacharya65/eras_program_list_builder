@@ -165,6 +165,20 @@ export default function HomePage() {
         currentRole={currentRole}
         onSelectRole={handleSelectRole}
         institutionName={studentContext.institution.name}
+        onOpenAdvisingLeadership={() => {
+          if (currentRole !== 'student') {
+            service.switchPersona('student');
+            setCurrentRole('student');
+          }
+          if (typeof window !== 'undefined') {
+            const url = new URL(window.location.href);
+            url.searchParams.set('role', 'student');
+            url.searchParams.set('view', 'advising_leadership');
+            window.history.pushState({ role: 'student', view: 'advising_leadership' }, '', url.toString());
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            window.dispatchEvent(new CustomEvent('navigate_to_advising_leadership'));
+          }
+        }}
       />
 
       {/* Main Container */}
