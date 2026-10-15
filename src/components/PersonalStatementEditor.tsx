@@ -26,6 +26,7 @@ import {
   MessageSquare,
   Star,
   ExternalLink,
+  Columns,
 } from 'lucide-react';
 import { AnnotatedDocumentViewer } from './collaborative/AnnotatedDocumentViewer';
 
@@ -39,7 +40,7 @@ interface PersonalStatementEditorProps {
   onForkRevision?: () => void;
   latestFeedback?: DocumentFeedbackSummary;
   feedbackHistory?: DocumentFeedbackSummary[];
-  initialViewMode?: 'editor' | 'annotations';
+  initialViewMode?: 'editor' | 'annotations' | 'split';
   initialShowSubmitModal?: boolean;
   onNavigateToFeedback?: () => void;
 }
@@ -71,7 +72,7 @@ export function PersonalStatementEditor({
   const [showSubmitModal, setShowSubmitModal] = useState(initialShowSubmitModal);
   const [showDiffModal, setShowDiffModal] = useState(false);
   const [sanitizedNotice, setSanitizedNotice] = useState(false);
-  const [viewMode, setViewMode] = useState<'editor' | 'annotations'>(() => {
+  const [viewMode, setViewMode] = useState<'editor' | 'annotations' | 'split'>(() => {
     if (initialViewMode) return initialViewMode;
     return 'editor';
   });
@@ -84,6 +85,21 @@ export function PersonalStatementEditor({
   const referenceVersionNum =
     referenceFeedback?.versionNumber || Math.max(1, draft.currentVersionNumber - 1);
 
+  // Split view previous snapshot: most recent snapshot submitted prior to active working draft
+  const priorSnapshots = psSnapshots.filter((s) => s.versionNumber < draft.currentVersionNumber);
+  const splitPreviousSnapshot =
+    priorSnapshots.length > 0
+      ? priorSnapshots[priorSnapshots.length - 1]
+      : psSnapshots.length > 0
+      ? psSnapshots[psSnapshots.length - 1]
+      : null;
+
+  const splitPrevVerNum = splitPreviousSnapshot
+    ? splitPreviousSnapshot.versionNumber
+    : referenceVersionNum;
+
+  const splitPrevContent = splitPreviousSnapshot ? splitPreviousSnapshot.content : '';
+
   const handleSwitchToAnnotations = () => {
     setViewMode('annotations');
     if (selectedVersionNum === draft.currentVersionNumber && psSnapshots.length > 0) {
@@ -93,6 +109,11 @@ export function PersonalStatementEditor({
 
   const handleSwitchToEditor = () => {
     setViewMode('editor');
+    setSelectedVersionNum(draft.currentVersionNumber);
+  };
+
+  const handleSwitchToSplit = () => {
+    setViewMode('split');
     setSelectedVersionNum(draft.currentVersionNumber);
   };
 
@@ -333,6 +354,19 @@ export function PersonalStatementEditor({
               </span>
             )}
           </button>
+
+          <button
+            onClick={handleSwitchToSplit}
+            id="view-mode-split-btn"
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 cursor-pointer ${
+              viewMode === 'split'
+                ? 'bg-indigo-600 text-white shadow-sm ring-2 ring-indigo-400/30'
+                : 'bg-white text-slate-700 border border-slate-200 hover:border-slate-300'
+            }`}
+          >
+            <Columns className="w-3.5 h-3.5" />
+            <span>Split View (Side-by-Side Revision)</span>
+          </button>
         </div>
 
         {onNavigateToFeedback && referenceFeedback && (
@@ -347,7 +381,115 @@ export function PersonalStatementEditor({
         )}
       </div>
 
-      {viewMode === 'annotations' ? (
+      {viewMode === 'split' ? (
+        /* Split View: Side-by-Side Revision */
+        <div className="grid grid-cols-1 xl:grid-cols-2 gap-6 items-start">
+          {/* Left Column: Previous Version with Faculty Markup & Margin Comments */}
+          <div className="space-y-3 flex flex-col">
+            <div className="flex items-center justify-between bg-purple-50/90 p-3.5 rounded-t-xl border border-purple-200 shadow-2xs">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wide bg-purple-200 text-purple-900 border border-purple-300 flex items-center gap-1.5">
+                  <Lock className="w-3 h-3 text-purple-700" />
+                  v{splitPrevVerNum} (Reviewed Snapshot)
+                </span>
+                <span className="text-xs text-purple-900 font-semibold">Faculty Markup &amp; Comments</span>
+              </div>
+              <span className="text-[11px] font-semibold text-purple-700 bg-white px-2 py-0.5 rounded border border-purple-200">
+                Read-Only Reference
+              </span>
+            </div>
+
+            {splitPreviousSnapshot ? (
+              <div className="border border-t-0 border-purple-200 rounded-b-xl overflow-hidden bg-white p-4 shadow-sm">
+                <AnnotatedDocumentViewer
+                  documentId="personal_statement"
+                  documentVersionId={`v${splitPrevVerNum}`}
+                  versionNumber={splitPrevVerNum}
+                  documentTitle={`Personal Statement v${splitPrevVerNum} (Faculty Reviewed)`}
+                  documentSubtitle={`Evaluated by ${assignedAdvisor.name} (${assignedAdvisor.specialty})`}
+                  text={splitPrevContent}
+                  userRole="applicant"
+                  currentUserId="stu-101"
+                  currentUserName="Applicant"
+                  readOnly={true}
+                />
+              </div>
+            ) : (
+              <div className="bg-white rounded-b-xl border border-t-0 border-purple-200 p-8 text-center space-y-3 shadow-sm">
+                <div className="w-12 h-12 rounded-full bg-purple-100 text-purple-700 mx-auto flex items-center justify-center">
+                  <MessageSquare className="w-6 h-6" />
+                </div>
+                <h4 className="text-sm font-bold text-slate-800">Initial Draft (v1) in Progress</h4>
+                <p className="text-xs text-slate-500 max-w-sm mx-auto leading-relaxed">
+                  Once you submit <strong>v1</strong> and {assignedAdvisor.name} provides rubric scores and inline markup, this left pane will automatically display Dr. {assignedAdvisor.name.split(' ').pop()}&apos;s comments side-by-side with your active revision.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Right Column: Live Active Working Draft (Editable) */}
+          <div className="space-y-3 flex flex-col">
+            <div className="flex items-center justify-between bg-sky-50/90 p-3.5 rounded-t-xl border border-sky-200 shadow-2xs">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded text-[11px] font-bold uppercase tracking-wide bg-sky-200 text-sky-900 border border-sky-300 flex items-center gap-1.5">
+                  <Edit3 className="w-3 h-3 text-sky-700" />
+                  v{draft.currentVersionNumber} (Active Working Draft)
+                </span>
+                <span className="text-xs text-sky-900 font-semibold">Live Revision</span>
+              </div>
+              <span className="text-[11px] font-semibold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
+                Autosaving Locally
+              </span>
+            </div>
+
+            <div className="border border-t-0 border-sky-200 rounded-b-xl bg-white p-5 shadow-sm flex flex-col space-y-4">
+              <div className="flex items-center justify-between text-xs text-slate-500 pb-2 border-b border-slate-100">
+                <span className="font-semibold text-slate-700">
+                  {splitPreviousSnapshot ? `Iterating from v${splitPrevVerNum} Submitted Draft` : 'Initial Baseline Draft'}
+                </span>
+                <span className="text-emerald-700 font-medium">Auto-forks upon edit</span>
+              </div>
+
+              <textarea
+                value={content}
+                onChange={handleChange}
+                onPaste={handlePaste}
+                rows={22}
+                className="w-full flex-1 p-4 rounded-lg font-mono text-sm leading-relaxed resize-none transition-all placeholder:text-slate-400 bg-slate-50/50 border border-slate-200 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/40 focus:border-sky-500"
+                placeholder="Edit your active revision here while referencing faculty feedback on the left..."
+              />
+
+              {/* Compact Metrics Bar for Split View */}
+              <div className="bg-slate-50 p-3.5 rounded-lg border border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-4">
+                  <div>
+                    <span className="font-bold text-slate-900">{metrics.characterCount.toLocaleString()}</span>
+                    <span className="text-slate-500 ml-1">/ 5,300 chars</span>
+                  </div>
+                  <div className="h-4 w-px bg-slate-300" />
+                  <div>
+                    <span className="font-bold text-slate-900">{metrics.wordCount}</span>
+                    <span className="text-slate-500 ml-1">words</span>
+                  </div>
+                  <div className="h-4 w-px bg-slate-300" />
+                  <div>
+                    <span className="font-bold text-slate-900">{metrics.estimatedPages}</span>
+                    <span className="text-slate-500 ml-1">pgs</span>
+                  </div>
+                </div>
+
+                <button
+                  onClick={() => setShowSubmitModal(true)}
+                  className="px-3.5 py-1.5 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-700 text-white flex items-center gap-1.5 shadow-sm transition-colors cursor-pointer"
+                >
+                  <Send className="w-3.5 h-3.5" />
+                  Submit v{draft.currentVersionNumber} for Review
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      ) : viewMode === 'annotations' ? (
         <AnnotatedDocumentViewer
           documentId="personal_statement"
           documentVersionId={`v${selectedVersionNum}`}

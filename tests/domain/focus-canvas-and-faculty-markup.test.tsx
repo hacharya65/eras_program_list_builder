@@ -31,7 +31,7 @@ describe('Simplified Focus Canvas and Faculty Markup with Resilient Highlighting
     institutionId: 'geisinger',
   };
 
-  it('verifies PersonalStatementEditor contains only Focus Canvas and Faculty Markup buttons, with NO split view button', () => {
+  it('verifies PersonalStatementEditor contains Focus Canvas, Faculty Markup, and Split View buttons', () => {
     const markup = renderToStaticMarkup(
       <PersonalStatementEditor
         draft={mockDraft}
@@ -50,9 +50,51 @@ describe('Simplified Focus Canvas and Faculty Markup with Resilient Highlighting
     expect(markup).toContain('Faculty Markup &amp; Anchored Comments');
     expect(markup).toContain('view-mode-annotations-btn');
 
-    // Verify Split View is completely removed
-    expect(markup).not.toContain('Split View (Feedback + Draft)');
-    expect(markup).not.toContain('view-mode-split-btn');
+    // Verify Split View button exists
+    expect(markup).toContain('Split View (Side-by-Side Revision)');
+    expect(markup).toContain('view-mode-split-btn');
+  });
+
+  it('renders side-by-side revision in Split View with previous snapshot on left and live editor on right', () => {
+    const v2Draft: PersonalStatementDraft = {
+      ...mockDraft,
+      currentVersionNumber: 2,
+      content: 'Refined draft iterating from faculty feedback with deeper clinical insights.',
+    };
+
+    const mockV1Snapshot = {
+      id: 'snap-ps-v1',
+      documentType: 'personal_statement' as const,
+      documentId: 'ps-1',
+      versionNumber: 1,
+      content: 'Initial v1 draft with broad medical interest.',
+      changelogNote: 'Initial draft',
+      submittedAt: '2026-09-01T12:00:00Z',
+    };
+
+    const markup = renderToStaticMarkup(
+      <PersonalStatementEditor
+        draft={v2Draft}
+        assignedAdvisor={mockAdvisor}
+        snapshots={[mockV1Snapshot]}
+        initialViewMode="split"
+        onSave={() => {}}
+        onSubmitForReview={() => {}}
+        onBack={() => {}}
+      />
+    );
+
+    // Left pane: Previous version with faculty feedback
+    expect(markup).toContain('v1 (Reviewed Snapshot)');
+    expect(markup).toContain('Read-Only Reference');
+    expect(markup).toContain('Initial v1 draft with broad medical interest.');
+
+    // Right pane: Live active revision editor
+    expect(markup).toContain('v2 (Active Working Draft)');
+    expect(markup).toContain('Live Revision');
+    expect(markup).toContain('Iterating from v1 Submitted Draft');
+    expect(markup).toContain('Refined draft iterating from faculty feedback with deeper clinical insights.');
+    expect(markup).toContain('Submit v2 for Review');
   });
 
   it('resiliently segments document text and creates highlighted spans for comment threads with anchorText', () => {
