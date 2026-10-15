@@ -94,4 +94,64 @@ describe('Simplified Focus Canvas and Faculty Markup with Resilient Highlighting
     expect(markup).toContain('Active Annotations');
     expect(markup).toContain('Specialty dedication in inpatient medicine.');
   });
+
+  it('does NOT prompt for Student Revision Changelog on submission of the first draft (v1)', () => {
+    const markup = renderToStaticMarkup(
+      <PersonalStatementEditor
+        draft={mockDraft} // currentVersionNumber: 1
+        assignedAdvisor={mockAdvisor}
+        initialShowSubmitModal={true}
+        onSave={() => {}}
+        onSubmitForReview={() => {}}
+        onBack={() => {}}
+      />
+    );
+
+    // Initial draft modal header
+    expect(markup).toContain('Submit Initial Draft (v1) to Advisor');
+    expect(markup).toContain('Confirm Submission &amp; Freeze v1');
+
+    // "Student Revision Changelog (Required)" must NOT be prompted for first draft
+    expect(markup).not.toContain('Student Revision Changelog (Required)');
+    expect(markup).not.toContain('Briefly summarize what was revised');
+
+    // The submit button must NOT have disabled attribute
+    const confirmButtonHtml = markup.match(/<button[^>]*>Confirm Submission &amp; Freeze v1<\/button>/)?.[0];
+    expect(confirmButtonHtml).toBeDefined();
+    expect(confirmButtonHtml).not.toContain('disabled=""');
+
+    // Also verify no changelog textarea exists
+    expect(markup).not.toContain('placeholder="Briefly summarize what was revised');
+  });
+
+  it('DOES prompt for Student Revision Changelog (Required) on submission of future drafts (v2+)', () => {
+    const revisionDraft: PersonalStatementDraft = {
+      ...mockDraft,
+      currentVersionNumber: 2,
+    };
+
+    const markup = renderToStaticMarkup(
+      <PersonalStatementEditor
+        draft={revisionDraft} // currentVersionNumber: 2
+        assignedAdvisor={mockAdvisor}
+        initialShowSubmitModal={true}
+        onSave={() => {}}
+        onSubmitForReview={() => {}}
+        onBack={() => {}}
+      />
+    );
+
+    // Revision draft modal header
+    expect(markup).toContain('Submit Revision (v2) to Advisor');
+    expect(markup).toContain('Confirm Revision &amp; Freeze v2');
+
+    // "Student Revision Changelog (Required)" MUST be prompted for revisions
+    expect(markup).toContain('Student Revision Changelog (Required)');
+    expect(markup).toContain('Briefly summarize what was revised');
+
+    // The submit button must be disabled until changelog is entered
+    const confirmButtonHtml = markup.match(/<button[^>]*>Confirm Revision &amp; Freeze v2<\/button>/)?.[0];
+    expect(confirmButtonHtml).toBeDefined();
+    expect(confirmButtonHtml).toContain('disabled=""');
+  });
 });

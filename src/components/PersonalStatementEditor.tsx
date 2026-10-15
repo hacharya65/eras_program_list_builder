@@ -40,6 +40,7 @@ interface PersonalStatementEditorProps {
   latestFeedback?: DocumentFeedbackSummary;
   feedbackHistory?: DocumentFeedbackSummary[];
   initialViewMode?: 'editor' | 'annotations';
+  initialShowSubmitModal?: boolean;
   onNavigateToFeedback?: () => void;
 }
 
@@ -54,6 +55,7 @@ export function PersonalStatementEditor({
   latestFeedback,
   feedbackHistory = [],
   initialViewMode,
+  initialShowSubmitModal = false,
   onNavigateToFeedback,
 }: PersonalStatementEditorProps) {
   // Build complete version list (all snapshots + active draft)
@@ -63,9 +65,10 @@ export function PersonalStatementEditor({
 
   // Selected version to view: 'active' or a snapshot version number
   const [selectedVersionNum, setSelectedVersionNum] = useState<number>(draft.currentVersionNumber);
+  const isRevision = draft.currentVersionNumber > 1;
   const [content, setContent] = useState(draft.content);
   const [changelog, setChangelog] = useState('');
-  const [showSubmitModal, setShowSubmitModal] = useState(false);
+  const [showSubmitModal, setShowSubmitModal] = useState(initialShowSubmitModal);
   const [showDiffModal, setShowDiffModal] = useState(false);
   const [sanitizedNotice, setSanitizedNotice] = useState(false);
   const [viewMode, setViewMode] = useState<'editor' | 'annotations'>(() => {
@@ -145,7 +148,7 @@ export function PersonalStatementEditor({
   };
 
   const handleConfirmSubmit = () => {
-    onSubmitForReview(changelog);
+    onSubmitForReview(isRevision ? changelog.trim() : '');
     setShowSubmitModal(false);
     setChangelog('');
   };
@@ -589,29 +592,35 @@ export function PersonalStatementEditor({
                 <Send className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900">Submit v{draft.currentVersionNumber} to Advisor</h3>
+                <h3 className="text-base font-bold text-slate-900">
+                  {isRevision
+                    ? `Submit Revision (v${draft.currentVersionNumber}) to Advisor`
+                    : `Submit Initial Draft (v1) to Advisor`}
+                </h3>
                 <p className="text-xs text-slate-500">Reviewer: {assignedAdvisor.name} ({assignedAdvisor.specialty})</p>
               </div>
             </div>
 
             <div className="text-xs text-slate-600 space-y-2 bg-slate-50 p-3 rounded-lg border border-slate-200">
               <p>
-                <strong>Immutable Version Freeze:</strong> Submitting locks <strong>v{draft.currentVersionNumber}</strong> as an immutable snapshot in your version history. Any subsequent edit will automatically fork into active <strong>v{draft.currentVersionNumber + 1}</strong>.
+                <strong>{isRevision ? 'Revision Freeze:' : 'Immutable Version Freeze:'}</strong> Submitting locks <strong>v{draft.currentVersionNumber}</strong> as an immutable snapshot in your version history. {isRevision ? `Any subsequent edit will automatically fork into active v${draft.currentVersionNumber + 1}.` : 'Your advisor will review this baseline draft and provide feedback, rubrics, and annotations. Any subsequent edit will fork into v2.'}
               </p>
             </div>
 
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1">
-                Student Revision Changelog (Required)
-              </label>
-              <textarea
-                value={changelog}
-                onChange={(e) => setChangelog(e.target.value)}
-                rows={3}
-                className="w-full p-3 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none"
-                placeholder="Briefly summarize what was revised (e.g., 'Refined clinical reflection paragraph and strengthened conclusion')."
-              />
-            </div>
+            {isRevision && (
+              <div>
+                <label className="block text-xs font-bold text-slate-700 mb-1">
+                  Student Revision Changelog (Required)
+                </label>
+                <textarea
+                  value={changelog}
+                  onChange={(e) => setChangelog(e.target.value)}
+                  rows={3}
+                  className="w-full p-3 rounded-lg border border-slate-300 text-xs focus:ring-2 focus:ring-sky-500 focus:outline-none"
+                  placeholder="Briefly summarize what was revised (e.g., 'Refined clinical reflection paragraph and strengthened conclusion')."
+                />
+              </div>
+            )}
 
             <div className="flex items-center justify-end gap-2 pt-2">
               <button
@@ -622,10 +631,12 @@ export function PersonalStatementEditor({
               </button>
               <button
                 onClick={handleConfirmSubmit}
-                disabled={!changelog.trim()}
+                disabled={isRevision && !changelog.trim()}
                 className="px-4 py-2 rounded-lg text-xs font-semibold bg-sky-600 hover:bg-sky-700 text-white disabled:opacity-50 disabled:cursor-not-allowed shadow-sm transition-colors"
               >
-                Confirm Submission &amp; Freeze v{draft.currentVersionNumber}
+                {isRevision
+                  ? `Confirm Revision & Freeze v${draft.currentVersionNumber}`
+                  : `Confirm Submission & Freeze v1`}
               </button>
             </div>
           </div>
