@@ -170,6 +170,81 @@ export function getSelectionCharacterOffsets(
   };
 }
 
+/**
+ * Helper to smoothly scroll to a target element within its nearest scrollable container
+ * (such as the independent Split View left pane) without scrolling the outer browser window.
+ */
+export function scrollToElementWithinContainer(
+  targetElement: HTMLElement | null,
+  fallbackToWindow = true
+): void {
+  if (!targetElement) return;
+
+  let parent = targetElement.parentElement;
+  let scrollContainer: HTMLElement | null = null;
+
+  const docBody = typeof document !== 'undefined' ? document.body : null;
+  const docElement = typeof document !== 'undefined' ? document.documentElement : null;
+
+  while (parent) {
+    if ((docBody && parent === docBody) || (docElement && parent === docElement)) {
+      break;
+    }
+    if (typeof window !== 'undefined' && typeof window.getComputedStyle === 'function') {
+      const style = window.getComputedStyle(parent);
+      const overflowY = style ? style.overflowY : '';
+      if (
+        (overflowY === 'auto' || overflowY === 'scroll') &&
+        parent.scrollHeight > parent.clientHeight
+      ) {
+        scrollContainer = parent;
+        break;
+      }
+    }
+    parent = parent.parentElement;
+  }
+
+  // Fallback: In headless/test environments or fixed-height wrappers, also check overflowY directly
+  if (!scrollContainer) {
+    let p = targetElement.parentElement;
+    while (p) {
+      if ((docBody && p === docBody) || (docElement && p === docElement)) break;
+      if (typeof window !== 'undefined' && typeof window.getComputedStyle === 'function') {
+        const style = window.getComputedStyle(p);
+        if (style && (style.overflowY === 'auto' || style.overflowY === 'scroll')) {
+          scrollContainer = p;
+          break;
+        }
+      }
+      p = p.parentElement;
+    }
+  }
+
+  if (scrollContainer) {
+    const containerRect = scrollContainer.getBoundingClientRect();
+    const targetRect = targetElement.getBoundingClientRect();
+    const relativeTop = targetRect.top - containerRect.top + scrollContainer.scrollTop;
+    const targetScrollTop = Math.max(
+      0,
+      relativeTop - scrollContainer.clientHeight / 2 + targetRect.height / 2
+    );
+
+    if (typeof scrollContainer.scrollTo === 'function') {
+      scrollContainer.scrollTo({
+        top: targetScrollTop,
+        behavior: 'smooth',
+      });
+    } else {
+      scrollContainer.scrollTop = targetScrollTop;
+    }
+  } else if (fallbackToWindow && typeof targetElement.scrollIntoView === 'function') {
+    targetElement.scrollIntoView({
+      behavior: 'smooth',
+      block: 'center',
+    });
+  }
+}
+
 export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = ({
   documentId,
   documentVersionId,
@@ -472,10 +547,10 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
     const linkedThread = threads.find((t) => t.annotationId === ann.id);
     if (linkedThread) {
       setSelectedThreadId(linkedThread.id);
-      commentCardsRef.current[linkedThread.id]?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'center',
-      });
+      const cardEl = commentCardsRef.current[linkedThread.id];
+      if (cardEl) {
+        scrollToElementWithinContainer(cardEl);
+      }
     } else if (userRole === 'advisor') {
       // If clicking an orphaned markup with no thread, delete it immediately
       handleDeleteAnnotation(ann.id);
@@ -627,10 +702,10 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
                   onClick={() => {
                     if (linkedThread) {
                       setSelectedThreadId(linkedThread.id);
-                      commentCardsRef.current[linkedThread.id]?.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center',
-                      });
+                      const cardEl = commentCardsRef.current[linkedThread.id];
+                      if (cardEl) {
+                        scrollToElementWithinContainer(cardEl);
+                      }
                     } else {
                       handleSpanClick(ann);
                     }
@@ -768,10 +843,7 @@ export const AnnotatedDocumentViewer: React.FC<AnnotatedDocumentViewerProps> = (
                     setSelectedThreadId(thread.id);
                     const targetSpan = passageSpansRef.current[thread.id];
                     if (targetSpan) {
-                      targetSpan.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'center',
-                      });
+                      scrollToElementWithinContainer(targetSpan);
                     }
                   }}
                   className={`bg-white rounded-xl border transition-all p-4 shadow-sm space-y-3 cursor-pointer ${

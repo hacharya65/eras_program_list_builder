@@ -400,7 +400,10 @@ export function PersonalStatementEditor({
             </div>
 
             {splitPreviousSnapshot ? (
-              <div className="border border-t-0 border-purple-200 rounded-b-xl overflow-hidden bg-white p-4 shadow-sm">
+              <div
+                id="split-left-pane-scroll"
+                className="border border-t-0 border-purple-200 rounded-b-xl overflow-y-auto max-h-[680px] bg-white p-4 shadow-sm"
+              >
                 <AnnotatedDocumentViewer
                   documentId="personal_statement"
                   documentVersionId={`v${splitPrevVerNum}`}
@@ -442,7 +445,7 @@ export function PersonalStatementEditor({
               </span>
             </div>
 
-            <div className="border border-t-0 border-sky-200 rounded-b-xl bg-white p-5 shadow-sm flex flex-col space-y-4">
+            <div className="border border-t-0 border-sky-200 rounded-b-xl bg-white p-5 shadow-sm flex flex-col space-y-4 max-h-[680px]">
               <div className="flex items-center justify-between text-xs text-slate-500 pb-2 border-b border-slate-100">
                 <span className="font-semibold text-slate-700">
                   {splitPreviousSnapshot ? `Iterating from v${splitPrevVerNum} Submitted Draft` : 'Initial Baseline Draft'}
@@ -455,7 +458,7 @@ export function PersonalStatementEditor({
                 onChange={handleChange}
                 onPaste={handlePaste}
                 rows={22}
-                className="w-full flex-1 p-4 rounded-lg font-mono text-sm leading-relaxed resize-none transition-all placeholder:text-slate-400 bg-slate-50/50 border border-slate-200 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/40 focus:border-sky-500"
+                className="w-full flex-1 p-4 rounded-lg font-mono text-sm leading-relaxed resize-none transition-all placeholder:text-slate-400 bg-slate-50/50 border border-slate-200 text-slate-800 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/40 focus:border-sky-500 overflow-y-auto"
                 placeholder="Edit your active revision here while referencing faculty feedback on the left..."
               />
 

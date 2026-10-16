@@ -2,7 +2,10 @@ import { describe, it, expect, vi } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { PersonalStatementEditor } from '@/components/PersonalStatementEditor';
-import { AnnotatedDocumentViewer } from '@/components/collaborative/AnnotatedDocumentViewer';
+import {
+  AnnotatedDocumentViewer,
+  scrollToElementWithinContainer,
+} from '@/components/collaborative/AnnotatedDocumentViewer';
 import {
   segmentDocumentText,
   createCommentThread,
@@ -293,6 +296,116 @@ describe('Simplified Focus Canvas and Faculty Markup with Resilient Highlighting
       const firstPeriodSpan = spans.find((s) => s.text.includes('First paragraph encounter.'));
       expect(firstPeriodSpan).toBeDefined();
       expect(firstPeriodSpan?.annotation).toBeUndefined();
+    });
+  });
+
+  describe('Independent Split View Scrolling and Localized Anchor Focusing', () => {
+    it('Split View renders the left pane as an independent scroll container matching the right pane', () => {
+      const v2Draft: PersonalStatementDraft = {
+        ...mockDraft,
+        currentVersionNumber: 2,
+        content: 'Working on revision based on Dr. Chen notes.',
+      };
+
+      const mockV1Snapshot = {
+        id: 'snap-ps-v1',
+        documentType: 'personal_statement' as const,
+        documentId: 'ps-1',
+        versionNumber: 1,
+        content: 'Version 1 text snapshot.',
+        changelogNote: 'First draft',
+        submittedAt: '2026-09-01T12:00:00Z',
+      };
+
+      const markup = renderToStaticMarkup(
+        <PersonalStatementEditor
+          draft={v2Draft}
+          assignedAdvisor={mockAdvisor}
+          snapshots={[mockV1Snapshot]}
+          initialViewMode="split"
+          onSave={() => {}}
+          onSubmitForReview={() => {}}
+          onBack={() => {}}
+        />
+      );
+
+      // Verify the left pane has independent scroll container id and classes
+      expect(markup).toContain('id="split-left-pane-scroll"');
+      expect(markup).toContain('overflow-y-auto max-h-[680px]');
+
+      // Verify the right pane textarea has independent scrolling capability
+      expect(markup).toContain('overflow-y-auto');
+    });
+
+    it('scrollToElementWithinContainer scrolls nearest scrollable parent container instead of calling window scrollIntoView', () => {
+      const origWindow = globalThis.window;
+      const scrollSpy = vi.fn();
+      const scrollIntoViewSpy = vi.fn();
+
+      const mockParent = {
+        parentElement: null,
+        scrollHeight: 1000,
+        clientHeight: 400,
+        scrollTop: 50,
+        scrollTo: scrollSpy,
+        getBoundingClientRect: () => ({ top: 100, height: 400, bottom: 500, left: 0, right: 400 }),
+      };
+
+      const mockTarget = {
+        parentElement: mockParent,
+        scrollIntoView: scrollIntoViewSpy,
+        getBoundingClientRect: () => ({ top: 250, height: 20, bottom: 270, left: 0, right: 400 }),
+      };
+
+      (globalThis as any).window = {
+        getComputedStyle: (el: any) => {
+          if (el === mockParent) return { overflowY: 'auto' };
+          return { overflowY: 'visible' };
+        },
+      };
+
+      try {
+        scrollToElementWithinContainer(mockTarget as unknown as HTMLElement);
+
+        // Container scrollTo should have been called smoothly
+        expect(scrollSpy).toHaveBeenCalledTimes(1);
+        expect(scrollSpy).toHaveBeenCalledWith(
+          expect.objectContaining({
+            behavior: 'smooth',
+          })
+        );
+
+        // Crucially, targetElement.scrollIntoView (which jumps outer browser window) must NOT be called
+        expect(scrollIntoViewSpy).not.toHaveBeenCalled();
+      } finally {
+        globalThis.window = origWindow;
+      }
+    });
+
+    it('scrollToElementWithinContainer falls back to scrollIntoView when no scrollable parent container exists', () => {
+      const origWindow = globalThis.window;
+      const scrollIntoViewSpy = vi.fn();
+
+      const mockTarget = {
+        parentElement: null,
+        scrollIntoView: scrollIntoViewSpy,
+        getBoundingClientRect: () => ({ top: 250, height: 20, bottom: 270, left: 0, right: 400 }),
+      };
+
+      (globalThis as any).window = {
+        getComputedStyle: () => ({ overflowY: 'visible' }),
+      };
+
+      try {
+        scrollToElementWithinContainer(mockTarget as unknown as HTMLElement, true);
+
+        expect(scrollIntoViewSpy).toHaveBeenCalledWith({
+          behavior: 'smooth',
+          block: 'center',
+        });
+      } finally {
+        globalThis.window = origWindow;
+      }
     });
   });
 });
