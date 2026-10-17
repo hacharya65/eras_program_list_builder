@@ -322,12 +322,6 @@ export function StudentDashboardHome({
                         <Compass className="w-4 h-4 text-[#1F3A30]" />
                         <span>School List Building &amp; Signaling Strategy</span>
                       </h2>
-                      <span
-                        className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-bold border border-emerald-200"
-                        suppressHydrationWarning
-                      >
-                        {totalPrograms} Added
-                      </span>
                     </div>
                     <p className="text-[11px] text-neutral-500 mt-0.5">
                       Live distribution across Reach, Target &amp; Safety tiers with ERAS preference signaling allocation for <strong>{targetSpecialty}</strong>

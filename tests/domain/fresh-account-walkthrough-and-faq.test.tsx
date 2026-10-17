@@ -238,6 +238,7 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
 
       // Verify Column 1: School List Building & Signaling Strategy is present and unburied
       expect(markup).toContain('School List Building &amp; Signaling Strategy');
+      expect(markup).not.toContain('Added');
       expect(markup).toContain('Tier Balance Distribution');
       expect(markup).toContain('Preference Signals Allocation');
 
