@@ -37,6 +37,9 @@ import {
   Check,
   ChevronRight,
   Stethoscope,
+  Eye,
+  EyeOff,
+  Lock,
 } from 'lucide-react';
 
 interface ThalamusAuthExperienceProps {
@@ -64,9 +67,12 @@ export function ThalamusAuthExperience({
   const [viewMode, setViewMode] = useState<'signin' | 'guided_intake'>(initialMode);
   const [showHelpModal, setShowHelpModal] = useState(false);
 
-  // Sign In Form State
+  // Sign In / Log In Form State
   const [emailInput, setEmailInput] = useState('');
+  const [passwordInput, setPasswordInput] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
   const [signInError, setSignInError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   // Guided Intake Wizard State (1 Question at a time)
   const [currentStep, setCurrentStep] = useState(1);
@@ -141,16 +147,26 @@ export function ThalamusAuthExperience({
   const [gradYear, setGradYear] = useState<number>(2027);
   const [accountError, setAccountError] = useState<string | null>(null);
 
-  // Handle Sign In submission
+  // Handle Log In submission
   const handleSignIn = (e: React.FormEvent) => {
     e.preventDefault();
     setSignInError(null);
+    setPasswordError(null);
 
     const clean = emailInput.trim().toLowerCase();
+    let hasError = false;
+
     if (!clean) {
       setSignInError('This field cannot be left blank');
-      return;
+      hasError = true;
     }
+
+    if (!passwordInput.trim()) {
+      setPasswordError('This field cannot be left blank');
+      hasError = true;
+    }
+
+    if (hasError) return;
 
     // Check if matching demo
     if (clean === DEMO_STUDENT_ACCOUNT.email.toLowerCase() || clean === 'alex.rivera@demo.edu' || clean === 'arivera@som.edu') {
@@ -1136,12 +1152,9 @@ export function ThalamusAuthExperience({
                   Ethmoid
                 </h1>
               </div>
-              <h2 className="text-lg font-bold text-neutral-800 pt-2">
-                Sign In
-              </h2>
             </div>
 
-            {/* Sign In Form */}
+            {/* Log In Form */}
             <form onSubmit={handleSignIn} className="space-y-4">
               <div>
                 <label className="block text-xs font-bold text-neutral-700 mb-1.5 text-left">
@@ -1167,12 +1180,53 @@ export function ThalamusAuthExperience({
                 )}
               </div>
 
-              {/* Primary Sign In Button */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-xs font-bold text-neutral-700 text-left">
+                    Password
+                  </label>
+                </div>
+                <div className="relative">
+                  <input
+                    type={showPassword ? 'text' : 'password'}
+                    value={passwordInput}
+                    onChange={(e) => {
+                      setPasswordInput(e.target.value);
+                      setPasswordError(null);
+                    }}
+                    placeholder="Enter password"
+                    className={`w-full px-4 py-3 pr-11 text-sm rounded-xl border bg-white shadow-2xs focus:outline-none focus:ring-2 focus:ring-[#1F3A30] transition-all ${
+                      passwordError ? 'border-rose-400 ring-1 ring-rose-300' : 'border-neutral-300'
+                    }`}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 p-1 cursor-pointer transition-colors"
+                    title={showPassword ? 'Hide password' : 'Show password'}
+                    aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  >
+                    {showPassword ? (
+                      <EyeOff className="w-4 h-4" />
+                    ) : (
+                      <Eye className="w-4 h-4" />
+                    )}
+                  </button>
+                </div>
+                {passwordError && (
+                  <p className="text-xs text-rose-600 mt-1.5 flex items-center gap-1 font-medium text-left">
+                    <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                    <span>{passwordError}</span>
+                  </p>
+                )}
+              </div>
+
+              {/* Primary Log In Button */}
               <button
                 type="submit"
                 className="w-full py-3 px-4 rounded-xl bg-[#1F3A30] hover:bg-[#162D25] text-white font-bold text-sm shadow-md hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2"
               >
-                <span>Sign In</span>
+                <span>Log In</span>
               </button>
 
               {/* Quick Demo Login Button */}
@@ -1182,7 +1236,7 @@ export function ThalamusAuthExperience({
                 className="w-full py-2.5 px-4 rounded-xl bg-[#EAF2EE] hover:bg-[#D6E5DF] text-[#1F3A30] font-bold text-xs border border-[#7EAE9B]/40 transition-all cursor-pointer flex items-center justify-center gap-2"
               >
                 <Sparkles className="w-3.5 h-3.5 text-[#1F3A30]" />
-                <span>Quick Demo: Sign In as Alex Rivera (MS4)</span>
+                <span>Quick Demo: Log In as Alex Rivera (MS4)</span>
               </button>
             </form>
 
@@ -1232,7 +1286,7 @@ export function ThalamusAuthExperience({
                 onClick={() => setViewMode('signin')}
                 className="text-xs font-semibold text-neutral-500 hover:text-neutral-800 cursor-pointer"
               >
-                Exit to Sign In
+                Exit to Log In
               </button>
             </div>
 

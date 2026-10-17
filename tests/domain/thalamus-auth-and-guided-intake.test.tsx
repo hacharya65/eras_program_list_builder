@@ -39,9 +39,11 @@ describe('ThalamusAuthExperience & Student Portal Auth Flow', () => {
     // Thalamus branding & design cues
     expect(markup).toContain('Ethmoid');
     expect(markup).not.toContain('Connecting the Match');
-    expect(markup).toContain('Sign In');
+    expect(markup).not.toContain('Sign In');
     expect(markup).toContain('Email');
-    expect(markup).toContain('Quick Demo: Sign In as Alex Rivera (MS4)');
+    expect(markup).toContain('Password');
+    expect(markup).toContain('Log In');
+    expect(markup).toContain('Quick Demo: Log In as Alex Rivera (MS4)');
     expect(markup).not.toContain('Sign In with AAMC Account');
     expect(markup).toContain('Complete 1-Question Intake Form');
   });
