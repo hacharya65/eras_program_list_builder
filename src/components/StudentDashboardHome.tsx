@@ -84,7 +84,6 @@ interface StudentDashboardHomeProps {
       | 'school_list'
       | 'letters'
       | 'journal'
-      | 'transfer_kit'
   ) => void;
 }
 

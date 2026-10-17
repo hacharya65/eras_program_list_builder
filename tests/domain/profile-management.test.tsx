@@ -57,7 +57,6 @@ describe('ProfileManagementView', () => {
           medicalSchool: 'Penn State College of Medicine',
         }}
         onOpenIntake={() => {}}
-        onOpenTransferKit={() => {}}
         onBack={() => {}}
         assignedAdvisor={mockAdvisor}
       />
@@ -71,11 +70,9 @@ describe('ProfileManagementView', () => {
     // Key sections
     expect(markup).toContain('Academic Record &amp; Competitiveness Metrics');
     expect(markup).toContain('Target Applying Specialty Strategy');
-    expect(markup).toContain('1-Click ERAS Transfer Kit');
-    expect(markup).toContain('Geisinger Specialty Advising Intake Form');
+    expect(markup).toContain('Specialty Advising Intake Form');
 
     // Controls and buttons
-    expect(markup).toContain('Open ERAS Transfer Kit Workspace');
     expect(markup).toContain('Open &amp; Edit Full Specialty Advising Form');
     expect(markup).toContain('Dr. Marcus Chen');
   });
@@ -103,7 +100,6 @@ describe('ProfileManagementView', () => {
         onSpecialtyChange={() => {}}
         advisingIntake={customIntake}
         onOpenIntake={() => {}}
-        onOpenTransferKit={() => {}}
         onBack={() => {}}
       />
     );

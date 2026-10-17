@@ -6,12 +6,16 @@ import { InMemoryStorageAdapter } from '@/domain/storage/in-memory-adapter';
 import { DevPersonaSwitcher } from '@/components/DevPersonaSwitcher';
 import { StudentPortal } from '@/components/StudentPortal';
 import { StudentAuthModal } from '@/components/StudentAuthModal';
+import { ThalamusAuthExperience } from '@/components/ThalamusAuthExperience';
 import { BrowserStoragePortfolioAdapter } from '@/domain/student-portfolio';
 import {
   StudentAccount,
   getCurrentStudentId,
   getStudentAccount,
   loadStudentRegistry,
+  isUserAuthenticated,
+  logoutSession,
+  setAuthenticatedSession,
 } from '@/domain/student-registry';
 
 // Instantiate singleton service with in-memory adapter and browser storage portfolio adapter
@@ -22,17 +26,25 @@ const service = new AdvisingPlatformService(storage, portfolioRepo);
 export default function HomePage() {
   const studentContext = service.getStudentDashboardContext();
   const [currentAccount, setCurrentAccount] = useState<StudentAccount | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isMounted, setIsMounted] = useState<boolean>(false);
 
   useEffect(() => {
-    const id = getCurrentStudentId();
-    const acc = getStudentAccount(id);
-    if (acc) {
-      setCurrentAccount(acc);
-    } else {
-      const registry = loadStudentRegistry();
-      if (registry.length > 0) {
-        setCurrentAccount(registry[0]);
+    setIsMounted(true);
+    const authed = isUserAuthenticated();
+    setIsAuthenticated(authed);
+
+    if (authed) {
+      const id = getCurrentStudentId();
+      const acc = getStudentAccount(id);
+      if (acc) {
+        setCurrentAccount(acc);
+      } else {
+        const registry = loadStudentRegistry();
+        if (registry.length > 0) {
+          setCurrentAccount(registry[0]);
+        }
       }
     }
 
@@ -48,6 +60,26 @@ export default function HomePage() {
     return () => window.removeEventListener('student_account_switched', handleSwitched);
   }, []);
 
+  const handleAuthenticated = (acc: StudentAccount) => {
+    setAuthenticatedSession(true);
+    setCurrentAccount(acc);
+    setIsAuthenticated(true);
+  };
+
+  const handleLogout = () => {
+    logoutSession();
+    setIsAuthenticated(false);
+  };
+
+  // If not mounted yet (SSR) or not authenticated, render ThalamusAuthExperience
+  if (!isMounted || !isAuthenticated) {
+    return (
+      <ThalamusAuthExperience
+        onAuthenticated={handleAuthenticated}
+      />
+    );
+  }
+
   const currentSchool = currentAccount?.medicalSchool || '';
   const currentName = currentAccount?.name || studentContext.student.name;
 
@@ -62,6 +94,7 @@ export default function HomePage() {
         userName={currentName}
         userRoleTitle="MS4 Applicant"
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
+        onLogout={handleLogout}
         onOpenAdvisingLeadership={() => {
           if (typeof window !== 'undefined') {
             const url = new URL(window.location.href);
@@ -88,7 +121,7 @@ export default function HomePage() {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         onAuthenticated={(acc) => {
-          setCurrentAccount(acc);
+          handleAuthenticated(acc);
           setIsAuthModalOpen(false);
         }}
       />

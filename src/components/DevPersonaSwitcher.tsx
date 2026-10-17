@@ -14,6 +14,7 @@ import {
   FileText,
   Contact,
   Mail,
+  LogOut,
 } from 'lucide-react';
 
 interface DevPersonaSwitcherProps {
@@ -26,6 +27,8 @@ interface DevPersonaSwitcherProps {
   onOpenProfileManagement?: () => void;
   onOpenAdvisingLeadership?: () => void;
   onOpenAuthModal?: () => void;
+  onLogout?: () => void;
+  defaultMenuOpen?: boolean;
 }
 
 export function DevPersonaSwitcher({
@@ -38,8 +41,10 @@ export function DevPersonaSwitcher({
   onOpenProfileManagement,
   onOpenAdvisingLeadership,
   onOpenAuthModal,
+  onLogout,
+  defaultMenuOpen = false,
 }: DevPersonaSwitcherProps) {
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(defaultMenuOpen);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -79,13 +84,6 @@ export function DevPersonaSwitcher({
     }
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('navigate_to_profile_management'));
-    }
-    setIsProfileMenuOpen(false);
-  };
-
-  const handleTransferKitClick = () => {
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('navigate_to_transfer_kit'));
     }
     setIsProfileMenuOpen(false);
   };
@@ -242,20 +240,27 @@ export function DevPersonaSwitcher({
                     </button>
 
                     <button
-                      onClick={handleTransferKitClick}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
-                    >
-                      <ClipboardCopy className="w-4 h-4 text-[#4E8773]" />
-                      <span>1-Click ERAS Transfer Kit</span>
-                    </button>
-
-                    <button
                       onClick={handleIntakeClick}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
                     >
                       <FileText className="w-4 h-4 text-[#4E8773]" />
                       <span>Specialty Advising Dossier</span>
                     </button>
+
+                    {onLogout && (
+                      <div className="pt-1 mt-1 border-t border-neutral-100">
+                        <button
+                          onClick={() => {
+                            setIsProfileMenuOpen(false);
+                            onLogout();
+                          }}
+                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-red-700 hover:bg-red-50 hover:text-red-800 font-semibold transition-colors text-left cursor-pointer"
+                        >
+                          <LogOut className="w-4 h-4 text-red-600" />
+                          <span>Sign Out</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}

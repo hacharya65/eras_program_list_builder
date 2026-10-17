@@ -39,7 +39,6 @@ interface ProfileManagementViewProps {
   onSpecialtyChange: (specialty: string) => void;
   advisingIntake: SpecialtyAdvisingIntake;
   onOpenIntake: () => void;
-  onOpenTransferKit: () => void;
   onBack: () => void;
   assignedAdvisor?: UserProfile;
 }
@@ -50,7 +49,6 @@ export function ProfileManagementView({
   onSpecialtyChange,
   advisingIntake,
   onOpenIntake,
-  onOpenTransferKit,
   onBack,
   assignedAdvisor,
 }: ProfileManagementViewProps) {
@@ -129,14 +127,6 @@ export function ProfileManagementView({
 
         {/* Quick Jump Buttons */}
         <div className="flex flex-wrap sm:flex-col items-start sm:items-end gap-2.5 shrink-0">
-          <button
-            onClick={onOpenTransferKit}
-            className="px-4 py-2 bg-[#1F3A30] hover:bg-[#162D25] text-white rounded-xl text-xs font-semibold flex items-center gap-2 shadow-2xs transition-all cursor-pointer"
-          >
-            <ClipboardCopy className="w-4 h-4 text-[#7EAE9B]" />
-            <span>1-Click ERAS Transfer Kit</span>
-          </button>
-
           <button
             onClick={onOpenIntake}
             className="px-4 py-2 bg-[#EAF2EE] hover:bg-[#D6E5DF] text-[#1F3A30] border border-[#7EAE9B] rounded-xl text-xs font-bold flex items-center gap-2 shadow-2xs transition-all cursor-pointer"
@@ -243,38 +233,6 @@ export function ProfileManagementView({
               >
                 Contact
               </a>
-            </div>
-          </div>
-
-          {/* Module 2: 1-Click ERAS Transfer Kit & Packet Card */}
-          <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-6 space-y-4">
-            <div className="border-b border-neutral-100 pb-3 flex items-center justify-between">
-              <div>
-                <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
-                  <ClipboardCopy className="w-4 h-4 text-[#1F3A30]" />
-                  <span>1-Click ERAS Transfer Kit &amp; Packet Export</span>
-                </h2>
-                <p className="text-xs text-neutral-500 mt-0.5">
-                  Clean plain-text copy-paste blocks &amp; official PDF advising packet preview.
-                </p>
-              </div>
-            </div>
-
-            <p className="text-xs text-neutral-600 leading-relaxed">
-              When ready to submit to the official AAMC MyERAS portal, use the Transfer Kit to export
-              your Personal Statement, top 10 Selected Experiences, Hobbies, and Citations formatted
-              to strict AAMC plain-text specifications without hidden control characters.
-            </p>
-
-            <div className="flex items-center gap-3 pt-2">
-              <button
-                onClick={onOpenTransferKit}
-                className="px-4 py-2.5 bg-[#1F3A30] hover:bg-[#162D25] text-white font-bold text-xs rounded-xl shadow-2xs flex items-center gap-2 cursor-pointer transition-all"
-              >
-                <Download className="w-4 h-4 text-[#7EAE9B]" />
-                <span>Open ERAS Transfer Kit Workspace</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
             </div>
           </div>
         </div>

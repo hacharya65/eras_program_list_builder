@@ -6,7 +6,6 @@ import { ApplicantProfileModal } from './ApplicantProfileModal';
 import { SpecialtyAdvisingFormModal } from './SpecialtyAdvisingFormModal';
 import { LetterOfRecommendationTracker } from './LetterOfRecommendationTracker';
 import { SpecialtySwitchingSafetyModal } from './SpecialtySwitchingSafetyModal';
-import { ErasTransferKit } from './ErasTransferKit';
 import { StudentDashboardHome } from './StudentDashboardHome';
 import { ProfileManagementView } from './ProfileManagementView';
 import { JournalRepositoryView } from './JournalRepositoryView';
@@ -59,7 +58,6 @@ export function StudentPortal({
     | 'journal'
     | 'school_list'
     | 'competitiveness'
-    | 'transfer_kit'
     | 'letters'
     | 'advising_leadership'
   >('overview');
@@ -118,7 +116,6 @@ export function StudentPortal({
           'journal',
           'school_list',
           'competitiveness',
-          'transfer_kit',
           'letters',
           'advising_leadership',
         ].includes(urlView)
@@ -139,7 +136,6 @@ export function StudentPortal({
             'journal',
             'school_list',
             'competitiveness',
-            'transfer_kit',
             'letters',
             'advising_leadership',
           ].includes(urlView)
@@ -156,7 +152,6 @@ export function StudentPortal({
   // Listen to custom navigation events from top nav or external components
   useEffect(() => {
     const handleNavProfile = () => updateView('profile');
-    const handleNavTransfer = () => updateView('transfer_kit');
     const handleNavIntake = () => updateView('intake');
     const handleNavLeadership = () => updateView('advising_leadership');
     const handleOpenAuth = () => {
@@ -168,14 +163,12 @@ export function StudentPortal({
     };
 
     window.addEventListener('navigate_to_profile_management', handleNavProfile);
-    window.addEventListener('navigate_to_transfer_kit', handleNavTransfer);
     window.addEventListener('navigate_to_intake', handleNavIntake);
     window.addEventListener('navigate_to_advising_leadership', handleNavLeadership);
     window.addEventListener('open_student_auth_modal', handleOpenAuth);
 
     return () => {
       window.removeEventListener('navigate_to_profile_management', handleNavProfile);
-      window.removeEventListener('navigate_to_transfer_kit', handleNavTransfer);
       window.removeEventListener('navigate_to_intake', handleNavIntake);
       window.removeEventListener('navigate_to_advising_leadership', handleNavLeadership);
       window.removeEventListener('open_student_auth_modal', handleOpenAuth);
@@ -260,7 +253,6 @@ export function StudentPortal({
         return 'journal';
       case 'intake':
       case 'letters':
-      case 'transfer_kit':
         return 'documents';
       default:
         return 'dashboard';
@@ -321,7 +313,6 @@ export function StudentPortal({
           badge: advisingIntake.isCompleted ? 'Complete' : 'In Progress',
         },
         { id: 'letters', label: 'Letters of Recommendation', icon: MailCheck },
-        { id: 'transfer_kit', label: 'Packet & Exports', icon: Download },
       ],
     },
   ];
@@ -383,15 +374,6 @@ export function StudentPortal({
       );
     }
 
-    if (activeView === 'transfer_kit') {
-      return (
-        <ErasTransferKit
-          context={context}
-          onBack={() => updateView('overview')}
-        />
-      );
-    }
-
     if (activeView === 'letters') {
       return (
         <div className="space-y-6">
@@ -424,7 +406,6 @@ export function StudentPortal({
           onSpecialtyChange={handleSpecialtyChange}
           advisingIntake={advisingIntake}
           onOpenIntake={() => updateView('intake')}
-          onOpenTransferKit={() => updateView('transfer_kit')}
           onBack={() => updateView('overview')}
           assignedAdvisor={assignedAdvisor}
         />
