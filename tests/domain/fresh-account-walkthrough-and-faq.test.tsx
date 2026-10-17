@@ -179,6 +179,10 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
       expect(markup).toContain('Advising and Leadership');
       expect(markup).toContain('FAQ &amp; Platform Walkthrough');
       expect(markup).toContain('Profile Management &amp; Scores');
+
+      // Verify top dark green demonstration strip is removed
+      expect(markup).not.toContain('Demonstration — fictional applicant records');
+      expect(markup).not.toContain('Student Match Strategy &amp; Signaling Workspace');
     });
   });
 

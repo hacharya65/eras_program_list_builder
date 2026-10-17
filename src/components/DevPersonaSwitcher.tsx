@@ -137,26 +137,7 @@ export function DevPersonaSwitcher({
 
   return (
     <div className="sticky top-0 z-50 shadow-xs">
-      {/* Level 0: Top Demonstration Strip (Solid Dark Spruce #1F3A30) with Shifted Active Persona Switcher */}
-      <div className="bg-[#1F3A30] text-white py-1.5 px-4 sm:px-6 lg:px-8 border-b border-white/10">
-        <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs">
-          {/* Demonstration Notice */}
-          <div className="font-medium tracking-wide text-white/90 text-center sm:text-left flex items-center gap-2">
-            <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span>
-            <span>Demonstration — fictional applicant records</span>
-          </div>
-
-          {/* Student Status Tag */}
-          <div className="flex items-center gap-2">
-            <span className="text-emerald-200 bg-white/10 px-2.5 py-0.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5 border border-white/10">
-              <GraduationCap className="w-3.5 h-3.5" />
-              <span>Student Match Strategy &amp; Signaling Workspace</span>
-            </span>
-          </div>
-        </div>
-      </div>
-
-      {/* Level 1: Main Institutional Navigation Header (Pure White #FFFFFF) with Classic Profile Tab */}
+      {/* Main Institutional Navigation Header (Pure White #FFFFFF) with Classic Profile Tab */}
       <header className="bg-white border-b border-neutral-200/90">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           {/* Left: Ethmoid Logo & School Name */}
