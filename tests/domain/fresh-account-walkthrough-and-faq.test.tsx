@@ -8,6 +8,9 @@ import { loadExperienceJournalEntries } from '@/domain/experience-journal-models
 import { PlatformWalkthroughModal } from '@/components/PlatformWalkthroughModal';
 import { FaqAndGuideView } from '@/components/FaqAndGuideView';
 import { DevPersonaSwitcher } from '@/components/DevPersonaSwitcher';
+import { StudentDashboardHome } from '@/components/StudentDashboardHome';
+import { INITIAL_MOCK_INTAKE } from '@/domain/advising-intake-models';
+import { StudentDashboardContext } from '@/domain/types';
 
 describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
   const newStudentId = 'stu-new-applicant-987';
@@ -174,6 +177,72 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
       expect(markup).toContain('Advising and Leadership');
       expect(markup).toContain('FAQ &amp; Platform Walkthrough');
       expect(markup).toContain('Profile Management &amp; Scores');
+    });
+  });
+
+  describe('StudentDashboardHome 3-Column Layout Visibility', () => {
+    it('renders School List Strategy, Letters of Rec, and compact Journal concurrently in 3 columns without burying School List', () => {
+      const mockContext: StudentDashboardContext = {
+        student: {
+          id: 'stu-alex-rivera',
+          name: 'Alex Rivera',
+          email: 'alex.rivera@geisinger.edu',
+          role: 'student',
+          medicalSchool: 'Geisinger Commonwealth School of Medicine',
+          specialty: 'Internal Medicine',
+        },
+        assignedAdvisors: [],
+        portfolio: {
+          studentId: 'stu-alex-rivera',
+          specialty: 'Internal Medicine',
+          schoolList: [],
+          lorRequests: [],
+          journalEntries: [],
+          status: 'draft',
+          lastSaved: new Date().toISOString(),
+        },
+        competitiveness: {
+          overallScore: 82,
+          stepScoreTier: 'competitive',
+          clerkshipHonorsCount: 4,
+          researchOutputTier: 'moderate',
+          tierRecommendation: '25% Reach, 50% Target, 25% Safety',
+          signalsAvailable: 15,
+        },
+      };
+
+      const markup = renderToStaticMarkup(
+        <StudentDashboardHome
+          context={mockContext}
+          student={mockContext.student}
+          targetSpecialty="Internal Medicine"
+          onSpecialtyChange={() => {}}
+          advisingIntake={{
+            ...INITIAL_MOCK_INTAKE,
+            studentId: mockContext.student.id,
+            applyingSpecialty: 'Internal Medicine',
+          }}
+          onOpenIntake={() => {}}
+          onOpenProfile={() => {}}
+          assignedAdvisors={mockContext.assignedAdvisors}
+          schoolListStats={{ count: 0, signalsAssigned: 0 }}
+          onNavigate={() => {}}
+        />
+      );
+
+      // Verify Column 1: School List Building & Signaling Strategy is present and unburied
+      expect(markup).toContain('School List Building &amp; Signaling Strategy');
+      expect(markup).toContain('Tier Balance Distribution');
+      expect(markup).toContain('Preference Signals Allocation');
+
+      // Verify Column 2: Letters of Recommendation
+      expect(markup).toContain('Letters of Recommendation');
+      expect(markup).toContain('Add Writer');
+
+      // Verify Column 3: Compact Reflective Journal
+      expect(markup).toContain('Journal');
+      expect(markup).toContain('Encounter &amp; takeaway scratchpad');
+      expect(markup).toContain('Private scratchpad');
     });
   });
 });

@@ -294,127 +294,10 @@ export function StudentDashboardHome({
         </div>
       </div>
 
-      {/* 2. Thalamus-Style Asymmetric 2-Column Dashboard Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
-        {/* ==================== LEFT MAIN COLUMN (Col 1 to 7/8) ==================== */}
-        <div className="lg:col-span-7 xl:col-span-8 space-y-6">
-          {/* Card 1: Journal (Low-Friction Clinical Reflection Scratchpad - positioned ABOVE Program List) */}
-          <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-5">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-neutral-100">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
-                    <BookOpen className="w-4 h-4 text-[#1F3A30]" />
-                    <span>Journal</span>
-                  </h2>
-                  <button
-                    type="button"
-                    onClick={() => setIsJournalDrawerOpen(true)}
-                    className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold border border-emerald-200/80 flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
-                    title="Click to browse saved journal entries"
-                    suppressHydrationWarning
-                  >
-                    <span>{journalEntries.length} saved entries</span>
-                    <ChevronRight className="w-3 h-3 text-emerald-600" />
-                  </button>
-                </div>
-                <p className="text-xs text-neutral-500 mt-0.5">
-                  Quickly capture patient encounters, clinical insights, and takeaways to draw from later.
-                </p>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => setIsJournalDrawerOpen(true)}
-                className="text-xs font-bold text-[#1F3A30] hover:underline flex items-center gap-1 cursor-pointer self-start sm:self-auto shrink-0"
-              >
-                <span>View Entries ({journalEntries.length})</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-
-            {journalSuccessMessage && (
-              <div className="mt-4 p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-                <span>{journalSuccessMessage}</span>
-              </div>
-            )}
-
-            {/* Simple, low-friction journaling form: Topic + Reflection + Category + Save */}
-            <form onSubmit={handleSaveJournalEntry} className="mt-4 space-y-3.5">
-              <div>
-                <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                  Topic or Encounter *
-                </label>
-                <input
-                  type="text"
-                  required
-                  placeholder="e.g., ICU family meeting, night float consult, pediatric sedation debrief..."
-                  value={journalTitle}
-                  onChange={(e) => setJournalTitle(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B] shadow-2xs"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                  Reflection &amp; Notes *
-                </label>
-                <textarea
-                  rows={3}
-                  required
-                  placeholder="What happened? What patient dynamics, procedural lessons, or personal reflections stood out? Jot them down while fresh..."
-                  value={journalNotes}
-                  onChange={(e) => setJournalNotes(e.target.value)}
-                  className="w-full px-3.5 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B] shadow-2xs"
-                />
-              </div>
-
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider">
-                    Category:
-                  </span>
-                  <select
-                    value={journalCategory}
-                    onChange={(e) => setJournalCategory(e.target.value as any)}
-                    className="px-2.5 py-1.5 text-xs font-semibold border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-800 focus:outline-none focus:ring-2 focus:ring-[#7EAE9B] cursor-pointer"
-                  >
-                    <option value="Clinical Encounter">Clinical Encounter</option>
-                    <option value="Patient Advocacy">Patient Advocacy</option>
-                    <option value="Teaching & Mentorship">Teaching &amp; Mentorship</option>
-                    <option value="Research Breakthrough">Research Breakthrough</option>
-                    <option value="Leadership Moment">Leadership Moment</option>
-                    <option value="Personal Reflection">Personal Reflection</option>
-                  </select>
-                </div>
-
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-[#1F3A30] hover:bg-[#162D25] text-white font-bold text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1.5 transition-all cursor-pointer"
-                >
-                  <Plus className="w-3.5 h-3.5" />
-                  <span>Save Entry</span>
-                </button>
-              </div>
-            </form>
-
-            <div className="mt-3 pt-3 border-t border-neutral-100 flex items-center justify-between text-xs">
-              <span className="text-[11px] text-neutral-400">
-                Private scratchpad &bull; not submitted to ERAS
-              </span>
-              <button
-                type="button"
-                onClick={() => setIsJournalDrawerOpen(true)}
-                className="text-xs font-bold text-[#1F3A30] hover:underline flex items-center gap-1 cursor-pointer"
-              >
-                <span>Browse Saved Entries ({journalEntries.length})</span>
-                <ChevronRight className="w-3.5 h-3.5" />
-              </button>
-            </div>
-          </div>
-
-          {/* Card 2: School List Building Progress & Strategy Summary */}
+      {/* 2. Three-Column Strategic Command Grid: All 3 Core Modules Visible Without Scrolling */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-5 items-start">
+        {/* ==================== COLUMN 1: SCHOOL LIST & SIGNALING STRATEGY (Col 1 to 5) ==================== */}
+        <div className="md:col-span-2 lg:col-span-5">
           {(() => {
             const reachCount = savedPrograms.filter((p) => p.tier === 'reach').length;
             const targetCount = savedPrograms.filter((p) => p.tier === 'target').length;
@@ -425,8 +308,8 @@ export function StudentDashboardHome({
             const safetyPct = totalPrograms > 0 ? Math.round((safetyCount / totalPrograms) * 100) : 0;
 
             return (
-              <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-5 space-y-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-neutral-100">
+              <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-4 sm:p-5 space-y-4">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-neutral-100">
                   <div>
                     <div className="flex items-center gap-2">
                       <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
@@ -440,14 +323,14 @@ export function StudentDashboardHome({
                         {totalPrograms} Added
                       </span>
                     </div>
-                    <p className="text-xs text-neutral-500 mt-0.5">
+                    <p className="text-[11px] text-neutral-500 mt-0.5">
                       Live distribution across Reach, Target &amp; Safety tiers with ERAS preference signaling allocation for <strong>{targetSpecialty}</strong>
                     </p>
                   </div>
 
                   <button
                     onClick={() => onNavigate('school_list')}
-                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#1F3A30] hover:bg-[#152B23] text-white flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer self-start sm:self-auto shrink-0"
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#1F3A30] hover:bg-[#152B23] text-white flex items-center gap-1 shadow-2xs transition-all cursor-pointer self-start sm:self-auto shrink-0"
                   >
                     <span>Full School List Matrix</span>
                     <ChevronRight className="w-3.5 h-3.5" />
@@ -455,61 +338,61 @@ export function StudentDashboardHome({
                 </div>
 
                 {/* Metrics Grid */}
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {/* Total Added */}
-                  <div className="p-3.5 bg-neutral-50 rounded-xl border border-neutral-200/80">
-                    <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Total Programs</div>
-                    <div className="text-2xl font-black text-neutral-900 mt-0.5">{totalPrograms}</div>
-                    <div className="text-[10px] text-neutral-500 mt-1 font-medium">
-                      {totalPrograms >= 25 ? 'Broad, competitive list' : totalPrograms >= 15 ? 'Target cohort range' : 'Early list building'}
+                  <div className="p-2.5 sm:p-3 bg-neutral-50 rounded-xl border border-neutral-200/80">
+                    <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Total</div>
+                    <div className="text-xl font-black text-neutral-900 mt-0.5">{totalPrograms}</div>
+                    <div className="text-[9px] text-neutral-500 mt-0.5 font-medium truncate">
+                      {totalPrograms >= 25 ? 'Broad list' : totalPrograms >= 15 ? 'Target cohort' : 'Early building'}
                     </div>
                   </div>
 
                   {/* Reach */}
-                  <div className="p-3.5 bg-rose-50/70 rounded-xl border border-rose-200/80">
+                  <div className="p-2.5 sm:p-3 bg-rose-50/70 rounded-xl border border-rose-200/80">
                     <div className="text-[10px] font-bold text-rose-800 uppercase tracking-wider flex items-center justify-between">
                       <span>Reach</span>
                       <span className="font-bold">{reachPct}%</span>
                     </div>
-                    <div className="text-2xl font-black text-rose-950 mt-0.5">{reachCount}</div>
-                    <div className="text-[10px] text-rose-700 mt-1 font-medium">High reach / stretch</div>
+                    <div className="text-xl font-black text-rose-950 mt-0.5">{reachCount}</div>
+                    <div className="text-[9px] text-rose-700 mt-0.5 font-medium truncate">Stretch reach</div>
                   </div>
 
                   {/* Target */}
-                  <div className="p-3.5 bg-emerald-50/70 rounded-xl border border-emerald-200/80">
+                  <div className="p-2.5 sm:p-3 bg-emerald-50/70 rounded-xl border border-emerald-200/80">
                     <div className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider flex items-center justify-between">
                       <span>Target</span>
                       <span className="font-bold">{targetPct}%</span>
                     </div>
-                    <div className="text-2xl font-black text-emerald-950 mt-0.5">{targetCount}</div>
-                    <div className="text-[10px] text-emerald-700 mt-1 font-medium">Core score alignment</div>
+                    <div className="text-xl font-black text-emerald-950 mt-0.5">{targetCount}</div>
+                    <div className="text-[9px] text-emerald-700 mt-0.5 font-medium truncate">Core align</div>
                   </div>
 
                   {/* Safety */}
-                  <div className="p-3.5 bg-blue-50/70 rounded-xl border border-blue-200/80">
+                  <div className="p-2.5 sm:p-3 bg-blue-50/70 rounded-xl border border-blue-200/80">
                     <div className="text-[10px] font-bold text-blue-800 uppercase tracking-wider flex items-center justify-between">
                       <span>Safety</span>
                       <span className="font-bold">{safetyPct}%</span>
                     </div>
-                    <div className="text-2xl font-black text-blue-950 mt-0.5">{safetyCount}</div>
-                    <div className="text-[10px] text-blue-700 mt-1 font-medium">High match probability</div>
+                    <div className="text-xl font-black text-blue-950 mt-0.5">{safetyCount}</div>
+                    <div className="text-[9px] text-blue-700 mt-0.5 font-medium truncate">High match</div>
                   </div>
                 </div>
 
                 {/* Visual Balance Distribution Bar */}
-                <div className="space-y-1.5 pt-1">
+                <div className="space-y-1 pt-0.5">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="text-neutral-700 font-bold flex items-center gap-1.5 text-[11px] uppercase tracking-wider">
+                    <span className="text-neutral-700 font-bold flex items-center gap-1 text-[10px] uppercase tracking-wider">
                       Tier Balance Distribution
                     </span>
-                    <span className="text-neutral-400 text-[11px]">
-                      Benchmark: ~25% Reach &bull; ~50% Target &bull; ~25% Safety
+                    <span className="text-neutral-400 text-[10px]">
+                      ~25% Reach &bull; ~50% Target &bull; ~25% Safety
                     </span>
                   </div>
 
-                  <div className="w-full bg-neutral-100 h-3 rounded-full overflow-hidden flex shadow-inner">
+                  <div className="w-full bg-neutral-100 h-2.5 rounded-full overflow-hidden flex shadow-inner">
                     {totalPrograms === 0 ? (
-                      <div className="w-full bg-neutral-200 h-full text-center text-[9px] text-neutral-500 font-medium leading-3">
+                      <div className="w-full bg-neutral-200 h-full text-center text-[8px] text-neutral-500 font-medium leading-2.5">
                         No programs added yet
                       </div>
                     ) : (
@@ -536,30 +419,30 @@ export function StudentDashboardHome({
 
                 {/* Signaling Utilization Progress Bars */}
                 {specialtyRule.totalSignals > 0 ? (
-                  <div className="p-4 bg-[#FAFBF9] rounded-xl border border-neutral-200/80 space-y-3">
+                  <div className="p-3 bg-[#FAFBF9] rounded-xl border border-neutral-200/80 space-y-2.5">
                     <div className="flex items-center justify-between text-xs">
-                      <div className="font-bold text-neutral-800 flex items-center gap-1.5">
+                      <div className="font-bold text-neutral-800 flex items-center gap-1.5 text-[11px]">
                         <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
                         <span>{targetSpecialty} Preference Signals Allocation</span>
                       </div>
-                      <span className="text-[11px] font-semibold text-neutral-600 bg-white px-2 py-0.5 rounded border border-neutral-200">
-                        {goldUsed + silverUsed} / {specialtyRule.totalSignals} signals assigned
+                      <span className="text-[10px] font-semibold text-neutral-600 bg-white px-2 py-0.5 rounded border border-neutral-200">
+                        {goldUsed + silverUsed} / {specialtyRule.totalSignals} assigned
                       </span>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-0.5">
                       {specialtyRule.goldSignals > 0 && (
                         <div className="space-y-1">
-                          <div className="flex justify-between text-[11px]">
+                          <div className="flex justify-between text-[10px]">
                             <span className="font-bold text-amber-900 flex items-center gap-1">
-                              <span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
-                              Gold Signals (Highest Interest)
+                              <span className="w-1.5 h-1.5 rounded-full bg-amber-500 inline-block"></span>
+                              Gold Signals (Top Choice)
                             </span>
                             <span className="font-bold text-amber-900">
-                              {goldUsed} / {specialtyRule.goldSignals} used
+                              {goldUsed} / {specialtyRule.goldSignals}
                             </span>
                           </div>
-                          <div className="w-full bg-amber-100 rounded-full h-2 overflow-hidden">
+                          <div className="w-full bg-amber-100 rounded-full h-1.5 overflow-hidden">
                             <div
                               className="bg-amber-500 h-full rounded-full transition-all"
                               style={{
@@ -571,16 +454,16 @@ export function StudentDashboardHome({
                       )}
 
                       <div className="space-y-1">
-                        <div className="flex justify-between text-[11px]">
+                        <div className="flex justify-between text-[10px]">
                           <span className="font-bold text-slate-800 flex items-center gap-1">
-                            <span className="w-2 h-2 rounded-full bg-slate-400 inline-block"></span>
-                            {specialtyRule.goldSignals > 0 ? 'Silver Signals (High Interest)' : 'Standard Preference Signals'}
+                            <span className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block"></span>
+                            {specialtyRule.goldSignals > 0 ? 'Silver Signals' : 'Preference Signals'}
                           </span>
                           <span className="font-bold text-slate-900">
-                            {silverUsed} / {specialtyRule.silverSignals} used
+                            {silverUsed} / {specialtyRule.silverSignals}
                           </span>
                         </div>
-                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                        <div className="w-full bg-slate-200 rounded-full h-1.5 overflow-hidden">
                           <div
                             className="bg-slate-500 h-full rounded-full transition-all"
                             style={{
@@ -592,19 +475,19 @@ export function StudentDashboardHome({
                     </div>
                   </div>
                 ) : (
-                  <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 text-xs text-neutral-500">
+                  <div className="p-2.5 bg-neutral-50 rounded-xl border border-neutral-200 text-[11px] text-neutral-500">
                     {targetSpecialty} does not participate in preference signaling under current AAMC guidelines.
                   </div>
                 )}
 
                 {/* Quick Link to Matrix */}
-                <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-xs">
-                  <span className="text-[11px] text-neutral-500">
-                    Search 2,500+ ACGME programs with Step 2 CK ranges, signals &amp; filters
+                <div className="pt-1.5 border-t border-neutral-100 flex items-center justify-between text-[11px]">
+                  <span className="text-neutral-500 truncate max-w-[240px]">
+                    2,500+ ACGME programs with Step ranges
                   </span>
                   <button
                     onClick={() => onNavigate('school_list')}
-                    className="text-xs font-bold text-[#1F3A30] hover:underline flex items-center gap-1 cursor-pointer"
+                    className="font-bold text-[#1F3A30] hover:underline flex items-center gap-1 cursor-pointer shrink-0"
                   >
                     <span>Open School List Matrix &rarr;</span>
                   </button>
@@ -614,23 +497,22 @@ export function StudentDashboardHome({
           })()}
         </div>
 
-        {/* ==================== RIGHT SIDEBAR COLUMN (Col 8 to 12) ==================== */}
-        <div className="lg:col-span-5 xl:col-span-4 space-y-6">
-          {/* Card E: Letters of Recommendation Tracker (With inline add & quick status) */}
-          <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-5">
+        {/* ==================== COLUMN 2: LETTERS OF RECOMMENDATION (Col 6 to 9) ==================== */}
+        <div className="md:col-span-1 lg:col-span-4">
+          <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-4 sm:p-5 space-y-3.5">
             <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
               <div>
                 <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
                   <MailCheck className="w-4 h-4 text-[#1F3A30]" />
                   <span>Letters of Recommendation</span>
                 </h2>
-                <div className="text-xs text-neutral-500 mt-0.5" suppressHydrationWarning>
+                <div className="text-[11px] text-neutral-500 mt-0.5" suppressHydrationWarning>
                   {writers.filter((w) => w.status === 'submitted').length} of {writers.length} submitted
                 </div>
               </div>
               <button
                 onClick={handleOpenAddWriter}
-                className="px-2.5 py-1.5 bg-[#1F3A30] hover:bg-[#162D25] text-white rounded-xl text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors cursor-pointer"
+                className="px-2.5 py-1.5 bg-[#1F3A30] hover:bg-[#162D25] text-white rounded-xl text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Writer</span>
@@ -638,16 +520,15 @@ export function StudentDashboardHome({
             </div>
 
             {/* Advising Tip Box */}
-            <div className="mt-3.5 p-3 bg-amber-50/80 border border-amber-200/80 rounded-xl text-xs text-amber-950 flex items-start gap-2">
-              <Sparkles className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
-              <p className="leading-tight text-[11px]">
-                <strong>Advising Rule of Thumb:</strong> Target 3–4 letters by July 15. Ensure at least one Sub-I
-                attending letter in {targetSpecialty}.
+            <div className="p-2.5 bg-amber-50/80 border border-amber-200/80 rounded-xl text-amber-950 flex items-start gap-2">
+              <Sparkles className="w-3.5 h-3.5 text-amber-700 shrink-0 mt-0.5" />
+              <p className="leading-tight text-[10px]">
+                <strong>Rule of Thumb:</strong> Target 3–4 letters by July 15. Ensure &ge;1 Sub-I attending letter in {targetSpecialty}.
               </p>
             </div>
 
-            {/* Writer List */}
-            <div className="mt-4 space-y-2.5">
+            {/* Writer List (Scrollable if >2 writers to maintain viewport alignment) */}
+            <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1 scrollbar-thin">
               {writers.length === 0 ? (
                 <div className="py-6 text-center text-xs text-neutral-400">
                   No letter writers added yet. Click &quot;Add Writer&quot; above.
@@ -656,21 +537,21 @@ export function StudentDashboardHome({
                 writers.map((w) => (
                   <div
                     key={w.id}
-                    className="p-3 bg-neutral-50 border border-neutral-200/70 rounded-xl text-xs hover:border-neutral-300 transition-colors"
+                    className="p-2.5 bg-neutral-50 border border-neutral-200/70 rounded-xl text-xs hover:border-neutral-300 transition-colors"
                   >
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <div className="font-bold text-neutral-900">{w.writerName}</div>
-                        <div className="text-[11px] text-neutral-500 leading-tight">
+                    <div className="flex items-start justify-between gap-1.5">
+                      <div className="min-w-0">
+                        <div className="font-bold text-neutral-900 truncate">{w.writerName}</div>
+                        <div className="text-[10px] text-neutral-500 leading-tight truncate">
                           {w.writerTitle} &bull; {w.institution}
                         </div>
-                        <span className="mt-1 inline-block text-[10px] px-1.5 py-0.2 rounded bg-neutral-200/70 text-neutral-700 font-medium">
+                        <span className="mt-1 inline-block text-[9px] px-1.5 py-0.2 rounded bg-neutral-200/70 text-neutral-700 font-medium">
                           {w.letterType}
                         </span>
                       </div>
                       <button
                         onClick={() => handleOpenEditWriter(w)}
-                        className="text-neutral-400 hover:text-neutral-700 p-1 cursor-pointer"
+                        className="text-neutral-400 hover:text-neutral-700 p-1 cursor-pointer shrink-0"
                         title="Edit writer details"
                       >
                         <Edit2 className="w-3 h-3" />
@@ -678,14 +559,14 @@ export function StudentDashboardHome({
                     </div>
 
                     {/* Status Pill Selector */}
-                    <div className="mt-2.5 pt-2 border-t border-neutral-200/60 flex items-center justify-between">
-                      <span className="text-[10px] text-neutral-400 uppercase tracking-wider font-semibold">
+                    <div className="mt-2 pt-1.5 border-t border-neutral-200/60 flex items-center justify-between">
+                      <span className="text-[9px] text-neutral-400 uppercase tracking-wider font-semibold">
                         Status:
                       </span>
                       <select
                         value={w.status}
                         onChange={(e) => handleQuickStatusChange(w.id, e.target.value as LetterRequestStatus)}
-                        className={`text-[10px] font-bold rounded-lg px-2 py-0.5 border cursor-pointer ${
+                        className={`text-[9px] font-bold rounded-lg px-2 py-0.5 border cursor-pointer ${
                           w.status === 'submitted'
                             ? 'bg-emerald-100 text-emerald-800 border-emerald-300'
                             : w.status === 'initiated_eras'
@@ -706,13 +587,111 @@ export function StudentDashboardHome({
               )}
             </div>
 
-            <div className="mt-4 pt-3 border-t border-neutral-100 text-center">
+            <div className="pt-2 border-t border-neutral-100 text-center">
               <button
                 onClick={() => onNavigate('letters')}
-                className="text-xs text-[#1F3A30] hover:text-[#142720] font-bold hover:underline flex items-center justify-center gap-1 mx-auto cursor-pointer"
+                className="text-[11px] text-[#1F3A30] hover:text-[#142720] font-bold hover:underline flex items-center justify-center gap-1 mx-auto cursor-pointer"
               >
                 <span>Audit Program Letter Gaps &amp; Requirements</span>
-                <ChevronRight className="w-3.5 h-3.5" />
+                <ChevronRight className="w-3 h-3" />
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* ==================== COLUMN 3: REFLECTIVE JOURNAL SCRATCHPAD (Col 10 to 12) ==================== */}
+        <div className="md:col-span-1 lg:col-span-3">
+          {/* Streamlined, low-friction clinical reflection scratchpad */}
+          <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-4 sm:p-5 space-y-3">
+            <div className="flex items-center justify-between pb-2.5 border-b border-neutral-100">
+              <div>
+                <h2 className="text-base font-bold text-neutral-900 flex items-center gap-1.5">
+                  <BookOpen className="w-4 h-4 text-[#1F3A30]" />
+                  <span>Journal</span>
+                </h2>
+                <p className="text-[10px] text-neutral-500 mt-0.5">
+                  Encounter &amp; takeaway scratchpad
+                </p>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setIsJournalDrawerOpen(true)}
+                className="text-[11px] px-2 py-0.5 rounded-full bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold border border-emerald-200/80 flex items-center gap-1 cursor-pointer transition-colors shadow-2xs"
+                title="Click to browse saved journal entries"
+                suppressHydrationWarning
+              >
+                <span>{journalEntries.length} saved</span>
+                <ChevronRight className="w-3 h-3 text-emerald-600" />
+              </button>
+            </div>
+
+            {journalSuccessMessage && (
+              <div className="p-2 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-[11px] flex items-center gap-1.5">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span className="truncate">{journalSuccessMessage}</span>
+              </div>
+            )}
+
+            {/* Compact Quick-Entry Form */}
+            <form onSubmit={handleSaveJournalEntry} className="space-y-2.5">
+              <div>
+                <input
+                  type="text"
+                  required
+                  placeholder="Topic: ICU consult, night float..."
+                  value={journalTitle}
+                  onChange={(e) => setJournalTitle(e.target.value)}
+                  className="w-full px-3 py-1.5 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B] shadow-2xs"
+                />
+              </div>
+
+              <div>
+                <textarea
+                  rows={2}
+                  required
+                  placeholder="Patient dynamics, key takeaways, clinical reflections while fresh..."
+                  value={journalNotes}
+                  onChange={(e) => setJournalNotes(e.target.value)}
+                  className="w-full px-3 py-1.5 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B] shadow-2xs resize-none"
+                />
+              </div>
+
+              <div className="flex items-center gap-1.5 pt-0.5">
+                <select
+                  value={journalCategory}
+                  onChange={(e) => setJournalCategory(e.target.value as any)}
+                  className="flex-1 min-w-0 px-2 py-1.5 text-[10px] font-semibold border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-800 focus:outline-none focus:ring-2 focus:ring-[#7EAE9B] cursor-pointer truncate"
+                >
+                  <option value="Clinical Encounter">Clinical Encounter</option>
+                  <option value="Patient Advocacy">Patient Advocacy</option>
+                  <option value="Teaching & Mentorship">Teaching &amp; Mentorship</option>
+                  <option value="Research Breakthrough">Research Breakthrough</option>
+                  <option value="Leadership Moment">Leadership Moment</option>
+                  <option value="Personal Reflection">Personal Reflection</option>
+                </select>
+
+                <button
+                  type="submit"
+                  className="px-3 py-1.5 bg-[#1F3A30] hover:bg-[#162D25] text-white font-bold text-xs rounded-xl shadow-2xs flex items-center justify-center gap-1 transition-all cursor-pointer shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Save</span>
+                </button>
+              </div>
+            </form>
+
+            <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-[10px]">
+              <span className="text-neutral-400">
+                Private scratchpad
+              </span>
+              <button
+                type="button"
+                onClick={() => setIsJournalDrawerOpen(true)}
+                className="font-bold text-[#1F3A30] hover:underline flex items-center gap-0.5 cursor-pointer"
+              >
+                <span>Browse All ({journalEntries.length})</span>
+                <ChevronRight className="w-3 h-3" />
               </button>
             </div>
           </div>
