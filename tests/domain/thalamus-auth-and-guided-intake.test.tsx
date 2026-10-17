@@ -110,6 +110,28 @@ describe('ThalamusAuthExperience & Student Portal Auth Flow', () => {
     expect(markup).toContain('Remove Internal Medicine');
   });
 
+  it('renders Question 10 with Work Experiences Count and removes Leadership Hours and School Tier', () => {
+    const markup = renderToStaticMarkup(
+      <ThalamusAuthExperience onAuthenticated={() => {}} initialMode="guided_intake" initialStep={10} />
+    );
+
+    // Title and question headers
+    expect(markup).toContain('Question 10 of 12');
+    expect(markup).toContain('Work, Volunteer &amp; Honor Societies');
+
+    // Has Work Experiences and Volunteer Experiences
+    expect(markup).toContain('Work Experiences Count');
+    expect(markup).toContain('Volunteer Experiences Count');
+
+    // Removed fields
+    expect(markup).not.toContain('Leadership / Community Hours');
+    expect(markup).not.toContain('Medical School Academic Tier');
+
+    // Has Honor Societies
+    expect(markup).toContain('Alpha Omega Alpha (AOA)');
+    expect(markup).toContain('Gold Humanism Honor Society (GHHS)');
+  });
+
   it('manages student accounts with password persistence', () => {
     const newStudent = createStudentAccount({
       name: 'Jordan Smith',

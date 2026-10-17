@@ -122,12 +122,11 @@ export function ThalamusAuthExperience({
   const [abstracts, setAbstracts] = useState<string>('');
   const [researchExperiences, setResearchExperiences] = useState<string>('');
 
-  // Step 10: Leadership, Volunteer & Honor Societies
+  // Step 10: Work, Volunteer & Honor Societies
   const [volunteerExperiences, setVolunteerExperiences] = useState<string>('');
-  const [leadershipHours, setLeadershipHours] = useState<string>('');
+  const [workExperiences, setWorkExperiences] = useState<string>('');
   const [isAoaMember, setIsAoaMember] = useState(false);
   const [isGoldHumanism, setIsGoldHumanism] = useState(false);
-  const [medicalSchoolTier, setMedicalSchoolTier] = useState('');
 
   // Step 11: Geography & Census Divisions
   const [selectedDivisions, setSelectedDivisions] = useState<string[]>([]);
@@ -277,10 +276,9 @@ export function ThalamusAuthExperience({
     setAbstracts('');
     setResearchExperiences('');
     setVolunteerExperiences('');
-    setLeadershipHours('');
+    setWorkExperiences('');
     setIsAoaMember(false);
     setIsGoldHumanism(false);
-    setMedicalSchoolTier('');
     setSelectedDivisions([]);
     setResidencyGoalsAndGeography('');
     setAccountName('');
@@ -366,10 +364,9 @@ export function ThalamusAuthExperience({
       abstracts: Number(abstracts) || 0,
       researchExperiences: Number(researchExperiences) || 0,
       volunteerExperiences: Number(volunteerExperiences) || 0,
-      leadershipHours: Number(leadershipHours) || 0,
+      workExperiences: Number(workExperiences) || 0,
       isAoaMember,
       isGoldHumanism,
-      medicalSchoolTier: medicalSchoolTier || 'State / Mid-Tier',
       isCompleted: true,
       completedAt: new Date().toISOString(),
     };
@@ -1046,13 +1043,13 @@ export function ThalamusAuthExperience({
           <div className="space-y-4 animate-fade-in">
             <div>
               <span className="text-[11px] font-bold tracking-widest uppercase text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
-                Question 10 of 12 &bull; Leadership &amp; Honors
+                Question 10 of 12 &bull; Experiences &amp; Honors
               </span>
               <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mt-2">
-                Leadership, Honor Societies &amp; School Tier
+                Work, Volunteer &amp; Honor Societies
               </h2>
               <p className="text-xs text-neutral-500 mt-1">
-                Qualitative markers evaluated during holistic application review.
+                Quantify your work experiences and community volunteerism evaluated in NRMP Charting Outcomes benchmarking.
               </p>
             </div>
 
@@ -1073,33 +1070,16 @@ export function ThalamusAuthExperience({
 
               <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-xl">
                 <label className="block text-[11px] font-bold text-neutral-700 mb-1">
-                  Leadership / Community Hours
+                  Work Experiences Count
                 </label>
                 <input
                   type="number"
                   min={0}
-                  value={leadershipHours}
-                  onChange={(e) => setLeadershipHours(e.target.value)}
+                  value={workExperiences}
+                  onChange={(e) => setWorkExperiences(e.target.value)}
                   placeholder="0"
                   className="w-full px-3 py-1.5 text-xs border border-neutral-300 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-[#1F3A30]"
                 />
-              </div>
-
-              <div className="p-3 bg-neutral-50 border border-neutral-200 rounded-xl sm:col-span-2">
-                <label className="block text-[11px] font-bold text-neutral-700 mb-1">
-                  Medical School Academic Tier
-                </label>
-                <select
-                  value={medicalSchoolTier}
-                  onChange={(e) => setMedicalSchoolTier(e.target.value)}
-                  className="w-full px-3 py-2 text-xs font-semibold border border-neutral-300 rounded-lg bg-white"
-                >
-                  <option value="" disabled>-- Select Medical School Tier --</option>
-                  <option value="Top 25 Research-Intensive">Top 25 Research-Intensive</option>
-                  <option value="State / Mid-Tier">State / Mid-Tier Flagship</option>
-                  <option value="Newer Community-Based">Newer Community-Based</option>
-                  <option value="International / Caribbean">International / IMG</option>
-                </select>
               </div>
             </div>
 

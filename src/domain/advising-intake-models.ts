@@ -102,6 +102,7 @@ export interface SpecialtyAdvisingIntake {
   abstracts?: number;
   researchExperiences?: number;
   volunteerExperiences?: number;
+  workExperiences?: number;
   leadershipHours?: number;
   isAoaMember?: boolean;
   isGoldHumanism?: boolean;
@@ -254,6 +255,7 @@ export const INITIAL_MOCK_INTAKE: SpecialtyAdvisingIntake = {
   abstracts: 2,
   researchExperiences: 4,
   volunteerExperiences: 5,
+  workExperiences: 2,
   leadershipHours: 120,
   isAoaMember: false,
   isGoldHumanism: true,
