@@ -36,6 +36,17 @@ export const DEMO_STUDENT_ACCOUNT: StudentAccount = {
 
 export const INITIAL_DEFAULT_STUDENT: StudentAccount = DEMO_STUDENT_ACCOUNT;
 
+export function isDemoStudentId(id?: string | null): boolean {
+  if (!id) return false;
+  return (
+    id === DEMO_STUDENT_ACCOUNT.id ||
+    id === 'stu-alex-rivera' ||
+    id === 'usr-student-1' ||
+    id === 'student-test-sync' ||
+    id.startsWith('demo-')
+  );
+}
+
 export function isUserAuthenticated(): boolean {
   if (typeof localStorage === 'undefined') return false;
   return localStorage.getItem(AUTH_SESSION_KEY) === 'true';

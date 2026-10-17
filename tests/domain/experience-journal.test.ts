@@ -9,6 +9,7 @@ import {
 } from '@/domain/experience-journal-models';
 
 describe('Experience Journal Domain Models', () => {
+  const demoStudentId = 'stu-alex-rivera';
   const studentId = 'test-student-123';
 
   beforeEach(() => {
@@ -31,16 +32,24 @@ describe('Experience Journal Domain Models', () => {
     }
   });
 
-  it('loads initial mock entries when storage is empty', () => {
-    const entries = loadExperienceJournalEntries(studentId);
+  it('loads initial mock entries for demo student when storage is empty', () => {
+    const entries = loadExperienceJournalEntries(demoStudentId);
     expect(entries.length).toBeGreaterThanOrEqual(2);
     expect(entries[0].title).toBeDefined();
     expect(entries[0].notableObservation).toBeDefined();
     expect(entries[0].keyTakeaway).toBeDefined();
   });
 
+  it('starts with 0 entries for a fresh non-demo student account', () => {
+    const entries = loadExperienceJournalEntries(studentId);
+    expect(entries).toEqual([]);
+    expect(entries.length).toBe(0);
+  });
+
   it('adds a new journal entry without affecting official experiences', () => {
     const initial = loadExperienceJournalEntries(studentId);
+    expect(initial.length).toBe(0);
+
     const newEntry: ExperienceJournalEntry = {
       id: 'journal-test-1',
       studentId,
@@ -55,7 +64,7 @@ describe('Experience Journal Domain Models', () => {
     };
 
     const updated = addExperienceJournalEntry(studentId, newEntry);
-    expect(updated.length).toBe(initial.length + 1);
+    expect(updated.length).toBe(1);
     expect(updated[0].id).toBe('journal-test-1');
 
     // Verify persistence
@@ -64,11 +73,26 @@ describe('Experience Journal Domain Models', () => {
   });
 
   it('deletes a journal entry', () => {
+    const newEntry: ExperienceJournalEntry = {
+      id: 'journal-test-del',
+      studentId,
+      date: '2026-09-10',
+      title: 'Surgery rounding observation',
+      category: 'Clinical Encounter',
+      setting: 'OR 4',
+      notableObservation: 'Laparoscopic cholecystectomy technique.',
+      keyTakeaway: 'Anatomy visualization.',
+      isKeyMemory: false,
+      createdAt: '2026-09-10T14:00:00Z',
+    };
+    addExperienceJournalEntry(studentId, newEntry);
+
     const initial = loadExperienceJournalEntries(studentId);
+    expect(initial.length).toBe(1);
     const firstId = initial[0].id;
 
     const afterDelete = deleteExperienceJournalEntry(studentId, firstId);
     expect(afterDelete.find((e) => e.id === firstId)).toBeUndefined();
-    expect(afterDelete.length).toBe(initial.length - 1);
+    expect(afterDelete.length).toBe(0);
   });
 });

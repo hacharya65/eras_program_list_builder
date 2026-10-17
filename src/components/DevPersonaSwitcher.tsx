@@ -15,6 +15,7 @@ import {
   Contact,
   Mail,
   LogOut,
+  HelpCircle,
 } from 'lucide-react';
 
 interface DevPersonaSwitcherProps {
@@ -26,6 +27,7 @@ interface DevPersonaSwitcherProps {
   userRoleTitle?: string;
   onOpenProfileManagement?: () => void;
   onOpenAdvisingLeadership?: () => void;
+  onOpenFaq?: () => void;
   onOpenAuthModal?: () => void;
   onLogout?: () => void;
   defaultMenuOpen?: boolean;
@@ -40,6 +42,7 @@ export function DevPersonaSwitcher({
   userRoleTitle = 'MS4 Applicant',
   onOpenProfileManagement,
   onOpenAdvisingLeadership,
+  onOpenFaq,
   onOpenAuthModal,
   onLogout,
   defaultMenuOpen = false,
@@ -105,6 +108,16 @@ export function DevPersonaSwitcher({
     setIsProfileMenuOpen(false);
   };
 
+  const handleFaqClick = () => {
+    if (onOpenFaq) {
+      onOpenFaq();
+    }
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('navigate_to_faq'));
+    }
+    setIsProfileMenuOpen(false);
+  };
+
   const activePersonaName =
     currentRole === 'student' ? userName : currentRole === 'advisor' ? 'Dr. Marcus Chen' : 'Dr. Evelyn Taylor';
   const activePersonaTitle =
@@ -152,17 +165,28 @@ export function DevPersonaSwitcher({
             </div>
           </div>
 
-          {/* Right: Contact Directory Quick Icon & Classic Profile Tab */}
+          {/* Right: Advising Leadership Quick Icon, FAQ Quick Icon & Classic Profile Tab */}
           <div className="flex items-center gap-2">
-            {/* Newly integrated contact icon on the left of the user profile on the top bar */}
+            {/* Advising and Leadership Quick Icon */}
             <button
               onClick={handleLeadershipClick}
               className="flex items-center justify-center w-9 h-9 rounded-2xl border border-neutral-200/80 bg-white hover:bg-[#EAF2EE] text-neutral-600 hover:text-[#1F3A30] hover:border-[#1F3A30]/30 transition-all cursor-pointer shadow-2xs group relative"
-              title="Official Advising Leadership Directory"
-              aria-label="Official Advising Leadership Directory"
+              title="Advising and Leadership"
+              aria-label="Advising and Leadership"
             >
               <Contact className="w-4 h-4 text-neutral-600 group-hover:text-[#1F3A30] group-hover:scale-105 transition-all" />
-              <span className="sr-only">Advising Leadership Directory</span>
+              <span className="sr-only">Advising and Leadership</span>
+            </button>
+
+            {/* Frequently Asked Questions Quick Icon */}
+            <button
+              onClick={handleFaqClick}
+              className="flex items-center justify-center w-9 h-9 rounded-2xl border border-neutral-200/80 bg-white hover:bg-[#EAF2EE] text-neutral-600 hover:text-[#1F3A30] hover:border-[#1F3A30]/30 transition-all cursor-pointer shadow-2xs group relative"
+              title="Frequently Asked Questions & Guide"
+              aria-label="Frequently Asked Questions & Guide"
+            >
+              <HelpCircle className="w-4 h-4 text-neutral-600 group-hover:text-[#1F3A30] group-hover:scale-105 transition-all" />
+              <span className="sr-only">Frequently Asked Questions & Guide</span>
             </button>
 
             {/* Classic Profile Tab with User Name & Circular Picture */}
@@ -236,7 +260,15 @@ export function DevPersonaSwitcher({
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
                     >
                       <Contact className="w-4 h-4 text-[#4E8773]" />
-                      <span>Advising Leadership Directory</span>
+                      <span>Advising and Leadership</span>
+                    </button>
+
+                    <button
+                      onClick={handleFaqClick}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
+                    >
+                      <HelpCircle className="w-4 h-4 text-[#4E8773]" />
+                      <span>FAQ &amp; Platform Walkthrough</span>
                     </button>
 
                     <button

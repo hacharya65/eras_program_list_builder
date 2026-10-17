@@ -229,7 +229,7 @@ export function AdvisingLeadershipView({
           </div>
 
           <h1 className="text-2xl sm:text-3xl font-serif font-bold text-white tracking-tight">
-            Specialty Advising Leadership &amp; Champions
+            Advising and Leadership
           </h1>
 
           <p className="text-sm sm:text-base text-neutral-200/90 leading-relaxed">

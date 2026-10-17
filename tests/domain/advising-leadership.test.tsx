@@ -55,7 +55,7 @@ describe('AdvisingLeadership Integration & Navigation', () => {
     );
 
     // Verify key titles and header
-    expect(markup).toContain('Specialty Advising Leadership &amp; Champions');
+    expect(markup).toContain('Advising and Leadership');
     expect(markup).toContain('Official contact directory for MS4 match advising');
 
     // Verify leadership members are rendered
@@ -102,7 +102,7 @@ describe('AdvisingLeadership Integration & Navigation', () => {
     expect(markup).toContain('Letters of Recommendation');
   });
 
-  it('renders the contact icon on the top bar in DevPersonaSwitcher', () => {
+  it('renders the contact icon on the top bar in DevPersonaSwitcher with Advising and Leadership title and FAQ button', () => {
     const markup = renderToStaticMarkup(
       <DevPersonaSwitcher
         currentRole="student"
@@ -111,8 +111,11 @@ describe('AdvisingLeadership Integration & Navigation', () => {
       />
     );
 
-    // Verify contact icon button has accessible title
-    expect(markup).toContain('Official Advising Leadership Directory');
+    // Verify contact icon button has accessible title "Advising and Leadership"
+    expect(markup).toContain('title="Advising and Leadership"');
+    expect(markup).toContain('aria-label="Advising and Leadership"');
+    // Verify FAQ icon button is rendered right next to it
+    expect(markup).toContain('Frequently Asked Questions &amp; Guide');
     // Verify user profile tab is also present
     expect(markup).toContain('Alex Rivera');
   });

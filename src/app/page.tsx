@@ -104,6 +104,15 @@ export default function HomePage() {
             window.dispatchEvent(new CustomEvent('navigate_to_advising_leadership'));
           }
         }}
+        onOpenFaq={() => {
+          if (typeof window !== 'undefined') {
+            const url = new URL(window.location.href);
+            url.searchParams.set('view', 'faq');
+            window.history.pushState({ view: 'faq' }, '', url.toString());
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            window.dispatchEvent(new CustomEvent('navigate_to_faq'));
+          }
+        }}
       />
 
       {/* Main Container */}

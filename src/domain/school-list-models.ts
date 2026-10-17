@@ -808,51 +808,66 @@ export function getSampleProgramsForSpecialty(
   });
 }
 
-export function getStorageKeyForSpecialty(specialty: string): string {
+export function getStorageKeyForSpecialty(specialty: string, studentId?: string): string {
   const safe = (specialty || 'Internal Medicine').toLowerCase().replace(/[^a-z0-9]/g, '_');
+  const sid = studentId || (typeof localStorage !== 'undefined' ? localStorage.getItem('ethmoid_current_student_id_v1') : null);
+  const isDemo = !sid || sid === 'stu-alex-rivera' || sid === 'usr-student-1' || sid === 'student-test-sync' || sid.startsWith('demo-');
+  if (sid && !isDemo) {
+    return `eras_school_list_matrix_${sid}_${safe}`;
+  }
   return `eras_school_list_matrix_${safe}`;
 }
 
 export function loadItemsForSpecialty(
   specialty: string,
-  applicantScore?: number
+  applicantScore?: number,
+  studentId?: string
 ): SchoolListItem[] {
   const normSpec = specialty?.trim() || 'Internal Medicine';
   const baseline = applicantScore ?? getStoredApplicantStep2Ck();
+  const sid = studentId || (typeof localStorage !== 'undefined' ? localStorage.getItem('ethmoid_current_student_id_v1') : null);
+  const isDemo = !sid || sid === 'stu-alex-rivera' || sid === 'usr-student-1' || sid === 'student-test-sync' || sid.startsWith('demo-');
 
   if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
-    const specificKey = getStorageKeyForSpecialty(normSpec);
+    const specificKey = getStorageKeyForSpecialty(normSpec, sid || undefined);
     const cached = localStorage.getItem(specificKey);
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed) && parsed.length > 0) {
-          // Verify that cached items belong to the requested specialty
-          const belongs = parsed.some(
-            (p: SchoolListItem) => p.specialty && p.specialty.toLowerCase() === normSpec.toLowerCase()
-          );
-          if (belongs) {
-            return parsed.map((item: SchoolListItem) => {
-              let min = item.step2Min;
-              let max = item.step2Max;
-              if ((min === undefined || max === undefined) && item.step2ScoreRange) {
-                const p = parseScoreRange(item.step2ScoreRange);
-                if (p.min !== undefined && p.max !== undefined) {
-                  min = p.min;
-                  max = p.max;
+        if (Array.isArray(parsed)) {
+          if (parsed.length > 0) {
+            const belongs = parsed.some(
+              (p: SchoolListItem) => p.specialty && p.specialty.toLowerCase() === normSpec.toLowerCase()
+            );
+            if (belongs) {
+              return parsed.map((item: SchoolListItem) => {
+                let min = item.step2Min;
+                let max = item.step2Max;
+                if ((min === undefined || max === undefined) && item.step2ScoreRange) {
+                  const p = parseScoreRange(item.step2ScoreRange);
+                  if (p.min !== undefined && p.max !== undefined) {
+                    min = p.min;
+                    max = p.max;
+                  }
                 }
-              }
-              const autoTier = evaluateProgramTier(baseline, min, max);
-              return {
-                ...item,
-                step2Min: min,
-                step2Max: max,
-                ...(autoTier ? { tier: autoTier } : {}),
-              };
-            });
+                const autoTier = evaluateProgramTier(baseline, min, max);
+                return {
+                  ...item,
+                  step2Min: min,
+                  step2Max: max,
+                  ...(autoTier ? { tier: autoTier } : {}),
+                };
+              });
+            }
           }
+          return parsed;
         }
       } catch {}
+    }
+
+    // Non-demo users start with a fresh, empty school list!
+    if (sid && !isDemo) {
+      return [];
     }
 
     // Check legacy key if specialty is Internal Medicine
@@ -887,6 +902,11 @@ export function loadItemsForSpecialty(
         } catch {}
       }
     }
+  }
+
+  // Non-demo users start with an empty school list
+  if (sid && !isDemo) {
+    return [];
   }
 
   return getSampleProgramsForSpecialty(normSpec, baseline);

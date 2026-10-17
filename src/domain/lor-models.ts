@@ -82,22 +82,40 @@ export const INITIAL_MOCK_LETTER_WRITERS: LetterWriterRequest[] = [
   },
 ];
 
-export function loadLetterWriterRequests(): LetterWriterRequest[] {
+import { isDemoStudentId, CURRENT_STUDENT_ID_KEY } from './student-registry';
+
+export function getLorStorageKey(studentId?: string): string {
+  const sid = studentId || (typeof localStorage !== 'undefined' ? localStorage.getItem(CURRENT_STUDENT_ID_KEY) : null);
+  if (sid && !isDemoStudentId(sid)) {
+    return `${LOR_STORAGE_KEY}_${sid}`;
+  }
+  return LOR_STORAGE_KEY;
+}
+
+export function loadLetterWriterRequests(studentId?: string): LetterWriterRequest[] {
+  const sid = studentId || (typeof localStorage !== 'undefined' ? localStorage.getItem(CURRENT_STUDENT_ID_KEY) : null);
   if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
     try {
-      const stored = localStorage.getItem(LOR_STORAGE_KEY);
+      const key = getLorStorageKey(sid || undefined);
+      const stored = localStorage.getItem(key);
       if (stored) {
         return JSON.parse(stored);
       }
     } catch {}
   }
+  // Non-demo users start with 0 letter writers recorded!
+  if (sid && !isDemoStudentId(sid)) {
+    return [];
+  }
   return INITIAL_MOCK_LETTER_WRITERS;
 }
 
-export function saveLetterWriterRequests(requests: LetterWriterRequest[]): void {
+export function saveLetterWriterRequests(requests: LetterWriterRequest[], studentId?: string): void {
+  const sid = studentId || (typeof localStorage !== 'undefined' ? localStorage.getItem(CURRENT_STUDENT_ID_KEY) : null);
   if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
     try {
-      localStorage.setItem(LOR_STORAGE_KEY, JSON.stringify(requests));
+      const key = getLorStorageKey(sid || undefined);
+      localStorage.setItem(key, JSON.stringify(requests));
     } catch (e) {
       console.error('Error saving letter writer requests:', e);
     }

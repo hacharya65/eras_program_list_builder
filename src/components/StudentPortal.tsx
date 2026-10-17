@@ -11,7 +11,14 @@ import { ProfileManagementView } from './ProfileManagementView';
 import { JournalRepositoryView } from './JournalRepositoryView';
 import { AdvisingLeadershipView } from './AdvisingLeadershipView';
 import { StudentAuthModal } from './StudentAuthModal';
-import { StudentAccount, getCurrentStudentId, getStudentAccount } from '@/domain/student-registry';
+import { PlatformWalkthroughModal } from './PlatformWalkthroughModal';
+import { FaqAndGuideView } from './FaqAndGuideView';
+import {
+  StudentAccount,
+  getCurrentStudentId,
+  getStudentAccount,
+  isDemoStudentId,
+} from '@/domain/student-registry';
 import {
   CANONICAL_SPECIALTIES,
   getStoredTargetSpecialty,
@@ -60,10 +67,12 @@ export function StudentPortal({
     | 'competitiveness'
     | 'letters'
     | 'advising_leadership'
+    | 'faq'
   >('overview');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isIntakeModalOpen, setIsIntakeModalOpen] = useState(false);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
+  const [isWalkthroughOpen, setIsWalkthroughOpen] = useState(false);
   const { student, assignedAdvisors } = context;
 
   // Active Student ID
@@ -102,6 +111,25 @@ export function StudentPortal({
     }
   };
 
+  // Auto-launch platform walkthrough for new (non-demo) accounts on first visit
+  useEffect(() => {
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      if (!isDemoStudentId(activeStudentId)) {
+        const completed = localStorage.getItem(`ethmoid_walkthrough_completed_${activeStudentId}`);
+        if (completed !== 'true') {
+          setIsWalkthroughOpen(true);
+        }
+      }
+    }
+  }, [activeStudentId]);
+
+  const handleCloseWalkthrough = () => {
+    setIsWalkthroughOpen(false);
+    if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+      localStorage.setItem(`ethmoid_walkthrough_completed_${activeStudentId}`, 'true');
+    }
+  };
+
   // Sync with browser history and URL search params on mount and popstate
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -118,6 +146,7 @@ export function StudentPortal({
           'competitiveness',
           'letters',
           'advising_leadership',
+          'faq',
         ].includes(urlView)
       ) {
         setActiveView(urlView);
@@ -138,6 +167,7 @@ export function StudentPortal({
             'competitiveness',
             'letters',
             'advising_leadership',
+            'faq',
           ].includes(urlView)
         ) {
           setActiveView(urlView);
@@ -154,6 +184,8 @@ export function StudentPortal({
     const handleNavProfile = () => updateView('profile');
     const handleNavIntake = () => updateView('intake');
     const handleNavLeadership = () => updateView('advising_leadership');
+    const handleNavFaq = () => updateView('faq');
+    const handleOpenWalkthrough = () => setIsWalkthroughOpen(true);
     const handleOpenAuth = () => {
       if (onOpenAuthModal) {
         onOpenAuthModal();
@@ -165,12 +197,16 @@ export function StudentPortal({
     window.addEventListener('navigate_to_profile_management', handleNavProfile);
     window.addEventListener('navigate_to_intake', handleNavIntake);
     window.addEventListener('navigate_to_advising_leadership', handleNavLeadership);
+    window.addEventListener('navigate_to_faq', handleNavFaq);
+    window.addEventListener('open_platform_walkthrough', handleOpenWalkthrough);
     window.addEventListener('open_student_auth_modal', handleOpenAuth);
 
     return () => {
       window.removeEventListener('navigate_to_profile_management', handleNavProfile);
       window.removeEventListener('navigate_to_intake', handleNavIntake);
       window.removeEventListener('navigate_to_advising_leadership', handleNavLeadership);
+      window.removeEventListener('navigate_to_faq', handleNavFaq);
+      window.removeEventListener('open_platform_walkthrough', handleOpenWalkthrough);
       window.removeEventListener('open_student_auth_modal', handleOpenAuth);
     };
   }, [onOpenAuthModal]);
@@ -421,6 +457,17 @@ export function StudentPortal({
       );
     }
 
+    if (activeView === 'faq') {
+      return (
+        <FaqAndGuideView
+          onBack={() => updateView('overview')}
+          onStartWalkthrough={() => setIsWalkthroughOpen(true)}
+          onNavigateToView={(view) => updateView(view as any)}
+          targetSpecialty={targetSpecialty}
+        />
+      );
+    }
+
     return (
       <StudentDashboardHome
         context={context}
@@ -587,6 +634,14 @@ export function StudentPortal({
             applySpecialtySwitch(newAcc.specialty);
           }
         }}
+      />
+
+      {/* Platform Interactive Walkthrough Modal */}
+      <PlatformWalkthroughModal
+        isOpen={isWalkthroughOpen}
+        onClose={handleCloseWalkthrough}
+        studentName={currentStudentAccount?.name || student.name}
+        onNavigateToView={(view) => updateView(view as any)}
       />
     </div>
   );

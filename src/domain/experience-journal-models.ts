@@ -92,7 +92,12 @@ export function loadExperienceJournalEntries(studentId: string): ExperienceJourn
       console.error('Error loading experience journal entries:', e);
     }
   }
-  return INITIAL_MOCK_JOURNAL_ENTRIES;
+  const isDemo =
+    !studentId ||
+    studentId === 'usr-student-1' ||
+    studentId === 'stu-alex-rivera' ||
+    studentId.startsWith('demo-');
+  return isDemo ? INITIAL_MOCK_JOURNAL_ENTRIES : [];
 }
 
 export function saveExperienceJournalEntries(
