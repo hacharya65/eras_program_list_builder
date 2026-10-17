@@ -113,6 +113,15 @@ export default function HomePage() {
             window.dispatchEvent(new CustomEvent('navigate_to_faq'));
           }
         }}
+        onOpenDashboard={() => {
+          if (typeof window !== 'undefined') {
+            const url = new URL(window.location.href);
+            url.searchParams.set('view', 'overview');
+            window.history.pushState({ view: 'overview' }, '', url.toString());
+            window.scrollTo({ top: 0, behavior: 'instant' });
+            window.dispatchEvent(new CustomEvent('navigate_to_dashboard'));
+          }
+        }}
       />
 
       {/* Main Container */}

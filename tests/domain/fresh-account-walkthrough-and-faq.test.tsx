@@ -164,6 +164,12 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
       expect(markup).toContain('title="Frequently Asked Questions &amp; Guide"');
       expect(markup).toContain('aria-label="Frequently Asked Questions &amp; Guide"');
 
+      // Ethmoid Logo and brand name button to return to dashboard
+      expect(markup).toContain('title="Return to Dashboard"');
+      expect(markup).toContain('aria-label="Return to Dashboard"');
+      expect(markup).toContain('alt="Ethmoid logo"');
+      expect(markup).toContain('Ethmoid');
+
       // Profile menu dropdown items
       expect(markup).toContain('Advising and Leadership');
       expect(markup).toContain('FAQ &amp; Platform Walkthrough');

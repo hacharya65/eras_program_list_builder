@@ -181,6 +181,7 @@ export function StudentPortal({
 
   // Listen to custom navigation events from top nav or external components
   useEffect(() => {
+    const handleNavDashboard = () => updateView('overview');
     const handleNavProfile = () => updateView('profile');
     const handleNavIntake = () => updateView('intake');
     const handleNavLeadership = () => updateView('advising_leadership');
@@ -194,6 +195,8 @@ export function StudentPortal({
       }
     };
 
+    window.addEventListener('navigate_to_dashboard', handleNavDashboard);
+    window.addEventListener('navigate_to_overview', handleNavDashboard);
     window.addEventListener('navigate_to_profile_management', handleNavProfile);
     window.addEventListener('navigate_to_intake', handleNavIntake);
     window.addEventListener('navigate_to_advising_leadership', handleNavLeadership);
@@ -202,6 +205,8 @@ export function StudentPortal({
     window.addEventListener('open_student_auth_modal', handleOpenAuth);
 
     return () => {
+      window.removeEventListener('navigate_to_dashboard', handleNavDashboard);
+      window.removeEventListener('navigate_to_overview', handleNavDashboard);
       window.removeEventListener('navigate_to_profile_management', handleNavProfile);
       window.removeEventListener('navigate_to_intake', handleNavIntake);
       window.removeEventListener('navigate_to_advising_leadership', handleNavLeadership);

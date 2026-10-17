@@ -28,6 +28,7 @@ interface DevPersonaSwitcherProps {
   onOpenProfileManagement?: () => void;
   onOpenAdvisingLeadership?: () => void;
   onOpenFaq?: () => void;
+  onOpenDashboard?: () => void;
   onOpenAuthModal?: () => void;
   onLogout?: () => void;
   defaultMenuOpen?: boolean;
@@ -43,6 +44,7 @@ export function DevPersonaSwitcher({
   onOpenProfileManagement,
   onOpenAdvisingLeadership,
   onOpenFaq,
+  onOpenDashboard,
   onOpenAuthModal,
   onLogout,
   defaultMenuOpen = false,
@@ -118,6 +120,16 @@ export function DevPersonaSwitcher({
     setIsProfileMenuOpen(false);
   };
 
+  const handleDashboardClick = () => {
+    if (onOpenDashboard) {
+      onOpenDashboard();
+    }
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('navigate_to_dashboard'));
+    }
+    setIsProfileMenuOpen(false);
+  };
+
   const activePersonaName =
     currentRole === 'student' ? userName : currentRole === 'advisor' ? 'Dr. Marcus Chen' : 'Dr. Evelyn Taylor';
   const activePersonaTitle =
@@ -149,20 +161,25 @@ export function DevPersonaSwitcher({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           {/* Left: Ethmoid Logo & School Name */}
           <div className="flex items-center gap-3">
-            <img
-              src="/ethmoid-square.jpeg"
-              alt="Ethmoid logo"
-              className="h-9 w-9 object-contain"
-            />
-            <div className="flex items-center gap-2.5">
-              <span className="text-xl font-bold tracking-tight text-neutral-900">
+            <button
+              onClick={handleDashboardClick}
+              className="flex items-center gap-3 group focus:outline-none focus:ring-2 focus:ring-[#1F3A30]/30 rounded-xl cursor-pointer text-left -m-1 p-1 hover:opacity-90 transition-all"
+              title="Return to Dashboard"
+              aria-label="Return to Dashboard"
+            >
+              <img
+                src="/ethmoid-square.jpeg"
+                alt="Ethmoid logo"
+                className="h-9 w-9 object-contain group-hover:scale-105 transition-transform"
+              />
+              <span className="text-xl font-bold tracking-tight text-neutral-900 group-hover:text-[#1F3A30] transition-colors">
                 Ethmoid
               </span>
-              <span className="h-4 w-px bg-neutral-300 hidden sm:block" />
-              <span className="text-xs sm:text-sm font-semibold text-neutral-600 hidden sm:block">
-                {medicalSchool || institutionName || 'Match Strategy & Signaling'}
-              </span>
-            </div>
+            </button>
+            <span className="h-4 w-px bg-neutral-300 hidden sm:block" />
+            <span className="text-xs sm:text-sm font-semibold text-neutral-600 hidden sm:block">
+              {medicalSchool || institutionName || 'Match Strategy & Signaling'}
+            </span>
           </div>
 
           {/* Right: Advising Leadership Quick Icon, FAQ Quick Icon & Classic Profile Tab */}
