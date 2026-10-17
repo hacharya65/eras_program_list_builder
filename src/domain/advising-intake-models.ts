@@ -14,14 +14,21 @@ import {
 
 export type ClerkshipGrade = 'Honors' | 'High Pass' | 'Pass' | 'Fail' | 'In Progress';
 
+export interface ClerkshipEntry {
+  id: string;
+  name: string;
+  grade: ClerkshipGrade | null;
+}
+
 export interface CoreClerkshipGrades {
-  familyMedicine: ClerkshipGrade;
-  internalMedicine: ClerkshipGrade;
-  surgery: ClerkshipGrade;
-  pediatrics: ClerkshipGrade;
-  obGyn: ClerkshipGrade;
-  neurology: ClerkshipGrade;
-  psychiatry: ClerkshipGrade;
+  familyMedicine?: ClerkshipGrade;
+  internalMedicine?: ClerkshipGrade;
+  surgery?: ClerkshipGrade;
+  pediatrics?: ClerkshipGrade;
+  obGyn?: ClerkshipGrade;
+  neurology?: ClerkshipGrade;
+  psychiatry?: ClerkshipGrade;
+  [customKey: string]: ClerkshipGrade | undefined;
 }
 
 export type CareerDirection = 'fellowship' | 'academic_practice' | 'community_practice' | 'undecided';
@@ -55,8 +62,9 @@ export interface SpecialtyAdvisingIntake {
   completedResearchYear: boolean;
   researchYearLocation?: string;
   
-  // Q6: 7 Core Clerkship Grades
+  // Q6: Core Clinical Clerkship Grades (customizable list)
   clerkshipGrades: CoreClerkshipGrades;
+  clerkshipEntries?: ClerkshipEntry[];
   
   // Q7: Academic / Course / Clerkship Failures or Repeat of Year
   hasAcademicFailuresOrRepeats: boolean;
@@ -180,12 +188,27 @@ export function checkStateDivisionsMismatch(
 }
 
 /**
- * Automatically computes total Clerkship Honors from the 7 core clerkship grades.
+ * Automatically computes total Clerkship Honors from clerkship grades or entry array.
  */
-export function calculateClerkshipHonorsCount(grades: CoreClerkshipGrades): number {
-  if (!grades) return 0;
-  return Object.values(grades).filter((grade) => grade === 'Honors').length;
+export function calculateClerkshipHonorsCount(
+  gradesOrEntries: CoreClerkshipGrades | ClerkshipEntry[] | Record<string, ClerkshipGrade | null | undefined>
+): number {
+  if (!gradesOrEntries) return 0;
+  if (Array.isArray(gradesOrEntries)) {
+    return gradesOrEntries.filter((item) => item.grade === 'Honors').length;
+  }
+  return Object.values(gradesOrEntries).filter((grade) => grade === 'Honors').length;
 }
+
+export const DEFAULT_INITIAL_CLERKSHIPS: ClerkshipEntry[] = [
+  { id: 'internalMedicine', name: 'Internal Medicine', grade: null },
+  { id: 'surgery', name: 'Surgery', grade: null },
+  { id: 'pediatrics', name: 'Pediatrics', grade: null },
+  { id: 'obGyn', name: 'Obstetrics & Gynecology', grade: null },
+  { id: 'familyMedicine', name: 'Family Medicine', grade: null },
+  { id: 'neurology', name: 'Neurology', grade: null },
+  { id: 'psychiatry', name: 'Psychiatry', grade: null },
+];
 
 export const SPECIALTY_INTAKE_STORAGE_PREFIX = 'ethmoid_specialty_advising_intake_';
 

@@ -15,7 +15,9 @@ import {
   saveStudentAdvisingIntake,
   CoreClerkshipGrades,
   ClerkshipGrade,
+  ClerkshipEntry,
   calculateClerkshipHonorsCount,
+  DEFAULT_INITIAL_CLERKSHIPS,
   US_CENSUS_DIVISIONS,
   INITIAL_MOCK_INTAKE,
 } from '@/domain/advising-intake-models';
@@ -40,11 +42,15 @@ import {
   Eye,
   EyeOff,
   Lock,
+  Plus,
+  Trash2,
+  RotateCcw,
 } from 'lucide-react';
 
 interface ThalamusAuthExperienceProps {
   onAuthenticated: (studentAccount: StudentAccount) => void;
   initialMode?: 'signin' | 'guided_intake';
+  initialStep?: number;
 }
 
 const TOTAL_STEPS = 12;
@@ -63,6 +69,7 @@ const POPULAR_SCHOOLS = [
 export function ThalamusAuthExperience({
   onAuthenticated,
   initialMode = 'signin',
+  initialStep = 1,
 }: ThalamusAuthExperienceProps) {
   const [viewMode, setViewMode] = useState<'signin' | 'guided_intake'>(initialMode);
   const [showHelpModal, setShowHelpModal] = useState(false);
@@ -75,7 +82,7 @@ export function ThalamusAuthExperience({
   const [passwordError, setPasswordError] = useState<string | null>(null);
 
   // Guided Intake Wizard State (1 Question at a time)
-  const [currentStep, setCurrentStep] = useState(1);
+  const [currentStep, setCurrentStep] = useState(initialStep);
   const [stepDirection, setStepDirection] = useState<'forward' | 'backward'>('forward');
 
   // Step 1: Medical School
@@ -100,24 +107,9 @@ export function ThalamusAuthExperience({
   const [hasStepFailures, setHasStepFailures] = useState<boolean | null>(null);
   const [stepFailureDetails, setStepFailureDetails] = useState('');
 
-  // Step 7: 7 Core Clinical Clerkships
-  const [clerkshipGrades, setClerkshipGrades] = useState<{
-    familyMedicine: ClerkshipGrade | null;
-    internalMedicine: ClerkshipGrade | null;
-    surgery: ClerkshipGrade | null;
-    pediatrics: ClerkshipGrade | null;
-    obGyn: ClerkshipGrade | null;
-    neurology: ClerkshipGrade | null;
-    psychiatry: ClerkshipGrade | null;
-  }>({
-    familyMedicine: null,
-    internalMedicine: null,
-    surgery: null,
-    pediatrics: null,
-    obGyn: null,
-    neurology: null,
-    psychiatry: null,
-  });
+  // Step 7: Core Clinical Clerkships (starts with standard 7 core clerkships, student can add or remove)
+  const [clerkships, setClerkships] = useState<ClerkshipEntry[]>(DEFAULT_INITIAL_CLERKSHIPS);
+  const [customClerkshipInput, setCustomClerkshipInput] = useState('');
 
   // Step 8: Dedicated Research Year
   const [completedResearchYear, setCompletedResearchYear] = useState<boolean | null>(null);
@@ -224,11 +216,31 @@ export function ThalamusAuthExperience({
     }
   };
 
-  const handleClerkshipChange = (subject: keyof CoreClerkshipGrades, grade: ClerkshipGrade) => {
-    setClerkshipGrades((prev) => ({
-      ...prev,
-      [subject]: grade,
-    }));
+  const handleClerkshipGradeChange = (id: string, grade: ClerkshipGrade) => {
+    setClerkships((prev) =>
+      prev.map((c) => (c.id === id ? { ...c, grade: c.grade === grade ? null : grade } : c))
+    );
+  };
+
+  const handleAddClerkship = (name: string) => {
+    const trimmed = name.trim();
+    if (!trimmed) return;
+    if (clerkships.some((c) => c.name.toLowerCase() === trimmed.toLowerCase())) {
+      setCustomClerkshipInput('');
+      return;
+    }
+    const slug = trimmed.toLowerCase().replace(/[^a-z0-9]/g, '');
+    const id = slug || `clerkship-${Date.now().toString(36)}`;
+    setClerkships((prev) => [...prev, { id, name: trimmed, grade: null }]);
+    setCustomClerkshipInput('');
+  };
+
+  const handleRemoveClerkship = (id: string) => {
+    setClerkships((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  const handleResetClerkships = () => {
+    setClerkships(DEFAULT_INITIAL_CLERKSHIPS.map((c) => ({ ...c, grade: null })));
   };
 
   const handleToggleDivision = (divName: string) => {
@@ -255,15 +267,8 @@ export function ThalamusAuthExperience({
     setStep2AnticipatedDate('');
     setHasStepFailures(null);
     setStepFailureDetails('');
-    setClerkshipGrades({
-      familyMedicine: null,
-      internalMedicine: null,
-      surgery: null,
-      pediatrics: null,
-      obGyn: null,
-      neurology: null,
-      psychiatry: null,
-    });
+    setClerkships(DEFAULT_INITIAL_CLERKSHIPS.map((c) => ({ ...c, grade: null })));
+    setCustomClerkshipInput('');
     setCompletedResearchYear(null);
     setResearchYearLocation('');
     setPublications('');
@@ -317,15 +322,10 @@ export function ThalamusAuthExperience({
     });
 
     // 2. Compile full intake dossier
-    const finalClerkshipGrades: CoreClerkshipGrades = {
-      familyMedicine: clerkshipGrades.familyMedicine || 'Pass',
-      internalMedicine: clerkshipGrades.internalMedicine || 'Pass',
-      surgery: clerkshipGrades.surgery || 'Pass',
-      pediatrics: clerkshipGrades.pediatrics || 'Pass',
-      obGyn: clerkshipGrades.obGyn || 'Pass',
-      neurology: clerkshipGrades.neurology || 'Pass',
-      psychiatry: clerkshipGrades.psychiatry || 'Pass',
-    };
+    const finalClerkshipGrades: CoreClerkshipGrades = {};
+    clerkships.forEach((c) => {
+      finalClerkshipGrades[c.id] = c.grade || 'Pass';
+    });
 
     const fullIntake: SpecialtyAdvisingIntake = {
       ...INITIAL_MOCK_INTAKE,
@@ -347,6 +347,11 @@ export function ThalamusAuthExperience({
       completedResearchYear: completedResearchYear === true,
       researchYearLocation: completedResearchYear ? researchYearLocation.trim() : undefined,
       clerkshipGrades: finalClerkshipGrades,
+      clerkshipEntries: clerkships.map((c) => ({
+        id: c.id,
+        name: c.name,
+        grade: c.grade || 'Pass',
+      })),
       hasAcademicFailuresOrRepeats: false,
       hasCapsOrProfessionalismConcerns: false,
       hasLeaveOfAbsence: false,
@@ -374,7 +379,7 @@ export function ThalamusAuthExperience({
     onAuthenticated(newAccount);
   };
 
-  const honorsCount = Object.values(clerkshipGrades).filter((g) => g === 'Honors').length;
+  const honorsCount = clerkships.filter((c) => c.grade === 'Honors').length;
 
   // Render Step Content
   const renderStepContent = () => {
@@ -760,58 +765,141 @@ export function ThalamusAuthExperience({
                   Question 7 of 12 &bull; Clinical Clerkships
                 </span>
                 <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mt-2">
-                  What are your 7 Core Clinical Clerkship grades?
+                  What are your Core Clinical Clerkship grades?
                 </h2>
                 <p className="text-xs text-neutral-500 mt-1">
-                  Clerkship honors across core disciplines heavily influence specialty competitiveness.
+                  Clerkship honors heavily influence specialty competitiveness. Add or remove rotations to match your medical school curriculum.
                 </p>
               </div>
               <div className="bg-[#EAF2EE] border border-[#7EAE9B] px-3.5 py-1.5 rounded-xl text-center shrink-0">
                 <span className="text-lg font-bold text-[#1F3A30] font-mono block leading-none">
-                  {honorsCount} / 7
+                  {honorsCount} / {clerkships.length}
                 </span>
                 <span className="text-[10px] text-emerald-800 font-medium">Core Honors</span>
               </div>
             </div>
 
-            <div className="space-y-2 pt-1">
-              {[
-                { key: 'internalMedicine', label: 'Internal Medicine' },
-                { key: 'surgery', label: 'Surgery' },
-                { key: 'pediatrics', label: 'Pediatrics' },
-                { key: 'obGyn', label: 'Obstetrics & Gynecology' },
-                { key: 'familyMedicine', label: 'Family Medicine' },
-                { key: 'neurology', label: 'Neurology' },
-                { key: 'psychiatry', label: 'Psychiatry' },
-              ].map(({ key, label }) => {
-                const grade = clerkshipGrades[key as keyof CoreClerkshipGrades];
-                return (
-                  <div
-                    key={key}
-                    className="flex items-center justify-between p-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs"
-                  >
-                    <span className="font-semibold text-neutral-800">{label}</span>
-                    <div className="flex items-center gap-1.5">
-                      {(['Honors', 'High Pass', 'Pass'] as ClerkshipGrade[]).map((g) => (
-                        <button
-                          key={g}
-                          type="button"
-                          onClick={() => handleClerkshipChange(key as keyof CoreClerkshipGrades, g)}
-                          className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
-                            grade === g
-                              ? g === 'Honors'
-                                ? 'bg-emerald-700 text-white shadow-2xs font-bold'
-                                : 'bg-[#1F3A30] text-white shadow-2xs font-bold'
-                              : 'bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-100'
-                          }`}
-                        >
-                          {g}
-                        </button>
-                      ))}
-                    </div>
+            {/* Clerkship List */}
+            <div className="space-y-2 pt-1 max-h-[290px] overflow-y-auto pr-1">
+              {clerkships.map((c) => (
+                <div
+                  key={c.id}
+                  className="flex items-center justify-between p-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-xs hover:border-neutral-300 transition-colors"
+                >
+                  <div className="flex items-center gap-2 min-w-0">
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveClerkship(c.id)}
+                      className="text-neutral-400 hover:text-rose-600 p-1 rounded-md hover:bg-rose-50 transition-colors cursor-pointer shrink-0"
+                      title={`Remove ${c.name}`}
+                      aria-label={`Remove ${c.name}`}
+                    >
+                      <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                    <span className="font-semibold text-neutral-800 truncate">{c.name}</span>
                   </div>
-                );
-              })}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {(['Honors', 'High Pass', 'Pass'] as ClerkshipGrade[]).map((g) => (
+                      <button
+                        key={g}
+                        type="button"
+                        onClick={() => handleClerkshipGradeChange(c.id, g)}
+                        className={`px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer ${
+                          c.grade === g
+                            ? g === 'Honors'
+                              ? 'bg-emerald-700 text-white shadow-2xs font-bold'
+                              : 'bg-[#1F3A30] text-white shadow-2xs font-bold'
+                            : 'bg-white border border-neutral-200 text-neutral-600 hover:bg-neutral-100'
+                        }`}
+                      >
+                        {g}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ))}
+
+              {clerkships.length === 0 && (
+                <div className="p-4 text-center border border-dashed border-neutral-300 rounded-xl text-neutral-500 text-xs space-y-2">
+                  <p>No clerkships currently listed.</p>
+                  <button
+                    type="button"
+                    onClick={handleResetClerkships}
+                    className="px-3 py-1.5 bg-[#EAF2EE] text-[#1F3A30] font-bold rounded-lg text-xs hover:bg-[#D6E5DF] cursor-pointer"
+                  >
+                    Restore Standard 7 Core Clerkships
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Add Custom Clerkship Field */}
+            <div className="pt-2 border-t border-neutral-100 space-y-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  value={customClerkshipInput}
+                  onChange={(e) => setCustomClerkshipInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      handleAddClerkship(customClerkshipInput);
+                    }
+                  }}
+                  placeholder="Add another clerkship (e.g. Emergency Medicine, Sub-I, Radiology...)"
+                  className="flex-1 px-3 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#1F3A30]"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleAddClerkship(customClerkshipInput)}
+                  disabled={!customClerkshipInput.trim()}
+                  className="px-3.5 py-2 bg-[#1F3A30] hover:bg-[#162D25] disabled:opacity-40 disabled:cursor-not-allowed text-white text-xs font-bold rounded-xl flex items-center gap-1.5 cursor-pointer transition-colors shrink-0"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add</span>
+                </button>
+              </div>
+
+              {/* Quick Add Suggestions */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[11px] text-neutral-500 font-medium">Quick add:</span>
+                {[
+                  'Emergency Medicine',
+                  'Anesthesiology',
+                  'Dermatology',
+                  'Radiology',
+                  'Sub-Internship (Sub-I)',
+                  'Critical Care / ICU',
+                  'Orthopaedic Surgery',
+                ]
+                  .filter((name) => !clerkships.some((c) => c.name.toLowerCase() === name.toLowerCase()))
+                  .slice(0, 5)
+                  .map((name) => (
+                    <button
+                      key={name}
+                      type="button"
+                      onClick={() => handleAddClerkship(name)}
+                      className="text-[11px] px-2 py-0.5 rounded-md bg-neutral-100 hover:bg-neutral-200 text-neutral-700 border border-neutral-200 flex items-center gap-1 cursor-pointer transition-colors"
+                    >
+                      <Plus className="w-2.5 h-2.5 text-neutral-500" />
+                      <span>{name}</span>
+                    </button>
+                  ))}
+              </div>
+
+              {/* Reset link if list is modified */}
+              {(clerkships.length !== 7 || !clerkships.every((c, i) => c.id === DEFAULT_INITIAL_CLERKSHIPS[i]?.id)) && (
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="button"
+                    onClick={handleResetClerkships}
+                    className="text-[11px] text-neutral-500 hover:text-neutral-800 underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                    <span>Reset to standard 7 core clerkships</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         );
@@ -1212,7 +1300,7 @@ export function ThalamusAuthExperience({
                 <div><strong>Attending School:</strong> {medicalSchool || 'Medical School'}</div>
                 <div><strong>Target Specialty:</strong> {specialty}</div>
                 <div><strong>Step 2 CK Benchmark:</strong> {step2Status === 'score_available' ? step2Score : 'Pending'}</div>
-                <div><strong>Core Clerkship Honors:</strong> {honorsCount} of 7</div>
+                <div><strong>Core Clerkship Honors:</strong> {honorsCount} of {clerkships.length}</div>
               </div>
             </div>
           </div>

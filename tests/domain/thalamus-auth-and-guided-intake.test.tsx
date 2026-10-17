@@ -85,6 +85,31 @@ describe('ThalamusAuthExperience & Student Portal Auth Flow', () => {
     expect(markup).toContain('Penn State College of Medicine');
   });
 
+  it('renders Question 7 with label "What are your Core Clinical Clerkship grades?" and dynamic add/remove controls starting with 7 clerkships', () => {
+    const markup = renderToStaticMarkup(
+      <ThalamusAuthExperience onAuthenticated={() => {}} initialMode="guided_intake" initialStep={7} />
+    );
+
+    // Exact label requested
+    expect(markup).toContain('What are your Core Clinical Clerkship grades?');
+    expect(markup).not.toContain('What are your 7 Core Clinical Clerkship grades?');
+
+    // Starts with the 7 core clerkships
+    expect(markup).toContain('Internal Medicine');
+    expect(markup).toContain('Surgery');
+    expect(markup).toContain('Pediatrics');
+    expect(markup).toContain('Obstetrics &amp; Gynecology');
+    expect(markup).toContain('Family Medicine');
+    expect(markup).toContain('Neurology');
+    expect(markup).toContain('Psychiatry');
+
+    // Controls to add and remove clerkships
+    expect(markup).toContain('Add another clerkship');
+    expect(markup).toContain('Quick add:');
+    expect(markup).toContain('Emergency Medicine');
+    expect(markup).toContain('Remove Internal Medicine');
+  });
+
   it('manages student accounts with password persistence', () => {
     const newStudent = createStudentAccount({
       name: 'Jordan Smith',
