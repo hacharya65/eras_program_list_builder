@@ -375,7 +375,7 @@ export function ErasTransferKit({ context, onBack }: ErasTransferKitProps) {
                 <GraduationCap className="w-6 h-6 text-slate-800" />
                 <div>
                   <span id="dossier-modal-title" className="text-sm font-bold text-slate-900 block">
-                    Geisinger Commonwealth School of Medicine &bull; Dean's Office / MSPE Application Dossier
+                    Medical School &bull; Dean's Office / MSPE Application Dossier
                   </span>
                   <span className="text-[11px] text-slate-500">
                     Official ERAS 2027 institutional application portfolio preview

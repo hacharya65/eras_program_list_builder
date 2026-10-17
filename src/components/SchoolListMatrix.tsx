@@ -27,7 +27,6 @@ import {
   CENSUS_DIVISIONS,
   formatProgramDisplayName,
 } from '@/domain/residency-database';
-import { getAlumniByProgram } from '@/domain/alumni-models';
 import {
   Sparkles,
   Plus,
@@ -57,8 +56,6 @@ import {
 
 interface SchoolListMatrixProps {
   specialty?: string;
-  alumniResidents?: import('@/domain/alumni-models').AlumniResident[];
-  onNavigateToAlumni?: (programName: string) => void;
   onBack: () => void;
 }
 
@@ -68,8 +65,6 @@ const STORAGE_KEY = 'eras_school_list_matrix';
 
 export function SchoolListMatrix({
   specialty = 'Internal Medicine',
-  alumniResidents,
-  onNavigateToAlumni,
   onBack,
 }: SchoolListMatrixProps) {
   const [selectedSpecialty, setSelectedSpecialty] = useState(specialty);
@@ -1399,46 +1394,6 @@ export function SchoolListMatrix({
                   </div>
                 )}
               </div>
-
-              {/* Verified School Alumni */}
-              {(() => {
-                const alumni = getAlumniByProgram(detailItem.programName, detailItem.specialty, alumniResidents);
-                return (
-                  <div className="p-3 bg-indigo-50/60 rounded-lg border border-indigo-200 space-y-1.5">
-                    <div className="font-bold text-indigo-900 flex items-center justify-between">
-                      <div className="flex items-center gap-1.5">
-                        <Users className="w-3.5 h-3.5 text-indigo-600" />
-                        <span>Geisinger Commonwealth Alumni Network ({alumni.length} Matches)</span>
-                      </div>
-                    </div>
-                    {alumni.length > 0 ? (
-                      <>
-                        <ul className="text-[11px] text-indigo-800 space-y-1">
-                          {alumni.map((a) => (
-                            <li key={a.id}>
-                              &bull; <strong>{a.name}</strong> (Class of {a.graduationYear}) - {a.specialty} ({a.currentPgy})
-                            </li>
-                          ))}
-                        </ul>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            onNavigateToAlumni?.(detailItem.programName);
-                            setDetailItem(null);
-                          }}
-                          className="mt-2 w-full py-1.5 px-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-md text-[11px] font-semibold flex items-center justify-center gap-1.5 shadow-sm transition-colors"
-                        >
-                          <span>View Full Profiles in Alumni Directory &rarr;</span>
-                        </button>
-                      </>
-                    ) : (
-                      <p className="text-[11px] text-indigo-700">
-                        No recent historical matches on file for this specific program.
-                      </p>
-                    )}
-                  </div>
-                );
-              })()}
 
               {/* External Links */}
               <div className="flex items-center gap-3 pt-2">

@@ -17,23 +17,27 @@ import {
 } from 'lucide-react';
 
 interface DevPersonaSwitcherProps {
-  currentRole: UserRole;
-  onSelectRole: (role: UserRole) => void;
-  institutionName: string;
+  currentRole?: UserRole;
+  onSelectRole?: (role: UserRole) => void;
+  institutionName?: string;
+  medicalSchool?: string;
   userName?: string;
   userRoleTitle?: string;
   onOpenProfileManagement?: () => void;
   onOpenAdvisingLeadership?: () => void;
+  onOpenAuthModal?: () => void;
 }
 
 export function DevPersonaSwitcher({
-  currentRole,
+  currentRole = 'student',
   onSelectRole,
   institutionName,
+  medicalSchool,
   userName = 'Alex Rivera',
   userRoleTitle = 'MS4 Applicant',
   onOpenProfileManagement,
   onOpenAdvisingLeadership,
+  onOpenAuthModal,
 }: DevPersonaSwitcherProps) {
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -145,7 +149,7 @@ export function DevPersonaSwitcher({
               </span>
               <span className="h-4 w-px bg-neutral-300 hidden sm:block" />
               <span className="text-xs sm:text-sm font-semibold text-neutral-600 hidden sm:block">
-                {institutionName || 'Geisinger Commonwealth School of Medicine'}
+                {medicalSchool || institutionName || 'Match Strategy & Signaling'}
               </span>
             </div>
           </div>
@@ -156,11 +160,11 @@ export function DevPersonaSwitcher({
             <button
               onClick={handleLeadershipClick}
               className="flex items-center justify-center w-9 h-9 rounded-2xl border border-neutral-200/80 bg-white hover:bg-[#EAF2EE] text-neutral-600 hover:text-[#1F3A30] hover:border-[#1F3A30]/30 transition-all cursor-pointer shadow-2xs group relative"
-              title="Geisinger Advising Leadership & Contact Directory"
-              aria-label="Geisinger Advising Leadership & Contact Directory"
+              title="Official Advising Leadership Directory"
+              aria-label="Official Advising Leadership Directory"
             >
               <Contact className="w-4 h-4 text-neutral-600 group-hover:text-[#1F3A30] group-hover:scale-105 transition-all" />
-              <span className="sr-only">Geisinger Advising Leadership Directory</span>
+              <span className="sr-only">Advising Leadership Directory</span>
             </button>
 
             {/* Classic Profile Tab with User Name & Circular Picture */}
@@ -175,8 +179,8 @@ export function DevPersonaSwitcher({
                   <div className="text-xs font-bold text-neutral-900 group-hover:text-[#1F3A30] transition-colors leading-tight">
                     {activePersonaName}
                   </div>
-                  <div className="text-[10px] text-neutral-500 font-medium">
-                    {activePersonaTitle} &bull; Geisinger
+                  <div className="text-[10px] text-neutral-500 font-medium truncate max-w-[150px]">
+                    {medicalSchool || activePersonaTitle}
                   </div>
                 </div>
 
@@ -202,12 +206,25 @@ export function DevPersonaSwitcher({
                   <div className="p-3 border-b border-neutral-100">
                     <div className="font-bold text-neutral-900 text-sm">{activePersonaName}</div>
                     <div className="text-[11px] text-neutral-500">{activePersonaTitle}</div>
-                    <div className="text-[10px] text-neutral-400 mt-0.5">
-                      Geisinger Commonwealth School of Medicine
+                    <div className="text-[10px] text-neutral-400 mt-0.5 truncate">
+                      {medicalSchool || 'Medical School'}
                     </div>
                   </div>
 
                   <div className="py-1.5 space-y-0.5">
+                    {onOpenAuthModal && (
+                      <button
+                        onClick={() => {
+                          setIsProfileMenuOpen(false);
+                          onOpenAuthModal();
+                        }}
+                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-800 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-bold transition-colors text-left cursor-pointer border-b border-neutral-100 mb-1"
+                      >
+                        <User className="w-4 h-4 text-[#1F3A30]" />
+                        <span>Switch Student / New Intake</span>
+                      </button>
+                    )}
+
                     <button
                       onClick={handleProfileClick}
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
@@ -237,7 +254,7 @@ export function DevPersonaSwitcher({
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
                     >
                       <FileText className="w-4 h-4 text-[#4E8773]" />
-                      <span>Specialty Advising Form</span>
+                      <span>Specialty Advising Dossier</span>
                     </button>
                   </div>
                 </div>

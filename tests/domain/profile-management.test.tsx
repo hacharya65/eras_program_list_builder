@@ -54,6 +54,7 @@ describe('ProfileManagementView', () => {
           ...INITIAL_MOCK_INTAKE,
           studentId: mockStudent.id,
           applyingSpecialty: 'Internal Medicine',
+          medicalSchool: 'Penn State College of Medicine',
         }}
         onOpenIntake={() => {}}
         onOpenTransferKit={() => {}}
@@ -65,7 +66,7 @@ describe('ProfileManagementView', () => {
     // Profile header
     expect(markup).toContain('Alex Rivera');
     expect(markup).toContain('Internal Medicine');
-    expect(markup).toContain('Geisinger Commonwealth School of Medicine');
+    expect(markup).toContain('Penn State College of Medicine');
 
     // Key sections
     expect(markup).toContain('Academic Record &amp; Competitiveness Metrics');

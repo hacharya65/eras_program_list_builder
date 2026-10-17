@@ -6,12 +6,13 @@ import { ApplicantProfileModal } from './ApplicantProfileModal';
 import { SpecialtyAdvisingFormModal } from './SpecialtyAdvisingFormModal';
 import { LetterOfRecommendationTracker } from './LetterOfRecommendationTracker';
 import { SpecialtySwitchingSafetyModal } from './SpecialtySwitchingSafetyModal';
-import { AlumniResidentDirectory } from './AlumniResidentDirectory';
 import { ErasTransferKit } from './ErasTransferKit';
 import { StudentDashboardHome } from './StudentDashboardHome';
 import { ProfileManagementView } from './ProfileManagementView';
 import { JournalRepositoryView } from './JournalRepositoryView';
 import { AdvisingLeadershipView } from './AdvisingLeadershipView';
+import { StudentAuthModal } from './StudentAuthModal';
+import { StudentAccount, getCurrentStudentId, getStudentAccount } from '@/domain/student-registry';
 import {
   CANONICAL_SPECIALTIES,
   getStoredTargetSpecialty,
@@ -40,12 +41,16 @@ import {
 
 interface StudentPortalProps {
   context: StudentDashboardContext;
-  alumniResidents?: import('@/domain/alumni-models').AlumniResident[];
+  currentStudentAccount?: StudentAccount | null;
+  onOpenAuthModal?: () => void;
+  onStudentSwitched?: (account: StudentAccount) => void;
 }
 
 export function StudentPortal({
   context,
-  alumniResidents,
+  currentStudentAccount,
+  onOpenAuthModal,
+  onStudentSwitched,
 }: StudentPortalProps) {
   const [activeView, setActiveView] = useState<
     | 'overview'
@@ -54,20 +59,24 @@ export function StudentPortal({
     | 'journal'
     | 'school_list'
     | 'competitiveness'
-    | 'alumni_directory'
     | 'transfer_kit'
     | 'letters'
     | 'advising_leadership'
   >('overview');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isIntakeModalOpen, setIsIntakeModalOpen] = useState(false);
+  const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
   const { student, assignedAdvisors } = context;
+
+  // Active Student ID
+  const activeStudentId = currentStudentAccount?.id || student.id;
 
   // Specialty Advising Intake State (Deterministic SSR initialization to prevent hydration mismatches)
   const [advisingIntake, setAdvisingIntake] = useState<SpecialtyAdvisingIntake>({
     ...INITIAL_MOCK_INTAKE,
-    studentId: student.id,
-    applyingSpecialty: student.specialty || 'Internal Medicine',
+    studentId: activeStudentId,
+    applyingSpecialty: currentStudentAccount?.specialty || student.specialty || 'Internal Medicine',
+    medicalSchool: currentStudentAccount?.medicalSchool || INITIAL_MOCK_INTAKE.medicalSchool,
   });
   const [pendingSpecialtySwitch, setPendingSpecialtySwitch] = useState<string | null>(null);
 
@@ -109,7 +118,6 @@ export function StudentPortal({
           'journal',
           'school_list',
           'competitiveness',
-          'alumni_directory',
           'transfer_kit',
           'letters',
           'advising_leadership',
@@ -131,7 +139,6 @@ export function StudentPortal({
             'journal',
             'school_list',
             'competitiveness',
-            'alumni_directory',
             'transfer_kit',
             'letters',
             'advising_leadership',
@@ -152,23 +159,32 @@ export function StudentPortal({
     const handleNavTransfer = () => updateView('transfer_kit');
     const handleNavIntake = () => updateView('intake');
     const handleNavLeadership = () => updateView('advising_leadership');
+    const handleOpenAuth = () => {
+      if (onOpenAuthModal) {
+        onOpenAuthModal();
+      } else {
+        setIsAuthModalOpen(true);
+      }
+    };
 
     window.addEventListener('navigate_to_profile_management', handleNavProfile);
     window.addEventListener('navigate_to_transfer_kit', handleNavTransfer);
     window.addEventListener('navigate_to_intake', handleNavIntake);
     window.addEventListener('navigate_to_advising_leadership', handleNavLeadership);
+    window.addEventListener('open_student_auth_modal', handleOpenAuth);
 
     return () => {
       window.removeEventListener('navigate_to_profile_management', handleNavProfile);
       window.removeEventListener('navigate_to_transfer_kit', handleNavTransfer);
       window.removeEventListener('navigate_to_intake', handleNavIntake);
       window.removeEventListener('navigate_to_advising_leadership', handleNavLeadership);
+      window.removeEventListener('open_student_auth_modal', handleOpenAuth);
     };
-  }, []);
+  }, [onOpenAuthModal]);
 
   // Sync client-side intake and target specialty in useEffect
   useEffect(() => {
-    const loadedIntake = loadStudentAdvisingIntake(student.id);
+    const loadedIntake = loadStudentAdvisingIntake(activeStudentId);
     if (loadedIntake) {
       setAdvisingIntake(loadedIntake);
       if (loadedIntake.applyingSpecialty) {
@@ -180,16 +196,13 @@ export function StudentPortal({
     if (stored) {
       setTargetSpecialty(stored);
     }
-  }, [student.id]);
+  }, [activeStudentId]);
 
   // School List Summary Stats (Deterministic SSR default)
   const [schoolListStats, setSchoolListStats] = useState({
     count: 0,
     signalsAssigned: 0,
   });
-
-  // Alumni Directory Search Filter
-  const [alumniSearchFilter, setAlumniSearchFilter] = useState('');
 
   // Update stats on mount and specialty switch
   useEffect(() => {
@@ -241,12 +254,11 @@ export function StudentPortal({
       case 'profile':
         return 'dashboard';
       case 'school_list':
-      case 'intake':
       case 'competitiveness':
-      case 'alumni_directory':
         return 'programs';
       case 'journal':
         return 'journal';
+      case 'intake':
       case 'letters':
       case 'transfer_kit':
         return 'documents';
@@ -287,14 +299,7 @@ export function StudentPortal({
       defaultView: 'school_list',
       subSections: [
         { id: 'school_list', label: 'Program List & Signals', icon: Compass },
-        {
-          id: 'intake',
-          label: 'Advising Intake',
-          icon: FileCheck,
-          badge: advisingIntake.isCompleted ? 'Complete' : 'In Progress',
-        },
         { id: 'competitiveness', label: 'Specialty Appraisal', icon: TrendingUp },
-        { id: 'alumni_directory', label: 'Alumni Network', icon: GraduationCap },
       ],
     },
     {
@@ -307,8 +312,14 @@ export function StudentPortal({
       id: 'documents',
       label: 'Documents & Packet',
       icon: MailCheck,
-      defaultView: 'letters',
+      defaultView: 'intake',
       subSections: [
+        {
+          id: 'intake',
+          label: 'Advising Intake Dossier',
+          icon: FileCheck,
+          badge: advisingIntake.isCompleted ? 'Complete' : 'In Progress',
+        },
         { id: 'letters', label: 'Letters of Recommendation', icon: MailCheck },
         { id: 'transfer_kit', label: 'Packet & Exports', icon: Download },
       ],
@@ -320,18 +331,28 @@ export function StudentPortal({
   const renderViewContent = () => {
     if (activeView === 'intake') {
       return (
-        <SpecialtyAdvisingFormModal
-          isOpen={true}
-          isEmbedded={true}
-          onClose={() => updateView('overview')}
-          studentId={student.id}
-          onSaved={(updated) => {
-            setAdvisingIntake(updated);
-            if (updated.applyingSpecialty && updated.applyingSpecialty !== targetSpecialty) {
-              applySpecialtySwitch(updated.applyingSpecialty);
-            }
-          }}
-        />
+        <div className="space-y-4">
+          <div className="flex items-center justify-between">
+            <button
+              onClick={() => updateView('overview')}
+              className="flex items-center gap-1.5 text-xs font-semibold text-[#1F3A30] hover:text-[#142720] bg-white border border-[#D6E5DF] px-3 py-1.5 rounded-lg shadow-2xs transition-colors cursor-pointer"
+            >
+              &larr; Back to Student Hub
+            </button>
+          </div>
+          <SpecialtyAdvisingFormModal
+            isOpen={true}
+            isEmbedded={true}
+            onClose={() => updateView('overview')}
+            studentId={activeStudentId}
+            onSaved={(updated) => {
+              setAdvisingIntake(updated);
+              if (updated.applyingSpecialty && updated.applyingSpecialty !== targetSpecialty) {
+                applySpecialtySwitch(updated.applyingSpecialty);
+              }
+            }}
+          />
+        </div>
       );
     }
 
@@ -348,11 +369,6 @@ export function StudentPortal({
       return (
         <SchoolListMatrix
           specialty={targetSpecialty}
-          alumniResidents={alumniResidents}
-          onNavigateToAlumni={(programName) => {
-            setAlumniSearchFilter(programName);
-            updateView('alumni_directory');
-          }}
           onBack={() => updateView('overview')}
         />
       );
@@ -363,21 +379,6 @@ export function StudentPortal({
         <CompetitivenessCalculator
           initialSpecialty={targetSpecialty}
           onBack={() => updateView('overview')}
-        />
-      );
-    }
-
-    if (activeView === 'alumni_directory') {
-      return (
-        <AlumniResidentDirectory
-          studentName={student.name}
-          initialSpecialty={targetSpecialty}
-          initialSearchQuery={alumniSearchFilter}
-          alumniResidents={alumniResidents}
-          onBack={() => {
-            setAlumniSearchFilter('');
-            updateView('overview');
-          }}
         />
       );
     }
@@ -414,11 +415,15 @@ export function StudentPortal({
       const assignedAdvisor = assignedAdvisors && assignedAdvisors.length > 0 ? assignedAdvisors[0] : undefined;
       return (
         <ProfileManagementView
-          student={student}
+          student={{
+            ...student,
+            name: currentStudentAccount?.name || student.name,
+            email: currentStudentAccount?.email || student.email,
+          }}
           targetSpecialty={targetSpecialty}
           onSpecialtyChange={handleSpecialtyChange}
           advisingIntake={advisingIntake}
-          onOpenIntake={() => setIsIntakeModalOpen(true)}
+          onOpenIntake={() => updateView('intake')}
           onOpenTransferKit={() => updateView('transfer_kit')}
           onBack={() => updateView('overview')}
           assignedAdvisor={assignedAdvisor}
@@ -438,16 +443,19 @@ export function StudentPortal({
     return (
       <StudentDashboardHome
         context={context}
-        student={student}
+        student={{
+          ...student,
+          name: currentStudentAccount?.name || student.name,
+          email: currentStudentAccount?.email || student.email,
+        }}
         targetSpecialty={targetSpecialty}
         onSpecialtyChange={handleSpecialtyChange}
         advisingIntake={advisingIntake}
-        onOpenIntake={() => setIsIntakeModalOpen(true)}
+        onOpenIntake={() => updateView('intake')}
         onOpenProfile={() => updateView('profile')}
         assignedAdvisors={assignedAdvisors}
         schoolListStats={schoolListStats}
         onNavigate={(view) => updateView(view)}
-        alumniResidents={alumniResidents}
       />
     );
   };
@@ -575,11 +583,28 @@ export function StudentPortal({
       <ApplicantProfileModal
         isOpen={isProfileModalOpen}
         onClose={() => setIsProfileModalOpen(false)}
-        studentName={student.name}
+        studentName={currentStudentAccount?.name || student.name}
         specialty={targetSpecialty}
         onOpenCompetitivenessEngine={() => {
           setIsProfileModalOpen(false);
           updateView('competitiveness');
+        }}
+      />
+
+      {/* Multi-Student Intake & Authentication Modal */}
+      <StudentAuthModal
+        isOpen={isAuthModalOpen}
+        onClose={() => setIsAuthModalOpen(false)}
+        onAuthenticated={(newAcc) => {
+          setIsAuthModalOpen(false);
+          if (onStudentSwitched) {
+            onStudentSwitched(newAcc);
+          }
+          const loaded = loadStudentAdvisingIntake(newAcc.id);
+          setAdvisingIntake(loaded);
+          if (newAcc.specialty) {
+            applySpecialtySwitch(newAcc.specialty);
+          }
         }}
       />
     </div>

@@ -16,12 +16,9 @@ describe('School List Matrix & Alumni Resident Directory Cross-Linking', () => {
     const html = renderToStaticMarkup(
       React.createElement(SchoolListMatrix, {
         onBack: () => {},
-        alumniResidents: SAMPLE_ALUMNI_ROSTER,
       })
     );
 
-    // Should indicate presence of alumni on school rows
-    expect(html).toContain('Alumni');
     expect(html).toContain('Massachusetts General Hospital');
   });
 

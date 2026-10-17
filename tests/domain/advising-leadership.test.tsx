@@ -55,7 +55,7 @@ describe('AdvisingLeadership Integration & Navigation', () => {
     );
 
     // Verify key titles and header
-    expect(markup).toContain('Geisinger Advising Leadership');
+    expect(markup).toContain('Specialty Advising Leadership &amp; Champions');
     expect(markup).toContain('Official contact directory for MS4 match advising');
 
     // Verify leadership members are rendered
@@ -112,7 +112,7 @@ describe('AdvisingLeadership Integration & Navigation', () => {
     );
 
     // Verify contact icon button has accessible title
-    expect(markup).toContain('Geisinger Advising Leadership Directory');
+    expect(markup).toContain('Official Advising Leadership Directory');
     // Verify user profile tab is also present
     expect(markup).toContain('Alex Rivera');
   });

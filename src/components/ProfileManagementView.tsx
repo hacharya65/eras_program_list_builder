@@ -95,7 +95,7 @@ export function ProfileManagementView({
         </button>
 
         <span className="text-xs text-neutral-500">
-          Profile &amp; Governance Center &bull; Geisinger Commonwealth School of Medicine
+          Profile &amp; Governance Center &bull; {advisingIntake.medicalSchool || 'Match Strategy & Advising Center'}
         </span>
       </div>
 
@@ -118,11 +118,11 @@ export function ProfileManagementView({
               </span>
             </div>
             <p className="text-xs sm:text-sm text-neutral-600 mt-1">
-              {student.email} &bull; Class of 2027 &bull; Scranton Regional Campus
+              {student.email} &bull; Class of 2027 &bull; {advisingIntake.regionalCampus || 'Campus'}
             </p>
             <div className="flex items-center gap-2 mt-2 text-xs text-neutral-500">
               <span>Medical School:</span>
-              <strong className="text-neutral-800">Geisinger Commonwealth School of Medicine</strong>
+              <strong className="text-neutral-800">{advisingIntake.medicalSchool || 'School of Medicine'}</strong>
             </div>
           </div>
         </div>

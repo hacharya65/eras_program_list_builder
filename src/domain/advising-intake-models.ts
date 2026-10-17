@@ -83,6 +83,22 @@ export interface SpecialtyAdvisingIntake {
   // Q13: Goals for Residency Program & Geographic Preferences
   residencyGoalsAndGeography: string;
   
+  // Medical School attended
+  medicalSchool?: string;
+  step1Result?: 'Pass' | 'Fail' | string;
+
+  // Academic & Portfolio Metrics
+  publications?: number;
+  firstAuthorPublications?: number;
+  presentations?: number;
+  abstracts?: number;
+  researchExperiences?: number;
+  volunteerExperiences?: number;
+  leadershipHours?: number;
+  isAoaMember?: boolean;
+  isGoldHumanism?: boolean;
+  medicalSchoolTier?: string;
+
   // Strategic Preferences
   careerDirection?: CareerDirection;
   settingPreference?: SettingPreference;
@@ -207,6 +223,18 @@ export const INITIAL_MOCK_INTAKE: SpecialtyAdvisingIntake = {
   externalAdvisors: 'None (working primarily with Geisinger faculty)',
   residencyGoalsAndGeography:
     'Academic university-based programs (focus on clinician-educator track). Preferred geography: Middle Atlantic (NY, NJ, PA) and New England (MA, CT).',
+  medicalSchool: 'School of Medicine',
+  step1Result: 'Pass',
+  publications: 2,
+  firstAuthorPublications: 1,
+  presentations: 4,
+  abstracts: 2,
+  researchExperiences: 4,
+  volunteerExperiences: 5,
+  leadershipHours: 120,
+  isAoaMember: false,
+  isGoldHumanism: true,
+  medicalSchoolTier: 'State / Mid-Tier',
   careerDirection: 'fellowship',
   settingPreference: 'urban',
   programTypeInterest: ['academic', 'hybrid'],

@@ -152,7 +152,7 @@ export function JournalRepositoryView({
         </button>
 
         <span className="text-xs text-neutral-500">
-          Independent Clinical Moments Scratchpad &bull; Geisinger Commonwealth School of Medicine
+          Independent Clinical Moments Scratchpad &bull; Applicant Reflective Repository
         </span>
       </div>
 

@@ -18,7 +18,10 @@ import {
   HelpCircle,
   ShieldAlert,
   ChevronRight,
-  BookOpen
+  BookOpen,
+  Download,
+  Copy,
+  Award,
 } from 'lucide-react';
 import {
   SpecialtyAdvisingIntake,
@@ -54,6 +57,7 @@ export function SpecialtyAdvisingFormModal({
   const [formData, setFormData] = useState<SpecialtyAdvisingIntake>(() => loadStudentAdvisingIntake(studentId));
   const [activeTab, setActiveTab] = useState<'editor' | 'printable_preview'>('editor');
   const [saveSuccess, setSaveSuccess] = useState(false);
+  const [copiedSuccess, setCopiedSuccess] = useState(false);
 
   // Re-read storage on open or when studentId changes
   useEffect(() => {
@@ -62,6 +66,63 @@ export function SpecialtyAdvisingFormModal({
       setFormData(data);
     }
   }, [isOpen, isEmbedded, studentId]);
+
+  const handleExportJson = () => {
+    const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(formData, null, 2));
+    const downloadAnchor = document.createElement('a');
+    downloadAnchor.setAttribute('href', dataStr);
+    downloadAnchor.setAttribute(
+      'download',
+      `${(formData.studentName || 'Student').replace(/\s+/g, '_')}_Advising_Intake_${(formData.applyingSpecialty || 'Specialty').replace(/\s+/g, '_')}.json`
+    );
+    document.body.appendChild(downloadAnchor);
+    downloadAnchor.click();
+    downloadAnchor.remove();
+  };
+
+  const handleCopySummary = () => {
+    const honors = calculateClerkshipHonorsCount(formData.clerkshipGrades);
+    const summary = `STUDENT SPECIALTY ADVISING INTAKE DOSSIER
+================================================
+Applicant: ${formData.studentName} (${formData.pronouns || 'N/A'})
+Medical School: ${formData.medicalSchool || 'Not specified'}
+Regional Campus: ${formData.regionalCampus}
+Specialty Applying: ${formData.applyingSpecialty}
+Specialty Advisor: ${formData.specialtyAdvisorName}
+Date: ${formData.submissionDate}
+
+USMLE & ACADEMIC PERFORMANCE:
+- Step 1: ${formData.step1Result || 'Pass'}
+- Step 2 CK: ${formData.step2Status === 'score_available' ? formData.step2Score : `Anticipated ${formData.step2AnticipatedDate}`}
+- Step Failures: ${formData.hasStepFailures ? formData.stepFailureDetails : 'None'}
+- Clerkship Honors: ${honors} of 7 core rotations
+- Core Grades: ${Object.entries(formData.clerkshipGrades).map(([k, v]) => `${k}: ${v}`).join(', ')}
+- Dedicated Research Year: ${formData.completedResearchYear ? `Yes (${formData.researchYearLocation})` : 'No'}
+- Academic Disclosures: ${formData.hasAcademicFailuresOrRepeats ? formData.academicFailuresDetails : 'None'}
+- MSPE Disclosures: ${formData.hasCapsOrProfessionalismConcerns ? formData.capsConcernsDetails : 'None'}
+
+PORTFOLIO & RESEARCH METRICS:
+- Medical School Tier: ${formData.medicalSchoolTier || 'State / Mid-Tier'}
+- Peer-Reviewed Publications: ${formData.publications ?? 0} (First-author: ${formData.firstAuthorPublications ?? 0})
+- Regional / National Presentations: ${formData.presentations ?? 0}
+- Scientific Abstracts: ${formData.abstracts ?? 0}
+- Research Experiences: ${formData.researchExperiences ?? 0}
+- Volunteer Experiences: ${formData.volunteerExperiences ?? 0}
+- Leadership / Service Hours: ${formData.leadershipHours ?? 0} hrs
+- Alpha Omega Alpha (AOA): ${formData.isAoaMember ? 'Yes' : 'No'}
+- Gold Humanism Honor Society (GHHS): ${formData.isGoldHumanism ? 'Yes' : 'No'}
+
+CLINICAL STATEMENT & GOALS:
+- Motivation & Fit: ${formData.specialtyInterestReason}
+- Parallel Plan: ${formData.consideringParallelPlan ? formData.parallelPlanSpecialty : 'None'}
+- Rotations & Sub-Is: ${formData.futureRotationsTimeline}
+- Geographic & Program Preferences: ${formData.residencyGoalsAndGeography}
+- 2027 MyERAS Census Divisions: ${(formData.myErasCensusDivisions || []).join(', ') || 'None selected'}`;
+
+    navigator.clipboard.writeText(summary);
+    setCopiedSuccess(true);
+    setTimeout(() => setCopiedSuccess(false), 2500);
+  };
 
   if (!isOpen && !isEmbedded) return null;
 
@@ -149,17 +210,39 @@ export function SpecialtyAdvisingFormModal({
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded bg-[#7EAE9B]/20 text-[#A3D9C5] border border-[#7EAE9B]/40">
-                Geisinger Commonwealth Form
+                {formData.medicalSchool ? `${formData.medicalSchool} Dossier` : 'Specialty Advising Dossier'}
               </span>
-              <span className="text-xs text-emerald-200/80">Ethmoid Clinical Governance</span>
+              <span className="text-xs text-emerald-200/80">Ethmoid Match Strategy</span>
             </div>
             <h2 id="intake-modal-title" className="text-lg font-bold text-white tracking-tight">
-              Specialty Advising Intake Form
+              Specialty Advising Intake &amp; Dossier
             </h2>
           </div>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 flex-wrap justify-end">
+          {/* Export Action Controls */}
+          <div className="flex items-center gap-1.5">
+            <button
+              type="button"
+              onClick={handleCopySummary}
+              className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-emerald-100 flex items-center gap-1.5 transition-all border border-white/10"
+              title="Copy text summary formatted for advisor meetings or emails"
+            >
+              <Copy className="w-3.5 h-3.5 text-[#7EAE9B]" />
+              <span>{copiedSuccess ? 'Copied to Clipboard!' : 'Copy Summary'}</span>
+            </button>
+            <button
+              type="button"
+              onClick={handleExportJson}
+              className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-emerald-100 flex items-center gap-1.5 transition-all border border-white/10"
+              title="Download intake profile as JSON file"
+            >
+              <Download className="w-3.5 h-3.5 text-[#7EAE9B]" />
+              <span>Export JSON</span>
+            </button>
+          </div>
+
           <div className="bg-[#142720] p-1 rounded-lg flex items-center gap-1 border border-[#2D5949] text-xs">
             <button
               type="button"
@@ -185,14 +268,16 @@ export function SpecialtyAdvisingFormModal({
             </button>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-1.5 text-emerald-200/70 hover:text-white hover:bg-[#264639] rounded-lg transition-colors"
-            title="Close modal"
-            aria-label="Close"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          {!isEmbedded && (
+            <button
+              onClick={onClose}
+              className="p-1.5 text-emerald-200/70 hover:text-white hover:bg-[#264639] rounded-lg transition-colors ml-1"
+              title="Close modal"
+              aria-label="Close"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          )}
         </div>
       </div>
 
@@ -224,7 +309,7 @@ export function SpecialtyAdvisingFormModal({
                   <span className="text-xs text-slate-500">Date: {formData.submissionDate}</span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 text-xs">
                   <div>
                     <label className="font-semibold text-slate-700 block mb-1">Student Name</label>
                     <input
@@ -232,6 +317,16 @@ export function SpecialtyAdvisingFormModal({
                       disabled
                       value={formData.studentName}
                       className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-700 font-medium cursor-not-allowed"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Medical School Attended</label>
+                    <input
+                      type="text"
+                      value={formData.medicalSchool || ''}
+                      onChange={(e) => setFormData({ ...formData, medicalSchool: e.target.value })}
+                      placeholder="e.g. Johns Hopkins, Penn State, UCLA"
+                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-900 font-medium focus:ring-2 focus:ring-[#7EAE9B] focus:outline-none"
                     />
                   </div>
                   <div>
@@ -251,12 +346,13 @@ export function SpecialtyAdvisingFormModal({
                       onChange={(e) => setFormData({ ...formData, regionalCampus: e.target.value })}
                       className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-900 font-medium focus:ring-2 focus:ring-[#7EAE9B] focus:outline-none"
                     >
-                      <option value="Northeast">Northeast (Scranton/Wilkes-Barre)</option>
-                      <option value="Central">Central (Danville)</option>
+                      <option value="Northeast">Northeast</option>
+                      <option value="Central">Central</option>
                       <option value="South">South</option>
                       <option value="West">West</option>
-                      <option value="Guthrie">Guthrie (Sayre)</option>
+                      <option value="Guthrie">Guthrie</option>
                       <option value="AtlantiCare">AtlantiCare</option>
+                      <option value="Main Campus">Main Campus</option>
                       <option value="Other">Other Campus</option>
                     </select>
                   </div>
@@ -320,42 +416,35 @@ export function SpecialtyAdvisingFormModal({
                   3, 4 & 5. Examination Performance & Dedicated Research
                 </h3>
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-5 text-xs">
-                  {/* Q3: Step Failures */}
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                  {/* Step 1 Result */}
                   <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
-                    <div className="flex items-center justify-between mb-2">
-                      <label className="font-bold text-slate-800">3. Any step failures?</label>
-                      <div className="flex items-center gap-3">
-                        <label className="inline-flex items-center gap-1 cursor-pointer">
-                          <input
-                            type="radio"
-                            name="step_failures"
-                            checked={!formData.hasStepFailures}
-                            onChange={() => setFormData({ ...formData, hasStepFailures: false, stepFailureDetails: '' })}
-                          />
-                          <span>No</span>
-                        </label>
-                        <label className="inline-flex items-center gap-1 cursor-pointer font-semibold text-rose-700">
-                          <input
-                            type="radio"
-                            name="step_failures"
-                            checked={formData.hasStepFailures}
-                            onChange={() => setFormData({ ...formData, hasStepFailures: true })}
-                          />
-                          <span>Yes</span>
-                        </label>
-                      </div>
+                    <label className="font-bold text-slate-800 block mb-2">USMLE Step 1</label>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, step1Result: 'Pass' })}
+                        className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${
+                          formData.step1Result !== 'Fail'
+                            ? 'bg-emerald-700 text-white shadow-xs'
+                            : 'bg-white border text-slate-600'
+                        }`}
+                      >
+                        Pass
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setFormData({ ...formData, step1Result: 'Fail' })}
+                        className={`px-3 py-1.5 rounded text-xs font-bold transition-all ${
+                          formData.step1Result === 'Fail'
+                            ? 'bg-rose-700 text-white shadow-xs'
+                            : 'bg-white border text-slate-600'
+                        }`}
+                      >
+                        Fail
+                      </button>
                     </div>
-                    {formData.hasStepFailures && (
-                      <textarea
-                        rows={2}
-                        value={formData.stepFailureDetails || ''}
-                        onChange={(e) => setFormData({ ...formData, stepFailureDetails: e.target.value })}
-                        placeholder="Specify Step 1 or Step 2 CK, date, and context..."
-                        className="w-full bg-white border border-rose-300 rounded p-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-rose-500 mt-1"
-                        required
-                      />
-                    )}
+                    <span className="text-[11px] text-slate-500 mt-2 block">Official first-attempt outcome</span>
                   </div>
 
                   {/* Q4: Step 2 CK Status */}
@@ -398,7 +487,7 @@ export function SpecialtyAdvisingFormModal({
                           onChange={(e) => setFormData({ ...formData, step2Score: parseInt(e.target.value) || 0 })}
                           className="w-24 bg-white border border-slate-300 rounded px-2 py-1 font-bold text-slate-900"
                         />
-                        <span className="text-[11px] text-slate-500">Auto-tiers your School List</span>
+                        <span className="text-[11px] text-slate-500">Auto-tiers matrix</span>
                       </div>
                     ) : (
                       <input
@@ -411,11 +500,50 @@ export function SpecialtyAdvisingFormModal({
                     )}
                   </div>
 
+                  {/* Q3: Step Failures */}
+                  <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="font-bold text-slate-800">3. Any step failures?</label>
+                      <div className="flex items-center gap-2">
+                        <label className="inline-flex items-center gap-1 cursor-pointer">
+                          <input
+                            type="radio"
+                            name="step_failures"
+                            checked={!formData.hasStepFailures}
+                            onChange={() => setFormData({ ...formData, hasStepFailures: false, stepFailureDetails: '' })}
+                          />
+                          <span>No</span>
+                        </label>
+                        <label className="inline-flex items-center gap-1 cursor-pointer font-semibold text-rose-700">
+                          <input
+                            type="radio"
+                            name="step_failures"
+                            checked={formData.hasStepFailures}
+                            onChange={() => setFormData({ ...formData, hasStepFailures: true })}
+                          />
+                          <span>Yes</span>
+                        </label>
+                      </div>
+                    </div>
+                    {formData.hasStepFailures ? (
+                      <textarea
+                        rows={2}
+                        value={formData.stepFailureDetails || ''}
+                        onChange={(e) => setFormData({ ...formData, stepFailureDetails: e.target.value })}
+                        placeholder="Specify Step 1 or Step 2 CK, date, and context..."
+                        className="w-full bg-white border border-rose-300 rounded p-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-rose-500 mt-1"
+                        required
+                      />
+                    ) : (
+                      <span className="text-[11px] text-slate-500 block">Clean testing record</span>
+                    )}
+                  </div>
+
                   {/* Q5: Research Year */}
                   <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
                     <div className="flex items-center justify-between mb-2">
                       <label className="font-bold text-slate-800">5. Research Year?</label>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-2">
                         <label className="inline-flex items-center gap-1 cursor-pointer">
                           <input
                             type="radio"
@@ -436,16 +564,139 @@ export function SpecialtyAdvisingFormModal({
                         </label>
                       </div>
                     </div>
-                    {formData.completedResearchYear && (
+                    {formData.completedResearchYear ? (
                       <input
                         type="text"
                         value={formData.researchYearLocation || ''}
                         onChange={(e) => setFormData({ ...formData, researchYearLocation: e.target.value })}
-                        placeholder="Institution / Laboratory (e.g. NIH, Harvard)"
+                        placeholder="Lab / Institution (e.g. NIH, Harvard)"
                         className="w-full bg-white border border-slate-300 rounded p-1.5 text-xs text-slate-800 focus:ring-1 focus:ring-[#7EAE9B] mt-1"
                         required
                       />
+                    ) : (
+                      <span className="text-[11px] text-slate-500 block">Standard 4-year track</span>
                     )}
+                  </div>
+                </div>
+              </div>
+
+              {/* Your Academic & Portfolio Metrics */}
+              <div className="bg-white rounded-xl border border-[#D6E5DF] p-5 shadow-xs space-y-4">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+                  <h3 className="text-sm font-bold text-[#1F3A30] flex items-center gap-2">
+                    <Award className="w-4 h-4 text-[#7EAE9B]" />
+                    Academic &amp; Portfolio Metrics
+                  </h3>
+                  <span className="text-[11px] text-slate-500">
+                    Used for Program List Competitiveness &amp; Signaling Strategy
+                  </span>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3.5 text-xs">
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Medical School Tier</label>
+                    <select
+                      value={formData.medicalSchoolTier || 'State / Mid-Tier'}
+                      onChange={(e) => setFormData({ ...formData, medicalSchoolTier: e.target.value })}
+                      className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900"
+                    >
+                      <option value="Top 25 Research-Intensive">Top 25 Research</option>
+                      <option value="State / Mid-Tier">State / Mid-Tier</option>
+                      <option value="Newer Community-Based">Community-Based</option>
+                      <option value="International / Caribbean">International</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Publications</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={formData.publications ?? 0}
+                      onChange={(e) => setFormData({ ...formData, publications: parseInt(e.target.value) || 0 })}
+                      className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">First-Author Pubs</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={formData.firstAuthorPublications ?? 0}
+                      onChange={(e) => setFormData({ ...formData, firstAuthorPublications: parseInt(e.target.value) || 0 })}
+                      className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Presentations / Posters</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={formData.presentations ?? 0}
+                      onChange={(e) => setFormData({ ...formData, presentations: parseInt(e.target.value) || 0 })}
+                      className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Abstracts</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={formData.abstracts ?? 0}
+                      onChange={(e) => setFormData({ ...formData, abstracts: parseInt(e.target.value) || 0 })}
+                      className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Research Experiences</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={formData.researchExperiences ?? 0}
+                      onChange={(e) => setFormData({ ...formData, researchExperiences: parseInt(e.target.value) || 0 })}
+                      className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Volunteer Experiences</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={formData.volunteerExperiences ?? 0}
+                      onChange={(e) => setFormData({ ...formData, volunteerExperiences: parseInt(e.target.value) || 0 })}
+                      className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900"
+                    />
+                  </div>
+                  <div>
+                    <label className="font-semibold text-slate-700 block mb-1">Leadership Hours</label>
+                    <input
+                      type="number"
+                      min={0}
+                      value={formData.leadershipHours ?? 0}
+                      onChange={(e) => setFormData({ ...formData, leadershipHours: parseInt(e.target.value) || 0 })}
+                      className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900"
+                    />
+                  </div>
+                  <div className="flex items-center pt-5">
+                    <label className="inline-flex items-center gap-2 cursor-pointer font-semibold text-slate-800">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(formData.isAoaMember)}
+                        onChange={(e) => setFormData({ ...formData, isAoaMember: e.target.checked })}
+                        className="rounded border-slate-300 text-[#1F3A30] focus:ring-[#7EAE9B]"
+                      />
+                      <span>Alpha Omega Alpha (AOA)</span>
+                    </label>
+                  </div>
+                  <div className="flex items-center pt-5">
+                    <label className="inline-flex items-center gap-2 cursor-pointer font-semibold text-slate-800">
+                      <input
+                        type="checkbox"
+                        checked={Boolean(formData.isGoldHumanism)}
+                        onChange={(e) => setFormData({ ...formData, isGoldHumanism: e.target.checked })}
+                        className="rounded border-slate-300 text-[#1F3A30] focus:ring-[#7EAE9B]"
+                      />
+                      <span>Gold Humanism (GHHS)</span>
+                    </label>
                   </div>
                 </div>
               </div>
@@ -712,7 +963,7 @@ export function SpecialtyAdvisingFormModal({
                   {/* Q12: External Advisors */}
                   <div className="p-3 bg-slate-50 rounded-lg border border-slate-200">
                     <label className="font-bold text-slate-800 block mb-1">
-                      12. Other specialty advisors outside of Geisinger/Guthrie/AtlantiCare:
+                      12. Other specialty advisors outside primary home institution network:
                     </label>
                     <input
                       type="text"
@@ -877,34 +1128,51 @@ export function SpecialtyAdvisingFormModal({
               </div>
             </form>
           ) : (
-            /* Printable Preview matching Geisinger paper form */
+            /* Printable Preview matching official advising paper form */
             <div className="space-y-4">
               <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200 text-xs">
                 <span className="text-slate-600">
-                  Matches the Geisinger Commonwealth School of Medicine 2-page institutional layout.
+                  Comprehensive Official Specialty Advising Dossier &amp; Diagnostic Record.
                 </span>
-                <button
-                  onClick={() => window.print()}
-                  className="px-3 py-1.5 bg-[#1F3A30] hover:bg-[#142720] text-white rounded font-bold flex items-center gap-1.5"
-                >
-                  <Printer className="w-3.5 h-3.5 text-[#7EAE9B]" />
-                  Print / Save as PDF
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={handleCopySummary}
+                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-semibold flex items-center gap-1.5 border border-slate-300"
+                  >
+                    <Copy className="w-3.5 h-3.5 text-slate-600" />
+                    <span>{copiedSuccess ? 'Copied!' : 'Copy Summary'}</span>
+                  </button>
+                  <button
+                    onClick={handleExportJson}
+                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-semibold flex items-center gap-1.5 border border-slate-300"
+                  >
+                    <Download className="w-3.5 h-3.5 text-slate-600" />
+                    <span>Export JSON</span>
+                  </button>
+                  <button
+                    onClick={() => window.print()}
+                    className="px-3 py-1.5 bg-[#1F3A30] hover:bg-[#142720] text-white rounded font-bold flex items-center gap-1.5"
+                  >
+                    <Printer className="w-3.5 h-3.5 text-[#7EAE9B]" />
+                    Print / Save as PDF
+                  </button>
+                </div>
               </div>
 
               {/* Form Sheet Preview */}
               <div className="bg-white p-8 rounded-lg shadow-sm border border-slate-300 max-w-2xl mx-auto text-slate-900 font-serif text-[12px] leading-relaxed space-y-4">
                 <div className="border-b-2 border-slate-900 pb-3 text-center">
-                  <h1 className="text-base font-bold uppercase tracking-wide">Specialty Advising Form</h1>
-                  <span className="text-[10px] text-slate-600 font-sans">Geisinger Commonwealth School of Medicine</span>
+                  <h1 className="text-base font-bold uppercase tracking-wide">Specialty Advising Dossier</h1>
+                  <span className="text-[10px] text-slate-600 font-sans">{formData.medicalSchool || 'Medical Student Advising Network'}</span>
                 </div>
 
                 <div className="grid grid-cols-2 gap-2 text-[11px] font-sans border-b border-slate-300 pb-3">
                   <div><strong>NAME:</strong> {formData.studentName}</div>
+                  <div><strong>MEDICAL SCHOOL:</strong> {formData.medicalSchool || '—'}</div>
                   <div><strong>PRONOUNS:</strong> {formData.pronouns || '—'}</div>
                   <div><strong>DATE:</strong> {formData.submissionDate}</div>
                   <div><strong>REGIONAL CAMPUS:</strong> {formData.regionalCampus}</div>
-                  <div className="col-span-2"><strong>SPECIALTY ADVISOR:</strong> {formData.specialtyAdvisorName}</div>
+                  <div><strong>SPECIALTY ADVISOR:</strong> {formData.specialtyAdvisorName}</div>
                 </div>
 
                 <div className="space-y-3 font-sans text-[11px]">
@@ -918,19 +1186,39 @@ export function SpecialtyAdvisingFormModal({
                     </p>
                   </div>
                   <div>
-                    <strong>3. Any step failures:</strong> {formData.hasStepFailures ? `Yes — ${formData.stepFailureDetails}` : 'No'}
+                    <strong>3. USMLE Performance &amp; Disclosures:</strong>
+                    <div className="mt-1 pl-3 text-slate-800">
+                      Step 1: <strong>{formData.step1Result || 'Pass'}</strong> &bull; Step 2 CK:{' '}
+                      <strong>
+                        {formData.step2Status === 'score_available'
+                          ? formData.step2Score
+                          : `Anticipated ${formData.step2AnticipatedDate || 'Pending'}`}
+                      </strong>
+                      {formData.hasStepFailures ? (
+                        <span className="text-rose-700 ml-2">(Disclosures: {formData.stepFailureDetails})</span>
+                      ) : (
+                        <span className="text-emerald-700 ml-2">(No exam failures)</span>
+                      )}
+                    </div>
                   </div>
                   <div>
-                    <strong>4. Anticipated date of Step 2 or score if available:</strong>{' '}
-                    {formData.step2Status === 'score_available'
-                      ? `Step 2CK: ${formData.step2Score}`
-                      : `Anticipated: ${formData.step2AnticipatedDate || 'Pending'}`}
+                    <strong>4. Academic &amp; Portfolio Metrics:</strong>
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1 pl-3 text-slate-800 font-mono text-[11px]">
+                      <div>School Tier: {formData.medicalSchoolTier || 'State / Mid-Tier'}</div>
+                      <div>Publications: {formData.publications ?? 0} (1st author: {formData.firstAuthorPublications ?? 0})</div>
+                      <div>Presentations: {formData.presentations ?? 0}</div>
+                      <div>Scientific Abstracts: {formData.abstracts ?? 0}</div>
+                      <div>Research Experiences: {formData.researchExperiences ?? 0}</div>
+                      <div>Volunteer Experiences: {formData.volunteerExperiences ?? 0}</div>
+                      <div>Leadership Hours: {formData.leadershipHours ?? 0} hrs</div>
+                      <div>AOA: {formData.isAoaMember ? 'Yes' : 'No'} | GHHS: {formData.isGoldHumanism ? 'Yes' : 'No'}</div>
+                    </div>
                   </div>
                   <div>
                     <strong>5. Completion of Research Year:</strong> {formData.completedResearchYear ? `Yes (${formData.researchYearLocation})` : 'No'}
                   </div>
                   <div>
-                    <strong>6. Clerkship grades available:</strong>
+                    <strong>6. Clerkship grades available ({honorsCount} of 7 Honors):</strong>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1 pl-3 text-slate-800 font-mono text-[11px]">
                       <div>Family Medicine: {formData.clerkshipGrades.familyMedicine}</div>
                       <div>Pediatrics: {formData.clerkshipGrades.pediatrics}</div>
@@ -962,17 +1250,20 @@ export function SpecialtyAdvisingFormModal({
                     <p className="mt-0.5 pl-3 text-slate-800 italic">{formData.futureRotationsTimeline || 'None'}</p>
                   </div>
                   <div>
-                    <strong>12. Other specialty advisors outside Geisinger/Guthrie/AtlantiCare:</strong>{' '}
+                    <strong>12. Other specialty advisors outside primary home institution:</strong>{' '}
                     {formData.externalAdvisors || 'n/a'}
                   </div>
                   <div>
                     <strong>13. Goals for residency & geographic preferences:</strong>
                     <p className="mt-0.5 pl-3 text-slate-800 italic">{formData.residencyGoalsAndGeography || 'None'}</p>
+                    <p className="mt-0.5 pl-3 text-slate-600 text-[10px]">
+                      Selected 2027 Census Divisions: {(formData.myErasCensusDivisions || []).join(', ') || 'None selected'}
+                    </p>
                   </div>
                 </div>
 
                 <div className="border-t border-slate-300 pt-3 text-center text-[10px] text-slate-500 font-sans italic">
-                  Please bring this form along with an updated copy of your CV when you are meeting with your specialty advisor.
+                  Please bring this dossier along with an updated copy of your CV when you are meeting with your specialty advisor.
                 </div>
               </div>
             </div>

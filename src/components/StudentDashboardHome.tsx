@@ -85,9 +85,7 @@ interface StudentDashboardHomeProps {
       | 'letters'
       | 'journal'
       | 'transfer_kit'
-      | 'alumni_directory'
   ) => void;
-  alumniResidents?: import('@/domain/alumni-models').AlumniResident[];
 }
 
 export function StudentDashboardHome({
@@ -101,7 +99,6 @@ export function StudentDashboardHome({
   assignedAdvisors,
   schoolListStats,
   onNavigate,
-  alumniResidents,
 }: StudentDashboardHomeProps) {
   // LOR State - Initial state uses INITIAL_MOCK_LETTER_WRITERS for identical SSR
   const [writers, setWriters] = useState<LetterWriterRequest[]>(INITIAL_MOCK_LETTER_WRITERS);
@@ -111,7 +108,7 @@ export function StudentDashboardHome({
   // Modal fields for LOR
   const [writerName, setWriterName] = useState('');
   const [writerTitle, setWriterTitle] = useState('');
-  const [writerInstitution, setWriterInstitution] = useState('Geisinger Medical Center');
+  const [writerInstitution, setWriterInstitution] = useState(advisingIntake.medicalSchool || 'University Medical Center');
   const [writerType, setWriterType] = useState<
     'Department Chair / SLOE' | 'Clinical Sub-I / Attending' | 'Research Mentor' | 'General'
   >('Clinical Sub-I / Attending');
@@ -147,7 +144,7 @@ export function StudentDashboardHome({
     setEditingWriterId(null);
     setWriterName('');
     setWriterTitle('');
-    setWriterInstitution('Geisinger Medical Center');
+    setWriterInstitution(advisingIntake.medicalSchool || 'University Medical Center');
     setWriterType('Clinical Sub-I / Attending');
     setWriterStatus('asked');
     setWriterNotes('');
@@ -190,7 +187,7 @@ export function StudentDashboardHome({
         writerName: writerName.trim(),
         writerTitle: writerTitle.trim() || 'Clinical Attending',
         specialty: targetSpecialty,
-        institution: writerInstitution.trim() || 'Geisinger Health System',
+        institution: writerInstitution.trim() || advisingIntake.medicalSchool || 'Academic Medical Center',
         letterType: writerType,
         status: writerStatus,
         notes: writerNotes.trim() || undefined,
@@ -302,174 +299,7 @@ export function StudentDashboardHome({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
         {/* ==================== LEFT MAIN COLUMN (Col 1 to 7/8) ==================== */}
         <div className="lg:col-span-7 xl:col-span-8 space-y-6">
-          {/* Card A: Current Program List & Signaling Tracker (Requirement 3 - Thalamus table style) */}
-          <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs overflow-hidden">
-            <div className="p-5 border-b border-neutral-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
-                    <Compass className="w-4 h-4 text-[#1F3A30]" />
-                    <span>Program List &amp; Signaling Tracker</span>
-                  </h2>
-                  <span
-                    className="text-xs px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700 font-semibold"
-                    suppressHydrationWarning
-                  >
-                    {savedPrograms.length} saved
-                  </span>
-                </div>
-                <p className="text-xs text-neutral-500 mt-0.5">
-                  Reach, Target &amp; Safety distribution for <strong>{targetSpecialty}</strong>
-                </p>
-              </div>
-
-              {/* Signals summary badges */}
-              <div className="flex items-center gap-2 flex-wrap">
-                <span
-                  className="text-xs px-2.5 py-1 rounded-lg bg-amber-50 text-amber-900 border border-amber-200/80 font-bold flex items-center gap-1"
-                  suppressHydrationWarning
-                >
-                  <span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
-                  Gold: {goldUsed} / {specialtyRule.goldSignals}
-                </span>
-                <span
-                  className="text-xs px-2.5 py-1 rounded-lg bg-slate-100 text-slate-800 border border-slate-200 font-bold flex items-center gap-1"
-                  suppressHydrationWarning
-                >
-                  <span className="w-2 h-2 rounded-full bg-slate-400 inline-block"></span>
-                  Silver: {silverUsed} / {specialtyRule.silverSignals}
-                </span>
-                <button
-                  onClick={() => onNavigate('school_list')}
-                  className="text-xs text-[#1F3A30] hover:text-[#142720] font-bold flex items-center gap-1 hover:underline ml-1 cursor-pointer"
-                >
-                  <span>View Full Matrix</span>
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-            </div>
-
-            {/* Filter and search bar */}
-            <div className="px-5 py-3 bg-[#FBFBFA] border-b border-neutral-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
-              <div className="flex items-center gap-1.5 overflow-x-auto scrollbar-none text-xs">
-                {(['all', 'gold', 'silver', 'reach', 'target', 'safety'] as const).map((filter) => (
-                  <button
-                    key={filter}
-                    onClick={() => setProgramFilter(filter)}
-                    className={`px-2.5 py-1 rounded-lg font-semibold capitalize transition-all cursor-pointer ${
-                      programFilter === filter
-                        ? 'bg-[#1F3A30] text-white shadow-2xs'
-                        : 'text-neutral-600 hover:text-neutral-900 hover:bg-neutral-200/60'
-                    }`}
-                  >
-                    {filter === 'all'
-                      ? 'All'
-                      : filter === 'gold'
-                      ? 'Gold Tokens'
-                      : filter === 'silver'
-                      ? 'Silver Tokens'
-                      : filter}
-                  </button>
-                ))}
-              </div>
-
-              <div className="relative w-full sm:w-48">
-                <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400" />
-                <input
-                  type="text"
-                  placeholder="Filter programs..."
-                  value={programSearch}
-                  onChange={(e) => setProgramSearch(e.target.value)}
-                  className="w-full pl-8 pr-2.5 py-1 text-xs border border-neutral-200 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-[#7EAE9B]"
-                />
-              </div>
-            </div>
-
-            {/* Table of Programs */}
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs">
-                <thead className="bg-[#F8F9F8] text-neutral-500 font-semibold border-b border-neutral-100">
-                  <tr>
-                    <th className="py-2.5 px-4">Program &amp; Location</th>
-                    <th className="py-2.5 px-3">Tier</th>
-                    <th className="py-2.5 px-3">Signal</th>
-                    <th className="py-2.5 px-3">Step 2 CK Mid-80%</th>
-                    <th className="py-2.5 px-4 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-neutral-100">
-                  {filteredPrograms.length === 0 ? (
-                    <tr>
-                      <td colSpan={5} className="py-8 text-center text-neutral-400">
-                        No programs match your search criteria.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredPrograms.slice(0, 6).map((prog) => (
-                      <tr key={prog.id} className="hover:bg-neutral-50/80 transition-colors">
-                        <td className="py-3 px-4">
-                          <div className="font-semibold text-neutral-900 leading-snug">{prog.programName}</div>
-                          <div className="text-[11px] text-neutral-500">
-                            {prog.city}, {prog.state} &bull; {prog.region}
-                          </div>
-                        </td>
-                        <td className="py-3 px-3">
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider ${
-                              prog.tier === 'reach'
-                                ? 'bg-rose-50 text-rose-700 border border-rose-200'
-                                : prog.tier === 'target'
-                                ? 'bg-emerald-50 text-emerald-700 border border-emerald-200'
-                                : 'bg-blue-50 text-blue-700 border border-blue-200'
-                            }`}
-                          >
-                            {prog.tier}
-                          </span>
-                        </td>
-                        <td className="py-3 px-3">
-                          {prog.signal === 'gold' ? (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 flex items-center gap-1 w-fit">
-                              <Star className="w-3 h-3 text-amber-600 fill-amber-500" /> Gold
-                            </span>
-                          ) : prog.signal === 'silver' ? (
-                            <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-100 text-slate-800 border border-slate-300 flex items-center gap-1 w-fit">
-                              <Star className="w-3 h-3 text-slate-500 fill-slate-400" /> Silver
-                            </span>
-                          ) : (
-                            <span className="text-neutral-400 text-[11px]">—</span>
-                          )}
-                        </td>
-                        <td className="py-3 px-3 text-neutral-600 font-medium">
-                          {prog.step2ScoreRange || `${prog.step2Min} - ${prog.step2Max}`}
-                        </td>
-                        <td className="py-3 px-4 text-right">
-                          <button
-                            onClick={() => onNavigate('school_list')}
-                            className="text-[#1F3A30] hover:text-[#142720] font-semibold text-[11px] hover:underline cursor-pointer"
-                          >
-                            Edit
-                          </button>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
-            </div>
-
-            {savedPrograms.length > 6 && (
-              <div className="p-3 bg-[#FBFBFA] border-t border-neutral-100 text-center">
-                <button
-                  onClick={() => onNavigate('school_list')}
-                  className="text-xs text-[#1F3A30] hover:text-[#142720] font-bold hover:underline cursor-pointer"
-                >
-                  View all {savedPrograms.length} programs in full matrix &rarr;
-                </button>
-              </div>
-            )}
-          </div>
-
-          {/* Card B: Journal (Simplified Low-Friction Clinical Reflection Scratchpad) */}
+          {/* Card 1: Journal (Low-Friction Clinical Reflection Scratchpad - positioned ABOVE Program List) */}
           <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-5">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-4 border-b border-neutral-100">
               <div>
@@ -584,6 +414,205 @@ export function StudentDashboardHome({
               </button>
             </div>
           </div>
+
+          {/* Card 2: School List Building Progress & Strategy Summary */}
+          {(() => {
+            const reachCount = savedPrograms.filter((p) => p.tier === 'reach').length;
+            const targetCount = savedPrograms.filter((p) => p.tier === 'target').length;
+            const safetyCount = savedPrograms.filter((p) => p.tier === 'safety').length;
+            const totalPrograms = savedPrograms.length;
+            const reachPct = totalPrograms > 0 ? Math.round((reachCount / totalPrograms) * 100) : 0;
+            const targetPct = totalPrograms > 0 ? Math.round((targetCount / totalPrograms) * 100) : 0;
+            const safetyPct = totalPrograms > 0 ? Math.round((safetyCount / totalPrograms) * 100) : 0;
+
+            return (
+              <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-5 space-y-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-neutral-100">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
+                        <Compass className="w-4 h-4 text-[#1F3A30]" />
+                        <span>School List Building &amp; Signaling Strategy</span>
+                      </h2>
+                      <span
+                        className="text-xs px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-bold border border-emerald-200"
+                        suppressHydrationWarning
+                      >
+                        {totalPrograms} Added
+                      </span>
+                    </div>
+                    <p className="text-xs text-neutral-500 mt-0.5">
+                      Live distribution across Reach, Target &amp; Safety tiers with ERAS preference signaling allocation for <strong>{targetSpecialty}</strong>
+                    </p>
+                  </div>
+
+                  <button
+                    onClick={() => onNavigate('school_list')}
+                    className="px-3.5 py-1.5 rounded-xl text-xs font-bold bg-[#1F3A30] hover:bg-[#152B23] text-white flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer self-start sm:self-auto shrink-0"
+                  >
+                    <span>Full School List Matrix</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {/* Metrics Grid */}
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  {/* Total Added */}
+                  <div className="p-3.5 bg-neutral-50 rounded-xl border border-neutral-200/80">
+                    <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Total Programs</div>
+                    <div className="text-2xl font-black text-neutral-900 mt-0.5">{totalPrograms}</div>
+                    <div className="text-[10px] text-neutral-500 mt-1 font-medium">
+                      {totalPrograms >= 25 ? 'Broad, competitive list' : totalPrograms >= 15 ? 'Target cohort range' : 'Early list building'}
+                    </div>
+                  </div>
+
+                  {/* Reach */}
+                  <div className="p-3.5 bg-rose-50/70 rounded-xl border border-rose-200/80">
+                    <div className="text-[10px] font-bold text-rose-800 uppercase tracking-wider flex items-center justify-between">
+                      <span>Reach</span>
+                      <span className="font-bold">{reachPct}%</span>
+                    </div>
+                    <div className="text-2xl font-black text-rose-950 mt-0.5">{reachCount}</div>
+                    <div className="text-[10px] text-rose-700 mt-1 font-medium">High reach / stretch</div>
+                  </div>
+
+                  {/* Target */}
+                  <div className="p-3.5 bg-emerald-50/70 rounded-xl border border-emerald-200/80">
+                    <div className="text-[10px] font-bold text-emerald-800 uppercase tracking-wider flex items-center justify-between">
+                      <span>Target</span>
+                      <span className="font-bold">{targetPct}%</span>
+                    </div>
+                    <div className="text-2xl font-black text-emerald-950 mt-0.5">{targetCount}</div>
+                    <div className="text-[10px] text-emerald-700 mt-1 font-medium">Core score alignment</div>
+                  </div>
+
+                  {/* Safety */}
+                  <div className="p-3.5 bg-blue-50/70 rounded-xl border border-blue-200/80">
+                    <div className="text-[10px] font-bold text-blue-800 uppercase tracking-wider flex items-center justify-between">
+                      <span>Safety</span>
+                      <span className="font-bold">{safetyPct}%</span>
+                    </div>
+                    <div className="text-2xl font-black text-blue-950 mt-0.5">{safetyCount}</div>
+                    <div className="text-[10px] text-blue-700 mt-1 font-medium">High match probability</div>
+                  </div>
+                </div>
+
+                {/* Visual Balance Distribution Bar */}
+                <div className="space-y-1.5 pt-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="text-neutral-700 font-bold flex items-center gap-1.5 text-[11px] uppercase tracking-wider">
+                      Tier Balance Distribution
+                    </span>
+                    <span className="text-neutral-400 text-[11px]">
+                      Benchmark: ~25% Reach &bull; ~50% Target &bull; ~25% Safety
+                    </span>
+                  </div>
+
+                  <div className="w-full bg-neutral-100 h-3 rounded-full overflow-hidden flex shadow-inner">
+                    {totalPrograms === 0 ? (
+                      <div className="w-full bg-neutral-200 h-full text-center text-[9px] text-neutral-500 font-medium leading-3">
+                        No programs added yet
+                      </div>
+                    ) : (
+                      <>
+                        <div
+                          style={{ width: `${reachPct}%` }}
+                          className="bg-rose-500 h-full transition-all"
+                          title={`Reach: ${reachCount} (${reachPct}%)`}
+                        />
+                        <div
+                          style={{ width: `${targetPct}%` }}
+                          className="bg-emerald-500 h-full transition-all"
+                          title={`Target: ${targetCount} (${targetPct}%)`}
+                        />
+                        <div
+                          style={{ width: `${safetyPct}%` }}
+                          className="bg-blue-500 h-full transition-all"
+                          title={`Safety: ${safetyCount} (${safetyPct}%)`}
+                        />
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* Signaling Utilization Progress Bars */}
+                {specialtyRule.totalSignals > 0 ? (
+                  <div className="p-4 bg-[#FAFBF9] rounded-xl border border-neutral-200/80 space-y-3">
+                    <div className="flex items-center justify-between text-xs">
+                      <div className="font-bold text-neutral-800 flex items-center gap-1.5">
+                        <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />
+                        <span>{targetSpecialty} Preference Signals Allocation</span>
+                      </div>
+                      <span className="text-[11px] font-semibold text-neutral-600 bg-white px-2 py-0.5 rounded border border-neutral-200">
+                        {goldUsed + silverUsed} / {specialtyRule.totalSignals} signals assigned
+                      </span>
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-1">
+                      {specialtyRule.goldSignals > 0 && (
+                        <div className="space-y-1">
+                          <div className="flex justify-between text-[11px]">
+                            <span className="font-bold text-amber-900 flex items-center gap-1">
+                              <span className="w-2 h-2 rounded-full bg-amber-500 inline-block"></span>
+                              Gold Signals (Highest Interest)
+                            </span>
+                            <span className="font-bold text-amber-900">
+                              {goldUsed} / {specialtyRule.goldSignals} used
+                            </span>
+                          </div>
+                          <div className="w-full bg-amber-100 rounded-full h-2 overflow-hidden">
+                            <div
+                              className="bg-amber-500 h-full rounded-full transition-all"
+                              style={{
+                                width: `${Math.min((goldUsed / specialtyRule.goldSignals) * 100, 100)}%`,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      )}
+
+                      <div className="space-y-1">
+                        <div className="flex justify-between text-[11px]">
+                          <span className="font-bold text-slate-800 flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-full bg-slate-400 inline-block"></span>
+                            {specialtyRule.goldSignals > 0 ? 'Silver Signals (High Interest)' : 'Standard Preference Signals'}
+                          </span>
+                          <span className="font-bold text-slate-900">
+                            {silverUsed} / {specialtyRule.silverSignals} used
+                          </span>
+                        </div>
+                        <div className="w-full bg-slate-200 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="bg-slate-500 h-full rounded-full transition-all"
+                            style={{
+                              width: `${Math.min((silverUsed / specialtyRule.silverSignals) * 100, 100)}%`,
+                            }}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 text-xs text-neutral-500">
+                    {targetSpecialty} does not participate in preference signaling under current AAMC guidelines.
+                  </div>
+                )}
+
+                {/* Quick Link to Matrix */}
+                <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-xs">
+                  <span className="text-[11px] text-neutral-500">
+                    Search 2,500+ ACGME programs with Step 2 CK ranges, signals &amp; filters
+                  </span>
+                  <button
+                    onClick={() => onNavigate('school_list')}
+                    className="text-xs font-bold text-[#1F3A30] hover:underline flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Open School List Matrix &rarr;</span>
+                  </button>
+                </div>
+              </div>
+            );
+          })()}
         </div>
 
         {/* ==================== RIGHT SIDEBAR COLUMN (Col 8 to 12) ==================== */}
@@ -613,7 +642,7 @@ export function StudentDashboardHome({
             <div className="mt-3.5 p-3 bg-amber-50/80 border border-amber-200/80 rounded-xl text-xs text-amber-950 flex items-start gap-2">
               <Sparkles className="w-4 h-4 text-amber-700 shrink-0 mt-0.5" />
               <p className="leading-tight text-[11px]">
-                <strong>Geisinger Rule of Thumb:</strong> Target 3–4 letters by July 15. Ensure at least one Sub-I
+                <strong>Advising Rule of Thumb:</strong> Target 3–4 letters by July 15. Ensure at least one Sub-I
                 attending letter in {targetSpecialty}.
               </p>
             </div>
@@ -741,7 +770,7 @@ export function StudentDashboardHome({
                 </label>
                 <input
                   type="text"
-                  placeholder="e.g. Geisinger Medical Center"
+                  placeholder="e.g. University Hospital, Mayo Clinic"
                   value={writerInstitution}
                   onChange={(e) => setWriterInstitution(e.target.value)}
                   className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B]"
