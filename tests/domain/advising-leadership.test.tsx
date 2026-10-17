@@ -89,13 +89,9 @@ describe('AdvisingLeadership Integration & Navigation', () => {
         }}
         onOpenIntake={() => {}}
         onOpenProfile={() => {}}
-        personalStatement={mockContext.personalStatement}
-        experiences={[]}
         assignedAdvisors={mockContext.assignedAdvisors}
-        scholarlyStats={{ count: 0, meaningful: 0 }}
         schoolListStats={{ count: 0, signalsAssigned: 0 }}
         onNavigate={() => {}}
-        onOpenSplitCanvas={() => {}}
       />
     );
 

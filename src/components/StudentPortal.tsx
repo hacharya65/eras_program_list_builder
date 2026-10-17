@@ -1,12 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StudentDashboardContext, ExperienceDraft, DocumentFeedbackSummary } from '@/domain/types';
-import { deserializeScholarlyPortfolio } from '@/domain/scholarly-models';
-import { PersonalStatementEditor } from './PersonalStatementEditor';
-import { ExperiencesManager } from './ExperiencesManager';
-import { ScholarlyWorksManager } from './ScholarlyWorksManager';
-import { OrderTracker } from './OrderTracker';
-import { StudentFeedbackViewer } from './StudentFeedbackViewer';
-import { StudentFeedbackHub } from './StudentFeedbackHub';
+import { StudentDashboardContext } from '@/domain/types';
 import { SchoolListMatrix } from './SchoolListMatrix';
 import { CompetitivenessCalculator } from './CompetitivenessCalculator';
 import { ApplicantProfileModal } from './ApplicantProfileModal';
@@ -23,7 +16,6 @@ import {
   CANONICAL_SPECIALTIES,
   getStoredTargetSpecialty,
   setStoredTargetSpecialty,
-  SPECIALTY_SIGNALING_RULES,
   loadItemsForSpecialty,
   getStorageKeyForSpecialty,
 } from '@/domain/school-list-models';
@@ -36,67 +28,29 @@ import {
   INITIAL_MOCK_INTAKE,
 } from '@/domain/advising-intake-models';
 import {
-  FileText,
-  Briefcase,
-  BookOpen,
   GraduationCap,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  ChevronRight,
-  ExternalLink,
-  Sparkles,
-  BarChart3,
-  Users,
-  ClipboardCopy,
-  Pencil,
-  RotateCcw,
-  ShieldCheck,
-  Columns,
-  MessageSquare,
-  ArrowRight,
-  Mail,
-  FileCheck,
+  BookOpen,
   LayoutDashboard,
   Compass,
   MailCheck,
   TrendingUp,
   Download,
+  FileCheck,
 } from 'lucide-react';
 
 interface StudentPortalProps {
   context: StudentDashboardContext;
-  onUpdatePersonalStatement?: (content: string) => void;
-  onSubmitPersonalStatement?: (changelog: string) => void;
-  onUpdateExperience?: (id: string, updates: Partial<ExperienceDraft>) => void;
-  onSubmitExperiences?: (changelog: string) => void;
-  getAdvisorFeedback?: () => any;
-  latestPSFeedback?: DocumentFeedbackSummary;
-  psFeedbackHistory?: DocumentFeedbackSummary[];
-  onCreateRevision?: (targetVersion?: number) => void;
   alumniResidents?: import('@/domain/alumni-models').AlumniResident[];
 }
 
 export function StudentPortal({
   context,
-  onUpdatePersonalStatement,
-  onSubmitPersonalStatement,
-  onUpdateExperience,
-  onSubmitExperiences,
-  getAdvisorFeedback,
-  latestPSFeedback,
-  psFeedbackHistory = [],
-  onCreateRevision,
   alumniResidents,
 }: StudentPortalProps) {
   const [activeView, setActiveView] = useState<
     | 'overview'
     | 'profile'
     | 'intake'
-    | 'personal_statement'
-    | 'personal_statement_feedback'
-    | 'experiences'
-    | 'scholarly_works'
     | 'journal'
     | 'school_list'
     | 'competitiveness'
@@ -105,10 +59,9 @@ export function StudentPortal({
     | 'letters'
     | 'advising_leadership'
   >('overview');
-  const [psEditorMode, setPsEditorMode] = useState<'editor' | 'annotations'>('editor');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
   const [isIntakeModalOpen, setIsIntakeModalOpen] = useState(false);
-  const { student, personalStatement, experiences, assignedAdvisors } = context;
+  const { student, assignedAdvisors } = context;
 
   // Specialty Advising Intake State (Deterministic SSR initialization to prevent hydration mismatches)
   const [advisingIntake, setAdvisingIntake] = useState<SpecialtyAdvisingIntake>({
@@ -142,75 +95,115 @@ export function StudentPortal({
     }
   };
 
-  // Sync client-persisted localStorage after hydration mount and listen for custom nav events & browser popstate
+  // Sync with browser history and URL search params on mount and popstate
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const storedSpec = getStoredTargetSpecialty();
-      if (storedSpec) {
-        setTargetSpecialty(storedSpec);
-      }
-      const storedIntake = loadStudentAdvisingIntake(student.id);
-      if (storedIntake) {
-        setAdvisingIntake(storedIntake);
-      }
-
-      // Check URL search params for deep linking
       const params = new URLSearchParams(window.location.search);
       const urlView = params.get('view') as typeof activeView | null;
-      const validViews = [
-        'overview',
-        'profile',
-        'intake',
-        'personal_statement',
-        'personal_statement_feedback',
-        'experiences',
-        'scholarly_works',
-        'journal',
-        'school_list',
-        'competitiveness',
-        'alumni_directory',
-        'transfer_kit',
-        'letters',
-        'advising_leadership',
-      ];
-      if (urlView && validViews.includes(urlView)) {
+      if (
+        urlView &&
+        [
+          'overview',
+          'profile',
+          'intake',
+          'journal',
+          'school_list',
+          'competitiveness',
+          'alumni_directory',
+          'transfer_kit',
+          'letters',
+          'advising_leadership',
+        ].includes(urlView)
+      ) {
         setActiveView(urlView);
       }
     }
 
+    const handlePopState = (e: PopStateEvent) => {
+      if (typeof window !== 'undefined') {
+        const params = new URLSearchParams(window.location.search);
+        const urlView = (params.get('view') || 'overview') as typeof activeView;
+        if (
+          [
+            'overview',
+            'profile',
+            'intake',
+            'journal',
+            'school_list',
+            'competitiveness',
+            'alumni_directory',
+            'transfer_kit',
+            'letters',
+            'advising_leadership',
+          ].includes(urlView)
+        ) {
+          setActiveView(urlView);
+        }
+      }
+    };
+
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  // Listen to custom navigation events from top nav or external components
+  useEffect(() => {
     const handleNavProfile = () => updateView('profile');
     const handleNavTransfer = () => updateView('transfer_kit');
     const handleNavIntake = () => updateView('intake');
     const handleNavLeadership = () => updateView('advising_leadership');
 
-    const handlePopState = () => {
-      if (typeof window !== 'undefined') {
-        const params = new URLSearchParams(window.location.search);
-        const urlView = (params.get('view') || 'overview') as typeof activeView;
-        setActiveView(urlView);
-        window.scrollTo({ top: 0, behavior: 'instant' });
-      }
-    };
-
     window.addEventListener('navigate_to_profile_management', handleNavProfile);
     window.addEventListener('navigate_to_transfer_kit', handleNavTransfer);
     window.addEventListener('navigate_to_intake', handleNavIntake);
     window.addEventListener('navigate_to_advising_leadership', handleNavLeadership);
-    window.addEventListener('popstate', handlePopState);
 
     return () => {
       window.removeEventListener('navigate_to_profile_management', handleNavProfile);
       window.removeEventListener('navigate_to_transfer_kit', handleNavTransfer);
       window.removeEventListener('navigate_to_intake', handleNavIntake);
       window.removeEventListener('navigate_to_advising_leadership', handleNavLeadership);
-      window.removeEventListener('popstate', handlePopState);
     };
+  }, []);
+
+  // Sync client-side intake and target specialty in useEffect
+  useEffect(() => {
+    const loadedIntake = loadStudentAdvisingIntake(student.id);
+    if (loadedIntake) {
+      setAdvisingIntake(loadedIntake);
+      if (loadedIntake.applyingSpecialty) {
+        setTargetSpecialty(loadedIntake.applyingSpecialty);
+        return;
+      }
+    }
+    const stored = getStoredTargetSpecialty();
+    if (stored) {
+      setTargetSpecialty(stored);
+    }
   }, [student.id]);
 
+  // School List Summary Stats (Deterministic SSR default)
+  const [schoolListStats, setSchoolListStats] = useState({
+    count: 0,
+    signalsAssigned: 0,
+  });
+
+  // Alumni Directory Search Filter
+  const [alumniSearchFilter, setAlumniSearchFilter] = useState('');
+
+  // Update stats on mount and specialty switch
+  useEffect(() => {
+    const items = loadItemsForSpecialty(targetSpecialty);
+    const assignedSignals = items.filter((i) => i.signal === 'gold' || i.signal === 'silver').length;
+    setSchoolListStats({
+      count: items.length,
+      signalsAssigned: assignedSignals,
+    });
+  }, [targetSpecialty]);
+
   const handleSpecialtyChange = (newSpecialty: string) => {
-    if (newSpecialty === targetSpecialty) return;
-    const currentProgs = loadItemsForSpecialty(targetSpecialty);
-    if (currentProgs && currentProgs.length > 0) {
+    const currentItems = loadItemsForSpecialty(targetSpecialty);
+    if (currentItems.length > 0 && newSpecialty !== targetSpecialty) {
       setPendingSpecialtySwitch(newSpecialty);
     } else {
       applySpecialtySwitch(newSpecialty);
@@ -218,70 +211,29 @@ export function StudentPortal({
   };
 
   const applySpecialtySwitch = (newSpecialty: string) => {
-    setTargetSpecialty(newSpecialty);
     setStoredTargetSpecialty(newSpecialty);
+    setTargetSpecialty(newSpecialty);
+
+    const defaultAdvisor = getDefaultAdvisorForSpecialty(newSpecialty);
     const updatedIntake: SpecialtyAdvisingIntake = {
       ...advisingIntake,
       applyingSpecialty: newSpecialty,
-      specialtyAdvisorName: getDefaultAdvisorForSpecialty(newSpecialty),
+      specialtyAdvisorName: defaultAdvisor || advisingIntake.specialtyAdvisorName,
     };
     setAdvisingIntake(updatedIntake);
     saveStudentAdvisingIntake(updatedIntake);
+
+    const newItems = loadItemsForSpecialty(newSpecialty);
+    const assigned = newItems.filter((i) => i.signal === 'gold' || i.signal === 'silver').length;
+    setSchoolListStats({
+      count: newItems.length,
+      signalsAssigned: assigned,
+    });
+
     setPendingSpecialtySwitch(null);
   };
 
-  const specialtyRule = SPECIALTY_SIGNALING_RULES[targetSpecialty] || SPECIALTY_SIGNALING_RULES['Internal Medicine'];
-
-  // Real-time synced counts across modules
-  const [scholarlyStats, setScholarlyStats] = useState({ count: 2, meaningful: 2 });
-  const [schoolListStats, setSchoolListStats] = useState({ count: 0, signalsAssigned: 0 });
-  const [alumniSearchFilter, setAlumniSearchFilter] = useState('');
-
-  // Re-read storage whenever returning to overview or mounting
-  useEffect(() => {
-    if (typeof window !== 'undefined') {
-      // Scholarly Works sync
-      const cachedScholarly = localStorage.getItem('eras_scholarly_portfolio');
-      const restoredScholarly = deserializeScholarlyPortfolio(cachedScholarly);
-      if (restoredScholarly) {
-        setScholarlyStats({
-          count: restoredScholarly.works.length,
-          meaningful: restoredScholarly.works.filter((w) => w.isMeaningful).length,
-        });
-      }
-
-      // School List sync
-      const cachedSchoolList = localStorage.getItem('eras_school_list_matrix');
-      if (cachedSchoolList) {
-        try {
-          const parsed = JSON.parse(cachedSchoolList);
-          if (Array.isArray(parsed)) {
-            const signals = parsed.filter(
-              (p: any) => p.signalingTier === 'gold' || p.signalingTier === 'silver'
-            ).length;
-            setSchoolListStats({
-              count: parsed.length,
-              signalsAssigned: signals,
-            });
-          }
-        } catch {
-          // keep fallback
-        }
-      }
-    }
-  }, [activeView]);
-
-  const stageLabels = {
-    drafting: { label: 'Drafting Locally', color: 'bg-slate-100 text-slate-700 border-slate-300' },
-    submitted: { label: 'Queued with Advisor', color: 'bg-amber-100 text-amber-800 border-amber-300' },
-    in_review: { label: 'Under Review by Faculty', color: 'bg-blue-100 text-blue-800 border-blue-300' },
-    revisions_requested: { label: 'Revisions Requested', color: 'bg-purple-100 text-purple-800 border-purple-300' },
-    endorsed: { label: 'Endorsed & ERAS Ready', color: 'bg-emerald-100 text-emerald-800 border-emerald-300' },
-  };
-
-  const psStage = stageLabels[personalStatement.stage];
-
-  type MainTabKey = 'dashboard' | 'programs' | 'application' | 'documents';
+  type MainTabKey = 'dashboard' | 'programs' | 'journal' | 'documents';
 
   const getMainTabForView = (view: typeof activeView): MainTabKey => {
     switch (view) {
@@ -293,12 +245,8 @@ export function StudentPortal({
       case 'competitiveness':
       case 'alumni_directory':
         return 'programs';
-      case 'personal_statement':
-      case 'personal_statement_feedback':
-      case 'experiences':
-      case 'scholarly_works':
       case 'journal':
-        return 'application';
+        return 'journal';
       case 'letters':
       case 'transfer_kit':
         return 'documents';
@@ -350,22 +298,10 @@ export function StudentPortal({
       ],
     },
     {
-      id: 'application',
-      label: 'Application Materials',
-      icon: FileText,
-      defaultView: 'personal_statement',
-      badge: psStage.label,
-      subSections: [
-        {
-          id: 'personal_statement',
-          label: 'Personal Statement',
-          icon: FileText,
-          badge: psStage.label,
-        },
-        { id: 'experiences', label: '10 Selected Experiences', icon: Briefcase },
-        { id: 'scholarly_works', label: 'Scholarly Works', icon: BookOpen },
-        { id: 'journal', label: 'Journal', icon: BookOpen },
-      ],
+      id: 'journal',
+      label: 'Reflective Journal',
+      icon: BookOpen,
+      defaultView: 'journal',
     },
     {
       id: 'documents',
@@ -399,76 +335,11 @@ export function StudentPortal({
       );
     }
 
-    if (activeView === 'personal_statement_feedback') {
-      return (
-        <StudentFeedbackHub
-          latestFeedback={latestPSFeedback}
-          feedbackHistory={psFeedbackHistory.length > 0 ? psFeedbackHistory : (latestPSFeedback ? [latestPSFeedback] : [])}
-          currentDraftVersion={personalStatement.currentVersionNumber}
-          personalStatementStage={personalStatement.stage}
-          onBack={() => updateView('overview')}
-          onStartRevision={(targetVersion) => {
-            onCreateRevision?.(targetVersion);
-          }}
-          onOpenEditor={(initialMode = 'editor') => {
-            setPsEditorMode(initialMode === 'annotations' ? 'annotations' : 'editor');
-            updateView('personal_statement');
-          }}
-        />
-      );
-    }
-
-    if (activeView === 'personal_statement') {
-      return (
-        <PersonalStatementEditor
-          draft={personalStatement}
-          assignedAdvisor={assignedAdvisors[0]}
-          snapshots={context.snapshots}
-          latestFeedback={latestPSFeedback}
-          feedbackHistory={psFeedbackHistory}
-          initialViewMode={psEditorMode}
-          onNavigateToFeedback={() => updateView('personal_statement_feedback')}
-          onSave={(newContent) => onUpdatePersonalStatement?.(newContent)}
-          onSubmitForReview={(changelog) => {
-            onSubmitPersonalStatement?.(changelog);
-            updateView('overview');
-          }}
-          onBack={() => updateView('overview')}
-        />
-      );
-    }
-
-    if (activeView === 'experiences') {
-      const activeExpReview = context.activeReviewRequests.find(r => r.documentType === 'experience_portfolio');
-      return (
-        <ExperiencesManager
-          experiences={experiences}
-          assignedAdvisor={assignedAdvisors[0]}
-          activeReviewRequest={activeExpReview}
-          onSubmitForReview={onSubmitExperiences}
-          onSaveExperience={(id, updates) => onUpdateExperience?.(id, updates)}
-          onDeleteExperience={(id) => {}}
-          onBack={() => updateView('overview')}
-          targetSpecialty={targetSpecialty}
-        />
-      );
-    }
-
-    if (activeView === 'scholarly_works') {
-      return (
-        <ScholarlyWorksManager
-          onBack={() => updateView('overview')}
-        />
-      );
-    }
-
     if (activeView === 'journal') {
       return (
         <JournalRepositoryView
           student={student}
           onBack={() => updateView('overview')}
-          onNavigateToExperiences={() => updateView('experiences')}
-          onNavigateToPersonalStatement={() => updateView('personal_statement')}
         />
       );
     }
@@ -526,7 +397,7 @@ export function StudentPortal({
           <div className="flex items-center justify-between">
             <button
               onClick={() => updateView('overview')}
-              className="flex items-center gap-1.5 text-xs font-semibold text-[#1F3A30] hover:text-[#142720] bg-white border border-[#D6E5DF] px-3 py-1.5 rounded-lg shadow-2xs transition-colors"
+              className="flex items-center gap-1.5 text-xs font-semibold text-[#1F3A30] hover:text-[#142720] bg-white border border-[#D6E5DF] px-3 py-1.5 rounded-lg shadow-2xs transition-colors cursor-pointer"
             >
               &larr; Back to Student Hub
             </button>
@@ -573,18 +444,9 @@ export function StudentPortal({
         advisingIntake={advisingIntake}
         onOpenIntake={() => setIsIntakeModalOpen(true)}
         onOpenProfile={() => updateView('profile')}
-        personalStatement={personalStatement}
-        latestPSFeedback={latestPSFeedback}
-        experiences={experiences}
-        onUpdateExperience={onUpdateExperience}
         assignedAdvisors={assignedAdvisors}
-        scholarlyStats={scholarlyStats}
         schoolListStats={schoolListStats}
         onNavigate={(view) => updateView(view)}
-        onOpenSplitCanvas={() => {
-          setPsEditorMode('editor');
-          updateView('personal_statement');
-        }}
         alumniResidents={alumniResidents}
       />
     );
@@ -641,20 +503,11 @@ export function StudentPortal({
             className="bg-[#F2F4F2]/80 backdrop-blur-xs rounded-xl border border-neutral-200/70 p-1 flex items-center justify-center gap-1.5 overflow-x-auto scrollbar-none"
           >
             {currentMainTabConfig.subSections.map((sub) => {
-              const isSubActive =
-                activeView === sub.id ||
-                (sub.id === 'personal_statement' &&
-                  (activeView === 'personal_statement' || activeView === 'personal_statement_feedback'));
+              const isSubActive = activeView === sub.id;
               return (
                 <button
                   key={sub.id}
-                  onClick={() => {
-                    if (sub.id === 'personal_statement') {
-                      updateView('personal_statement');
-                    } else {
-                      updateView(sub.id as any);
-                    }
-                  }}
+                  onClick={() => updateView(sub.id as any)}
                   className={`flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-medium whitespace-nowrap transition-all cursor-pointer ${
                     isSubActive
                       ? 'bg-white text-[#1F3A30] shadow-xs font-bold border border-neutral-200/80'

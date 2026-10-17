@@ -119,34 +119,12 @@ export function DevPersonaSwitcher({
             <span>Demonstration — fictional applicant records</span>
           </div>
 
-          {/* Shifted Active Persona Tabs */}
+          {/* Student Status Tag */}
           <div className="flex items-center gap-2">
-            <span className="text-white/60 text-[11px] font-semibold uppercase tracking-wider hidden md:inline">
-              Active Persona:
+            <span className="text-emerald-200 bg-white/10 px-2.5 py-0.5 rounded-full text-[11px] font-semibold flex items-center gap-1.5 border border-white/10">
+              <GraduationCap className="w-3.5 h-3.5" />
+              <span>Student Match Strategy &amp; Signaling Workspace</span>
             </span>
-            <div className="flex items-center bg-black/25 p-0.5 rounded-lg border border-white/10">
-              {personas.map((p) => {
-                const isActive = currentRole === p.role;
-                return (
-                  <button
-                    key={p.role}
-                    onClick={() => onSelectRole(p.role)}
-                    className={`flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[11px] font-semibold transition-all cursor-pointer ${
-                      isActive
-                        ? 'bg-white text-[#1F3A30] font-bold shadow-xs'
-                        : 'text-white/80 hover:text-white hover:bg-white/10'
-                    }`}
-                    title={`Switch view to ${p.name} (${p.title})`}
-                  >
-                    <span>{p.icon}</span>
-                    <span>{p.name.split(' ')[0]}</span>
-                    <span className="opacity-70 hidden lg:inline">
-                      ({p.title.split(' ')[0]})
-                    </span>
-                  </button>
-                );
-              })}
-            </div>
           </div>
         </div>
       </div>
