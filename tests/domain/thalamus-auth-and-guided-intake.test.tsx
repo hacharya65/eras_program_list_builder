@@ -37,7 +37,8 @@ describe('ThalamusAuthExperience & Student Portal Auth Flow', () => {
     );
 
     // Thalamus branding & design cues
-    expect(markup).toContain('Connecting the Match');
+    expect(markup).toContain('Ethmoid');
+    expect(markup).not.toContain('Connecting the Match');
     expect(markup).toContain('Sign In');
     expect(markup).toContain('Email');
     expect(markup).toContain('Quick Demo: Sign In as Alex Rivera (MS4)');

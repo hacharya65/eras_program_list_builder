@@ -1135,9 +1135,6 @@ export function ThalamusAuthExperience({
                 <h1 className="text-2xl font-bold tracking-tight text-neutral-900">
                   Ethmoid
                 </h1>
-                <p className="text-xs text-neutral-500 font-medium">
-                  Connecting the Match
-                </p>
               </div>
               <h2 className="text-lg font-bold text-neutral-800 pt-2">
                 Sign In
