@@ -8,6 +8,8 @@ import {
   isUserAuthenticated,
   logoutSession,
   setAuthenticatedSession,
+  createStudentAccount,
+  getStudentAccountByEmail,
 } from '@/domain/student-registry';
 
 describe('ThalamusAuthExperience & Student Portal Auth Flow', () => {
@@ -67,6 +69,37 @@ describe('ThalamusAuthExperience & Student Portal Auth Flow', () => {
     expect(markup).toContain('Question 1 of 12');
     expect(markup).toContain('What medical school do you currently attend?');
     expect(markup).toContain('Geisinger Commonwealth School of Medicine');
+  });
+
+  it('initializes guided intake questionnaire completely blank with no pre-filled answers', () => {
+    const markup = renderToStaticMarkup(
+      <ThalamusAuthExperience onAuthenticated={() => {}} initialMode="guided_intake" />
+    );
+
+    // Starts on Question 1 of 12
+    expect(markup).toContain('Question 1 of 12');
+    expect(markup).toContain('What medical school do you currently attend?');
+    // The text input value is empty (value="")
+    expect(markup).toContain('value=""');
+    // Popular schools are available to select but none are active
+    expect(markup).toContain('Penn State College of Medicine');
+  });
+
+  it('manages student accounts with password persistence', () => {
+    const newStudent = createStudentAccount({
+      name: 'Jordan Smith',
+      email: 'jsmith@som.edu',
+      password: 'SecurePassword123!',
+      medicalSchool: 'Penn State College of Medicine',
+      specialty: 'Orthopaedic Surgery',
+      gradYear: 2027,
+    });
+
+    expect(newStudent.id).toBeDefined();
+    expect(newStudent.password).toBe('SecurePassword123!');
+    const retrieved = getStudentAccountByEmail('jsmith@som.edu');
+    expect(retrieved?.name).toBe('Jordan Smith');
+    expect(retrieved?.password).toBe('SecurePassword123!');
   });
 
   it('renders DevPersonaSwitcher with Sign Out button when onLogout is provided', () => {

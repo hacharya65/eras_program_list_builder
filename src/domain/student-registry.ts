@@ -7,6 +7,7 @@ export interface StudentAccount {
   id: string;
   name: string;
   email: string;
+  password?: string;
   medicalSchool: string;
   specialty: string;
   pronouns?: string;
@@ -140,6 +141,7 @@ export function getStudentAccountByEmail(email: string): StudentAccount | null {
 export function createStudentAccount(data: {
   name: string;
   email: string;
+  password?: string;
   medicalSchool: string;
   specialty: string;
   pronouns?: string;
@@ -154,6 +156,7 @@ export function createStudentAccount(data: {
     const updatedAccount: StudentAccount = {
       ...existing,
       name: data.name.trim(),
+      password: data.password ? data.password.trim() : existing.password,
       medicalSchool: data.medicalSchool.trim(),
       specialty: data.specialty.trim() || existing.specialty,
       pronouns: data.pronouns || existing.pronouns,
@@ -172,6 +175,7 @@ export function createStudentAccount(data: {
     id,
     name: data.name.trim(),
     email: cleanEmail,
+    password: data.password ? data.password.trim() : undefined,
     medicalSchool: data.medicalSchool.trim(),
     specialty: data.specialty.trim() || 'Internal Medicine',
     pronouns: data.pronouns?.trim() || 'they/them',

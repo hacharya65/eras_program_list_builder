@@ -83,68 +83,71 @@ export function ThalamusAuthExperience({
   const [medicalSchoolError, setMedicalSchoolError] = useState<string | null>(null);
 
   // Step 2: Target Specialty
-  const [specialty, setSpecialty] = useState('Internal Medicine');
+  const [specialty, setSpecialty] = useState('');
 
   // Step 3: Clinical Motivations
-  const [specialtyInterestReason, setSpecialtyInterestReason] = useState(
-    'I am drawn to the diagnostic breadth, longitudinal care, and potential for fellowship specialization.'
-  );
+  const [specialtyInterestReason, setSpecialtyInterestReason] = useState('');
 
   // Step 4: USMLE Step 1
-  const [step1Result, setStep1Result] = useState<'Pass' | 'Fail'>('Pass');
+  const [step1Result, setStep1Result] = useState<'Pass' | 'Fail' | null>(null);
 
   // Step 5: USMLE Step 2 CK
-  const [step2Status, setStep2Status] = useState<'score_available' | 'anticipated_date'>('score_available');
-  const [step2Score, setStep2Score] = useState<number>(254);
-  const [step2AnticipatedDate, setStep2AnticipatedDate] = useState('July 2026');
+  const [step2Status, setStep2Status] = useState<'score_available' | 'anticipated_date' | null>(null);
+  const [step2Score, setStep2Score] = useState<string>('');
+  const [step2AnticipatedDate, setStep2AnticipatedDate] = useState('');
 
   // Step 6: Step Failures / Disclosures
-  const [hasStepFailures, setHasStepFailures] = useState(false);
+  const [hasStepFailures, setHasStepFailures] = useState<boolean | null>(null);
   const [stepFailureDetails, setStepFailureDetails] = useState('');
 
   // Step 7: 7 Core Clinical Clerkships
-  const [clerkshipGrades, setClerkshipGrades] = useState<CoreClerkshipGrades>({
-    familyMedicine: 'High Pass',
-    internalMedicine: 'Honors',
-    surgery: 'High Pass',
-    pediatrics: 'Honors',
-    obGyn: 'High Pass',
-    neurology: 'Honors',
-    psychiatry: 'Honors',
+  const [clerkshipGrades, setClerkshipGrades] = useState<{
+    familyMedicine: ClerkshipGrade | null;
+    internalMedicine: ClerkshipGrade | null;
+    surgery: ClerkshipGrade | null;
+    pediatrics: ClerkshipGrade | null;
+    obGyn: ClerkshipGrade | null;
+    neurology: ClerkshipGrade | null;
+    psychiatry: ClerkshipGrade | null;
+  }>({
+    familyMedicine: null,
+    internalMedicine: null,
+    surgery: null,
+    pediatrics: null,
+    obGyn: null,
+    neurology: null,
+    psychiatry: null,
   });
 
   // Step 8: Dedicated Research Year
-  const [completedResearchYear, setCompletedResearchYear] = useState(false);
+  const [completedResearchYear, setCompletedResearchYear] = useState<boolean | null>(null);
   const [researchYearLocation, setResearchYearLocation] = useState('');
 
   // Step 9: Publications & Scholarship
-  const [publications, setPublications] = useState<number>(2);
-  const [firstAuthorPubs, setFirstAuthorPubs] = useState<number>(1);
-  const [presentations, setPresentations] = useState<number>(3);
-  const [abstracts, setAbstracts] = useState<number>(2);
-  const [researchExperiences, setResearchExperiences] = useState<number>(3);
+  const [publications, setPublications] = useState<string>('');
+  const [firstAuthorPubs, setFirstAuthorPubs] = useState<string>('');
+  const [presentations, setPresentations] = useState<string>('');
+  const [abstracts, setAbstracts] = useState<string>('');
+  const [researchExperiences, setResearchExperiences] = useState<string>('');
 
   // Step 10: Leadership, Volunteer & Honor Societies
-  const [volunteerExperiences, setVolunteerExperiences] = useState<number>(4);
-  const [leadershipHours, setLeadershipHours] = useState<number>(80);
+  const [volunteerExperiences, setVolunteerExperiences] = useState<string>('');
+  const [leadershipHours, setLeadershipHours] = useState<string>('');
   const [isAoaMember, setIsAoaMember] = useState(false);
   const [isGoldHumanism, setIsGoldHumanism] = useState(false);
-  const [medicalSchoolTier, setMedicalSchoolTier] = useState('State / Mid-Tier');
+  const [medicalSchoolTier, setMedicalSchoolTier] = useState('');
 
   // Step 11: Geography & Census Divisions
-  const [selectedDivisions, setSelectedDivisions] = useState<string[]>([
-    'Middle Atlantic',
-    'New England',
-  ]);
-  const [residencyGoalsAndGeography, setResidencyGoalsAndGeography] = useState(
-    'Academic university-based programs and high-volume clinical centers.'
-  );
+  const [selectedDivisions, setSelectedDivisions] = useState<string[]>([]);
+  const [residencyGoalsAndGeography, setResidencyGoalsAndGeography] = useState('');
 
   // Step 12: Account Creation
   const [accountName, setAccountName] = useState('');
   const [accountEmail, setAccountEmail] = useState('');
-  const [pronouns, setPronouns] = useState('he/him/his');
-  const [gradYear, setGradYear] = useState<number>(2027);
+  const [accountPassword, setAccountPassword] = useState('');
+  const [showAccountPassword, setShowAccountPassword] = useState(false);
+  const [pronouns, setPronouns] = useState('');
+  const [gradYear, setGradYear] = useState<string>('2027');
   const [accountError, setAccountError] = useState<string | null>(null);
 
   // Handle Log In submission
@@ -178,6 +181,10 @@ export function ThalamusAuthExperience({
 
     const account = getStudentAccountByEmail(clean);
     if (account) {
+      if (account.password && account.password !== passwordInput.trim()) {
+        setPasswordError('Incorrect password. Please try again.');
+        return;
+      }
       setCurrentStudentId(account.id);
       setAuthenticatedSession(true);
       onAuthenticated(account);
@@ -236,6 +243,50 @@ export function ThalamusAuthExperience({
     }
   };
 
+  const resetIntakeForm = () => {
+    setCurrentStep(1);
+    setMedicalSchool('');
+    setMedicalSchoolError(null);
+    setSpecialty('');
+    setSpecialtyInterestReason('');
+    setStep1Result(null);
+    setStep2Status(null);
+    setStep2Score('');
+    setStep2AnticipatedDate('');
+    setHasStepFailures(null);
+    setStepFailureDetails('');
+    setClerkshipGrades({
+      familyMedicine: null,
+      internalMedicine: null,
+      surgery: null,
+      pediatrics: null,
+      obGyn: null,
+      neurology: null,
+      psychiatry: null,
+    });
+    setCompletedResearchYear(null);
+    setResearchYearLocation('');
+    setPublications('');
+    setFirstAuthorPubs('');
+    setPresentations('');
+    setAbstracts('');
+    setResearchExperiences('');
+    setVolunteerExperiences('');
+    setLeadershipHours('');
+    setIsAoaMember(false);
+    setIsGoldHumanism(false);
+    setMedicalSchoolTier('');
+    setSelectedDivisions([]);
+    setResidencyGoalsAndGeography('');
+    setAccountName('');
+    setAccountEmail('');
+    setAccountPassword('');
+    setShowAccountPassword(false);
+    setPronouns('');
+    setGradYear('2027');
+    setAccountError(null);
+  };
+
   // Final Account Creation & Intake Dossier Persistence
   const handleFinalAccountSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -249,38 +300,53 @@ export function ThalamusAuthExperience({
       setAccountError('Please enter a valid institutional or personal email address.');
       return;
     }
+    if (!accountPassword.trim()) {
+      setAccountError('Please enter a password for your account.');
+      return;
+    }
 
     // 1. Create account
     const newAccount = createStudentAccount({
       name: accountName.trim(),
       email: accountEmail.trim(),
+      password: accountPassword.trim(),
       medicalSchool: medicalSchool.trim(),
-      specialty: specialty.trim(),
-      pronouns: pronouns.trim(),
+      specialty: specialty.trim() || 'Internal Medicine',
+      pronouns: pronouns.trim() || 'they/them',
       gradYear: Number(gradYear) || 2027,
     });
 
     // 2. Compile full intake dossier
+    const finalClerkshipGrades: CoreClerkshipGrades = {
+      familyMedicine: clerkshipGrades.familyMedicine || 'Pass',
+      internalMedicine: clerkshipGrades.internalMedicine || 'Pass',
+      surgery: clerkshipGrades.surgery || 'Pass',
+      pediatrics: clerkshipGrades.pediatrics || 'Pass',
+      obGyn: clerkshipGrades.obGyn || 'Pass',
+      neurology: clerkshipGrades.neurology || 'Pass',
+      psychiatry: clerkshipGrades.psychiatry || 'Pass',
+    };
+
     const fullIntake: SpecialtyAdvisingIntake = {
       ...INITIAL_MOCK_INTAKE,
       studentId: newAccount.id,
       studentName: newAccount.name,
-      pronouns: pronouns.trim(),
+      pronouns: pronouns.trim() || 'they/them',
       medicalSchool: medicalSchool.trim(),
-      applyingSpecialty: specialty.trim(),
+      applyingSpecialty: specialty.trim() || 'Internal Medicine',
       specialtyInterestReason: specialtyInterestReason.trim(),
       submissionDate: new Date().toLocaleDateString('en-US'),
       regionalCampus: 'Main Campus',
       specialtyAdvisorName: 'Faculty Specialty Advisor',
-      step1Result,
-      step2Status,
-      step2Score: step2Status === 'score_available' ? Number(step2Score) : undefined,
-      step2AnticipatedDate: step2Status === 'anticipated_date' ? step2AnticipatedDate : undefined,
-      hasStepFailures,
+      step1Result: step1Result || 'Pass',
+      step2Status: step2Status || 'score_available',
+      step2Score: step2Status === 'score_available' && step2Score ? Number(step2Score) : undefined,
+      step2AnticipatedDate: step2Status === 'anticipated_date' ? step2AnticipatedDate.trim() : undefined,
+      hasStepFailures: hasStepFailures === true,
       stepFailureDetails: hasStepFailures ? stepFailureDetails.trim() : undefined,
-      completedResearchYear,
+      completedResearchYear: completedResearchYear === true,
       researchYearLocation: completedResearchYear ? researchYearLocation.trim() : undefined,
-      clerkshipGrades,
+      clerkshipGrades: finalClerkshipGrades,
       hasAcademicFailuresOrRepeats: false,
       hasCapsOrProfessionalismConcerns: false,
       hasLeaveOfAbsence: false,
@@ -298,7 +364,7 @@ export function ThalamusAuthExperience({
       leadershipHours: Number(leadershipHours) || 0,
       isAoaMember,
       isGoldHumanism,
-      medicalSchoolTier,
+      medicalSchoolTier: medicalSchoolTier || 'State / Mid-Tier',
       isCompleted: true,
       completedAt: new Date().toISOString(),
     };
@@ -308,7 +374,7 @@ export function ThalamusAuthExperience({
     onAuthenticated(newAccount);
   };
 
-  const honorsCount = calculateClerkshipHonorsCount(clerkshipGrades);
+  const honorsCount = Object.values(clerkshipGrades).filter((g) => g === 'Honors').length;
 
   // Render Step Content
   const renderStepContent = () => {
@@ -410,6 +476,7 @@ export function ThalamusAuthExperience({
                 onChange={(e) => setSpecialty(e.target.value)}
                 className="w-full px-4 py-3 text-sm font-semibold border border-neutral-300 rounded-xl bg-white shadow-2xs focus:outline-none focus:ring-2 focus:ring-[#1F3A30]"
               >
+                <option value="" disabled>-- Select Target Applying Specialty --</option>
                 {CANONICAL_SPECIALTIES.map((spec) => (
                   <option key={spec} value={spec}>
                     {spec}
@@ -459,7 +526,7 @@ export function ThalamusAuthExperience({
                 Question 3 of 12 &bull; Clinical Motivation
               </span>
               <h2 className="text-xl sm:text-2xl font-bold text-neutral-900 mt-2">
-                Why are you interested in {specialty}?
+                Why are you interested in {specialty || 'your chosen specialty'}?
               </h2>
               <p className="text-xs text-neutral-500 mt-1">
                 Provide a brief statement of your clinical motivations, procedural vs cognitive balance, and fellowship aspirations.
@@ -569,22 +636,28 @@ export function ThalamusAuthExperience({
               </button>
             </div>
 
-            {step2Status === 'score_available' ? (
+            {step2Status === 'score_available' && (
               <div className="p-4 bg-emerald-50/60 border border-emerald-200 rounded-2xl space-y-3">
                 <div className="flex items-center justify-between">
                   <label className="text-xs font-bold text-emerald-950">
                     Step 2 CK Three-Digit Score (150 – 300)
                   </label>
-                  <span className="text-xl font-bold text-emerald-900 font-mono">
-                    {step2Score}
-                  </span>
+                  <input
+                    type="number"
+                    min={150}
+                    max={300}
+                    value={step2Score}
+                    onChange={(e) => setStep2Score(e.target.value)}
+                    placeholder="Enter score"
+                    className="w-28 text-right px-3 py-1.5 text-base font-bold text-emerald-900 font-mono bg-white border border-emerald-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1F3A30]"
+                  />
                 </div>
                 <input
                   type="range"
                   min={180}
                   max={285}
-                  value={step2Score}
-                  onChange={(e) => setStep2Score(parseInt(e.target.value) || 240)}
+                  value={step2Score ? Number(step2Score) : 240}
+                  onChange={(e) => setStep2Score(e.target.value)}
                   className="w-full accent-[#1F3A30] cursor-pointer"
                 />
                 <div className="flex items-center justify-between text-[11px] text-emerald-800">
@@ -595,7 +668,8 @@ export function ThalamusAuthExperience({
                   <span>285</span>
                 </div>
               </div>
-            ) : (
+            )}
+            {step2Status === 'anticipated_date' && (
               <div className="space-y-2">
                 <label className="block text-xs font-semibold text-neutral-700">
                   Anticipated Step 2 CK Exam Date
@@ -608,6 +682,11 @@ export function ThalamusAuthExperience({
                   className="w-full px-4 py-3 text-sm border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#1F3A30]"
                 />
               </div>
+            )}
+            {step2Status === null && (
+              <p className="text-xs text-neutral-500 italic pt-1">
+                Please select whether you currently have a 3-digit score or a pending test date.
+              </p>
             )}
           </div>
         );
@@ -635,9 +714,9 @@ export function ThalamusAuthExperience({
                   setStepFailureDetails('');
                 }}
                 className={`p-4 rounded-xl border text-center transition-all cursor-pointer ${
-                  !hasStepFailures
+                  hasStepFailures === false
                     ? 'bg-emerald-50 border-emerald-500 text-emerald-900 font-bold'
-                    : 'bg-white border-neutral-200 text-neutral-700'
+                    : 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300'
                 }`}
               >
                 No exam failures
@@ -646,9 +725,9 @@ export function ThalamusAuthExperience({
                 type="button"
                 onClick={() => setHasStepFailures(true)}
                 className={`p-4 rounded-xl border text-center transition-all cursor-pointer ${
-                  hasStepFailures
+                  hasStepFailures === true
                     ? 'bg-rose-50 border-rose-500 text-rose-900 font-bold'
-                    : 'bg-white border-neutral-200 text-neutral-700'
+                    : 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300'
                 }`}
               >
                 Yes, disclosure required
@@ -760,9 +839,9 @@ export function ThalamusAuthExperience({
                   setResearchYearLocation('');
                 }}
                 className={`p-5 rounded-2xl border text-center transition-all cursor-pointer ${
-                  !completedResearchYear
+                  completedResearchYear === false
                     ? 'bg-neutral-900 text-white border-neutral-900 font-bold'
-                    : 'bg-white border-neutral-200 text-neutral-700'
+                    : 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300'
                 }`}
               >
                 No dedicated research year
@@ -771,9 +850,9 @@ export function ThalamusAuthExperience({
                 type="button"
                 onClick={() => setCompletedResearchYear(true)}
                 className={`p-5 rounded-2xl border text-center transition-all cursor-pointer ${
-                  completedResearchYear
+                  completedResearchYear === true
                     ? 'bg-emerald-50 border-emerald-600 text-emerald-900 ring-2 ring-emerald-500 font-bold'
-                    : 'bg-white border-neutral-200 text-neutral-700'
+                    : 'bg-white border-neutral-200 text-neutral-700 hover:border-neutral-300'
                 }`}
               >
                 Yes, completed research year
@@ -847,7 +926,7 @@ export function ThalamusAuthExperience({
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      onClick={() => set(Math.max(0, val - 1))}
+                      onClick={() => set(String(Math.max(0, (parseInt(val) || 0) - 1)))}
                       className="w-7 h-7 rounded-lg bg-white border border-neutral-300 font-bold text-xs hover:bg-neutral-100 flex items-center justify-center cursor-pointer"
                     >
                       -
@@ -856,12 +935,13 @@ export function ThalamusAuthExperience({
                       type="number"
                       min={0}
                       value={val}
-                      onChange={(e) => set(Math.max(0, parseInt(e.target.value) || 0))}
-                      className="w-12 text-center text-sm font-bold bg-white border border-neutral-300 rounded-lg py-1"
+                      onChange={(e) => set(e.target.value)}
+                      placeholder="0"
+                      className="w-14 text-center text-sm font-bold bg-white border border-neutral-300 rounded-lg py-1 focus:outline-none focus:ring-1 focus:ring-[#1F3A30]"
                     />
                     <button
                       type="button"
-                      onClick={() => set(val + 1)}
+                      onClick={() => set(String((parseInt(val) || 0) + 1))}
                       className="w-7 h-7 rounded-lg bg-white border border-neutral-300 font-bold text-xs hover:bg-neutral-100 flex items-center justify-center cursor-pointer"
                     >
                       +
@@ -897,8 +977,9 @@ export function ThalamusAuthExperience({
                   type="number"
                   min={0}
                   value={volunteerExperiences}
-                  onChange={(e) => setVolunteerExperiences(parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-1.5 text-xs border border-neutral-300 rounded-lg bg-white"
+                  onChange={(e) => setVolunteerExperiences(e.target.value)}
+                  placeholder="0"
+                  className="w-full px-3 py-1.5 text-xs border border-neutral-300 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-[#1F3A30]"
                 />
               </div>
 
@@ -910,8 +991,9 @@ export function ThalamusAuthExperience({
                   type="number"
                   min={0}
                   value={leadershipHours}
-                  onChange={(e) => setLeadershipHours(parseInt(e.target.value) || 0)}
-                  className="w-full px-3 py-1.5 text-xs border border-neutral-300 rounded-lg bg-white"
+                  onChange={(e) => setLeadershipHours(e.target.value)}
+                  placeholder="0"
+                  className="w-full px-3 py-1.5 text-xs border border-neutral-300 rounded-lg bg-white focus:outline-none focus:ring-1 focus:ring-[#1F3A30]"
                 />
               </div>
 
@@ -924,6 +1006,7 @@ export function ThalamusAuthExperience({
                   onChange={(e) => setMedicalSchoolTier(e.target.value)}
                   className="w-full px-3 py-2 text-xs font-semibold border border-neutral-300 rounded-lg bg-white"
                 >
+                  <option value="" disabled>-- Select Medical School Tier --</option>
                   <option value="Top 25 Research-Intensive">Top 25 Research-Intensive</option>
                   <option value="State / Mid-Tier">State / Mid-Tier Flagship</option>
                   <option value="Newer Community-Based">Newer Community-Based</option>
@@ -1068,6 +1151,36 @@ export function ThalamusAuthExperience({
 
                 <div>
                   <label className="block text-xs font-semibold text-neutral-700 mb-1">
+                    Password
+                  </label>
+                  <div className="relative">
+                    <input
+                      type={showAccountPassword ? 'text' : 'password'}
+                      required
+                      value={accountPassword}
+                      onChange={(e) => setAccountPassword(e.target.value)}
+                      placeholder="Create account password"
+                      className="w-full px-4 py-2.5 pr-10 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#1F3A30]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowAccountPassword(!showAccountPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-700 cursor-pointer"
+                      title={showAccountPassword ? 'Hide password' : 'Show password'}
+                    >
+                      {showAccountPassword ? (
+                        <EyeOff className="w-3.5 h-3.5" />
+                      ) : (
+                        <Eye className="w-3.5 h-3.5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-700 mb-1">
                     Pronouns
                   </label>
                   <input
@@ -1075,6 +1188,21 @@ export function ThalamusAuthExperience({
                     value={pronouns}
                     onChange={(e) => setPronouns(e.target.value)}
                     placeholder="e.g. she/her, he/him, they/them"
+                    className="w-full px-4 py-2.5 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#1F3A30]"
+                  />
+                </div>
+
+                <div>
+                  <label className="block text-xs font-semibold text-neutral-700 mb-1">
+                    Graduation Year
+                  </label>
+                  <input
+                    type="number"
+                    min="2024"
+                    max="2032"
+                    value={gradYear}
+                    onChange={(e) => setGradYear(e.target.value)}
+                    placeholder="2027"
                     className="w-full px-4 py-2.5 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#1F3A30]"
                   />
                 </div>
@@ -1248,8 +1376,8 @@ export function ThalamusAuthExperience({
               <button
                 type="button"
                 onClick={() => {
+                  resetIntakeForm();
                   setViewMode('guided_intake');
-                  setCurrentStep(1);
                 }}
                 className="w-full py-2.5 px-4 rounded-xl border border-dashed border-[#1F3A30]/40 text-[#1F3A30] hover:bg-[#EAF2EE] font-bold text-xs transition-colors cursor-pointer flex items-center justify-center gap-1.5"
               >
