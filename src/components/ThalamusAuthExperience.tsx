@@ -1187,16 +1187,6 @@ export function ThalamusAuthExperience({
                 <Sparkles className="w-3.5 h-3.5 text-[#1F3A30]" />
                 <span>Quick Demo: Sign In as Alex Rivera (MS4)</span>
               </button>
-
-              {/* Institutional Single Sign-On */}
-              <button
-                type="button"
-                onClick={handleQuickDemoLogin}
-                className="w-full py-2.5 px-4 rounded-xl bg-white hover:bg-neutral-50 text-neutral-700 font-semibold text-xs border border-neutral-300 transition-all cursor-pointer flex items-center justify-center gap-2 shadow-2xs"
-              >
-                <ShieldCheck className="w-3.5 h-3.5 text-neutral-500" />
-                <span>Sign In with AAMC Account</span>
-              </button>
             </form>
 
             {/* Guided Intake Link */}

@@ -41,7 +41,7 @@ describe('ThalamusAuthExperience & Student Portal Auth Flow', () => {
     expect(markup).toContain('Sign In');
     expect(markup).toContain('Email');
     expect(markup).toContain('Quick Demo: Sign In as Alex Rivera (MS4)');
-    expect(markup).toContain('Sign In with AAMC Account');
+    expect(markup).not.toContain('Sign In with AAMC Account');
     expect(markup).toContain('Complete 1-Question Intake Form');
   });
 
