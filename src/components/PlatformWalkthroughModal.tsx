@@ -46,10 +46,6 @@ const WALKTHROUGH_STEPS: WalkthroughStep[] = [
       'Ethmoid is designed to guide you through every milestone of your residency application. Your new account starts with a fresh, clean workspace so you can tailor every program, signal, and recommendation to your goals.',
     highlights: [
       {
-        title: 'Clean Slate Account',
-        detail: 'No pre-filled school lists or mock recommendations. Your data is 100% yours and private.',
-      },
-      {
         title: 'Evidence-Based Strategy',
         detail: 'Powered by official ACGME program data, NRMP charting outcomes, and specialty signaling rules.',
       },

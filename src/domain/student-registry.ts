@@ -41,6 +41,7 @@ export function isDemoStudentId(id?: string | null): boolean {
   return (
     id === DEMO_STUDENT_ACCOUNT.id ||
     id === 'stu-alex-rivera' ||
+    id === 'student-alex-rivera' ||
     id === 'usr-student-1' ||
     id === 'student-test-sync' ||
     id.startsWith('demo-')

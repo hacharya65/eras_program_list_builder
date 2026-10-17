@@ -81,6 +81,8 @@ export const INITIAL_MOCK_JOURNAL_ENTRIES: ExperienceJournalEntry[] = [
   },
 ];
 
+import { isDemoStudentId } from './student-registry';
+
 export function loadExperienceJournalEntries(studentId: string): ExperienceJournalEntry[] {
   if (typeof localStorage !== 'undefined') {
     try {
@@ -92,12 +94,7 @@ export function loadExperienceJournalEntries(studentId: string): ExperienceJourn
       console.error('Error loading experience journal entries:', e);
     }
   }
-  const isDemo =
-    !studentId ||
-    studentId === 'usr-student-1' ||
-    studentId === 'stu-alex-rivera' ||
-    studentId.startsWith('demo-');
-  return isDemo ? INITIAL_MOCK_JOURNAL_ENTRIES : [];
+  return isDemoStudentId(studentId) ? INITIAL_MOCK_JOURNAL_ENTRIES : [];
 }
 
 export function saveExperienceJournalEntries(

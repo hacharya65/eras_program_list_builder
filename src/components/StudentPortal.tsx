@@ -360,6 +360,14 @@ export function StudentPortal({
 
   const currentMainTabConfig = mainNavigationTabs.find((t) => t.id === activeMainTab);
 
+  const currentActiveStudent = {
+    ...student,
+    id: activeStudentId,
+    name: currentStudentAccount?.name || student.name,
+    email: currentStudentAccount?.email || student.email,
+    specialty: currentStudentAccount?.specialty || student.specialty,
+  };
+
   const renderViewContent = () => {
     if (activeView === 'intake') {
       return (
@@ -391,7 +399,7 @@ export function StudentPortal({
     if (activeView === 'journal') {
       return (
         <JournalRepositoryView
-          student={student}
+          student={currentActiveStudent}
           onBack={() => updateView('overview')}
         />
       );
@@ -401,6 +409,7 @@ export function StudentPortal({
       return (
         <SchoolListMatrix
           specialty={targetSpecialty}
+          studentId={activeStudentId}
           onBack={() => updateView('overview')}
         />
       );
@@ -428,6 +437,7 @@ export function StudentPortal({
           </div>
           <LetterOfRecommendationTracker
             specialty={targetSpecialty}
+            studentId={activeStudentId}
             onOpenSchoolList={() => updateView('school_list')}
           />
         </div>
@@ -438,11 +448,7 @@ export function StudentPortal({
       const assignedAdvisor = assignedAdvisors && assignedAdvisors.length > 0 ? assignedAdvisors[0] : undefined;
       return (
         <ProfileManagementView
-          student={{
-            ...student,
-            name: currentStudentAccount?.name || student.name,
-            email: currentStudentAccount?.email || student.email,
-          }}
+          student={currentActiveStudent}
           targetSpecialty={targetSpecialty}
           onSpecialtyChange={handleSpecialtyChange}
           advisingIntake={advisingIntake}
@@ -476,11 +482,7 @@ export function StudentPortal({
     return (
       <StudentDashboardHome
         context={context}
-        student={{
-          ...student,
-          name: currentStudentAccount?.name || student.name,
-          email: currentStudentAccount?.email || student.email,
-        }}
+        student={currentActiveStudent}
         targetSpecialty={targetSpecialty}
         onSpecialtyChange={handleSpecialtyChange}
         advisingIntake={advisingIntake}

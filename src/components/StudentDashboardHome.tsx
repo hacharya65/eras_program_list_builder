@@ -99,8 +99,10 @@ export function StudentDashboardHome({
   schoolListStats,
   onNavigate,
 }: StudentDashboardHomeProps) {
-  // LOR State - Initial state uses INITIAL_MOCK_LETTER_WRITERS for identical SSR
-  const [writers, setWriters] = useState<LetterWriterRequest[]>(INITIAL_MOCK_LETTER_WRITERS);
+  // LOR State - Initialized by student.id so fresh accounts start with 0 writers
+  const [writers, setWriters] = useState<LetterWriterRequest[]>(() =>
+    loadLetterWriterRequests(student.id)
+  );
   const [isAddWriterModalOpen, setIsAddWriterModalOpen] = useState(false);
   const [editingWriterId, setEditingWriterId] = useState<string | null>(null);
 
@@ -114,8 +116,10 @@ export function StudentDashboardHome({
   const [writerStatus, setWriterStatus] = useState<LetterRequestStatus>('asked');
   const [writerNotes, setWriterNotes] = useState('');
 
-  // Experience Journal Repository State (Completely decoupled from official 10 experiences)
-  const [journalEntries, setJournalEntries] = useState<ExperienceJournalEntry[]>(INITIAL_MOCK_JOURNAL_ENTRIES);
+  // Experience Journal Repository State (Initialized by student.id so fresh accounts start with 0 entries)
+  const [journalEntries, setJournalEntries] = useState<ExperienceJournalEntry[]>(() =>
+    loadExperienceJournalEntries(student.id)
+  );
   const [journalTitle, setJournalTitle] = useState('');
   const [journalCategory, setJournalCategory] = useState<
     'Clinical Encounter' | 'Patient Advocacy' | 'Research Breakthrough' | 'Teaching & Mentorship' | 'Leadership Moment' | 'Personal Reflection'
@@ -124,8 +128,10 @@ export function StudentDashboardHome({
   const [journalSuccessMessage, setJournalSuccessMessage] = useState<string | null>(null);
   const [isJournalDrawerOpen, setIsJournalDrawerOpen] = useState(false);
 
-  // School List Preview State
-  const [savedPrograms, setSavedPrograms] = useState<SchoolListItem[]>([]);
+  // School List Preview State (Scoped by student.id)
+  const [savedPrograms, setSavedPrograms] = useState<SchoolListItem[]>(() =>
+    loadItemsForSpecialty(targetSpecialty, undefined, student.id)
+  );
   const [programFilter, setProgramFilter] = useState<'all' | 'gold' | 'silver' | 'reach' | 'target' | 'safety'>('all');
   const [programSearch, setProgramSearch] = useState('');
 
@@ -133,9 +139,9 @@ export function StudentDashboardHome({
 
   // Client-side synchronization in useEffect to prevent hydration mismatches
   useEffect(() => {
-    setWriters(loadLetterWriterRequests());
+    setWriters(loadLetterWriterRequests(student.id));
     setJournalEntries(loadExperienceJournalEntries(student.id));
-    const progs = loadItemsForSpecialty(targetSpecialty);
+    const progs = loadItemsForSpecialty(targetSpecialty, undefined, student.id);
     setSavedPrograms(progs);
   }, [student.id, targetSpecialty]);
 

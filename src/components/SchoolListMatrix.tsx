@@ -56,6 +56,7 @@ import {
 
 interface SchoolListMatrixProps {
   specialty?: string;
+  studentId?: string;
   onBack: () => void;
 }
 
@@ -65,6 +66,7 @@ const STORAGE_KEY = 'eras_school_list_matrix';
 
 export function SchoolListMatrix({
   specialty = 'Internal Medicine',
+  studentId,
   onBack,
 }: SchoolListMatrixProps) {
   const [selectedSpecialty, setSelectedSpecialty] = useState(specialty);
@@ -74,7 +76,7 @@ export function SchoolListMatrix({
 
   // Rehydrate state safely from local storage or auto-populate consistent sample programs
   const [items, setItems] = useState<SchoolListItem[]>(() => {
-    return loadItemsForSpecialty(specialty, getStoredApplicantStep2Ck());
+    return loadItemsForSpecialty(specialty, getStoredApplicantStep2Ck(), studentId);
   });
 
   // Sync if parent prop changes
@@ -82,9 +84,9 @@ export function SchoolListMatrix({
     if (specialty && specialty !== selectedSpecialty) {
       setSelectedSpecialty(specialty);
       setDbSpecialtyFilter(specialty);
-      setItems(loadItemsForSpecialty(specialty, applicantStep2Ck));
+      setItems(loadItemsForSpecialty(specialty, applicantStep2Ck, studentId));
     }
-  }, [specialty, applicantStep2Ck]);
+  }, [specialty, applicantStep2Ck, studentId]);
 
   // Sync if global target specialty updates
   useEffect(() => {
@@ -92,12 +94,12 @@ export function SchoolListMatrix({
       if (e.detail && typeof e.detail === 'string' && e.detail !== selectedSpecialty) {
         setSelectedSpecialty(e.detail);
         setDbSpecialtyFilter(e.detail);
-        setItems(loadItemsForSpecialty(e.detail, applicantStep2Ck));
+        setItems(loadItemsForSpecialty(e.detail, applicantStep2Ck, studentId));
       }
     };
     window.addEventListener('applicant_specialty_updated', handleSpecialtyUpdated);
     return () => window.removeEventListener('applicant_specialty_updated', handleSpecialtyUpdated);
-  }, [selectedSpecialty, applicantStep2Ck]);
+  }, [selectedSpecialty, applicantStep2Ck, studentId]);
 
   useEffect(() => {
     const handleScoreUpdate = (e: any) => {
@@ -140,19 +142,19 @@ export function SchoolListMatrix({
 
   useEffect(() => {
     if (typeof window !== 'undefined' && items && items.length > 0) {
-      const storageKey = getStorageKeyForSpecialty(selectedSpecialty);
+      const storageKey = getStorageKeyForSpecialty(selectedSpecialty, studentId);
       localStorage.setItem(storageKey, JSON.stringify(items));
       if (selectedSpecialty === 'Internal Medicine') {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
       }
     }
-  }, [items, selectedSpecialty]);
+  }, [items, selectedSpecialty, studentId]);
 
   const handleSpecialtyChange = (newSpecialty: string) => {
     setSelectedSpecialty(newSpecialty);
     setStoredTargetSpecialty(newSpecialty);
     setDbSpecialtyFilter(newSpecialty);
-    const loaded = loadItemsForSpecialty(newSpecialty, applicantStep2Ck);
+    const loaded = loadItemsForSpecialty(newSpecialty, applicantStep2Ck, studentId);
     setItems(loaded);
   };
 

@@ -42,8 +42,10 @@ export function JournalRepositoryView({
   onNavigateToExperiences,
   onNavigateToPersonalStatement,
 }: JournalRepositoryViewProps) {
-  // Deterministic SSR default to prevent hydration mismatches
-  const [entries, setEntries] = useState<ExperienceJournalEntry[]>(INITIAL_MOCK_JOURNAL_ENTRIES);
+  // Deterministic SSR default initialized by student.id
+  const [entries, setEntries] = useState<ExperienceJournalEntry[]>(() =>
+    loadExperienceJournalEntries(student.id)
+  );
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [copiedId, setCopiedId] = useState<string | null>(null);

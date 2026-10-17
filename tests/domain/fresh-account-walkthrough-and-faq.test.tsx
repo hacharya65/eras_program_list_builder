@@ -94,8 +94,10 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
 
       // First step contents
       expect(markup).toContain('Your Personalized Residency Match &amp; Signaling Workspace');
-      expect(markup).toContain('Clean Slate Account');
+      expect(markup).not.toContain('Clean Slate Account');
+      expect(markup).not.toContain('No pre-filled school lists or mock recommendations');
       expect(markup).toContain('Evidence-Based Strategy');
+      expect(markup).toContain('Continuous Faculty Alignment');
 
       // Step progress counter
       expect(markup).toContain('Step 1 of 6');
@@ -183,32 +185,32 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
   describe('StudentDashboardHome 3-Column Layout Visibility', () => {
     it('renders School List Strategy, Letters of Rec, and compact Journal concurrently in 3 columns without burying School List', () => {
       const mockContext: StudentDashboardContext = {
+        institution: {
+          id: 'geisinger',
+          name: 'Geisinger Commonwealth School of Medicine',
+          domain: 'som.geisinger.edu',
+          defaultSlaDays: 14,
+        },
         student: {
           id: 'stu-alex-rivera',
           name: 'Alex Rivera',
           email: 'alex.rivera@geisinger.edu',
           role: 'student',
-          medicalSchool: 'Geisinger Commonwealth School of Medicine',
+          institutionId: 'geisinger',
           specialty: 'Internal Medicine',
         },
         assignedAdvisors: [],
-        portfolio: {
+        personalStatement: {
+          id: 'ps-1',
           studentId: 'stu-alex-rivera',
           specialty: 'Internal Medicine',
-          schoolList: [],
-          lorRequests: [],
-          journalEntries: [],
-          status: 'draft',
-          lastSaved: new Date().toISOString(),
+          currentVersionNumber: 1,
+          content: 'Draft content',
+          updatedAt: '2026-09-01T12:00:00Z',
+          stage: 'drafting',
         },
-        competitiveness: {
-          overallScore: 82,
-          stepScoreTier: 'competitive',
-          clerkshipHonorsCount: 4,
-          researchOutputTier: 'moderate',
-          tierRecommendation: '25% Reach, 50% Target, 25% Safety',
-          signalsAvailable: 15,
-        },
+        experiences: [],
+        activeReviewRequests: [],
       };
 
       const markup = renderToStaticMarkup(
@@ -243,6 +245,65 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
       expect(markup).toContain('Journal');
       expect(markup).toContain('Encounter &amp; takeaway scratchpad');
       expect(markup).toContain('Private scratchpad');
+      expect(markup).toContain('3 saved');
+    });
+
+    it('renders a fresh non-demo student account with 0 saved journal entries and empty letter writers on dashboard home', () => {
+      const freshContext: StudentDashboardContext = {
+        institution: {
+          id: 'geisinger',
+          name: 'Geisinger Commonwealth School of Medicine',
+          domain: 'som.geisinger.edu',
+          defaultSlaDays: 14,
+        },
+        student: {
+          id: newStudentId,
+          name: 'Jordan Smith',
+          email: 'jordan.smith@medschool.edu',
+          role: 'student',
+          institutionId: 'geisinger',
+          specialty: 'Internal Medicine',
+        },
+        assignedAdvisors: [],
+        personalStatement: {
+          id: 'ps-2',
+          studentId: newStudentId,
+          specialty: 'Internal Medicine',
+          currentVersionNumber: 1,
+          content: '',
+          updatedAt: new Date().toISOString(),
+          stage: 'drafting',
+        },
+        experiences: [],
+        activeReviewRequests: [],
+      };
+
+      const markup = renderToStaticMarkup(
+        <StudentDashboardHome
+          context={freshContext}
+          student={freshContext.student}
+          targetSpecialty="Internal Medicine"
+          onSpecialtyChange={() => {}}
+          advisingIntake={{
+            ...INITIAL_MOCK_INTAKE,
+            studentId: newStudentId,
+            applyingSpecialty: 'Internal Medicine',
+          }}
+          onOpenIntake={() => {}}
+          onOpenProfile={() => {}}
+          assignedAdvisors={[]}
+          schoolListStats={{ count: 0, signalsAssigned: 0 }}
+          onNavigate={() => {}}
+        />
+      );
+
+      // Verify fresh slate: 0 saved journal entries, NOT 3 saved
+      expect(markup).toContain('0 saved');
+      expect(markup).not.toContain('3 saved');
+
+      // Verify letters of rec: 0 of 0 submitted and empty state prompt
+      expect(markup).toContain('0 of 0 submitted');
+      expect(markup).toContain('No letter writers added yet');
     });
   });
 });

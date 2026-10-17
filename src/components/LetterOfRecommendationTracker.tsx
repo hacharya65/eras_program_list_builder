@@ -32,14 +32,16 @@ import { SchoolListItem, loadItemsForSpecialty } from '@/domain/school-list-mode
 
 interface LetterOfRecommendationTrackerProps {
   specialty?: string;
+  studentId?: string;
   onOpenSchoolList?: () => void;
 }
 
 export function LetterOfRecommendationTracker({
   specialty = 'Internal Medicine',
+  studentId,
   onOpenSchoolList,
 }: LetterOfRecommendationTrackerProps) {
-  const [writers, setWriters] = useState<LetterWriterRequest[]>(() => loadLetterWriterRequests());
+  const [writers, setWriters] = useState<LetterWriterRequest[]>(() => loadLetterWriterRequests(studentId));
   const [requirements, setRequirements] = useState<Record<string, ProgramLetterRequirement>>(() =>
     loadProgramLetterRequirements()
   );
@@ -59,9 +61,14 @@ export function LetterOfRecommendationTracker({
   const [notes, setNotes] = useState('');
   const [assignedPrograms, setAssignedPrograms] = useState<string[]>([]);
 
+  // Sync writers and programs when specialty or studentId changes
+  useEffect(() => {
+    setWriters(loadLetterWriterRequests(studentId));
+  }, [studentId]);
+
   // Load programs from school list
   useEffect(() => {
-    const progs = loadItemsForSpecialty(specialty);
+    const progs = loadItemsForSpecialty(specialty, undefined, studentId);
     setSavedPrograms(progs);
   }, [specialty]);
 
@@ -128,7 +135,7 @@ export function LetterOfRecommendationTracker({
     }
 
     setWriters(updated);
-    saveLetterWriterRequests(updated);
+    saveLetterWriterRequests(updated, studentId);
     setIsAddWriterModalOpen(false);
   };
 
@@ -136,7 +143,7 @@ export function LetterOfRecommendationTracker({
     if (confirm('Delete this letter writer record?')) {
       const updated = writers.filter((w) => w.id !== id);
       setWriters(updated);
-      saveLetterWriterRequests(updated);
+      saveLetterWriterRequests(updated, studentId);
     }
   };
 
