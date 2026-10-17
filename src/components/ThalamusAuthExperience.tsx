@@ -1335,12 +1335,12 @@ export function ThalamusAuthExperience({
           /* Thalamus-Style Minimal Sign-In Card */
           <div className="bg-white rounded-3xl border border-neutral-200/90 shadow-lg p-8 sm:p-10 space-y-6 animate-fade-in">
             {/* Logo & Brand Header */}
-            <div className="text-center space-y-2">
-              <div className="w-14 h-14 rounded-2xl bg-white border border-neutral-200/80 shadow-2xs mx-auto flex items-center justify-center p-2">
+            <div className="text-center space-y-3">
+              <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-3xl bg-white border border-neutral-200/80 shadow-sm mx-auto flex items-center justify-center p-2.5 overflow-hidden transition-transform hover:scale-[1.02]">
                 <img
                   src="/ethmoid-square.jpeg"
                   alt="Ethmoid logo"
-                  className="w-full h-full object-contain"
+                  className="w-full h-full object-contain rounded-2xl"
                 />
               </div>
               <div>
