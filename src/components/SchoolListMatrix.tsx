@@ -1708,7 +1708,7 @@ export function SchoolListMatrix({
                   <span>Real-Time LOR Synchronization</span>
                 </div>
                 <p className="text-emerald-950 text-[11px] leading-relaxed">
-                  The requirement you input here is automatically synchronized with your <strong>Letter of Recommendation (LOR) Tracking &amp; Gaps</strong> workspace (now located in <strong>Programs &amp; Strategy</strong>). If you have fewer letters assigned than required, the system will highlight the shortage in amber.
+                  The requirement you input here is automatically synchronized with your <strong>Letter of Recommendation (LOR) Tracking &amp; Gaps</strong> workspace. If you have fewer letters assigned than required, the system will highlight the shortage in amber.
                 </p>
               </div>
             </div>
