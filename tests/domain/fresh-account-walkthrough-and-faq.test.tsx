@@ -248,7 +248,7 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
 
       // Verify Column 3: Compact Reflective Journal
       expect(markup).toContain('Journal');
-      expect(markup).toContain('Encounter &amp; takeaway scratchpad');
+      expect(markup).not.toContain('Encounter &amp; takeaway scratchpad');
       expect(markup).toContain('Private scratchpad');
       expect(markup).toContain('3 saved');
     });

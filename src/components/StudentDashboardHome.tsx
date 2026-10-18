@@ -606,9 +606,6 @@ export function StudentDashboardHome({
                   <BookOpen className="w-4 h-4 text-[#1F3A30]" />
                   <span>Journal</span>
                 </h2>
-                <p className="text-[10px] text-neutral-500 mt-0.5">
-                  Encounter &amp; takeaway scratchpad
-                </p>
               </div>
 
               <button
