@@ -215,37 +215,21 @@ export function DevPersonaSwitcher({
                     </div>
                   </div>
 
-                  <div className="py-1.5 space-y-0.5">
+                  <div className="pt-1.5">
                     <button
-                      onClick={handleFaqClick}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
+                      onClick={() => {
+                        setIsProfileMenuOpen(false);
+                        if (onLogout) {
+                          onLogout();
+                        } else if (typeof window !== 'undefined') {
+                          window.location.href = '/';
+                        }
+                      }}
+                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-red-700 hover:bg-red-50 hover:text-red-800 font-semibold transition-colors text-left cursor-pointer"
                     >
-                      <HelpCircle className="w-4 h-4 text-[#4E8773]" />
-                      <span>FAQ &amp; Platform Walkthrough</span>
+                      <LogOut className="w-4 h-4 text-red-600" />
+                      <span>Sign Out</span>
                     </button>
-
-                    <button
-                      onClick={handleIntakeClick}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
-                    >
-                      <FileText className="w-4 h-4 text-[#4E8773]" />
-                      <span>Intake Packet</span>
-                    </button>
-
-                    {onLogout && (
-                      <div className="pt-1 mt-1 border-t border-neutral-100">
-                        <button
-                          onClick={() => {
-                            setIsProfileMenuOpen(false);
-                            onLogout();
-                          }}
-                          className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-red-700 hover:bg-red-50 hover:text-red-800 font-semibold transition-colors text-left cursor-pointer"
-                        >
-                          <LogOut className="w-4 h-4 text-red-600" />
-                          <span>Sign Out</span>
-                        </button>
-                      </div>
-                    )}
                   </div>
                 </div>
               )}

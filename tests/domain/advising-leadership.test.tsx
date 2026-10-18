@@ -51,9 +51,10 @@ describe('Advising Contacts Removal & Independent Student Experience', () => {
     expect(markup).not.toContain('aria-label="Advising and Leadership"');
     expect(markup).not.toContain('<span>Advising and Leadership</span>');
 
-    // FAQ and intake packet should be preserved; profile summary removed
+    // FAQ quick icon in header and Sign Out should be preserved; inner dropdown navigation links removed
     expect(markup).toContain('Frequently Asked Questions &amp; Guide');
-    expect(markup).toContain('Intake Packet');
+    expect(markup).toContain('Sign Out');
+    expect(markup).not.toContain('Intake Packet');
     expect(markup).not.toContain('Profile Summary');
     expect(markup).not.toContain('Profile Management &amp; Scores');
   });

@@ -178,8 +178,9 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
 
       // Profile menu dropdown items
       expect(markup).not.toContain('Advising and Leadership');
-      expect(markup).toContain('FAQ &amp; Platform Walkthrough');
-      expect(markup).toContain('Intake Packet');
+      expect(markup).toContain('Sign Out');
+      expect(markup).not.toContain('FAQ &amp; Platform Walkthrough');
+      expect(markup).not.toContain('Intake Packet');
       expect(markup).not.toContain('Profile Summary');
       expect(markup).not.toContain('Profile Management &amp; Scores');
 
