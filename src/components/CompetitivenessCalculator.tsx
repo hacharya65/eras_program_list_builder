@@ -182,32 +182,27 @@ export function CompetitivenessCalculator({
   return (
     <div className="space-y-6">
       {/* Top Navigation & Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-xl border border-slate-200 shadow-sm">
         <div className="flex items-center gap-3">
           <button
             onClick={onBack}
-            className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg text-xs font-semibold flex items-center gap-1 transition-colors"
+            className="p-2 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
+            title="Back to Overview"
           >
-            <ChevronLeft className="w-4 h-4" /> Back to Dashboard
+            <ChevronLeft className="w-5 h-5" />
           </button>
           <div>
-            <div className="flex items-center gap-2">
-              <span className="px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
-                Official NRMP 2026 Data
-              </span>
-              <span className="text-xs text-slate-500">Summary Statistics Medians</span>
-            </div>
-            <h1 className="text-xl font-bold text-slate-900 mt-1 flex items-center gap-2">
-              <BarChart3 className="w-6 h-6 text-emerald-600" />
-              Multimodal Competitiveness Engine
+            <h1 className="text-lg font-bold text-slate-900 flex items-center gap-2">
+              <BarChart3 className="w-5 h-5 text-emerald-600" />
+              <span>Multimodal Competitiveness Engine</span>
             </h1>
           </div>
         </div>
 
         {/* Declared Target Specialty Badge (Locked) */}
-        <div className="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 shadow-2xs">
-          <span className="text-xs font-medium text-slate-500">Target Specialty:</span>
-          <span className="text-xs font-bold text-slate-900">{specialty}</span>
+        <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs shadow-xs">
+          <span className="text-slate-600 font-bold whitespace-nowrap">Target Specialty:</span>
+          <span className="font-bold text-slate-900">{specialty}</span>
         </div>
       </div>
 
