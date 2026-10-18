@@ -1036,10 +1036,7 @@ CLINICAL STATEMENT & GOALS:
 
 
 
-              {/* Bottom CV reminder notice */}
-              <div className="p-3 bg-slate-100 rounded-lg text-center text-xs text-slate-600 italic">
-                "Please bring this form along with an updated copy of your CV when you are meeting with your specialty advisor."
-              </div>
+
 
               {/* Action Toolbar */}
               <div className="pt-2 flex items-center justify-between">
@@ -1203,9 +1200,7 @@ CLINICAL STATEMENT & GOALS:
                   </div>
                 </div>
 
-                <div className="border-t border-slate-300 pt-3 text-center text-[10px] text-slate-500 font-sans italic">
-                  Please bring this dossier along with an updated copy of your CV when you are meeting with your specialty advisor.
-                </div>
+
               </div>
             </div>
           )}
