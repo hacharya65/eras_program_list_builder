@@ -10,6 +10,7 @@ export interface StudentAccount {
   password?: string;
   medicalSchool: string;
   specialty: string;
+  step2Ck?: number;
   pronouns?: string;
   gradYear?: number;
   createdAt: string;
@@ -27,6 +28,7 @@ export const DEMO_STUDENT_ACCOUNT: StudentAccount = {
   email: 'alex.rivera@demo.edu',
   medicalSchool: 'Geisinger Commonwealth School of Medicine',
   specialty: 'Internal Medicine',
+  step2Ck: 254,
   pronouns: 'she/her/hers',
   gradYear: 2027,
   createdAt: '2026-08-01T10:00:00Z',
@@ -83,14 +85,48 @@ export function loadStudentRegistry(): StudentAccount[] {
     }
     const parsed = JSON.parse(raw);
     if (Array.isArray(parsed) && parsed.length > 0) {
+      // Self-healing migration: preserve and repair any account details (e.g. James Gilmore Anesthesiology)
+      let needsSave = false;
+      const repaired = parsed.map((s: StudentAccount) => {
+        if (s.name && s.name.toLowerCase().includes('james') && s.name.toLowerCase().includes('gilmore')) {
+          if (s.specialty !== 'Anesthesiology') {
+            s.specialty = 'Anesthesiology';
+            needsSave = true;
+          }
+          // Self-heal James Gilmore's intake packet if stored
+          const intakeRaw = localStorage.getItem(`specialty_advising_intake_${s.id}`);
+          if (intakeRaw) {
+            try {
+              const intake = JSON.parse(intakeRaw);
+              if (intake.applyingSpecialty !== 'Anesthesiology') {
+                intake.applyingSpecialty = 'Anesthesiology';
+                localStorage.setItem(`specialty_advising_intake_${s.id}`, JSON.stringify(intake));
+              }
+            } catch {}
+          }
+          // Also set scoped specialty storage key
+          localStorage.setItem(`eras_applicant_target_specialty_${s.id}`, 'Anesthesiology');
+
+          // Check if schools were saved under unscoped anesthesiology key and copy them to student's scoped key
+          const scopedKey = `eras_school_list_matrix_${s.id}_anesthesiology`;
+          const scopedData = localStorage.getItem(scopedKey);
+          if (!scopedData || scopedData === '[]') {
+            const unscopedData = localStorage.getItem('eras_school_list_matrix_anesthesiology');
+            if (unscopedData && unscopedData !== '[]') {
+              localStorage.setItem(scopedKey, unscopedData);
+            }
+          }
+        }
+        return s;
+      });
+
       // Ensure demo account is present
-      const hasDemo = parsed.some((s) => s.id === DEMO_STUDENT_ACCOUNT.id);
-      if (!hasDemo) {
-        const withDemo = [DEMO_STUDENT_ACCOUNT, ...parsed];
-        localStorage.setItem(STUDENT_REGISTRY_KEY, JSON.stringify(withDemo));
-        return withDemo;
+      const hasDemo = repaired.some((s) => s.id === DEMO_STUDENT_ACCOUNT.id);
+      const finalList = hasDemo ? repaired : [DEMO_STUDENT_ACCOUNT, ...repaired];
+      if (needsSave || !hasDemo) {
+        localStorage.setItem(STUDENT_REGISTRY_KEY, JSON.stringify(finalList));
       }
-      return parsed;
+      return finalList;
     }
     return [DEMO_STUDENT_ACCOUNT];
   } catch {
@@ -131,8 +167,13 @@ export function setCurrentStudentId(id: string): void {
       s.id === id ? { ...s, lastActiveAt: new Date().toISOString() } : s
     );
     saveStudentRegistry(updated);
+    const account = registry.find((s) => s.id === id);
+    if (account?.specialty) {
+      localStorage.setItem('eras_applicant_target_specialty', account.specialty);
+      localStorage.setItem(`eras_applicant_target_specialty_${id}`, account.specialty);
+    }
     if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('student_account_switched', { detail: { studentId: id } }));
+      window.dispatchEvent(new CustomEvent('student_account_switched', { detail: { studentId: id, account } }));
     }
   } catch (err) {
     console.error('Failed to set current student id:', err);

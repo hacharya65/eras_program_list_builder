@@ -11,6 +11,7 @@ import {
   setStoredTargetSpecialty,
   APPLICANT_PROFILE_STORAGE_KEY,
 } from './school-list-models';
+import { getStudentAccount, updateStudentAccount } from './student-registry';
 
 export type ClerkshipGrade = 'Honors' | 'High Pass' | 'Pass' | 'Fail' | 'In Progress';
 
@@ -280,14 +281,22 @@ export function loadStudentAdvisingIntake(studentId: string = 'usr-student-1'): 
       const stored = localStorage.getItem(`${SPECIALTY_INTAKE_STORAGE_PREFIX}${studentId}`);
       if (stored) {
         const parsed: SpecialtyAdvisingIntake = JSON.parse(stored);
-        // Ensure synchronization with global step 2 CK and target specialty if stored
-        const globalStep2 = getStoredApplicantStep2Ck();
-        const globalSpecialty = getStoredTargetSpecialty();
-        if (globalStep2 && parsed.step2Status === 'score_available' && !parsed.step2Score) {
-          parsed.step2Score = globalStep2;
+        
+        // Self-heal: If student account has a non-default specialty and parsed was overwritten to 'Internal Medicine'
+        const acc = getStudentAccount(studentId);
+        if (acc && acc.specialty && acc.specialty !== 'Internal Medicine' && parsed.applyingSpecialty === 'Internal Medicine') {
+          parsed.applyingSpecialty = acc.specialty;
+          try {
+            localStorage.setItem(`${SPECIALTY_INTAKE_STORAGE_PREFIX}${studentId}`, JSON.stringify(parsed));
+          } catch {}
         }
-        if (globalSpecialty && parsed.applyingSpecialty !== globalSpecialty) {
-          parsed.applyingSpecialty = globalSpecialty;
+
+        // Intake is authoritative for the student's declared specialty
+        if (parsed.applyingSpecialty) {
+          setStoredTargetSpecialty(parsed.applyingSpecialty, studentId);
+        }
+        if (parsed.step2Status === 'score_available' && typeof parsed.step2Score === 'number') {
+          setStoredApplicantStep2Ck(parsed.step2Score, studentId);
         }
         return parsed;
       }
@@ -298,12 +307,18 @@ export function loadStudentAdvisingIntake(studentId: string = 'usr-student-1'): 
     return inMemoryIntakeMap.get(studentId)!;
   }
 
-  // Return initial mock intake for demo student
+  const acc = getStudentAccount(studentId);
+  const initialSpecialty = acc?.specialty || getStoredTargetSpecialty(studentId) || INITIAL_MOCK_INTAKE.applyingSpecialty;
+  const initialStep2 = acc?.step2Ck || getStoredApplicantStep2Ck(studentId) || INITIAL_MOCK_INTAKE.step2Score;
+
+  // Return initial mock intake for demo student or new student
   return {
     ...INITIAL_MOCK_INTAKE,
     studentId,
-    applyingSpecialty: getStoredTargetSpecialty() || INITIAL_MOCK_INTAKE.applyingSpecialty,
-    step2Score: getStoredApplicantStep2Ck() || INITIAL_MOCK_INTAKE.step2Score,
+    studentName: acc?.name || INITIAL_MOCK_INTAKE.studentName,
+    medicalSchool: acc?.medicalSchool || INITIAL_MOCK_INTAKE.medicalSchool,
+    applyingSpecialty: initialSpecialty,
+    step2Score: initialStep2,
   };
 }
 
@@ -315,12 +330,12 @@ export function saveStudentAdvisingIntake(intake: SpecialtyAdvisingIntake): void
 
   // 1. Synchronize Step 2 CK score with downstream School List tiering
   if (intake.step2Status === 'score_available' && typeof intake.step2Score === 'number') {
-    setStoredApplicantStep2Ck(intake.step2Score);
+    setStoredApplicantStep2Ck(intake.step2Score, intake.studentId);
   }
 
   // 2. Synchronize Target Specialty
   if (intake.applyingSpecialty) {
-    setStoredTargetSpecialty(intake.applyingSpecialty);
+    setStoredTargetSpecialty(intake.applyingSpecialty, intake.studentId);
   }
 
   if (typeof localStorage !== 'undefined') {
@@ -329,6 +344,17 @@ export function saveStudentAdvisingIntake(intake: SpecialtyAdvisingIntake): void
         `${SPECIALTY_INTAKE_STORAGE_PREFIX}${intake.studentId}`,
         JSON.stringify(intake)
       );
+
+      // Keep student registry account updated with the authoritative specialty and med school
+      if (intake.studentId) {
+        updateStudentAccount(intake.studentId, {
+          ...(intake.applyingSpecialty ? { specialty: intake.applyingSpecialty } : {}),
+          ...(intake.medicalSchool ? { medicalSchool: intake.medicalSchool } : {}),
+          ...(intake.step2Status === 'score_available' && typeof intake.step2Score === 'number'
+            ? { step2Ck: intake.step2Score }
+            : {}),
+        });
+      }
 
       // 3. Synchronize auto-computed clerkship honors count and metrics into ApplicantProfile
       const computedHonors = calculateClerkshipHonorsCount(intake.clerkshipGrades);

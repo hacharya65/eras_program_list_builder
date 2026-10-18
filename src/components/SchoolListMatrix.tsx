@@ -17,6 +17,7 @@ import {
   getStorageKeyForSpecialty,
   DEFAULT_INTERNAL_MEDICINE_SAMPLE_ITEMS,
 } from '@/domain/school-list-models';
+import { isDemoStudentId } from '@/domain/student-registry';
 import {
   computeSignalingRecommendation,
   SignalingRecommendation,
@@ -95,11 +96,11 @@ export function SchoolListMatrix({
   const [selectedSpecialty, setSelectedSpecialty] = useState(specialty);
 
   // Applicant baseline Step 2 CK score (Ticket Candidate 8)
-  const [applicantStep2Ck, setApplicantStep2Ck] = useState<number>(() => getStoredApplicantStep2Ck());
+  const [applicantStep2Ck, setApplicantStep2Ck] = useState<number>(() => getStoredApplicantStep2Ck(studentId));
 
   // Rehydrate state safely from local storage or auto-populate consistent sample programs
   const [items, setItems] = useState<SchoolListItem[]>(() => {
-    return loadItemsForSpecialty(specialty, getStoredApplicantStep2Ck(), studentId);
+    return loadItemsForSpecialty(specialty, getStoredApplicantStep2Ck(studentId), studentId);
   });
 
   // Sync if parent prop changes
@@ -164,10 +165,10 @@ export function SchoolListMatrix({
   }, [applicantStep2Ck]);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && items && items.length > 0) {
+    if (typeof window !== 'undefined' && items) {
       const storageKey = getStorageKeyForSpecialty(selectedSpecialty, studentId);
       localStorage.setItem(storageKey, JSON.stringify(items));
-      if (selectedSpecialty === 'Internal Medicine') {
+      if (selectedSpecialty === 'Internal Medicine' && isDemoStudentId(studentId)) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
       }
     }
@@ -175,7 +176,7 @@ export function SchoolListMatrix({
 
   const handleSpecialtyChange = (newSpecialty: string) => {
     setSelectedSpecialty(newSpecialty);
-    setStoredTargetSpecialty(newSpecialty);
+    setStoredTargetSpecialty(newSpecialty, studentId);
     setDbSpecialtyFilter(newSpecialty);
     const loaded = loadItemsForSpecialty(newSpecialty, applicantStep2Ck, studentId);
     setItems(loaded);

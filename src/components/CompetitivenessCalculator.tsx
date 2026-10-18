@@ -70,7 +70,7 @@ export function CompetitivenessCalculator({
   // Resolve initial student metrics from intake or stored profile
   const resolveInitialMetrics = () => {
     let aoa = false;
-    let step2 = getStoredApplicantStep2Ck() || 250;
+    let step2 = getStoredApplicantStep2Ck(studentId) || 250;
     let research = 4;
     let abs = 2;
     let pres = 4;

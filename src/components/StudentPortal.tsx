@@ -17,6 +17,7 @@ import {
   getStudentAccount,
   isDemoStudentId,
   updateStudentMedicalSchool,
+  updateStudentAccount,
 } from '@/domain/student-registry';
 import {
   CANONICAL_SPECIALTIES,
@@ -88,7 +89,7 @@ export function StudentPortal({
 
   // Student Target Specialty State (Deterministic SSR initialization)
   const [targetSpecialty, setTargetSpecialty] = useState<string>(
-    student.specialty || 'Internal Medicine'
+    currentStudentAccount?.specialty || student.specialty || 'Internal Medicine'
   );
 
   // Scroll to top and synchronize URL search parameters on view navigation
@@ -237,16 +238,20 @@ export function StudentPortal({
     const loadedIntake = loadStudentAdvisingIntake(activeStudentId);
     if (loadedIntake) {
       setAdvisingIntake(loadedIntake);
-      if (loadedIntake.applyingSpecialty) {
-        setTargetSpecialty(loadedIntake.applyingSpecialty);
-        return;
-      }
+      const trueSpecialty =
+        currentStudentAccount?.specialty ||
+        loadedIntake.applyingSpecialty ||
+        getStoredTargetSpecialty(activeStudentId) ||
+        'Internal Medicine';
+      setTargetSpecialty(trueSpecialty);
+      setStoredTargetSpecialty(trueSpecialty, activeStudentId);
+      return;
     }
-    const stored = getStoredTargetSpecialty();
+    const stored = getStoredTargetSpecialty(activeStudentId);
     if (stored) {
       setTargetSpecialty(stored);
     }
-  }, [activeStudentId]);
+  }, [activeStudentId, currentStudentAccount?.specialty]);
 
   // School List Summary Stats (Deterministic SSR default)
   const [schoolListStats, setSchoolListStats] = useState({
@@ -256,16 +261,16 @@ export function StudentPortal({
 
   // Update stats on mount and specialty switch
   useEffect(() => {
-    const items = loadItemsForSpecialty(targetSpecialty);
+    const items = loadItemsForSpecialty(targetSpecialty, undefined, activeStudentId);
     const assignedSignals = items.filter((i) => i.signal === 'gold' || i.signal === 'silver').length;
     setSchoolListStats({
       count: items.length,
       signalsAssigned: assignedSignals,
     });
-  }, [targetSpecialty]);
+  }, [targetSpecialty, activeStudentId]);
 
   const handleSpecialtyChange = (newSpecialty: string) => {
-    const currentItems = loadItemsForSpecialty(targetSpecialty);
+    const currentItems = loadItemsForSpecialty(targetSpecialty, undefined, activeStudentId);
     if (currentItems.length > 0 && newSpecialty !== targetSpecialty) {
       setPendingSpecialtySwitch(newSpecialty);
     } else {
@@ -274,7 +279,8 @@ export function StudentPortal({
   };
 
   const applySpecialtySwitch = (newSpecialty: string) => {
-    setStoredTargetSpecialty(newSpecialty);
+    setStoredTargetSpecialty(newSpecialty, activeStudentId);
+    updateStudentAccount(activeStudentId, { specialty: newSpecialty });
     setTargetSpecialty(newSpecialty);
 
     const defaultAdvisor = getDefaultAdvisorForSpecialty(newSpecialty);
@@ -286,7 +292,7 @@ export function StudentPortal({
     setAdvisingIntake(updatedIntake);
     saveStudentAdvisingIntake(updatedIntake);
 
-    const newItems = loadItemsForSpecialty(newSpecialty);
+    const newItems = loadItemsForSpecialty(newSpecialty, undefined, activeStudentId);
     const assigned = newItems.filter((i) => i.signal === 'gold' || i.signal === 'silver').length;
     setSchoolListStats({
       count: newItems.length,

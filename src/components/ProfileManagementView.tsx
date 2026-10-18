@@ -54,7 +54,7 @@ export function ProfileManagementView({
 }: ProfileManagementViewProps) {
   // Academic metrics state
   const [step2CkScore, setStep2CkScore] = useState<number>(() => {
-    return getStoredApplicantStep2Ck() || 254;
+    return getStoredApplicantStep2Ck(student?.id) || 254;
   });
   const [step1Status, setStep1Status] = useState<'pass' | 'fail'>('pass');
   const [classRank, setClassRank] = useState<'Top 10%' | 'Top Quartile' | 'Second Quartile' | 'Not Ranked'>(
@@ -73,7 +73,7 @@ export function ProfileManagementView({
 
   const handleSaveAcademicMetrics = (e: React.FormEvent) => {
     e.preventDefault();
-    setStoredApplicantStep2Ck(step2CkScore);
+    setStoredApplicantStep2Ck(step2CkScore, student?.id);
     setSaveSuccessMsg('Academic profile & Step 2 CK score updated successfully!');
     setTimeout(() => {
       setSaveSuccessMsg(null);

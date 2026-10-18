@@ -4,6 +4,7 @@
  */
 
 import { getAllResidencyPrograms, ResidencyProgramRecord, formatProgramDisplayName } from './residency-database';
+import { CURRENT_STUDENT_ID_KEY, isDemoStudentId, getStudentAccount, updateStudentAccount } from './student-registry';
 
 export interface SpecialtySignalRule {
   specialty: string;
@@ -498,9 +499,17 @@ export const APPLICANT_PROFILE_STORAGE_KEY = 'eras_applicant_profile';
 
 let inMemoryStep2Ck = DEFAULT_APPLICANT_STEP2_CK;
 
-export function getStoredApplicantStep2Ck(): number {
+export function getStoredApplicantStep2Ck(studentId?: string): number {
+  const sid = studentId || (typeof localStorage !== 'undefined' ? localStorage.getItem(CURRENT_STUDENT_ID_KEY) : null);
   if (typeof localStorage !== 'undefined') {
     try {
+      if (sid && !isDemoStudentId(sid)) {
+        const scoped = localStorage.getItem(`${APPLICANT_STEP2_CK_STORAGE_KEY}_${sid}`);
+        if (scoped) {
+          const parsed = parseInt(scoped, 10);
+          if (!isNaN(parsed) && parsed > 0) return parsed;
+        }
+      }
       const stored = localStorage.getItem(APPLICANT_STEP2_CK_STORAGE_KEY);
       if (stored) {
         const parsed = parseInt(stored, 10);
@@ -513,11 +522,16 @@ export function getStoredApplicantStep2Ck(): number {
   return inMemoryStep2Ck;
 }
 
-export function setStoredApplicantStep2Ck(score: number): void {
+export function setStoredApplicantStep2Ck(score: number, studentId?: string): void {
+  const sid = studentId || (typeof localStorage !== 'undefined' ? localStorage.getItem(CURRENT_STUDENT_ID_KEY) : null);
   inMemoryStep2Ck = score;
   if (typeof localStorage !== 'undefined') {
     try {
       localStorage.setItem(APPLICANT_STEP2_CK_STORAGE_KEY, score.toString());
+      if (sid && !isDemoStudentId(sid)) {
+        localStorage.setItem(`${APPLICANT_STEP2_CK_STORAGE_KEY}_${sid}`, score.toString());
+        updateStudentAccount(sid, { step2Ck: score });
+      }
     } catch {
       // fallback
     }
@@ -535,9 +549,23 @@ export const TARGET_SPECIALTY_STORAGE_KEY = 'eras_applicant_target_specialty';
 
 let inMemoryTargetSpecialty = 'Internal Medicine';
 
-export function getStoredTargetSpecialty(): string {
+export function getStoredTargetSpecialty(studentId?: string): string {
+  const sid = studentId || (typeof localStorage !== 'undefined' ? localStorage.getItem(CURRENT_STUDENT_ID_KEY) : null);
   if (typeof localStorage !== 'undefined') {
     try {
+      // 1. Scoped student specialty key
+      if (sid && !isDemoStudentId(sid)) {
+        const studentScoped = localStorage.getItem(`${TARGET_SPECIALTY_STORAGE_KEY}_${sid}`);
+        if (studentScoped) return studentScoped;
+      }
+      
+      // 2. Student account from registry
+      if (sid) {
+        const acc = getStudentAccount(sid);
+        if (acc?.specialty) return acc.specialty;
+      }
+
+      // 3. Fallback to global storage key
       const stored = localStorage.getItem(TARGET_SPECIALTY_STORAGE_KEY);
       if (stored) return stored;
     } catch {
@@ -547,11 +575,16 @@ export function getStoredTargetSpecialty(): string {
   return inMemoryTargetSpecialty;
 }
 
-export function setStoredTargetSpecialty(specialty: string): void {
+export function setStoredTargetSpecialty(specialty: string, studentId?: string): void {
+  const sid = studentId || (typeof localStorage !== 'undefined' ? localStorage.getItem(CURRENT_STUDENT_ID_KEY) : null);
   inMemoryTargetSpecialty = specialty;
   if (typeof localStorage !== 'undefined') {
     try {
       localStorage.setItem(TARGET_SPECIALTY_STORAGE_KEY, specialty);
+      if (sid && !isDemoStudentId(sid)) {
+        localStorage.setItem(`${TARGET_SPECIALTY_STORAGE_KEY}_${sid}`, specialty);
+        updateStudentAccount(sid, { specialty });
+      }
     } catch {
       // fallback
     }
@@ -824,45 +857,74 @@ export function loadItemsForSpecialty(
   studentId?: string
 ): SchoolListItem[] {
   const normSpec = specialty?.trim() || 'Internal Medicine';
-  const baseline = applicantScore ?? getStoredApplicantStep2Ck();
-  const sid = studentId || (typeof localStorage !== 'undefined' ? localStorage.getItem('ethmoid_current_student_id_v1') : null);
-  const isDemo = !sid || sid === 'stu-alex-rivera' || sid === 'usr-student-1' || sid === 'student-test-sync' || sid.startsWith('demo-');
+  const baseline = applicantScore ?? getStoredApplicantStep2Ck(studentId);
+  const sid = studentId || (typeof localStorage !== 'undefined' ? localStorage.getItem(CURRENT_STUDENT_ID_KEY) : null);
+  const isDemo = !sid || isDemoStudentId(sid);
+
+  const mapItems = (rawList: SchoolListItem[]) => {
+    return rawList.map((item: SchoolListItem) => {
+      let min = item.step2Min;
+      let max = item.step2Max;
+      if ((min === undefined || max === undefined) && item.step2ScoreRange) {
+        const p = parseScoreRange(item.step2ScoreRange);
+        if (p.min !== undefined && p.max !== undefined) {
+          min = p.min;
+          max = p.max;
+        }
+      }
+      const autoTier = evaluateProgramTier(baseline, min, max);
+      return {
+        ...item,
+        step2Min: min,
+        step2Max: max,
+        ...(autoTier ? { tier: autoTier } : {}),
+      };
+    });
+  };
 
   if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+    const safe = normSpec.toLowerCase().replace(/[^a-z0-9]/g, '_');
     const specificKey = getStorageKeyForSpecialty(normSpec, sid || undefined);
     const cached = localStorage.getItem(specificKey);
     if (cached) {
       try {
         const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed)) {
-          if (parsed.length > 0) {
-            const belongs = parsed.some(
-              (p: SchoolListItem) => p.specialty && p.specialty.toLowerCase() === normSpec.toLowerCase()
-            );
-            if (belongs) {
-              return parsed.map((item: SchoolListItem) => {
-                let min = item.step2Min;
-                let max = item.step2Max;
-                if ((min === undefined || max === undefined) && item.step2ScoreRange) {
-                  const p = parseScoreRange(item.step2ScoreRange);
-                  if (p.min !== undefined && p.max !== undefined) {
-                    min = p.min;
-                    max = p.max;
-                  }
-                }
-                const autoTier = evaluateProgramTier(baseline, min, max);
-                return {
-                  ...item,
-                  step2Min: min,
-                  step2Max: max,
-                  ...(autoTier ? { tier: autoTier } : {}),
-                };
-              });
-            }
-          }
-          return parsed;
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return mapItems(parsed);
         }
       } catch {}
+    }
+
+    // Self-healing fallback 1: If student is non-demo and doesn't have a scoped copy yet,
+    // check if schools were saved under the unscoped key for this specialty
+    if (sid && !isDemo) {
+      const unscopedKey = `eras_school_list_matrix_${safe}`;
+      const unscopedCached = localStorage.getItem(unscopedKey);
+      if (unscopedCached) {
+        try {
+          const parsed = JSON.parse(unscopedCached);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            localStorage.setItem(specificKey, unscopedCached);
+            return mapItems(parsed);
+          }
+        } catch {}
+      }
+
+      // Self-healing fallback 2: Check if student has saved programs under their registered account specialty
+      const acc = getStudentAccount(sid);
+      if (acc?.specialty && acc.specialty.toLowerCase() !== normSpec.toLowerCase()) {
+        const accSafe = acc.specialty.toLowerCase().replace(/[^a-z0-9]/g, '_');
+        const accScopedKey = `eras_school_list_matrix_${sid}_${accSafe}`;
+        const accCached = localStorage.getItem(accScopedKey) || localStorage.getItem(`eras_school_list_matrix_${accSafe}`);
+        if (accCached) {
+          try {
+            const parsed = JSON.parse(accCached);
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              return mapItems(parsed);
+            }
+          } catch {}
+        }
+      }
     }
 
     // Non-demo users start with a fresh, empty school list!
@@ -879,24 +941,7 @@ export function loadItemsForSpecialty(
           if (Array.isArray(parsed) && parsed.length > 0) {
             const isIM = parsed.every((p: SchoolListItem) => !p.specialty || p.specialty.toLowerCase() === 'internal medicine');
             if (isIM) {
-              return parsed.map((item: SchoolListItem) => {
-                let min = item.step2Min;
-                let max = item.step2Max;
-                if ((min === undefined || max === undefined) && item.step2ScoreRange) {
-                  const p = parseScoreRange(item.step2ScoreRange);
-                  if (p.min !== undefined && p.max !== undefined) {
-                    min = p.min;
-                    max = p.max;
-                  }
-                }
-                const autoTier = evaluateProgramTier(baseline, min, max);
-                return {
-                  ...item,
-                  step2Min: min,
-                  step2Max: max,
-                  ...(autoTier ? { tier: autoTier } : {}),
-                };
-              });
+              return mapItems(parsed);
             }
           }
         } catch {}

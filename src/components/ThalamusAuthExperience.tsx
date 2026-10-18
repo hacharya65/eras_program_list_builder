@@ -21,7 +21,7 @@ import {
   US_CENSUS_DIVISIONS,
   INITIAL_MOCK_INTAKE,
 } from '@/domain/advising-intake-models';
-import { CANONICAL_SPECIALTIES } from '@/domain/school-list-models';
+import { CANONICAL_SPECIALTIES, setStoredTargetSpecialty, setStoredApplicantStep2Ck } from '@/domain/school-list-models';
 import { MedicalSchoolCombobox } from './MedicalSchoolCombobox';
 import { isValidMedicalSchool } from '@/domain/medical-schools-database';
 import {
@@ -167,6 +167,7 @@ export function ThalamusAuthExperience({
     // Check if matching demo
     if (clean === DEMO_STUDENT_ACCOUNT.email.toLowerCase() || clean === 'alex.rivera@demo.edu' || clean === 'arivera@som.edu') {
       setCurrentStudentId(DEMO_STUDENT_ACCOUNT.id);
+      setStoredTargetSpecialty(DEMO_STUDENT_ACCOUNT.specialty, DEMO_STUDENT_ACCOUNT.id);
       setAuthenticatedSession(true);
       onAuthenticated(DEMO_STUDENT_ACCOUNT);
       return;
@@ -179,6 +180,10 @@ export function ThalamusAuthExperience({
         return;
       }
       setCurrentStudentId(account.id);
+      setStoredTargetSpecialty(account.specialty, account.id);
+      if (account.step2Ck) {
+        setStoredApplicantStep2Ck(account.step2Ck, account.id);
+      }
       setAuthenticatedSession(true);
       onAuthenticated(account);
       return;
@@ -190,6 +195,7 @@ export function ThalamusAuthExperience({
   // Quick Demo Login Action
   const handleQuickDemoLogin = () => {
     setCurrentStudentId(DEMO_STUDENT_ACCOUNT.id);
+    setStoredTargetSpecialty(DEMO_STUDENT_ACCOUNT.specialty, DEMO_STUDENT_ACCOUNT.id);
     setAuthenticatedSession(true);
     onAuthenticated(DEMO_STUDENT_ACCOUNT);
   };
@@ -374,6 +380,10 @@ export function ThalamusAuthExperience({
     };
 
     saveStudentAdvisingIntake(fullIntake);
+    setStoredTargetSpecialty(newAccount.specialty, newAccount.id);
+    if (newAccount.step2Ck) {
+      setStoredApplicantStep2Ck(newAccount.step2Ck, newAccount.id);
+    }
     setAuthenticatedSession(true);
     onAuthenticated(newAccount);
   };

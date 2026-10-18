@@ -128,7 +128,7 @@ export function StudentAuthModal({
 
   const handleSelectExistingStudent = (student: StudentAccount) => {
     setCurrentStudentId(student.id);
-    setStoredTargetSpecialty(student.specialty);
+    setStoredTargetSpecialty(student.specialty, student.id);
     onAuthenticated(student);
   };
 
@@ -224,9 +224,9 @@ export function StudentAuthModal({
 
       // 4. Update Step 2 CK & Target Specialty global helpers
       if (step2Status === 'score_available' && step2Score) {
-        setStoredApplicantStep2Ck(Number(step2Score));
+        setStoredApplicantStep2Ck(Number(step2Score), account.id);
       }
-      setStoredTargetSpecialty(specialty);
+      setStoredTargetSpecialty(specialty, account.id);
 
       // 5. Update Applicant Profile data in storage
       if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {

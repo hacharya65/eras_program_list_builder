@@ -12,12 +12,14 @@ import { BrowserStoragePortfolioAdapter } from '@/domain/student-portfolio';
 import {
   StudentAccount,
   getCurrentStudentId,
+  setCurrentStudentId,
   getStudentAccount,
   loadStudentRegistry,
   isUserAuthenticated,
   logoutSession,
   setAuthenticatedSession,
 } from '@/domain/student-registry';
+import { setStoredTargetSpecialty } from '@/domain/school-list-models';
 
 // Instantiate singleton service with in-memory adapter and browser storage portfolio adapter
 const storage = new InMemoryStorageAdapter();
@@ -38,14 +40,17 @@ export default function HomePage() {
 
     if (authed) {
       const id = getCurrentStudentId();
-      const acc = getStudentAccount(id);
-      if (acc) {
-        setCurrentAccount(acc);
-      } else {
+      let acc = getStudentAccount(id);
+      if (!acc) {
         const registry = loadStudentRegistry();
         if (registry.length > 0) {
-          setCurrentAccount(registry[0]);
+          acc = registry[0];
+          setCurrentStudentId(acc.id);
         }
+      }
+      if (acc) {
+        setStoredTargetSpecialty(acc.specialty, acc.id);
+        setCurrentAccount(acc);
       }
     }
 
@@ -53,7 +58,10 @@ export default function HomePage() {
       const switchedId = e.detail?.studentId;
       if (switchedId) {
         const found = getStudentAccount(switchedId);
-        if (found) setCurrentAccount(found);
+        if (found) {
+          setStoredTargetSpecialty(found.specialty, found.id);
+          setCurrentAccount(found);
+        }
       }
     };
 
@@ -88,6 +96,8 @@ export default function HomePage() {
       url.searchParams.set('view', 'dashboard');
       window.history.replaceState({ view: 'overview' }, '', url.toString());
     }
+    setCurrentStudentId(acc.id);
+    setStoredTargetSpecialty(acc.specialty, acc.id);
     setAuthenticatedSession(true);
     setCurrentAccount(acc);
     setIsAuthenticated(true);

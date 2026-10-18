@@ -12,6 +12,7 @@ import { ScholarlyWork, deserializeScholarlyPortfolio, serializeScholarlyPortfol
 import { SchoolListItem, SPECIALTY_SIGNALING_RULES, loadItemsForSpecialty, getStorageKeyForSpecialty } from './school-list-models';
 import { LetterWriterRequest, loadLetterWriterRequests, saveLetterWriterRequests, INITIAL_MOCK_LETTER_WRITERS } from './lor-models';
 import { ExperienceJournalEntry, loadExperienceJournalEntries, saveExperienceJournalEntries, INITIAL_MOCK_JOURNAL_ENTRIES } from './experience-journal-models';
+import { getStudentAccount, isDemoStudentId } from './student-registry';
 
 export interface StudentPortfolio {
   studentId: string;
@@ -210,17 +211,20 @@ export class BrowserStoragePortfolioAdapter implements PortfolioRepository {
     const scholarlyWorks = restoredScholarly ? restoredScholarly.works : [...SAMPLE_SCHOLARLY_WORKS];
 
     // School List
-    const schoolList = loadItemsForSpecialty(targetSpecialty);
+    const schoolList = loadItemsForSpecialty(targetSpecialty, undefined, studentId);
 
     // LOR Requests
-    const lorRequests = loadLetterWriterRequests();
+    const lorRequests = loadLetterWriterRequests(studentId);
 
     // Journal Entries
     const journalEntries = loadExperienceJournalEntries(studentId);
 
+    const acc = getStudentAccount(studentId);
+    const resolvedName = acc?.name || (isDemoStudentId(studentId) ? 'Alex Rivera (MS4)' : 'Medical Student Applicant');
+
     const portfolio: StudentPortfolio = {
       studentId,
-      studentName: 'Alex Rivera (MS4)',
+      studentName: resolvedName,
       targetSpecialty,
       intake,
       personalStatement: {
@@ -255,12 +259,12 @@ export class BrowserStoragePortfolioAdapter implements PortfolioRepository {
 
       // Bi-directional write to legacy keys so existing components continue to work
       saveStudentAdvisingIntake(portfolio.intake);
-      saveLetterWriterRequests(portfolio.lorRequests);
+      saveLetterWriterRequests(portfolio.lorRequests, portfolio.studentId);
       saveExperienceJournalEntries(portfolio.studentId, portfolio.journalEntries);
       
-      const specificSchoolListKey = getStorageKeyForSpecialty(portfolio.targetSpecialty);
+      const specificSchoolListKey = getStorageKeyForSpecialty(portfolio.targetSpecialty, portfolio.studentId);
       localStorage.setItem(specificSchoolListKey, JSON.stringify(portfolio.schoolList));
-      if (portfolio.targetSpecialty.toLowerCase() === 'internal medicine') {
+      if (portfolio.targetSpecialty.toLowerCase() === 'internal medicine' && isDemoStudentId(portfolio.studentId)) {
         localStorage.setItem('eras_school_list_matrix', JSON.stringify(portfolio.schoolList));
       }
 
