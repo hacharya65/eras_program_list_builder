@@ -27,7 +27,6 @@ interface DevPersonaSwitcherProps {
   onOpenProfileManagement?: () => void;
   onOpenFaq?: () => void;
   onOpenDashboard?: () => void;
-  onOpenAuthModal?: () => void;
   onLogout?: () => void;
   defaultMenuOpen?: boolean;
 }
@@ -42,7 +41,6 @@ export function DevPersonaSwitcher({
   onOpenProfileManagement,
   onOpenFaq,
   onOpenDashboard,
-  onOpenAuthModal,
   onLogout,
   defaultMenuOpen = false,
 }: DevPersonaSwitcherProps) {
@@ -85,6 +83,10 @@ export function DevPersonaSwitcher({
       onOpenProfileManagement();
     }
     if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('view', 'profile');
+      window.history.pushState({ view: 'profile' }, '', url.toString());
+      window.dispatchEvent(new CustomEvent('navigate_to_profile'));
       window.dispatchEvent(new CustomEvent('navigate_to_profile_management'));
     }
     setIsProfileMenuOpen(false);
@@ -92,17 +94,22 @@ export function DevPersonaSwitcher({
 
   const handleIntakeClick = () => {
     if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('view', 'intake');
+      window.history.pushState({ view: 'intake' }, '', url.toString());
       window.dispatchEvent(new CustomEvent('navigate_to_intake'));
     }
     setIsProfileMenuOpen(false);
   };
-
 
   const handleFaqClick = () => {
     if (onOpenFaq) {
       onOpenFaq();
     }
     if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('view', 'faq');
+      window.history.pushState({ view: 'faq' }, '', url.toString());
       window.dispatchEvent(new CustomEvent('navigate_to_faq'));
     }
     setIsProfileMenuOpen(false);
@@ -113,6 +120,9 @@ export function DevPersonaSwitcher({
       onOpenDashboard();
     }
     if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('view', 'dashboard');
+      window.history.pushState({ view: 'dashboard' }, '', url.toString());
       window.dispatchEvent(new CustomEvent('navigate_to_dashboard'));
     }
     setIsProfileMenuOpen(false);
@@ -209,18 +219,6 @@ export function DevPersonaSwitcher({
                   </div>
 
                   <div className="py-1.5 space-y-0.5">
-                    {onOpenAuthModal && (
-                      <button
-                        onClick={() => {
-                          setIsProfileMenuOpen(false);
-                          onOpenAuthModal();
-                        }}
-                        className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-800 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-bold transition-colors text-left cursor-pointer border-b border-neutral-100 mb-1"
-                      >
-                        <User className="w-4 h-4 text-[#1F3A30]" />
-                        <span>Switch Student / New Intake</span>
-                      </button>
-                    )}
 
                     <button
                       onClick={handleProfileClick}

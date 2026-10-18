@@ -42,6 +42,7 @@ import {
   TrendingUp,
   Download,
   FileCheck,
+  ArrowLeft,
 } from 'lucide-react';
 
 interface StudentPortalProps {
@@ -97,7 +98,8 @@ export function StudentPortal({
       window.scrollTo({ top: 0, behavior: 'instant' });
       try {
         const url = new URL(window.location.href);
-        url.searchParams.set('view', newView);
+        const urlParam = newView === 'overview' ? 'dashboard' : newView;
+        url.searchParams.set('view', urlParam);
         if (replaceHistory) {
           window.history.replaceState({ view: newView }, '', url.toString());
         } else {
@@ -108,6 +110,11 @@ export function StudentPortal({
       }
     }
   };
+
+  // Always reset to dashboard when activeStudentId changes (login, switch, demo)
+  useEffect(() => {
+    updateView('overview', true);
+  }, [activeStudentId]);
 
   // Auto-launch platform walkthrough for new (non-demo) accounts on first visit
   useEffect(() => {
@@ -132,7 +139,8 @@ export function StudentPortal({
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
-      const urlView = params.get('view') as typeof activeView | null;
+      const rawView = params.get('view');
+      const urlView = rawView === 'dashboard' ? 'overview' : (rawView as typeof activeView | null);
       if (
         urlView &&
         [
@@ -147,13 +155,20 @@ export function StudentPortal({
         ].includes(urlView)
       ) {
         setActiveView(urlView);
+      } else {
+        // Default to dashboard and ensure dedicated URL
+        setActiveView('overview');
+        const url = new URL(window.location.href);
+        url.searchParams.set('view', 'dashboard');
+        window.history.replaceState({ view: 'overview' }, '', url.toString());
       }
     }
 
     const handlePopState = (e: PopStateEvent) => {
       if (typeof window !== 'undefined') {
         const params = new URLSearchParams(window.location.search);
-        const urlView = (params.get('view') || 'overview') as typeof activeView;
+        const rawView = params.get('view');
+        const urlView = rawView === 'dashboard' ? 'overview' : ((rawView || 'overview') as typeof activeView);
         if (
           [
             'overview',
@@ -192,6 +207,7 @@ export function StudentPortal({
 
     window.addEventListener('navigate_to_dashboard', handleNavDashboard);
     window.addEventListener('navigate_to_overview', handleNavDashboard);
+    window.addEventListener('navigate_to_profile', handleNavProfile);
     window.addEventListener('navigate_to_profile_management', handleNavProfile);
     window.addEventListener('navigate_to_intake', handleNavIntake);
     window.addEventListener('navigate_to_faq', handleNavFaq);
@@ -201,6 +217,7 @@ export function StudentPortal({
     return () => {
       window.removeEventListener('navigate_to_dashboard', handleNavDashboard);
       window.removeEventListener('navigate_to_overview', handleNavDashboard);
+      window.removeEventListener('navigate_to_profile', handleNavProfile);
       window.removeEventListener('navigate_to_profile_management', handleNavProfile);
       window.removeEventListener('navigate_to_intake', handleNavIntake);
       window.removeEventListener('navigate_to_faq', handleNavFaq);
@@ -368,9 +385,10 @@ export function StudentPortal({
           <div className="flex items-center justify-between">
             <button
               onClick={() => updateView('overview')}
-              className="flex items-center gap-1.5 text-xs font-semibold text-[#1F3A30] hover:text-[#142720] bg-white border border-[#D6E5DF] px-3 py-1.5 rounded-lg shadow-2xs transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 text-xs font-semibold text-[#1F3A30] hover:text-[#142720] bg-white border border-[#D6E5DF] px-3.5 py-2 rounded-xl shadow-2xs transition-colors cursor-pointer"
             >
-              &larr; Back to Student Hub
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Dashboard</span>
             </button>
           </div>
           <SpecialtyAdvisingFormModal
@@ -423,9 +441,10 @@ export function StudentPortal({
           <div className="flex items-center justify-between">
             <button
               onClick={() => updateView('overview')}
-              className="flex items-center gap-1.5 text-xs font-semibold text-[#1F3A30] hover:text-[#142720] bg-white border border-[#D6E5DF] px-3 py-1.5 rounded-lg shadow-2xs transition-colors cursor-pointer"
+              className="flex items-center gap-1.5 text-xs font-semibold text-[#1F3A30] hover:text-[#142720] bg-white border border-[#D6E5DF] px-3.5 py-2 rounded-xl shadow-2xs transition-colors cursor-pointer"
             >
-              &larr; Back to Student Hub
+              <ArrowLeft className="w-3.5 h-3.5" />
+              <span>Back to Dashboard</span>
             </button>
           </div>
           <LetterOfRecommendationTracker
@@ -493,9 +512,7 @@ export function StudentPortal({
               <button
                 key={tab.id}
                 onClick={() => {
-                  if (activeMainTab !== tab.id) {
-                    updateView(tab.defaultView);
-                  }
+                  updateView(tab.defaultView);
                 }}
                 className={`flex items-center gap-2 px-5 py-2.5 rounded-xl text-xs font-semibold whitespace-nowrap transition-all cursor-pointer ${
                   isTabActive

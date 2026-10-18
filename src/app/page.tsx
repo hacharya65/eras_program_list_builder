@@ -61,12 +61,22 @@ export default function HomePage() {
   }, []);
 
   const handleAuthenticated = (acc: StudentAccount) => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('view', 'dashboard');
+      window.history.replaceState({ view: 'overview' }, '', url.toString());
+    }
     setAuthenticatedSession(true);
     setCurrentAccount(acc);
     setIsAuthenticated(true);
   };
 
   const handleLogout = () => {
+    if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.delete('view');
+      window.history.replaceState({}, '', url.pathname);
+    }
     logoutSession();
     setIsAuthenticated(false);
   };
@@ -93,7 +103,6 @@ export default function HomePage() {
         medicalSchool={currentSchool}
         userName={currentName}
         userRoleTitle="MS4 Applicant"
-        onOpenAuthModal={() => setIsAuthModalOpen(true)}
         onLogout={handleLogout}
         onOpenFaq={() => {
           if (typeof window !== 'undefined') {
@@ -107,7 +116,7 @@ export default function HomePage() {
         onOpenDashboard={() => {
           if (typeof window !== 'undefined') {
             const url = new URL(window.location.href);
-            url.searchParams.set('view', 'overview');
+            url.searchParams.set('view', 'dashboard');
             window.history.pushState({ view: 'overview' }, '', url.toString());
             window.scrollTo({ top: 0, behavior: 'instant' });
             window.dispatchEvent(new CustomEvent('navigate_to_dashboard'));

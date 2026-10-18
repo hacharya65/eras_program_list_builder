@@ -150,7 +150,7 @@ export function JournalRepositoryView({
           className="flex items-center gap-1.5 text-xs font-semibold text-[#1F3A30] hover:text-[#142720] bg-white border border-neutral-200/90 px-3.5 py-2 rounded-xl shadow-2xs transition-colors cursor-pointer w-fit"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
-          <span>&larr; Back to Dashboard</span>
+          <span>Back to Dashboard</span>
         </button>
 
         <span className="text-xs text-neutral-500">
