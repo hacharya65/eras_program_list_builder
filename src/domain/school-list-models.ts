@@ -587,7 +587,7 @@ export const DEFAULT_INTERNAL_MEDICINE_SAMPLE_ITEMS: SchoolListItem[] = [
     yieldGold: undefined,
     advisorNotes: 'Residency Explorer Middle 80%: 249–275. Highly competitive academic institution; Gold signal essential for out-of-region consideration.',
     residencyExplorerUrl: 'https://www.residencyexplorer.org/?utm_source=gemini',
-    doximityUrl: 'https://www.doximity.com/residency/programs/1402421162',
+    doximityUrl: 'https://www.doximity.com/residency',
   },
   {
     id: 'sample-im-2',
@@ -610,7 +610,7 @@ export const DEFAULT_INTERNAL_MEDICINE_SAMPLE_ITEMS: SchoolListItem[] = [
     yieldGold: 42,
     advisorNotes: 'Residency Explorer Middle 80%: 248–274. Gold signal produces a +22% interview surge over Silver (42% vs 20%). Prime target for Gold token.',
     residencyExplorerUrl: 'https://www.residencyexplorer.org/?utm_source=gemini',
-    doximityUrl: 'https://www.doximity.com/residency/programs/1402421160',
+    doximityUrl: 'https://www.doximity.com/residency',
   },
   {
     id: 'sample-im-3',
@@ -633,7 +633,7 @@ export const DEFAULT_INTERNAL_MEDICINE_SAMPLE_ITEMS: SchoolListItem[] = [
     yieldGold: 47,
     advisorNotes: 'Residency Explorer Middle 80%: 241–275. Silver signal captures strong 29% interview yield; Gold delivers 47%.',
     residencyExplorerUrl: 'https://www.residencyexplorer.org/?utm_source=gemini',
-    doximityUrl: 'https://www.doximity.com/residency/programs/1405421430',
+    doximityUrl: 'https://www.doximity.com/residency',
   },
   {
     id: 'sample-im-4',
@@ -656,7 +656,7 @@ export const DEFAULT_INTERNAL_MEDICINE_SAMPLE_ITEMS: SchoolListItem[] = [
     yieldGold: 35,
     advisorNotes: 'Residency Explorer Middle 80%: 243–271. Silver captures bulk of yield leverage (28% vs 3% baseline), optimal allocation.',
     residencyExplorerUrl: 'https://www.residencyexplorer.org/?utm_source=gemini',
-    doximityUrl: 'https://www.doximity.com/residency/programs/1401221105',
+    doximityUrl: 'https://www.doximity.com/residency',
   },
   {
     id: 'sample-im-5',
@@ -679,7 +679,7 @@ export const DEFAULT_INTERNAL_MEDICINE_SAMPLE_ITEMS: SchoolListItem[] = [
     yieldGold: 41,
     advisorNotes: 'Residency Explorer Middle 80%: 244–271. Silver delivers equal yield to Gold (42% vs 41%), conserving your Gold token.',
     residencyExplorerUrl: 'https://www.residencyexplorer.org/?utm_source=gemini',
-    doximityUrl: 'https://www.doximity.com/residency/programs/1402421175',
+    doximityUrl: 'https://www.doximity.com/residency',
   },
 ];
 
@@ -803,7 +803,7 @@ export function getSampleProgramsForSpecialty(
       mdApplicantYield: p.mdApplicantYield,
       advisorNotes: range.advisorNotes,
       residencyExplorerUrl: p.residencyExplorerUrl || 'https://www.residencyexplorer.org/?utm_source=gemini',
-      doximityUrl: p.doximityUrl || (p.id ? `https://www.doximity.com/residency/programs/${p.id}` : undefined),
+      doximityUrl: 'https://www.doximity.com/residency',
     };
   });
 }

@@ -505,6 +505,21 @@ describe('Ticket 07: Strategic School List Matrix & Dynamic Specialty Signaling'
       expect(html).not.toContain('Click to sort by Letters');
       expect(html).not.toContain('Click to sort by Yield');
     });
+
+    it('verifies Doximity URL points to https://www.doximity.com/residency for every program', async () => {
+      const { DEFAULT_INTERNAL_MEDICINE_SAMPLE_ITEMS, getSampleProgramsForSpecialty } = await import('@/domain/school-list-models');
+
+      // Sample IM items
+      DEFAULT_INTERNAL_MEDICINE_SAMPLE_ITEMS.forEach((item) => {
+        expect(item.doximityUrl).toBe('https://www.doximity.com/residency');
+      });
+
+      // Dynamically loaded specialty items
+      const dermItems = getSampleProgramsForSpecialty('Dermatology');
+      dermItems.forEach((item) => {
+        expect(item.doximityUrl).toBe('https://www.doximity.com/residency');
+      });
+    });
   });
 });
 

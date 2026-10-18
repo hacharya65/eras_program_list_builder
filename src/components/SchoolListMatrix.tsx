@@ -345,7 +345,7 @@ export function SchoolListMatrix({
       level2CeRange: prog.level2CeRange,
       mdApplicantYield: prog.mdApplicantYield,
       residencyExplorerUrl: prog.residencyExplorerUrl || 'https://www.residencyexplorer.org/?utm_source=gemini',
-      doximityUrl: prog.doximityUrl || 'https://www.doximity.com/residency',
+      doximityUrl: 'https://www.doximity.com/residency',
     };
 
     setItems((prev) => [newItem, ...prev]);
@@ -1627,7 +1627,7 @@ export function SchoolListMatrix({
                   Residency Explorer
                 </a>
                 <a
-                  href={detailItem.doximityUrl}
+                  href="https://www.doximity.com/residency"
                   target="_blank"
                   rel="noreferrer"
                   className="flex-1 text-center py-2 px-3 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-800 font-semibold text-xs border border-slate-300 transition-colors flex items-center justify-center gap-1.5"
