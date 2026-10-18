@@ -252,7 +252,7 @@ export function LetterOfRecommendationTracker({
             Faculty Letter Writers ({writers.length})
           </h2>
           <span className="text-xs text-slate-500">
-            Stages: Pending Ask &rarr; Asked &rarr; Initiated on ERAS &rarr; Submitted
+            Stages: Pending Ask &rarr; Asked &rarr; Requested on ERAS &rarr; Submitted
           </span>
         </div>
 
@@ -261,7 +261,7 @@ export function LetterOfRecommendationTracker({
             const statusConfig = {
               pending_ask: { label: 'Pending Ask', bg: 'bg-slate-100 text-slate-700 border-slate-300' },
               asked: { label: 'Asked for LOR', bg: 'bg-amber-50 text-amber-800 border-amber-300' },
-              initiated_eras: { label: 'Initiated on ERAS', bg: 'bg-sky-50 text-sky-800 border-sky-300' },
+              initiated_eras: { label: 'Requested on ERAS', bg: 'bg-sky-50 text-sky-800 border-sky-300' },
               submitted: { label: 'Submitted to ERAS', bg: 'bg-emerald-50 text-emerald-800 border-emerald-300' },
             }[w.status];
 
@@ -511,7 +511,7 @@ export function LetterOfRecommendationTracker({
                   >
                     <option value="pending_ask">Pending Ask</option>
                     <option value="asked">Asked for LOR</option>
-                    <option value="initiated_eras">Initiated on ERAS</option>
+                    <option value="initiated_eras">Requested on ERAS</option>
                     <option value="submitted">Submitted to ERAS</option>
                   </select>
                 </div>

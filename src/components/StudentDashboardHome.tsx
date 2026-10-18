@@ -534,7 +534,7 @@ export function StudentDashboardHome({
                         >
                           <option value="pending_ask">Pending Ask</option>
                           <option value="asked">Asked</option>
-                          <option value="initiated_eras">Initiated</option>
+                          <option value="initiated_eras">Requested on ERAS</option>
                           <option value="submitted">Submitted</option>
                         </select>
                       </div>
@@ -820,7 +820,7 @@ export function StudentDashboardHome({
                   >
                     <option value="pending_ask">Pending Ask</option>
                     <option value="asked">Asked for LOR</option>
-                    <option value="initiated_eras">Initiated on ERAS</option>
+                    <option value="initiated_eras">Requested on ERAS</option>
                     <option value="submitted">Submitted to ERAS</option>
                   </select>
                 </div>
