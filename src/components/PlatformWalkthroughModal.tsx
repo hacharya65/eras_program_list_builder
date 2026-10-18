@@ -68,10 +68,6 @@ const WALKTHROUGH_STEPS: WalkthroughStep[] = [
         detail: 'Real-time assessment combining clerkship grades, board scores, and clinical engagement.',
       },
       {
-        title: 'Advisor Direct Line',
-        detail: 'Quickly review your assigned faculty advisor, schedule 1:1 check-ins, and prepare meeting dossiers.',
-      },
-      {
         title: 'Key Milestones',
         detail: 'Track token registration, MSPE release, signaling deadlines, and interview season.',
       },
@@ -113,7 +109,7 @@ const WALKTHROUGH_STEPS: WalkthroughStep[] = [
     highlights: [
       {
         title: 'Core Clerkships & Electives',
-        detail: 'Track Honors, High Pass, and Pass grades across your 7 core rotations plus sub-internships.',
+        detail: 'Track Honors, High Pass, and Pass grades across your core clinical rotations.',
       },
       {
         title: 'NRMP Metrics',

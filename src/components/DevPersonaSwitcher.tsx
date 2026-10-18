@@ -183,12 +183,9 @@ export function DevPersonaSwitcher({
                 title="Open Profile Management"
               >
                 <div className="text-right hidden sm:block">
-                  <div className="text-xs font-bold text-neutral-900 group-hover:text-[#1F3A30] transition-colors leading-tight">
+                  <span className="text-xs font-bold text-neutral-900 group-hover:text-[#1F3A30] transition-colors leading-tight">
                     {activePersonaName}
-                  </div>
-                  <div className="text-[10px] text-neutral-500 font-medium truncate max-w-[150px]">
-                    {medicalSchool || activePersonaTitle}
-                  </div>
+                  </span>
                 </div>
 
                 {/* User Avatar Circle */}
