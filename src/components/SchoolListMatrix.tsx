@@ -667,7 +667,7 @@ export function SchoolListMatrix({
             <select
               value={regionFilter}
               onChange={(e) => setRegionFilter(e.target.value)}
-              className="text-xs rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="text-xs rounded-lg border border-slate-300 bg-white pl-2.5 pr-8 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
             >
               <option value="All">All 9 Census Divisions</option>
               {CENSUS_DIVISIONS.map((division) => (
@@ -684,7 +684,7 @@ export function SchoolListMatrix({
             <select
               value={tierFilter}
               onChange={(e) => setTierFilter(e.target.value)}
-              className="text-xs rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="text-xs rounded-lg border border-slate-300 bg-white pl-2.5 pr-8 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
             >
               <option value="All">All Tiers</option>
               <option value="reach">Reach</option>
@@ -1419,7 +1419,7 @@ export function SchoolListMatrix({
               <select
                 value={dbSpecialtyFilter}
                 onChange={(e) => setDbSpecialtyFilter(e.target.value)}
-                className="text-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 font-semibold"
+                className="text-xs rounded-lg border border-slate-300 bg-white pl-3 pr-8 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500 font-semibold"
               >
                 <option value="All">All Specialties</option>
                 {CANONICAL_SPECIALTIES.map((spec) => (
@@ -1432,7 +1432,7 @@ export function SchoolListMatrix({
               <select
                 value={dbRegionFilter}
                 onChange={(e) => setDbRegionFilter(e.target.value)}
-                className="text-xs rounded-lg border border-slate-300 bg-white px-3 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                className="text-xs rounded-lg border border-slate-300 bg-white pl-3 pr-8 py-2 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
               >
                 <option value="All">All 9 Census Divisions</option>
                 {CENSUS_DIVISIONS.map((division) => (

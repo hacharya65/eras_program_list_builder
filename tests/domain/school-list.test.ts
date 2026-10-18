@@ -583,6 +583,30 @@ describe('Ticket 07: Strategic School List Matrix & Dynamic Specialty Signaling'
       // Info icon is present specifically for Anesthesiology
       expect(anesthHtml).toContain('Signal Notes &amp; Rationale required for Anesthesiology');
     });
+
+    it('verifies dropdown selects have inset arrow styling and generous right padding', async () => {
+      const fs = await import('fs');
+      const path = await import('path');
+
+      // Check globals.css styling for select
+      const globalsCss = fs.readFileSync(path.resolve(process.cwd(), 'src/app/globals.css'), 'utf-8');
+      expect(globalsCss).toContain('select:not([multiple])');
+      expect(globalsCss).toContain('background-position: right 0.75rem center');
+      expect(globalsCss).toContain('padding-right: 2.25rem !important');
+
+      // Check SchoolListMatrix selects have generous pr-8 padding
+      const React = (await import('react')).default;
+      const { renderToStaticMarkup } = await import('react-dom/server');
+      const { SchoolListMatrix } = await import('@/components/SchoolListMatrix');
+      const html = renderToStaticMarkup(
+        React.createElement(SchoolListMatrix, {
+          onBack: () => {},
+        })
+      );
+
+      // Verify census division and tier selects contain pr-8
+      expect(html).toContain('pl-2.5 pr-8 py-1.5');
+    });
   });
 });
 
