@@ -243,13 +243,17 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
       expect(markup).toContain('Tier Balance Distribution');
       expect(markup).toContain('Preference Signals Allocation');
 
-      // Verify Column 2: Letters of Recommendation expanded layout
+      // Verify Column 2: Letters of Recommendation compact layout with i icon and Add Writer
       expect(markup).toContain('Letters of Recommendation');
       expect(markup).toContain('Add Writer');
-      expect(markup).toContain('Audit Program Letter Gaps');
+      expect(markup).not.toContain('Audit Program Letter Gaps');
+      expect(markup).not.toContain('Full School List Matrix');
+      expect(markup).not.toContain('Comprehensive tracking &amp; specialty requirements');
+      expect(markup).not.toContain('Live distribution across Reach, Target &amp; Safety');
 
-      // Verify journal scratchpad was removed from dashboard to eliminate vertical stretching
-      expect(markup).not.toContain('Private scratchpad');
+      // Verify bottom Journal card fits seamlessly without scrolling
+      expect(markup).toContain('Reflective Journal &amp; Clinical Scratchpad');
+      expect(markup).toContain('Save Entry');
 
       // Verify FloatingJournalWidget renders persistent trigger button across the application
       const floatingWidgetMarkup = renderToStaticMarkup(
