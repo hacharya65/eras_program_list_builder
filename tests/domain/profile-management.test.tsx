@@ -66,15 +66,16 @@ describe('ProfileManagementView', () => {
     expect(markup).toContain('Alex Rivera');
     expect(markup).toContain('Internal Medicine');
     expect(markup).toContain('Penn State College of Medicine');
+    expect(markup).toContain('Profile Summary');
 
     // Key sections
     expect(markup).toContain('Academic Record &amp; Competitiveness Metrics');
     expect(markup).toContain('Target Applying Specialty Strategy');
-    expect(markup).toContain('Specialty Advising Intake Form');
 
-    // Controls and buttons
-    expect(markup).toContain('Open &amp; Edit Full Specialty Advising Form');
-    expect(markup).toContain('Dr. Marcus Chen');
+    // Verified removed boxes: Advisor and Intake Form cards
+    expect(markup).not.toContain('Assigned Specialty Faculty Advisor');
+    expect(markup).not.toContain('Dr. Marcus Chen');
+    expect(markup).not.toContain('Specialty Advising Intake Form');
   });
 
   it('reflects honors count accurately from clerkship performance', () => {

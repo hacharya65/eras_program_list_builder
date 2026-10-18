@@ -180,7 +180,7 @@ export function DevPersonaSwitcher({
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
                 className="flex items-center gap-3 p-1.5 pl-2.5 rounded-2xl hover:bg-neutral-50 border border-neutral-200/80 transition-all cursor-pointer group"
                 aria-expanded={isProfileMenuOpen}
-                title="Open Profile Management"
+                title="Open Profile Summary"
               >
                 <div className="text-right hidden sm:block">
                   <span className="text-xs font-bold text-neutral-900 group-hover:text-[#1F3A30] transition-colors leading-tight">
@@ -222,7 +222,7 @@ export function DevPersonaSwitcher({
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
                     >
                       <User className="w-4 h-4 text-[#4E8773]" />
-                      <span>Profile Management &amp; Scores</span>
+                      <span>Profile Summary</span>
                     </button>
 
                     <button
@@ -238,7 +238,7 @@ export function DevPersonaSwitcher({
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
                     >
                       <FileText className="w-4 h-4 text-[#4E8773]" />
-                      <span>Specialty Advising Packet</span>
+                      <span>Intake Packet</span>
                     </button>
 
                     {onLogout && (

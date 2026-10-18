@@ -53,7 +53,7 @@ describe('Advising Contacts Removal & Independent Student Experience', () => {
 
     // FAQ and profile management should be preserved
     expect(markup).toContain('Frequently Asked Questions &amp; Guide');
-    expect(markup).toContain('Profile Management &amp; Scores');
+    expect(markup).toContain('Profile Summary');
   });
 
   it('verifies that StudentDashboardHome does not contain an advising contacts card', () => {

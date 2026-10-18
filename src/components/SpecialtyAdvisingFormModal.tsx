@@ -211,11 +211,11 @@ CLINICAL STATEMENT & GOALS:
           <div>
             <div className="flex items-center gap-2">
               <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-[#EAF2EE] text-[#1F3A30] border border-[#7EAE9B]/30">
-                {formData.medicalSchool ? `${formData.medicalSchool} Packet` : 'Specialty Advising Packet'}
+                {formData.medicalSchool ? `${formData.medicalSchool} Packet` : 'Intake Packet'}
               </span>
             </div>
             <h2 id="intake-modal-title" className="text-lg font-bold text-neutral-900 tracking-tight mt-0.5">
-              Specialty Advising Intake &amp; Packet
+              Intake Packet
             </h2>
           </div>
         </div>
@@ -223,15 +223,6 @@ CLINICAL STATEMENT & GOALS:
         <div className="flex items-center gap-2 flex-wrap justify-end">
           {/* Export Action Controls */}
           <div className="flex items-center gap-1.5">
-            <button
-              type="button"
-              onClick={handleCopySummary}
-              className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-neutral-50 hover:bg-[#EAF2EE] text-neutral-700 hover:text-[#1F3A30] flex items-center gap-1.5 transition-all border border-neutral-200/80 cursor-pointer shadow-2xs"
-              title="Copy text summary formatted for advisor meetings or emails"
-            >
-              <Copy className="w-3.5 h-3.5 text-[#4E8773]" />
-              <span>{copiedSuccess ? 'Copied to Clipboard!' : 'Copy Summary'}</span>
-            </button>
             <button
               type="button"
               onClick={handleExportJson}
@@ -557,20 +548,7 @@ CLINICAL STATEMENT & GOALS:
                   </span>
                 </div>
 
-                <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-5 gap-3.5 text-xs">
-                  <div>
-                    <label className="font-semibold text-slate-700 block mb-1">Medical School Tier</label>
-                    <select
-                      value={formData.medicalSchoolTier || 'State / Mid-Tier'}
-                      onChange={(e) => setFormData({ ...formData, medicalSchoolTier: e.target.value })}
-                      className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900"
-                    >
-                      <option value="Top 25 Research-Intensive">Top 25 Research</option>
-                      <option value="State / Mid-Tier">State / Mid-Tier</option>
-                      <option value="Newer Community-Based">Community-Based</option>
-                      <option value="International / Caribbean">International</option>
-                    </select>
-                  </div>
+                <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3.5 text-xs">
                   <div>
                     <label className="font-semibold text-slate-700 block mb-1">Publications</label>
                     <input
@@ -628,16 +606,6 @@ CLINICAL STATEMENT & GOALS:
                       min={0}
                       value={formData.volunteerExperiences ?? 0}
                       onChange={(e) => setFormData({ ...formData, volunteerExperiences: parseInt(e.target.value) || 0 })}
-                      className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900"
-                    />
-                  </div>
-                  <div>
-                    <label className="font-semibold text-slate-700 block mb-1">Leadership Hours</label>
-                    <input
-                      type="number"
-                      min={0}
-                      value={formData.leadershipHours ?? 0}
-                      onChange={(e) => setFormData({ ...formData, leadershipHours: parseInt(e.target.value) || 0 })}
                       className="w-full bg-white border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs text-slate-900"
                     />
                   </div>
@@ -1036,7 +1004,7 @@ CLINICAL STATEMENT & GOALS:
                     className="px-5 py-2 rounded-xl bg-[#1F3A30] hover:bg-[#142720] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5"
                   >
                     <Save className="w-4 h-4 text-[#7EAE9B]" />
-                    Save & Update Advising Packet
+                    Save & Update Intake Packet
                   </button>
                 </div>
               </div>
@@ -1046,16 +1014,9 @@ CLINICAL STATEMENT & GOALS:
             <div className="space-y-4">
               <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200 text-xs">
                 <span className="text-slate-600">
-                  Comprehensive Official Specialty Advising Packet &amp; Diagnostic Record.
+                  Official Intake Packet &amp; Diagnostic Record.
                 </span>
                 <div className="flex items-center gap-2">
-                  <button
-                    onClick={handleCopySummary}
-                    className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-semibold flex items-center gap-1.5 border border-slate-300"
-                  >
-                    <Copy className="w-3.5 h-3.5 text-slate-600" />
-                    <span>{copiedSuccess ? 'Copied!' : 'Copy Summary'}</span>
-                  </button>
                   <button
                     onClick={handleExportJson}
                     className="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded font-semibold flex items-center gap-1.5 border border-slate-300"
@@ -1076,7 +1037,7 @@ CLINICAL STATEMENT & GOALS:
               {/* Form Sheet Preview */}
               <div className="bg-white p-8 rounded-lg shadow-sm border border-slate-300 max-w-2xl mx-auto text-slate-900 font-serif text-[12px] leading-relaxed space-y-4">
                 <div className="border-b-2 border-slate-900 pb-3 text-center">
-                  <h1 className="text-base font-bold uppercase tracking-wide">Specialty Advising Packet</h1>
+                  <h1 className="text-base font-bold uppercase tracking-wide">Intake Packet</h1>
                   <span className="text-[10px] text-slate-600 font-sans">{formData.medicalSchool || 'Medical Student Advising Network'}</span>
                 </div>
 
@@ -1116,13 +1077,11 @@ CLINICAL STATEMENT & GOALS:
                   <div>
                     <strong>4. Academic &amp; Portfolio Metrics:</strong>
                     <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-1 pl-3 text-slate-800 font-mono text-[11px]">
-                      <div>School Tier: {formData.medicalSchoolTier || 'State / Mid-Tier'}</div>
                       <div>Publications: {formData.publications ?? 0} (1st author: {formData.firstAuthorPublications ?? 0})</div>
                       <div>Presentations: {formData.presentations ?? 0}</div>
                       <div>Scientific Abstracts: {formData.abstracts ?? 0}</div>
                       <div>Research Experiences: {formData.researchExperiences ?? 0}</div>
                       <div>Volunteer Experiences: {formData.volunteerExperiences ?? 0}</div>
-                      <div>Leadership Hours: {formData.leadershipHours ?? 0} hrs</div>
                       <div>AOA: {formData.isAoaMember ? 'Yes' : 'No'} | GHHS: {formData.isGoldHumanism ? 'Yes' : 'No'}</div>
                     </div>
                   </div>

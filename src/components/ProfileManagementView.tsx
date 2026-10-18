@@ -93,7 +93,7 @@ export function ProfileManagementView({
         </button>
 
         <span className="text-xs text-neutral-500">
-          Profile &amp; Governance Center &bull; {advisingIntake.medicalSchool || 'Match Strategy & Advising Center'}
+          Profile Summary &bull; {advisingIntake.medicalSchool || 'Match Strategy & Advising Center'}
         </span>
       </div>
 
@@ -132,7 +132,7 @@ export function ProfileManagementView({
             className="px-4 py-2 bg-[#EAF2EE] hover:bg-[#D6E5DF] text-[#1F3A30] border border-[#7EAE9B] rounded-xl text-xs font-bold flex items-center gap-2 shadow-2xs transition-all cursor-pointer"
           >
             <FileText className="w-4 h-4 text-[#4E8773]" />
-            <span>Advising Intake Form</span>
+            <span>Intake Packet</span>
           </button>
         </div>
       </div>
@@ -144,7 +144,7 @@ export function ProfileManagementView({
         </div>
       )}
 
-      {/* Grid: 3 Dedicated Profile Modules */}
+      {/* Grid: Profile Modules */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Module 1: Target Specialty & Signaling Strategy (lg:col-span-6) */}
         <div className="lg:col-span-6 space-y-6">
@@ -207,32 +207,6 @@ export function ProfileManagementView({
                   ? 'Note: This specialty requires program-specific 300-character signal rationale statements.'
                   : 'Program-specific signal explanations are optional or not utilized in this specialty.'}
               </p>
-            </div>
-
-            {/* Assigned Faculty Advisor snippet */}
-            <div className="p-4 bg-neutral-50 border border-neutral-200/80 rounded-xl flex items-center justify-between gap-3">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-[#1F3A30] text-white flex items-center justify-center font-bold text-xs shrink-0">
-                  MC
-                </div>
-                <div>
-                  <div className="text-[11px] text-neutral-500 font-semibold uppercase tracking-wider">
-                    Assigned Specialty Faculty Advisor
-                  </div>
-                  <div className="font-bold text-neutral-900">
-                    {assignedAdvisor?.name || 'Dr. Marcus Chen, MD'}
-                  </div>
-                  <div className="text-xs text-neutral-500">
-                    Geisinger Medical Center &bull; mchen@geisinger.edu
-                  </div>
-                </div>
-              </div>
-              <a
-                href="mailto:mchen@geisinger.edu"
-                className="px-3 py-1.5 bg-white border border-neutral-300 hover:border-neutral-400 text-xs font-semibold rounded-lg text-neutral-700 shadow-2xs"
-              >
-                Contact
-              </a>
             </div>
           </div>
         </div>
@@ -320,7 +294,7 @@ export function ProfileManagementView({
                     onClick={onOpenIntake}
                     className="text-xs text-[#1F3A30] font-semibold hover:underline shrink-0"
                   >
-                    Edit in Form &rarr;
+                    Edit in Intake Packet &rarr;
                   </button>
                 </div>
               </div>
@@ -364,44 +338,6 @@ export function ProfileManagementView({
               </button>
             </div>
           </form>
-
-          {/* Module 4: Specialty Advising Intake Form Status Card */}
-          <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-6 space-y-4">
-            <div className="flex items-center justify-between border-b border-neutral-100 pb-3">
-              <div>
-                <h3 className="font-bold text-neutral-900 text-sm flex items-center gap-2">
-                  <FileCheck className="w-4 h-4 text-[#1F3A30]" />
-                  <span>Specialty Advising Intake Form</span>
-                </h3>
-                <p className="text-xs text-neutral-500 mt-0.5">
-                  Official clinical rotation &amp; faculty advising questionnaire.
-                </p>
-              </div>
-              <span
-                className={`px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                  advisingIntake.isCompleted
-                    ? 'bg-emerald-100 text-emerald-800'
-                    : 'bg-amber-100 text-amber-800'
-                }`}
-              >
-                {advisingIntake.isCompleted ? 'Completed & Verified' : 'In Progress'}
-              </span>
-            </div>
-
-            <div className="text-xs text-neutral-600 leading-relaxed">
-              Discloses your 7 core clerkship grades, future MS4 rotation timeline (Blocks 3–7),
-              sub-internship placements, and geographic preference divisions.
-            </div>
-
-            <button
-              onClick={onOpenIntake}
-              className="w-full py-2.5 px-4 bg-[#EAF2EE] hover:bg-[#D6E5DF] text-[#1F3A30] border border-[#7EAE9B] font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-            >
-              <FileText className="w-4 h-4 text-[#4E8773]" />
-              <span>Open &amp; Edit Full Specialty Advising Form</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
         </div>
       </div>
     </div>
