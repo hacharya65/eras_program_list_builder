@@ -594,7 +594,7 @@ describe('Ticket 07: Strategic School List Matrix & Dynamic Specialty Signaling'
       expect(globalsCss).toContain('background-position: right 0.75rem center');
       expect(globalsCss).toContain('padding-right: 2.25rem !important');
 
-      // Check SchoolListMatrix selects have generous pr-8 padding
+      // Check SchoolListMatrix bar does not contain removed Census Division or Tier dropdowns
       const React = (await import('react')).default;
       const { renderToStaticMarkup } = await import('react-dom/server');
       const { SchoolListMatrix } = await import('@/components/SchoolListMatrix');
@@ -604,8 +604,9 @@ describe('Ticket 07: Strategic School List Matrix & Dynamic Specialty Signaling'
         })
       );
 
-      // Verify census division and tier selects contain pr-8
-      expect(html).toContain('pl-2.5 pr-8 py-1.5');
+      // Verify census division and tier selects are removed from the bar
+      expect(html).not.toContain('Census Division:');
+      expect(html).not.toContain('All 9 Census Divisions');
     });
 
     it('verifies globals.css blurs header and sticky bars when modals are open', async () => {

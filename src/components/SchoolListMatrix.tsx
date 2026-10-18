@@ -684,43 +684,11 @@ export function SchoolListMatrix({
           {/* Browse & Add Programs Button positioned directly beside search bar */}
           <button
             onClick={() => setShowBrowseModal(true)}
-            className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-sky-600 hover:bg-sky-700 text-white flex items-center gap-1.5 shadow-sm transition-colors whitespace-nowrap shrink-0"
+            className="px-3.5 py-1.5 text-xs font-semibold rounded-lg bg-sky-600 hover:bg-sky-700 text-white flex items-center gap-1.5 shadow-sm transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >
             <Plus className="w-4 h-4" />
             <span>Browse &amp; Add Programs</span>
           </button>
-
-          {/* Region Filter (9 US Census Divisions) */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs text-slate-500 font-semibold whitespace-nowrap">Census Division:</span>
-            <select
-              value={regionFilter}
-              onChange={(e) => setRegionFilter(e.target.value)}
-              className="text-xs rounded-lg border border-slate-300 bg-white pl-2.5 pr-8 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
-            >
-              <option value="All">All 9 Census Divisions</option>
-              {CENSUS_DIVISIONS.map((division) => (
-                <option key={division} value={division}>
-                  {division}
-                </option>
-              ))}
-            </select>
-          </div>
-
-          {/* Tier Filter */}
-          <div className="flex items-center gap-1.5">
-            <span className="text-xs text-slate-500 font-semibold whitespace-nowrap">Tier:</span>
-            <select
-              value={tierFilter}
-              onChange={(e) => setTierFilter(e.target.value)}
-              className="text-xs rounded-lg border border-slate-300 bg-white pl-2.5 pr-8 py-1.5 text-slate-700 focus:outline-none focus:ring-2 focus:ring-sky-500"
-            >
-              <option value="All">All Tiers</option>
-              <option value="reach">Reach</option>
-              <option value="target">Target</option>
-              <option value="safety">Safety</option>
-            </select>
-          </div>
         </div>
       </div>
 
