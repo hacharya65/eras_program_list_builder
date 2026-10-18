@@ -39,6 +39,7 @@ import {
 import { CANONICAL_SPECIALTIES } from '@/domain/school-list-models';
 import { MedicalSchoolCombobox } from './MedicalSchoolCombobox';
 import { isValidMedicalSchool } from '@/domain/medical-schools-database';
+import { updateStudentMedicalSchool } from '@/domain/student-registry';
 
 interface SpecialtyAdvisingFormModalProps {
   isOpen: boolean;
@@ -178,6 +179,9 @@ CLINICAL STATEMENT & GOALS:
       completedAt: formData.completedAt || new Date().toISOString(),
     };
     saveStudentAdvisingIntake(updated);
+    if (updated.medicalSchool) {
+      updateStudentMedicalSchool(studentId || updated.studentId, updated.medicalSchool);
+    }
     setFormData(updated);
     setSaveSuccess(true);
     setTimeout(() => setSaveSuccess(false), 3000);

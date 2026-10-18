@@ -57,8 +57,29 @@ export default function HomePage() {
       }
     };
 
+    const handleAccountUpdated = (e: any) => {
+      if (e?.detail?.account) {
+        setCurrentAccount(e.detail.account);
+        return;
+      }
+      const activeId = getCurrentStudentId();
+      let account = getStudentAccount(activeId);
+      if (e?.detail?.medicalSchool && account) {
+        account = { ...account, medicalSchool: e.detail.medicalSchool };
+      }
+      if (account) {
+        setCurrentAccount(account);
+      }
+    };
+
     window.addEventListener('student_account_switched', handleSwitched);
-    return () => window.removeEventListener('student_account_switched', handleSwitched);
+    window.addEventListener('student_account_updated', handleAccountUpdated);
+    window.addEventListener('student_intake_saved', handleAccountUpdated);
+    return () => {
+      window.removeEventListener('student_account_switched', handleSwitched);
+      window.removeEventListener('student_account_updated', handleAccountUpdated);
+      window.removeEventListener('student_intake_saved', handleAccountUpdated);
+    };
   }, []);
 
   const handleAuthenticated = (acc: StudentAccount) => {
@@ -91,7 +112,12 @@ export default function HomePage() {
     );
   }
 
-  const currentSchool = currentAccount?.medicalSchool || '';
+  const currentSchool =
+    currentAccount?.medicalSchool ||
+    (isMounted && typeof window !== 'undefined'
+      ? getStudentAccount(getCurrentStudentId())?.medicalSchool
+      : '') ||
+    '';
   const currentName = currentAccount?.name || studentContext.student.name;
 
   return (

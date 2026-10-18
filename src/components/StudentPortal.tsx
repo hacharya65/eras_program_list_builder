@@ -17,6 +17,7 @@ import {
   getCurrentStudentId,
   getStudentAccount,
   isDemoStudentId,
+  updateStudentMedicalSchool,
 } from '@/domain/student-registry';
 import {
   CANONICAL_SPECIALTIES,
@@ -404,6 +405,12 @@ export function StudentPortal({
             studentId={activeStudentId}
             onSaved={(updated) => {
               setAdvisingIntake(updated);
+              if (updated.medicalSchool) {
+                const acc = updateStudentMedicalSchool(activeStudentId, updated.medicalSchool);
+                if (acc && onStudentSwitched) {
+                  onStudentSwitched(acc);
+                }
+              }
               if (updated.applyingSpecialty && updated.applyingSpecialty !== targetSpecialty) {
                 applySpecialtySwitch(updated.applyingSpecialty);
               }
@@ -596,9 +603,15 @@ export function StudentPortal({
       <SpecialtyAdvisingFormModal
         isOpen={isIntakeModalOpen}
         onClose={() => setIsIntakeModalOpen(false)}
-        studentId={student.id}
+        studentId={activeStudentId}
         onSaved={(updated) => {
           setAdvisingIntake(updated);
+          if (updated.medicalSchool) {
+            const acc = updateStudentMedicalSchool(activeStudentId, updated.medicalSchool);
+            if (acc && onStudentSwitched) {
+              onStudentSwitched(acc);
+            }
+          }
           if (updated.applyingSpecialty && updated.applyingSpecialty !== targetSpecialty) {
             setTargetSpecialty(updated.applyingSpecialty);
           }

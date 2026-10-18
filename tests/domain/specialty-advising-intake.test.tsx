@@ -23,6 +23,10 @@ import {
   LetterWriterRequest,
   ProgramLetterRequirement,
 } from '@/domain/lor-models';
+import {
+  updateStudentMedicalSchool,
+  getStudentAccount,
+} from '@/domain/student-registry';
 
 describe('Ethmoid: Specialty Advising Intake & Governance Engine', () => {
   beforeEach(() => {
@@ -165,6 +169,28 @@ describe('Ethmoid: Specialty Advising Intake & Governance Engine', () => {
       const rehydrated = loadStudentAdvisingIntake('student-pending-step');
       expect(rehydrated.step2Status).toBe('anticipated_date');
       expect(rehydrated.step2AnticipatedDate).toBe('August 2026');
+    });
+
+    it('updates student account medical school and dispatches update event when medical school is updated', () => {
+      let eventDetail: any = null;
+      const listener = (e: any) => {
+        eventDetail = e.detail;
+      };
+      if (typeof window !== 'undefined') {
+        window.addEventListener('student_account_updated', listener);
+      }
+
+      const updated = updateStudentMedicalSchool('stu-alex-rivera', 'Stanford University School of Medicine');
+      expect(updated).not.toBeNull();
+      expect(updated?.medicalSchool).toBe('Stanford University School of Medicine');
+
+      const account = getStudentAccount('stu-alex-rivera');
+      expect(account?.medicalSchool).toBe('Stanford University School of Medicine');
+
+      if (typeof window !== 'undefined') {
+        expect(eventDetail?.account?.medicalSchool).toBe('Stanford University School of Medicine');
+        window.removeEventListener('student_account_updated', listener);
+      }
     });
   });
 

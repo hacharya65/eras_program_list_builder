@@ -141,7 +141,12 @@ export function setCurrentStudentId(id: string): void {
 
 export function getStudentAccount(id: string): StudentAccount | null {
   const registry = loadStudentRegistry();
-  return registry.find((s) => s.id === id) || null;
+  const direct = registry.find((s) => s.id === id);
+  if (direct) return direct;
+  if (isDemoStudentId(id)) {
+    return registry.find((s) => isDemoStudentId(s.id)) || DEMO_STUDENT_ACCOUNT;
+  }
+  return null;
 }
 
 export function getStudentAccountByEmail(email: string): StudentAccount | null {
@@ -203,10 +208,42 @@ export function createStudentAccount(data: {
   return newAccount;
 }
 
-export function updateStudentAccount(id: string, updates: Partial<StudentAccount>): void {
+export function updateStudentAccount(id: string, updates: Partial<StudentAccount>): StudentAccount | null {
   const registry = loadStudentRegistry();
-  const updated = registry.map((s) =>
-    s.id === id ? { ...s, ...updates, lastActiveAt: new Date().toISOString() } : s
-  );
-  saveStudentRegistry(updated);
+  let existing = registry.find((s) => s.id === id);
+  if (!existing && isDemoStudentId(id)) {
+    existing = registry.find((s) => isDemoStudentId(s.id)) || DEMO_STUDENT_ACCOUNT;
+  }
+
+  if (!existing) {
+    if (isDemoStudentId(id)) {
+      Object.assign(DEMO_STUDENT_ACCOUNT, updates);
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('student_account_updated', { detail: { account: DEMO_STUDENT_ACCOUNT } }));
+      }
+      return DEMO_STUDENT_ACCOUNT;
+    }
+    return null;
+  }
+
+  const effectiveId = existing.id;
+  const updatedAccount: StudentAccount = {
+    ...existing,
+    ...updates,
+    lastActiveAt: new Date().toISOString(),
+  };
+  const updatedList = registry.map((s) => (s.id === effectiveId ? updatedAccount : s));
+  saveStudentRegistry(updatedList);
+  if (isDemoStudentId(effectiveId) || isDemoStudentId(id)) {
+    Object.assign(DEMO_STUDENT_ACCOUNT, updates);
+  }
+  if (typeof window !== 'undefined') {
+    window.dispatchEvent(new CustomEvent('student_account_updated', { detail: { account: updatedAccount } }));
+  }
+  return updatedAccount;
 }
+
+export function updateStudentMedicalSchool(id: string, medicalSchool: string): StudentAccount | null {
+  return updateStudentAccount(id, { medicalSchool: medicalSchool.trim() });
+}
+
