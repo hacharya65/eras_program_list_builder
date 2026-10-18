@@ -187,22 +187,12 @@ export function assessApplicantStrategy(params: {
     }
   }
 
-  // Assess balance based on tier
+  // School list tier distribution
   let isListBalanced = true;
   let distributionGuidance = 'Your school list displays a healthy distribution across tiers.';
 
   if (tierDistribution.total > 0) {
-    const reachPct = (tierDistribution.reach / tierDistribution.total) * 100;
-    const safetyPct = (tierDistribution.safety / tierDistribution.total) * 100;
-
-    if (competitiveness.overallTier === 'below_average' && reachPct > 40) {
-      isListBalanced = false;
-      distributionGuidance =
-        'High Risk: Over 40% of your list is comprised of Reach programs. For your competitiveness tier, expand Target and Safety options to safeguard interview volume.';
-    } else if (competitiveness.overallTier === 'above_average' && safetyPct > 60) {
-      distributionGuidance =
-        'Conservative: Over 60% of your list is Safety programs. Consider deploying signals toward ambitious Target or Reach programs.';
-    } else if (tierDistribution.safety === 0 && tierDistribution.total >= 10) {
+    if (tierDistribution.safety === 0 && tierDistribution.total >= 10) {
       isListBalanced = false;
       distributionGuidance =
         'Zero Safety Programs: Your list lacks safety anchors. We advise adding at least 3-5 high-yield safety programs.';

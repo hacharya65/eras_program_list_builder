@@ -99,7 +99,7 @@ describe('Multimodal Competitiveness Engine', () => {
     const assessment = assessCompetitiveness(stretchProfile, 'Orthopaedic Surgery');
     expect(assessment.overallTier).toBe('below_average');
     expect(assessment.step2Delta).toBe(242 - 259); // -17
-    expect(assessment.recommendedSignalingStrategy).toContain('Target and Safety');
+    expect(assessment.advisorySummary).toContain('sits below the matched median');
 
     const step2Breakdown = assessment.dimensionBreakdowns.find(d => d.dimension === 'USMLE Step 2 CK');
     expect(step2Breakdown?.status).toBe('below');

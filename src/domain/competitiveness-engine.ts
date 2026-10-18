@@ -58,7 +58,7 @@ export interface CompetitivenessAssessment {
   totalScholarlyMatchedMedian: number;
   dimensionBreakdowns: DimensionBreakdown[];
   advisorySummary: string;
-  recommendedSignalingStrategy: string;
+  recommendedSignalingStrategy?: string;
 }
 
 // Specialty name normalization map
@@ -284,19 +284,15 @@ export function assessCompetitiveness(
     overallTier = 'average';
   }
 
-  // Generate advisory summary and strategy
+  // Generate advisory summary
   let advisorySummary = '';
-  let recommendedSignalingStrategy = '';
 
   if (overallTier === 'above_average') {
-    advisorySummary = `Your profile shows superior metrics compared to the national matched median in ${benchmark.specialty} (Step 2 CK ${profile.step2Ck} vs ${step2Matched} median; ${totalStudentScholarly} scholarly items vs ${totalMatchedScholarly} median). You are positioned as an Above Average candidate.`;
-    recommendedSignalingStrategy = `Deploy Gold signals on ambitious reach academic powerhouses and regional dream programs. Maintain 3-5 high-volume Target programs to ensure interview concentration.`;
+    advisorySummary = `Your profile shows above average metrics compared to the national matched median in ${benchmark.specialty} (Step 2 CK ${profile.step2Ck} vs ${step2Matched} median; ${totalStudentScholarly} scholarly items vs ${totalMatchedScholarly} median).`;
   } else if (overallTier === 'average') {
-    advisorySummary = `Your profile matches the national median of matched U.S. MD seniors in ${benchmark.specialty} (Step 2 CK ${profile.step2Ck} vs ${step2Matched} median; ${profile.publications} publications vs ${pubsMatched} median). You are positioned in the Average tier with solid, credible alignment with the specialty.`;
-    recommendedSignalingStrategy = `Distribute signals strategically: allocate Gold tokens to top-choice Target programs where your geographic ties and research overlap are strongest, reserving Silver tokens for high-yield programs aligned with your clinical trajectory.`;
+    advisorySummary = `Your profile matches the national median of matched U.S. MD seniors in ${benchmark.specialty} (Step 2 CK ${profile.step2Ck} vs ${step2Matched} median; ${profile.publications} publications vs ${pubsMatched} median).`;
   } else {
-    advisorySummary = `Your profile sits below the matched median for ${benchmark.specialty} (Step 2 CK ${profile.step2Ck} vs ${step2Matched} median; unmatched median was ${step2NotMatched}). Faculty advising categorizes this as Below Average, recommending an expanded safety net and targeted dual-application consideration if applicable.`;
-    recommendedSignalingStrategy = `Prioritize high-yield community and regional university-affiliated Target and Safety programs for your Gold and Silver tokens. Review Residency Explorer data to avoid burning signals on programs with restrictive Step 2 cutoffs.`;
+    advisorySummary = `Your profile sits below the matched median for ${benchmark.specialty} (Step 2 CK ${profile.step2Ck} vs ${step2Matched} median; unmatched median was ${step2NotMatched}).`;
   }
 
   return {
@@ -308,7 +304,7 @@ export function assessCompetitiveness(
     totalScholarlyMatchedMedian: totalMatchedScholarly,
     dimensionBreakdowns: breakdowns,
     advisorySummary,
-    recommendedSignalingStrategy,
+    recommendedSignalingStrategy: '',
   };
 }
 
