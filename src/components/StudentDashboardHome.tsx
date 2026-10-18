@@ -109,12 +109,13 @@ export function StudentDashboardHome({
   // Modal fields for LOR
   const [writerName, setWriterName] = useState('');
   const [writerTitle, setWriterTitle] = useState('');
+  const [writerSpecialty, setWriterSpecialty] = useState(targetSpecialty || '');
   const [writerInstitution, setWriterInstitution] = useState(advisingIntake.medicalSchool || 'University Medical Center');
   const [writerType, setWriterType] = useState<
     'Department Chair / SLOE' | 'Clinical Sub-I / Attending' | 'Research Mentor' | 'General'
   >('Clinical Sub-I / Attending');
   const [writerStatus, setWriterStatus] = useState<LetterRequestStatus>('asked');
-  const [writerNotes, setWriterNotes] = useState('');
+  const [assignedPrograms, setAssignedPrograms] = useState<string[]>([]);
 
   // Experience Journal Repository State (Initialized by student.id so fresh accounts start with 0 entries)
   const [journalEntries, setJournalEntries] = useState<ExperienceJournalEntry[]>(() =>
@@ -149,10 +150,11 @@ export function StudentDashboardHome({
     setEditingWriterId(null);
     setWriterName('');
     setWriterTitle('');
+    setWriterSpecialty(targetSpecialty || '');
     setWriterInstitution(advisingIntake.medicalSchool || 'University Medical Center');
     setWriterType('Clinical Sub-I / Attending');
     setWriterStatus('asked');
-    setWriterNotes('');
+    setAssignedPrograms([]);
     setIsAddWriterModalOpen(true);
   };
 
@@ -160,10 +162,11 @@ export function StudentDashboardHome({
     setEditingWriterId(writer.id);
     setWriterName(writer.writerName);
     setWriterTitle(writer.writerTitle);
-    setWriterInstitution(writer.institution);
+    setWriterSpecialty(writer.specialty || targetSpecialty || '');
+    setWriterInstitution(writer.institution || advisingIntake.medicalSchool || '');
     setWriterType(writer.letterType);
     setWriterStatus(writer.status);
-    setWriterNotes(writer.notes || '');
+    setAssignedPrograms(writer.assignedProgramIds || []);
     setIsAddWriterModalOpen(true);
   };
 
@@ -179,10 +182,11 @@ export function StudentDashboardHome({
               ...w,
               writerName: writerName.trim(),
               writerTitle: writerTitle.trim(),
-              institution: writerInstitution.trim(),
+              specialty: writerSpecialty.trim() || undefined,
+              institution: writerInstitution.trim() || undefined,
               letterType: writerType,
               status: writerStatus,
-              notes: writerNotes.trim() || undefined,
+              assignedProgramIds: assignedPrograms,
             }
           : w
       );
@@ -191,18 +195,17 @@ export function StudentDashboardHome({
         id: `lor-${Date.now()}`,
         writerName: writerName.trim(),
         writerTitle: writerTitle.trim() || 'Clinical Attending',
-        specialty: targetSpecialty,
+        specialty: writerSpecialty.trim() || targetSpecialty,
         institution: writerInstitution.trim() || advisingIntake.medicalSchool || 'Academic Medical Center',
         letterType: writerType,
         status: writerStatus,
-        notes: writerNotes.trim() || undefined,
-        assignedProgramIds: [],
+        assignedProgramIds: assignedPrograms,
       };
       updated = [newWriter, ...writers];
     }
 
     setWriters(updated);
-    saveLetterWriterRequests(updated);
+    saveLetterWriterRequests(updated, student.id);
     setIsAddWriterModalOpen(false);
   };
 
@@ -696,123 +699,161 @@ export function StudentDashboardHome({
         </div>
       </div>
 
-      {/* Quick Add / Edit LOR Writer Modal */}
+      {/* Add / Edit Letter Writer Modal (Aligned with LOR Tracker) */}
       {isAddWriterModalOpen && (
-        <div className="fixed inset-0 z-50 bg-neutral-950/40 backdrop-blur-xs flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-md w-full shadow-xl border border-neutral-200 overflow-hidden">
-            <div className="p-5 border-b border-neutral-100 flex items-center justify-between">
-              <h3 className="font-bold text-neutral-900 text-sm">
-                {editingWriterId ? 'Edit Letter Writer' : 'Add New Letter Writer'}
+        <div
+          data-modal="true"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 modal-backdrop"
+        >
+          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 space-y-4 border border-[#D6E5DF] animate-scale-in">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <h3 className="font-bold text-slate-900 text-base">
+                {editingWriterId ? 'Edit Letter Writer' : 'Add Letter Writer'}
               </h3>
               <button
+                type="button"
                 onClick={() => setIsAddWriterModalOpen(false)}
-                className="text-neutral-400 hover:text-neutral-700 p-1"
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                title="Close"
               >
-                <X className="w-4 h-4" />
+                <X className="w-5 h-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSaveWriterModal} className="p-5 space-y-3.5 text-xs">
+            <form onSubmit={handleSaveWriterModal} className="space-y-3 text-xs">
               <div>
-                <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                  Writer Full Name *
-                </label>
+                <label className="font-semibold text-slate-700 block mb-1">Faculty Name</label>
                 <input
                   type="text"
                   required
-                  placeholder="e.g. Dr. Rose Barham, MD"
                   value={writerName}
                   onChange={(e) => setWriterName(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                  Academic Title / Role
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Division Chief of General Internal Medicine"
-                  value={writerTitle}
-                  onChange={(e) => setWriterTitle(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B]"
-                />
-              </div>
-
-              <div>
-                <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                  Institution
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. University Hospital, Mayo Clinic"
-                  value={writerInstitution}
-                  onChange={(e) => setWriterInstitution(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B]"
+                  placeholder="e.g. Dr. Marcus Chen"
+                  className="w-full bg-white border border-slate-300 rounded-lg p-2 font-medium text-slate-900"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                    Letter Type
-                  </label>
+                  <label className="font-semibold text-slate-700 block mb-1">Faculty Title / Role</label>
+                  <input
+                    type="text"
+                    value={writerTitle}
+                    onChange={(e) => setWriterTitle(e.target.value)}
+                    placeholder="e.g. Sub-I Director"
+                    className="w-full bg-white border border-slate-300 rounded-lg p-2 text-slate-900"
+                  />
+                </div>
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Department / Specialty</label>
+                  <input
+                    type="text"
+                    value={writerSpecialty}
+                    onChange={(e) => setWriterSpecialty(e.target.value)}
+                    placeholder="e.g. Internal Medicine"
+                    className="w-full bg-white border border-slate-300 rounded-lg p-2 text-slate-900"
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="font-semibold text-slate-700 block mb-1">Letter Type</label>
                   <select
                     value={writerType}
                     onChange={(e) => setWriterType(e.target.value as any)}
-                    className="w-full px-2.5 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B]"
+                    className="w-full bg-white border border-slate-300 rounded-lg pl-3 pr-8 py-2 text-slate-900 font-medium"
                   >
-                    <option value="Clinical Sub-I / Attending">Clinical Sub-I</option>
-                    <option value="Department Chair / SLOE">Department Chair</option>
+                    <option value="Clinical Sub-I / Attending">Clinical Sub-I / Attending</option>
+                    <option value="Department Chair / SLOE">Department Chair / SLOE</option>
                     <option value="Research Mentor">Research Mentor</option>
-                    <option value="General">General Attending</option>
+                    <option value="General">General Letter</option>
                   </select>
                 </div>
 
                 <div>
-                  <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                    Current Status
-                  </label>
+                  <label className="font-semibold text-slate-700 block mb-1">Status</label>
                   <select
                     value={writerStatus}
-                    onChange={(e) => setWriterStatus(e.target.value as LetterRequestStatus)}
-                    className="w-full px-2.5 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B]"
+                    onChange={(e) => setWriterStatus(e.target.value as any)}
+                    className="w-full bg-white border border-slate-300 rounded-lg pl-3 pr-8 py-2 text-slate-900 font-bold"
                   >
                     <option value="pending_ask">Pending Ask</option>
-                    <option value="asked">Asked</option>
-                    <option value="initiated_eras">Initiated in ERAS</option>
-                    <option value="submitted">Submitted</option>
+                    <option value="asked">Asked for LOR</option>
+                    <option value="initiated_eras">Initiated on ERAS</option>
+                    <option value="submitted">Submitted to ERAS</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                  Notes / Focus
-                </label>
-                <textarea
-                  rows={2}
-                  placeholder="e.g. Agreed to highlight acute ICU patient care and family communications..."
-                  value={writerNotes}
-                  onChange={(e) => setWriterNotes(e.target.value)}
-                  className="w-full px-3 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B]"
-                />
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="font-semibold text-slate-700">Assign to Saved Programs</label>
+                  {savedPrograms.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allSelected = savedPrograms.every((p) => assignedPrograms.includes(p.id));
+                        if (allSelected) {
+                          setAssignedPrograms([]);
+                        } else {
+                          setAssignedPrograms(savedPrograms.map((p) => p.id));
+                        }
+                      }}
+                      className="text-[11px] font-bold text-emerald-800 hover:text-emerald-950 underline cursor-pointer"
+                    >
+                      {savedPrograms.every((p) => assignedPrograms.includes(p.id))
+                        ? 'Deselect All'
+                        : `Select All (${savedPrograms.length})`}
+                    </button>
+                  )}
+                </div>
+                <div className="max-h-40 overflow-y-auto border border-slate-200 rounded-lg p-2 space-y-1 bg-slate-50">
+                  {savedPrograms.length === 0 ? (
+                    <div className="text-slate-400 text-[11px] py-2 text-center">
+                      No saved programs in your school list. Add programs in the Strategic School List Matrix.
+                    </div>
+                  ) : (
+                    savedPrograms.map((prog) => {
+                      const isChecked = assignedPrograms.includes(prog.id);
+                      return (
+                        <label
+                          key={prog.id}
+                          className="flex items-center gap-2 text-[11px] cursor-pointer hover:bg-slate-100/80 p-1 rounded transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setAssignedPrograms([...assignedPrograms, prog.id]);
+                              } else {
+                                setAssignedPrograms(assignedPrograms.filter((id) => id !== prog.id));
+                              }
+                            }}
+                            className="rounded text-[#1F3A30] focus:ring-[#1F3A30]"
+                          />
+                          <span className="truncate text-slate-800 font-medium">{prog.programName}</span>
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
               </div>
 
-              <div className="flex items-center justify-end gap-2 pt-2 border-t border-neutral-100">
+              <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
                 <button
                   type="button"
                   onClick={() => setIsAddWriterModalOpen(false)}
-                  className="px-3.5 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900"
+                  className="px-3 py-1.5 text-slate-600 hover:text-slate-800 cursor-pointer"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-4 py-2 bg-[#1F3A30] hover:bg-[#162D25] text-white font-bold text-xs rounded-xl shadow-2xs"
+                  className="px-4 py-1.5 bg-[#1F3A30] hover:bg-[#142720] text-white font-bold rounded-lg shadow-sm cursor-pointer"
                 >
-                  {editingWriterId ? 'Update Writer' : 'Add Writer'}
+                  Save Letter Writer
                 </button>
               </div>
             </form>

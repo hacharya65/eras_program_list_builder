@@ -650,6 +650,19 @@ describe('Ticket 07: Strategic School List Matrix & Dynamic Specialty Signaling'
       expect(lorSource).not.toContain('Private Notes');
       expect(lorSource).toContain('data-modal="true"');
       expect(lorSource).toContain('modal-backdrop');
+
+      // Check StudentDashboardHome source file to verify identical letter writer modal
+      const dashSource = fs.readFileSync(
+        path.resolve(process.cwd(), 'src/components/StudentDashboardHome.tsx'),
+        'utf-8'
+      );
+
+      expect(dashSource).toContain('Assign to Saved Programs');
+      expect(dashSource).not.toContain('Add New Letter Writer');
+      expect(dashSource).not.toContain('Notes / Focus');
+      expect(dashSource).toContain('Select All');
+      expect(dashSource).toContain('data-modal="true"');
+      expect(dashSource).toContain('modal-backdrop');
     });
   });
 });
