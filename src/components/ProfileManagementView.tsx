@@ -300,7 +300,7 @@ export function ProfileManagementView({
                   <option value="Top 10%">Top 10% (First Decile)</option>
                   <option value="Top Quartile">Top Quartile (Quartile 1)</option>
                   <option value="Second Quartile">Second Quartile (Quartile 2)</option>
-                  <option value="Not Ranked">Geisinger Non-Ranked</option>
+                  <option value="Not Ranked">Non-Ranked</option>
                 </select>
               </div>
 
@@ -371,7 +371,7 @@ export function ProfileManagementView({
               <div>
                 <h3 className="font-bold text-neutral-900 text-sm flex items-center gap-2">
                   <FileCheck className="w-4 h-4 text-[#1F3A30]" />
-                  <span>Geisinger Specialty Advising Intake Form</span>
+                  <span>Specialty Advising Intake Form</span>
                 </h3>
                 <p className="text-xs text-neutral-500 mt-0.5">
                   Official clinical rotation &amp; faculty advising questionnaire.

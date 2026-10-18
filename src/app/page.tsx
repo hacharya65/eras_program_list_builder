@@ -95,15 +95,6 @@ export default function HomePage() {
         userRoleTitle="MS4 Applicant"
         onOpenAuthModal={() => setIsAuthModalOpen(true)}
         onLogout={handleLogout}
-        onOpenAdvisingLeadership={() => {
-          if (typeof window !== 'undefined') {
-            const url = new URL(window.location.href);
-            url.searchParams.set('view', 'advising_leadership');
-            window.history.pushState({ view: 'advising_leadership' }, '', url.toString());
-            window.scrollTo({ top: 0, behavior: 'instant' });
-            window.dispatchEvent(new CustomEvent('navigate_to_advising_leadership'));
-          }
-        }}
         onOpenFaq={() => {
           if (typeof window !== 'undefined') {
             const url = new URL(window.location.href);

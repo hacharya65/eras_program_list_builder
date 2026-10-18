@@ -1,18 +1,17 @@
 import { describe, it, expect } from 'vitest';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { AdvisingLeadershipView } from '@/components/AdvisingLeadershipView';
 import { DevPersonaSwitcher } from '@/components/DevPersonaSwitcher';
 import { StudentDashboardHome } from '@/components/StudentDashboardHome';
 import { INITIAL_MOCK_INTAKE } from '@/domain/advising-intake-models';
 import { StudentDashboardContext } from '@/domain/types';
 
-describe('AdvisingLeadership Integration & Navigation', () => {
+describe('Advising Contacts Removal & Independent Student Experience', () => {
   const mockContext: StudentDashboardContext = {
     institution: {
       id: 'geisinger',
-      name: 'Geisinger Commonwealth School of Medicine',
-      domain: 'som.geisinger.edu',
+      name: 'Medical School',
+      domain: 'som.edu',
       defaultSlaDays: 14,
     },
     student: {
@@ -23,16 +22,7 @@ describe('AdvisingLeadership Integration & Navigation', () => {
       specialty: 'Internal Medicine',
       institutionId: 'geisinger',
     },
-    assignedAdvisors: [
-      {
-        id: 'adv-marcus-chen',
-        name: 'Dr. Marcus Chen',
-        email: 'mchen@som.edu',
-        role: 'advisor',
-        specialty: 'Internal Medicine',
-        institutionId: 'geisinger',
-      },
-    ],
+    assignedAdvisors: [],
     personalStatement: {
       id: 'ps-1',
       studentId: 'student-alex-rivera',
@@ -46,36 +36,27 @@ describe('AdvisingLeadership Integration & Navigation', () => {
     activeReviewRequests: [],
   };
 
-  it('renders AdvisingLeadershipView with full directory leadership contacts and navigation', () => {
+  it('verifies that DevPersonaSwitcher does NOT contain the Advising and Leadership contact icon or menu link', () => {
     const markup = renderToStaticMarkup(
-      <AdvisingLeadershipView
-        targetSpecialty="Internal Medicine"
-        onBack={() => {}}
+      <DevPersonaSwitcher
+        currentRole="student"
+        onSelectRole={() => {}}
+        institutionName="Match Strategy & Signaling"
+        defaultMenuOpen={true}
       />
     );
 
-    // Verify key titles and header
-    expect(markup).toContain('Advising and Leadership');
-    expect(markup).toContain('Official contact directory for MS4 match advising');
+    // Advising and Leadership contact page must NOT be present
+    expect(markup).not.toContain('title="Advising and Leadership"');
+    expect(markup).not.toContain('aria-label="Advising and Leadership"');
+    expect(markup).not.toContain('<span>Advising and Leadership</span>');
 
-    // Verify leadership members are rendered
-    expect(markup).toContain('Dr. Marcus Chen');
-    expect(markup).toContain('Dr. Evelyn Taylor');
-    expect(markup).toContain('Sarah Jenkins');
-    expect(markup).toContain('David Alvarez');
-    expect(markup).toContain('Specialty Faculty Advisor');
-    expect(markup).toContain('Associate Dean of Student Affairs');
-
-    // Verify search and category filter controls are present
-    expect(markup).toContain('Search by name, role, specialty, campus, or focus area');
-    expect(markup).toContain('Specialty Advising');
-    expect(markup).toContain('Deans &amp; Student Affairs');
-
-    // Verify Back to Applicant Dashboard button exists
-    expect(markup).toContain('Back to Applicant Dashboard');
+    // FAQ and profile management should be preserved
+    expect(markup).toContain('Frequently Asked Questions &amp; Guide');
+    expect(markup).toContain('Profile Management &amp; Scores');
   });
 
-  it('verifies that StudentDashboardHome does not contain the old Advising Leadership directory card', () => {
+  it('verifies that StudentDashboardHome does not contain an advising contacts card', () => {
     const markup = renderToStaticMarkup(
       <StudentDashboardHome
         context={mockContext}
@@ -95,28 +76,8 @@ describe('AdvisingLeadership Integration & Navigation', () => {
       />
     );
 
-    // Old home page card description must not be in the home page
-    expect(markup).not.toContain('Official contact directory for MS4 match advising and student affairs.');
-
-    // Letters of Recommendation Tracker should be rendered
+    expect(markup).not.toContain('Official contact directory for MS4 match advising');
+    expect(markup).not.toContain('Deans &amp; Student Affairs');
     expect(markup).toContain('Letters of Recommendation');
-  });
-
-  it('renders the contact icon on the top bar in DevPersonaSwitcher with Advising and Leadership title and FAQ button', () => {
-    const markup = renderToStaticMarkup(
-      <DevPersonaSwitcher
-        currentRole="student"
-        onSelectRole={() => {}}
-        institutionName="Geisinger Commonwealth School of Medicine"
-      />
-    );
-
-    // Verify contact icon button has accessible title "Advising and Leadership"
-    expect(markup).toContain('title="Advising and Leadership"');
-    expect(markup).toContain('aria-label="Advising and Leadership"');
-    // Verify FAQ icon button is rendered right next to it
-    expect(markup).toContain('Frequently Asked Questions &amp; Guide');
-    // Verify user profile tab is also present
-    expect(markup).toContain('Alex Rivera');
   });
 });

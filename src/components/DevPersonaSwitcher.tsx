@@ -12,7 +12,6 @@ import {
   ClipboardCopy,
   Settings,
   FileText,
-  Contact,
   Mail,
   LogOut,
   HelpCircle,
@@ -26,7 +25,6 @@ interface DevPersonaSwitcherProps {
   userName?: string;
   userRoleTitle?: string;
   onOpenProfileManagement?: () => void;
-  onOpenAdvisingLeadership?: () => void;
   onOpenFaq?: () => void;
   onOpenDashboard?: () => void;
   onOpenAuthModal?: () => void;
@@ -42,7 +40,6 @@ export function DevPersonaSwitcher({
   userName = 'Alex Rivera',
   userRoleTitle = 'MS4 Applicant',
   onOpenProfileManagement,
-  onOpenAdvisingLeadership,
   onOpenFaq,
   onOpenDashboard,
   onOpenAuthModal,
@@ -100,15 +97,6 @@ export function DevPersonaSwitcher({
     setIsProfileMenuOpen(false);
   };
 
-  const handleLeadershipClick = () => {
-    if (onOpenAdvisingLeadership) {
-      onOpenAdvisingLeadership();
-    }
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('navigate_to_advising_leadership'));
-    }
-    setIsProfileMenuOpen(false);
-  };
 
   const handleFaqClick = () => {
     if (onOpenFaq) {
@@ -163,19 +151,8 @@ export function DevPersonaSwitcher({
             </span>
           </div>
 
-          {/* Right: Advising Leadership Quick Icon, FAQ Quick Icon & Classic Profile Tab */}
+          {/* Right: FAQ Quick Icon & Classic Profile Tab */}
           <div className="flex items-center gap-2">
-            {/* Advising and Leadership Quick Icon */}
-            <button
-              onClick={handleLeadershipClick}
-              className="flex items-center justify-center w-9 h-9 rounded-2xl border border-neutral-200/80 bg-white hover:bg-[#EAF2EE] text-neutral-600 hover:text-[#1F3A30] hover:border-[#1F3A30]/30 transition-all cursor-pointer shadow-2xs group relative"
-              title="Advising and Leadership"
-              aria-label="Advising and Leadership"
-            >
-              <Contact className="w-4 h-4 text-neutral-600 group-hover:text-[#1F3A30] group-hover:scale-105 transition-all" />
-              <span className="sr-only">Advising and Leadership</span>
-            </button>
-
             {/* Frequently Asked Questions Quick Icon */}
             <button
               onClick={handleFaqClick}
@@ -251,14 +228,6 @@ export function DevPersonaSwitcher({
                     >
                       <User className="w-4 h-4 text-[#4E8773]" />
                       <span>Profile Management &amp; Scores</span>
-                    </button>
-
-                    <button
-                      onClick={handleLeadershipClick}
-                      className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
-                    >
-                      <Contact className="w-4 h-4 text-[#4E8773]" />
-                      <span>Advising and Leadership</span>
                     </button>
 
                     <button

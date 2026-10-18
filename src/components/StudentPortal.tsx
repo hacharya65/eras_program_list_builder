@@ -9,7 +9,6 @@ import { SpecialtySwitchingSafetyModal } from './SpecialtySwitchingSafetyModal';
 import { StudentDashboardHome } from './StudentDashboardHome';
 import { ProfileManagementView } from './ProfileManagementView';
 import { JournalRepositoryView } from './JournalRepositoryView';
-import { AdvisingLeadershipView } from './AdvisingLeadershipView';
 import { StudentAuthModal } from './StudentAuthModal';
 import { PlatformWalkthroughModal } from './PlatformWalkthroughModal';
 import { FaqAndGuideView } from './FaqAndGuideView';
@@ -66,7 +65,6 @@ export function StudentPortal({
     | 'school_list'
     | 'competitiveness'
     | 'letters'
-    | 'advising_leadership'
     | 'faq'
   >('overview');
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -145,7 +143,6 @@ export function StudentPortal({
           'school_list',
           'competitiveness',
           'letters',
-          'advising_leadership',
           'faq',
         ].includes(urlView)
       ) {
@@ -166,7 +163,6 @@ export function StudentPortal({
             'school_list',
             'competitiveness',
             'letters',
-            'advising_leadership',
             'faq',
           ].includes(urlView)
         ) {
@@ -184,7 +180,6 @@ export function StudentPortal({
     const handleNavDashboard = () => updateView('overview');
     const handleNavProfile = () => updateView('profile');
     const handleNavIntake = () => updateView('intake');
-    const handleNavLeadership = () => updateView('advising_leadership');
     const handleNavFaq = () => updateView('faq');
     const handleOpenWalkthrough = () => setIsWalkthroughOpen(true);
     const handleOpenAuth = () => {
@@ -199,7 +194,6 @@ export function StudentPortal({
     window.addEventListener('navigate_to_overview', handleNavDashboard);
     window.addEventListener('navigate_to_profile_management', handleNavProfile);
     window.addEventListener('navigate_to_intake', handleNavIntake);
-    window.addEventListener('navigate_to_advising_leadership', handleNavLeadership);
     window.addEventListener('navigate_to_faq', handleNavFaq);
     window.addEventListener('open_platform_walkthrough', handleOpenWalkthrough);
     window.addEventListener('open_student_auth_modal', handleOpenAuth);
@@ -209,7 +203,6 @@ export function StudentPortal({
       window.removeEventListener('navigate_to_overview', handleNavDashboard);
       window.removeEventListener('navigate_to_profile_management', handleNavProfile);
       window.removeEventListener('navigate_to_intake', handleNavIntake);
-      window.removeEventListener('navigate_to_advising_leadership', handleNavLeadership);
       window.removeEventListener('navigate_to_faq', handleNavFaq);
       window.removeEventListener('open_platform_walkthrough', handleOpenWalkthrough);
       window.removeEventListener('open_student_auth_modal', handleOpenAuth);
@@ -455,15 +448,6 @@ export function StudentPortal({
           onOpenIntake={() => updateView('intake')}
           onBack={() => updateView('overview')}
           assignedAdvisor={assignedAdvisor}
-        />
-      );
-    }
-
-    if (activeView === 'advising_leadership') {
-      return (
-        <AdvisingLeadershipView
-          targetSpecialty={targetSpecialty}
-          onBack={() => updateView('overview')}
         />
       );
     }

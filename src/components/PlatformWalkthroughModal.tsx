@@ -13,7 +13,6 @@ import {
   ChevronLeft,
   Sparkles,
   CheckCircle2,
-  Contact,
   TrendingUp,
 } from 'lucide-react';
 
@@ -152,17 +151,17 @@ const WALKTHROUGH_STEPS: WalkthroughStep[] = [
     targetView: 'letters',
   },
   {
-    title: 'Advising Leadership & FAQ',
+    title: 'FAQ & Strategy Guidance',
     badge: 'Support & Guidance',
-    icon: Contact,
+    icon: HelpCircle,
     iconBg: 'bg-emerald-100 text-emerald-800',
-    headline: 'Faculty Directory & On-Demand Assistance',
+    headline: 'Self-Paced Assistance & Strategy Guide',
     description:
-      'Access the official Advising and Leadership directory at any time from the top navigation bar. If you ever have questions or want to review this walkthrough again, visit the FAQ tab right next to it.',
+      'Access the comprehensive FAQ and strategy guide at any time from the top navigation bar. If you ever have questions or want to review this walkthrough again, visit the FAQ tab.',
     highlights: [
       {
-        title: 'Advising and Leadership',
-        detail: 'Direct contact info, office hours, and booking links for specialty champions and deans.',
+        title: 'Self-Directed List Building',
+        detail: 'Build and calibrate your program list with transparent reach, target, and safety tiers.',
       },
       {
         title: 'FAQ & Platform Guide',

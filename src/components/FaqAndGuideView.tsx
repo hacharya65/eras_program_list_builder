@@ -11,7 +11,6 @@ import {
   FileCheck,
   MailCheck,
   BookOpen,
-  Contact,
   TrendingUp,
   ExternalLink,
   ShieldAlert,
@@ -35,8 +34,7 @@ interface FaqItem {
     | 'signals'
     | 'intake'
     | 'letters'
-    | 'journal'
-    | 'leadership';
+    | 'journal';
   categoryLabel: string;
   question: string;
   answer: string;
@@ -130,9 +128,9 @@ const FAQ_DATABASE: FaqItem[] = [
     categoryLabel: 'Gold & Silver Signals',
     question: 'Should I signal my home program or away rotations?',
     answer:
-      'Specialty guidelines vary. Many specialties (like Internal Medicine and General Surgery) explicitly state that home programs and away rotations do not require signals because connection is already established. However, some specialties advise signaling everyone you wish to be interviewed by. Consult the Advising and Leadership directory or your specialty advisor for current cycle recommendations.',
-    actionLabel: 'Consult Advising Directory',
-    actionView: 'advising_leadership',
+      'Specialty guidelines vary. Many specialties (like Internal Medicine and General Surgery) explicitly state that home programs and away rotations do not require signals because connection is already established. However, some specialties advise signaling everyone you wish to be interviewed by. Review official specialty society and ACGME recommendations for your cycle.',
+    actionLabel: 'Review Your Assigned Signals',
+    actionView: 'school_list',
   },
   {
     id: 'faq-int-1',
@@ -188,26 +186,6 @@ const FAQ_DATABASE: FaqItem[] = [
     actionLabel: 'Open Experience Journal',
     actionView: 'journal',
   },
-  {
-    id: 'faq-lead-1',
-    category: 'leadership',
-    categoryLabel: 'Advising and Leadership',
-    question: 'Who are the official Specialty Advising Champions?',
-    answer:
-      'Specialty Advising Champions are designated faculty members and deans who possess specialized expertise in residency selection, match trends, and department expectations. They review MSPE strategy, verify program lists, and provide 1:1 mentorship.',
-    actionLabel: 'Browse Advising and Leadership',
-    actionView: 'advising_leadership',
-  },
-  {
-    id: 'faq-lead-2',
-    category: 'leadership',
-    categoryLabel: 'Advising and Leadership',
-    question: 'How do I book an advising check-in or office hours?',
-    answer:
-      'Click the Advising and Leadership icon in the top navigation bar. Each faculty member card displays their office hours, campus affiliation, focus area, and direct email / booking links.',
-    actionLabel: 'View Leadership Directory',
-    actionView: 'advising_leadership',
-  },
 ];
 
 export function FaqAndGuideView({
@@ -238,7 +216,6 @@ export function FaqAndGuideView({
     { id: 'intake', label: 'Advising Intake' },
     { id: 'letters', label: 'Letters of Rec' },
     { id: 'journal', label: 'Reflective Journal' },
-    { id: 'leadership', label: 'Advising & Leadership' },
   ];
 
   const filteredFaqs = useMemo(() => {
@@ -289,7 +266,7 @@ export function FaqAndGuideView({
           </h1>
 
           <p className="text-sm sm:text-base text-neutral-200/90 leading-relaxed">
-            Essential guidance for navigating your residency match strategy, allocating Gold &amp; Silver preference signals, maintaining your clinical dossier, and leveraging official advising leadership.
+            Essential guidance for navigating your residency match strategy, allocating Gold &amp; Silver preference signals, maintaining your clinical dossier, and building a balanced, evidence-based program list.
           </p>
 
           {/* Interactive Replay Walkthrough Banner */}

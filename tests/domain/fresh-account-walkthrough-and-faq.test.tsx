@@ -140,7 +140,7 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
       expect(markup).toContain('Advising Intake');
       expect(markup).toContain('Letters of Rec');
       expect(markup).toContain('Reflective Journal');
-      expect(markup).toContain('Advising &amp; Leadership');
+      expect(markup).not.toContain('Advising &amp; Leadership');
 
       // Key sample questions rendered
       expect(markup).toContain('How does Ethmoid personalize my residency strategy?');
@@ -148,12 +148,12 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
       expect(markup).toContain('What is the difference between Gold and Silver preference signals?');
       expect(markup).toContain('How do I record and modify my Core Clinical Clerkships?');
       expect(markup).toContain('Why does Ethmoid ask about Work Experiences count?');
-      expect(markup).toContain('Who are the official Specialty Advising Champions?');
+      expect(markup).not.toContain('Who are the official Specialty Advising Champions?');
     });
   });
 
   describe('DevPersonaSwitcher Header Icons & Dropdown', () => {
-    it('renders the Advising and Leadership icon and FAQ icon side by side on the top bar', () => {
+    it('renders the FAQ icon and profile controls on the top bar with Advising Leadership icon eliminated', () => {
       const markup = renderToStaticMarkup(
         <DevPersonaSwitcher
           currentRole="student"
@@ -164,8 +164,8 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
       );
 
       // Top bar button titles
-      expect(markup).toContain('title="Advising and Leadership"');
-      expect(markup).toContain('aria-label="Advising and Leadership"');
+      expect(markup).not.toContain('title="Advising and Leadership"');
+      expect(markup).not.toContain('aria-label="Advising and Leadership"');
       expect(markup).toContain('title="Frequently Asked Questions &amp; Guide"');
       expect(markup).toContain('aria-label="Frequently Asked Questions &amp; Guide"');
 
@@ -176,7 +176,7 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
       expect(markup).toContain('Ethmoid');
 
       // Profile menu dropdown items
-      expect(markup).toContain('Advising and Leadership');
+      expect(markup).not.toContain('Advising and Leadership');
       expect(markup).toContain('FAQ &amp; Platform Walkthrough');
       expect(markup).toContain('Profile Management &amp; Scores');
 
