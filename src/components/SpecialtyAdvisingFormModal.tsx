@@ -22,6 +22,7 @@ import {
   Download,
   Copy,
   Award,
+  FileCheck,
 } from 'lucide-react';
 import {
   SpecialtyAdvisingIntake,
@@ -198,24 +199,19 @@ CLINICAL STATEMENT & GOALS:
   const modalContent = (
     <div className={`bg-white ${isEmbedded ? 'w-full shadow-xs' : 'rounded-2xl shadow-2xl max-w-4xl w-full max-h-[92vh]'} flex flex-col border border-neutral-200/90 overflow-hidden`}>
       {/* Modal Header */}
-      <div className="bg-[#1F3A30] text-white px-6 py-4 flex items-center justify-between shrink-0 border-b border-[#2D5949]">
+      <div className="bg-white text-neutral-900 px-6 py-4 flex items-center justify-between shrink-0 border-b border-neutral-200/90">
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-[#264639] border border-[#7EAE9B]/30 flex items-center justify-center p-1 overflow-hidden shrink-0">
-            <img
-              src="/ethmoid-square.jpeg"
-              alt="Ethmoid Mark"
-              className="w-full h-full object-contain filter brightness-110"
-            />
+          <div className="w-10 h-10 rounded-xl bg-[#EAF2EE] border border-[#7EAE9B]/30 flex items-center justify-center text-[#1F3A30] shrink-0">
+            <FileCheck className="w-5 h-5 text-[#1F3A30]" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <span className="text-[10px] font-bold tracking-widest uppercase px-2 py-0.5 rounded bg-[#7EAE9B]/20 text-[#A3D9C5] border border-[#7EAE9B]/40">
-                {formData.medicalSchool ? `${formData.medicalSchool} Dossier` : 'Specialty Advising Dossier'}
+              <span className="text-[10px] font-bold tracking-wider uppercase px-2 py-0.5 rounded bg-[#EAF2EE] text-[#1F3A30] border border-[#7EAE9B]/30">
+                {formData.medicalSchool ? `${formData.medicalSchool} Packet` : 'Specialty Advising Packet'}
               </span>
-              <span className="text-xs text-emerald-200/80">Ethmoid Match Strategy</span>
             </div>
-            <h2 id="intake-modal-title" className="text-lg font-bold text-white tracking-tight">
-              Specialty Advising Intake &amp; Dossier
+            <h2 id="intake-modal-title" className="text-lg font-bold text-neutral-900 tracking-tight mt-0.5">
+              Specialty Advising Intake &amp; Packet
             </h2>
           </div>
         </div>
@@ -226,31 +222,31 @@ CLINICAL STATEMENT & GOALS:
             <button
               type="button"
               onClick={handleCopySummary}
-              className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-emerald-100 flex items-center gap-1.5 transition-all border border-white/10"
+              className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-neutral-50 hover:bg-[#EAF2EE] text-neutral-700 hover:text-[#1F3A30] flex items-center gap-1.5 transition-all border border-neutral-200/80 cursor-pointer shadow-2xs"
               title="Copy text summary formatted for advisor meetings or emails"
             >
-              <Copy className="w-3.5 h-3.5 text-[#7EAE9B]" />
+              <Copy className="w-3.5 h-3.5 text-[#4E8773]" />
               <span>{copiedSuccess ? 'Copied to Clipboard!' : 'Copy Summary'}</span>
             </button>
             <button
               type="button"
               onClick={handleExportJson}
-              className="px-2.5 py-1 rounded-lg text-xs font-semibold bg-white/10 hover:bg-white/20 text-emerald-100 flex items-center gap-1.5 transition-all border border-white/10"
+              className="px-2.5 py-1.5 rounded-xl text-xs font-semibold bg-neutral-50 hover:bg-[#EAF2EE] text-neutral-700 hover:text-[#1F3A30] flex items-center gap-1.5 transition-all border border-neutral-200/80 cursor-pointer shadow-2xs"
               title="Download intake profile as JSON file"
             >
-              <Download className="w-3.5 h-3.5 text-[#7EAE9B]" />
+              <Download className="w-3.5 h-3.5 text-[#4E8773]" />
               <span>Export JSON</span>
             </button>
           </div>
 
-          <div className="bg-[#142720] p-1 rounded-lg flex items-center gap-1 border border-[#2D5949] text-xs">
+          <div className="bg-neutral-100 p-1 rounded-xl flex items-center gap-1 border border-neutral-200/80 text-xs">
             <button
               type="button"
               onClick={() => setActiveTab('editor')}
-              className={`px-3 py-1 rounded font-semibold transition-all ${
+              className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
                 activeTab === 'editor'
-                  ? 'bg-[#7EAE9B] text-[#142720] shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-white text-neutral-900 shadow-2xs border border-neutral-200/60'
+                  : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
               Interactive Form
@@ -258,10 +254,10 @@ CLINICAL STATEMENT & GOALS:
             <button
               type="button"
               onClick={() => setActiveTab('printable_preview')}
-              className={`px-3 py-1 rounded font-semibold transition-all ${
+              className={`px-3 py-1 rounded-lg font-semibold transition-all cursor-pointer ${
                 activeTab === 'printable_preview'
-                  ? 'bg-[#7EAE9B] text-[#142720] shadow-xs'
-                  : 'text-slate-300 hover:text-white'
+                  ? 'bg-white text-neutral-900 shadow-2xs border border-neutral-200/60'
+                  : 'text-neutral-500 hover:text-neutral-900'
               }`}
             >
               Official Printable View
@@ -271,7 +267,7 @@ CLINICAL STATEMENT & GOALS:
           {!isEmbedded && (
             <button
               onClick={onClose}
-              className="p-1.5 text-emerald-200/70 hover:text-white hover:bg-[#264639] rounded-lg transition-colors ml-1"
+              className="p-1.5 text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 rounded-xl transition-colors ml-1 cursor-pointer"
               title="Close modal"
               aria-label="Close"
             >
@@ -377,20 +373,13 @@ CLINICAL STATEMENT & GOALS:
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
                   <div className="md:col-span-1">
-                    <label className="font-bold text-slate-800 block mb-1">1. Specialty Applying</label>
-                    <select
-                      value={formData.applyingSpecialty}
-                      onChange={(e) => handleSpecialtyChange(e.target.value)}
-                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-2 text-xs font-bold text-slate-900 focus:ring-2 focus:ring-[#7EAE9B] focus:outline-none"
-                    >
-                      {CANONICAL_SPECIALTIES.map((spec) => (
-                        <option key={spec} value={spec}>
-                          {spec}
-                        </option>
-                      ))}
-                    </select>
+                    <label className="font-bold text-slate-800 block mb-1">1. Declared Specialty</label>
+                    <div className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-2 text-xs font-bold text-slate-800 flex items-center justify-between">
+                      <span>{formData.applyingSpecialty}</span>
+                      <span className="text-[10px] font-semibold text-slate-500 bg-slate-200/60 px-1.5 py-0.5 rounded">Declared</span>
+                    </div>
                     <span className="text-[11px] text-slate-500 mt-1 block">
-                      Syncs automatically across School List Matrix and signaling budgets.
+                      Declared during onboarding. Syncs across School List Matrix and signaling budgets.
                     </span>
                   </div>
 
@@ -1122,7 +1111,7 @@ CLINICAL STATEMENT & GOALS:
                     className="px-5 py-2 rounded-xl bg-[#1F3A30] hover:bg-[#142720] text-white text-xs font-bold shadow-md hover:shadow-lg transition-all flex items-center gap-1.5"
                   >
                     <Save className="w-4 h-4 text-[#7EAE9B]" />
-                    Save & Update Advising Dossier
+                    Save & Update Advising Packet
                   </button>
                 </div>
               </div>
@@ -1132,7 +1121,7 @@ CLINICAL STATEMENT & GOALS:
             <div className="space-y-4">
               <div className="flex items-center justify-between bg-white p-3 rounded-lg border border-slate-200 text-xs">
                 <span className="text-slate-600">
-                  Comprehensive Official Specialty Advising Dossier &amp; Diagnostic Record.
+                  Comprehensive Official Specialty Advising Packet &amp; Diagnostic Record.
                 </span>
                 <div className="flex items-center gap-2">
                   <button
@@ -1162,7 +1151,7 @@ CLINICAL STATEMENT & GOALS:
               {/* Form Sheet Preview */}
               <div className="bg-white p-8 rounded-lg shadow-sm border border-slate-300 max-w-2xl mx-auto text-slate-900 font-serif text-[12px] leading-relaxed space-y-4">
                 <div className="border-b-2 border-slate-900 pb-3 text-center">
-                  <h1 className="text-base font-bold uppercase tracking-wide">Specialty Advising Dossier</h1>
+                  <h1 className="text-base font-bold uppercase tracking-wide">Specialty Advising Packet</h1>
                   <span className="text-[10px] text-slate-600 font-sans">{formData.medicalSchool || 'Medical Student Advising Network'}</span>
                 </div>
 

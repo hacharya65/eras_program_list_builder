@@ -99,11 +99,11 @@ const WALKTHROUGH_STEPS: WalkthroughStep[] = [
     targetView: 'school_list',
   },
   {
-    title: 'Advising Intake Dossier',
+    title: 'Advising Intake Packet',
     badge: 'Academic Profile',
     icon: FileCheck,
     iconBg: 'bg-amber-100 text-amber-800',
-    headline: 'Comprehensive MSPE & Advising Dossier',
+    headline: 'Comprehensive MSPE & Advising Packet',
     description:
       'Record your core clinical clerkships, Step examination scores, research contributions, and work experiences. You can modify, add, or remove clerkships as your clinical schedule progresses.',
     highlights: [

@@ -359,7 +359,7 @@ export function StudentPortal({
       subSections: [
         {
           id: 'intake',
-          label: 'Advising Intake Dossier',
+          label: 'Advising Intake Packet',
           icon: FileCheck,
           badge: advisingIntake.isCompleted ? 'Complete' : 'In Progress',
         },

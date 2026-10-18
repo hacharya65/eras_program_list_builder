@@ -238,7 +238,7 @@ export function DevPersonaSwitcher({
                       className="w-full flex items-center gap-2.5 px-3 py-2 rounded-xl text-neutral-700 hover:text-neutral-900 hover:bg-[#EAF2EE] hover:text-[#1F3A30] font-semibold transition-colors text-left cursor-pointer"
                     >
                       <FileText className="w-4 h-4 text-[#4E8773]" />
-                      <span>Specialty Advising Dossier</span>
+                      <span>Specialty Advising Packet</span>
                     </button>
 
                     {onLogout && (

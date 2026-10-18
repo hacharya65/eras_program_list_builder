@@ -111,20 +111,10 @@ export function CompetitivenessCalculator({
           </div>
         </div>
 
-        {/* Specialty Selector Dropdown */}
-        <div className="flex items-center gap-3">
-          <label className="text-xs font-medium text-slate-600">Target Specialty:</label>
-          <select
-            value={specialty}
-            onChange={(e) => setSpecialty(e.target.value)}
-            className="bg-slate-50 border border-slate-300 rounded-lg px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-emerald-500"
-          >
-            {CANONICAL_SPECIALTIES.map((spec) => (
-              <option key={spec} value={spec}>
-                {spec}
-              </option>
-            ))}
-          </select>
+        {/* Declared Target Specialty Badge (Locked) */}
+        <div className="flex items-center gap-2 bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 shadow-2xs">
+          <span className="text-xs font-medium text-slate-500">Target Specialty:</span>
+          <span className="text-xs font-bold text-slate-900">{specialty}</span>
         </div>
       </div>
 

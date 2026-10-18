@@ -347,20 +347,10 @@ export function SchoolListMatrix({
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          {/* Specialty Selector Dropdown */}
+          {/* Declared Specialty Badge (Locked) */}
           <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs shadow-xs">
             <span className="text-slate-600 font-bold whitespace-nowrap">Specialty:</span>
-            <select
-              value={selectedSpecialty}
-              onChange={(e) => handleSpecialtyChange(e.target.value)}
-              className="text-xs font-bold rounded border-0 bg-transparent text-slate-800 focus:outline-none focus:ring-0 cursor-pointer"
-            >
-              {CANONICAL_SPECIALTIES.map((spec) => (
-                <option key={spec} value={spec}>
-                  {spec}
-                </option>
-              ))}
-            </select>
+            <span className="font-bold text-slate-900">{selectedSpecialty}</span>
             {rule.explanationRequired && (
               <span className="px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-100 text-amber-900 border border-amber-300 ml-1 whitespace-nowrap">
                 Explanation Req (300 chars)

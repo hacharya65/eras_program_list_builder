@@ -52,7 +52,7 @@ const FAQ_DATABASE: FaqItem[] = [
     answer:
       'Ethmoid synthesizes your core clinical clerkship grades, USMLE Step examinations, research output, and work experiences to calculate an evidence-based Strategic Readiness Score. It cross-references your profile with historical NRMP charting outcomes and specialty-specific competitiveness standards.',
     tips: [
-      'Complete your Advising Intake Dossier first to establish your personalized baseline.',
+      'Complete your Advising Intake Packet first to establish your personalized baseline.',
       'Your account begins with a clean slate—no pre-populated programs or mock letters.',
     ],
     actionLabel: 'Complete Advising Intake',
@@ -135,17 +135,17 @@ const FAQ_DATABASE: FaqItem[] = [
   {
     id: 'faq-int-1',
     category: 'intake',
-    categoryLabel: 'Advising Intake Dossier',
+    categoryLabel: 'Advising Intake Packet',
     question: 'How do I record and modify my Core Clinical Clerkships?',
     answer:
-      'Under the Documents & Packet tab, open the Advising Intake Dossier. You will find "What are your Core Clinical Clerkship grades?" with 7 core clinical clerkships (Internal Medicine, Surgery, Pediatrics, OB/GYN, Psychiatry, Family Medicine, and Neurology). You can record your grade (Honors, High Pass, Pass, In Progress), add additional clerkships (e.g. Sub-Internships or Critical Care), or remove electives that do not apply.',
+      'Under the Documents & Packet tab, open the Advising Intake Packet. You will find "What are your Core Clinical Clerkship grades?" with 7 core clinical clerkships (Internal Medicine, Surgery, Pediatrics, OB/GYN, Psychiatry, Family Medicine, and Neurology). You can record your grade (Honors, High Pass, Pass, In Progress), add additional clerkships (e.g. Sub-Internships or Critical Care), or remove electives that do not apply.',
     actionLabel: 'Update Clerkship Grades',
     actionView: 'intake',
   },
   {
     id: 'faq-int-2',
     category: 'intake',
-    categoryLabel: 'Advising Intake Dossier',
+    categoryLabel: 'Advising Intake Packet',
     question: 'Why does Ethmoid ask about Work Experiences count?',
     answer:
       'The NRMP Charting Outcomes matrix analyzes applicant matched probability relative to verified work experience count alongside publications and volunteer positions. Tracking this metric ensures your calculated competitiveness reflects the comprehensive residency applicant index.',
