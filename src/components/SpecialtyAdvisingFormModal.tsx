@@ -83,13 +83,12 @@ export function SpecialtyAdvisingFormModal({
 
   const handleCopySummary = () => {
     const honors = calculateClerkshipHonorsCount(formData.clerkshipGrades);
-    const summary = `STUDENT SPECIALTY ADVISING INTAKE DOSSIER
+    const summary = `STUDENT SPECIALTY ADVISING INTAKE PACKET
 ================================================
 Applicant: ${formData.studentName} (${formData.pronouns || 'N/A'})
 Medical School: ${formData.medicalSchool || 'Not specified'}
 Regional Campus: ${formData.regionalCampus}
 Specialty Applying: ${formData.applyingSpecialty}
-Specialty Advisor: ${formData.specialtyAdvisorName}
 Date: ${formData.submissionDate}
 
 USMLE & ACADEMIC PERFORMANCE:
@@ -305,7 +304,7 @@ CLINICAL STATEMENT & GOALS:
                   <span className="text-xs text-slate-500">Date: {formData.submissionDate}</span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
                   <div>
                     <label className="font-semibold text-slate-700 block mb-1">Student Name</label>
                     <input
@@ -351,15 +350,6 @@ CLINICAL STATEMENT & GOALS:
                       <option value="Main Campus">Main Campus</option>
                       <option value="Other">Other Campus</option>
                     </select>
-                  </div>
-                  <div>
-                    <label className="font-semibold text-slate-700 block mb-1">Specialty Advisor</label>
-                    <input
-                      type="text"
-                      disabled
-                      value={formData.specialtyAdvisorName}
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg px-3 py-1.5 text-slate-800 font-bold cursor-not-allowed"
-                    />
                   </div>
                 </div>
               </div>
@@ -1110,7 +1100,6 @@ CLINICAL STATEMENT & GOALS:
                   <div><strong>PRONOUNS:</strong> {formData.pronouns || '—'}</div>
                   <div><strong>DATE:</strong> {formData.submissionDate}</div>
                   <div><strong>REGIONAL CAMPUS:</strong> {formData.regionalCampus}</div>
-                  <div><strong>SPECIALTY ADVISOR:</strong> {formData.specialtyAdvisorName}</div>
                 </div>
 
                 <div className="space-y-3 font-sans text-[11px]">
