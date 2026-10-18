@@ -533,11 +533,21 @@ export function StudentDashboardHome({
                       key={w.id}
                       className="p-2.5 bg-neutral-50 hover:bg-neutral-100/80 border border-neutral-200/80 rounded-xl text-xs hover:border-neutral-300 transition-colors flex flex-col justify-between shadow-2xs"
                     >
-                      {/* Name & Edit pencil icon */}
-                      <div className="flex items-center justify-between gap-1.5">
-                        <span className="font-bold text-neutral-900 text-xs truncate" title={w.writerName}>
-                          {w.writerName}
-                        </span>
+                      {/* Name, Letter Type & Edit pencil icon */}
+                      <div className="flex items-center justify-between gap-1.5 min-w-0">
+                        <div className="flex items-center gap-1.5 min-w-0 truncate">
+                          <span className="font-bold text-neutral-900 text-xs truncate" title={w.writerName}>
+                            {w.writerName}
+                          </span>
+                          {w.letterType && (
+                            <span
+                              className="text-[9.5px] px-1.5 py-0.5 rounded bg-neutral-200/70 text-neutral-700 font-medium truncate shrink-0 max-w-[140px] sm:max-w-[180px]"
+                              title={w.letterType}
+                            >
+                              {w.letterType}
+                            </span>
+                          )}
+                        </div>
                         <button
                           onClick={() => handleOpenEditWriter(w)}
                           className="text-neutral-400 hover:text-neutral-700 p-0.5 rounded hover:bg-neutral-200/60 transition-colors cursor-pointer shrink-0"
