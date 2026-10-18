@@ -843,7 +843,7 @@ export function SchoolListMatrix({
                   </div>
                 </th>
                 <th className="py-2.5 px-3 w-[13%]">
-                  <div className="flex items-center gap-1.5">
+                  <div className="flex items-center gap-1.5 flex-wrap">
                     <span>Letters of Rec</span>
                     <button
                       type="button"
@@ -853,6 +853,15 @@ export function SchoolListMatrix({
                       aria-label="Program LOR Requirements Guidance"
                     >
                       <Info className="w-3.5 h-3.5 text-sky-600" />
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleGoToLetters}
+                      className="inline-flex items-center gap-0.5 text-sky-700 hover:text-sky-900 font-bold hover:underline normal-case text-[10px] cursor-pointer"
+                      title="Open Letter of Recommendation (LOR) Tracking & Gaps"
+                    >
+                      <span>(LOR Tracker)</span>
+                      <ExternalLink className="w-2.5 h-2.5 text-sky-600" />
                     </button>
                   </div>
                 </th>
@@ -1182,19 +1191,6 @@ export function SchoolListMatrix({
                                 );
                               }
                             })()}
-                          </div>
-
-                          {/* Link to LOR Tracking page */}
-                          <div>
-                            <button
-                              type="button"
-                              onClick={handleGoToLetters}
-                              className="text-[10px] text-sky-700 hover:text-sky-900 font-semibold hover:underline inline-flex items-center gap-0.5 cursor-pointer"
-                              title="Assign writers and view gaps in Letter of Recommendation Tracker"
-                            >
-                              <span>LOR Tracker</span>
-                              <ExternalLink className="w-2.5 h-2.5" />
-                            </button>
                           </div>
                         </div>
                       </td>

@@ -520,6 +520,30 @@ describe('Ticket 07: Strategic School List Matrix & Dynamic Specialty Signaling'
         expect(item.doximityUrl).toBe('https://www.doximity.com/residency');
       });
     });
+
+    it('verifies LOR Tracker is present as a column header hyperlink and removed from individual program rows', async () => {
+      const React = (await import('react')).default;
+      const { renderToStaticMarkup } = await import('react-dom/server');
+      const { SchoolListMatrix } = await import('@/components/SchoolListMatrix');
+
+      const html = renderToStaticMarkup(
+        React.createElement(SchoolListMatrix, {
+          onBack: () => {},
+        })
+      );
+
+      // Verify LOR Tracker link in the Letters of Rec column header
+      expect(html).toContain('Letters of Rec');
+      expect(html).toContain('(LOR Tracker)');
+      expect(html).toContain('Open Letter of Recommendation (LOR) Tracking &amp; Gaps');
+
+      // In tbody, the individual program cells should not contain individual LOR Tracker buttons
+      // Only the header and the info modal should have references to LOR Tracker
+      const tbodyStartIndex = html.indexOf('<tbody');
+      const tbodyEndIndex = html.indexOf('</tbody>');
+      const tbodyHtml = html.slice(tbodyStartIndex, tbodyEndIndex);
+      expect(tbodyHtml).not.toContain('LOR Tracker');
+    });
   });
 });
 
