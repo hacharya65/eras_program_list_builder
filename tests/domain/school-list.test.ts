@@ -544,6 +544,45 @@ describe('Ticket 07: Strategic School List Matrix & Dynamic Specialty Signaling'
       const tbodyHtml = html.slice(tbodyStartIndex, tbodyEndIndex);
       expect(tbodyHtml).not.toContain('LOR Tracker');
     });
+
+    it('verifies yellow "300 char rationale" badge is removed and info icon only renders for specialties requiring notes', async () => {
+      const React = (await import('react')).default;
+      const { renderToStaticMarkup } = await import('react-dom/server');
+      const { SchoolListMatrix } = await import('@/components/SchoolListMatrix');
+      const { SPECIALTY_SIGNALING_RULES } = await import('@/domain/school-list-models');
+
+      // Internal Medicine does NOT require signal rationale
+      expect(SPECIALTY_SIGNALING_RULES['Internal Medicine'].explanationRequired).toBe(false);
+
+      const imHtml = renderToStaticMarkup(
+        React.createElement(SchoolListMatrix, {
+          onBack: () => {},
+        })
+      );
+
+      // Verify yellow badge is never present
+      expect(imHtml).not.toContain('char rationale');
+      expect(imHtml).not.toContain('300 char rationale');
+
+      // For Internal Medicine, the info icon next to ERAS Signal should NOT be present
+      expect(imHtml).not.toContain('Signal Notes &amp; Rationale required for Internal Medicine');
+
+      // Anesthesiology DOES require signal rationale
+      expect(SPECIALTY_SIGNALING_RULES['Anesthesiology'].explanationRequired).toBe(true);
+
+      const anesthHtml = renderToStaticMarkup(
+        React.createElement(SchoolListMatrix, {
+          specialty: 'Anesthesiology',
+          onBack: () => {},
+        })
+      );
+
+      // Yellow badge is NOT present even when notes are required
+      expect(anesthHtml).not.toContain('char rationale');
+
+      // Info icon is present specifically for Anesthesiology
+      expect(anesthHtml).toContain('Signal Notes &amp; Rationale required for Anesthesiology');
+    });
   });
 });
 
