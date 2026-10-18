@@ -288,10 +288,10 @@ export function CompetitivenessCalculator({
               <div>
                 <h3 className="text-base font-bold text-slate-900">
                   {assessment.overallTier === 'above_average'
-                    ? 'Solid Advantage Over National Matched Medians'
+                    ? 'Metrics Above National Matched Median'
                     : assessment.overallTier === 'average'
-                    ? 'Well-Balanced & Aligned with Matched Cohort'
-                    : 'High-Risk Profile Requiring Strategic Mitigation'}
+                    ? 'Metrics Aligned with National Matched Median'
+                    : 'Metrics Below National Matched Median'}
                 </h3>
                 <p className="text-xs mt-1.5 leading-relaxed text-slate-700 opacity-95">
                   {assessment.advisorySummary}
