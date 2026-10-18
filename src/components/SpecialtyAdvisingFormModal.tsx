@@ -754,9 +754,6 @@ CLINICAL STATEMENT & GOALS:
                     <ShieldAlert className="w-4 h-4 text-rose-600" />
                     7, 8 & 9. Academic Screening & Institutional Disclosures
                   </h3>
-                  <span className="text-[11px] text-slate-500">
-                    Confidential to assigned faculty advisor; screened from routine dean cohorts
-                  </span>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
