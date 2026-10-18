@@ -184,13 +184,14 @@ export function CompetitivenessCalculator({
   const passingScore = 218;
   const studentScore = Number(step2Ck) || 250;
 
-  // Domain: 190 to 290
-  const minScore = 190;
-  const maxScore = 290;
-  const plotLeft = 35;
-  const plotWidth = 450;
-  const baselineY = 130;
-  const peakHeight = 78;
+  // Domain: 195 to 285 (expanded width to accommodate overlapping medians and user score)
+  const minScore = 195;
+  const maxScore = 285;
+  const plotLeft = 32;
+  const plotWidth = 536;
+  const baselineY = 138;
+  const peakHeight = 72;
+  const curveSigma = 24; // Wider standard deviation so the curve is broader and spacious
 
   const scoreToX = (score: number) => {
     const clamped = Math.max(minScore, Math.min(maxScore, score));
@@ -198,7 +199,7 @@ export function CompetitivenessCalculator({
   };
 
   const scoreToY = (score: number) => {
-    const z = (score - 250) / 16;
+    const z = (score - 250) / curveSigma;
     const pdf = Math.exp(-0.5 * z * z);
     return baselineY - peakHeight * pdf;
   };
@@ -218,10 +219,23 @@ export function CompetitivenessCalculator({
   const xStudent = scoreToX(studentScore);
   const yStudent = scoreToY(studentScore);
 
-  // Staggered Y offsets to guarantee collision-free annotations
-  const isMediansClose = Math.abs(specialtyMedian - nationalMedian) < 10;
-  const nationalBadgeY = 14;
-  const specialtyBadgeY = isMediansClose ? 32 : 14;
+  // Staggered Y offsets to guarantee collision-free annotations even when user score is at or near medians
+  const nationalBadgeY = 10;
+  const specialtyBadgeY = Math.abs(xSpecialty - xNational) < 68 ? 28 : 10;
+
+  // Collision detection for student score badge:
+  const distToNational = Math.abs(xStudent - xNational);
+  const distToSpecialty = specialtyMedian !== nationalMedian ? Math.abs(xStudent - xSpecialty) : 999;
+  const distToPassing = Math.abs(xStudent - xPassing);
+  const isNearMedians = distToNational < 44 || distToSpecialty < 44;
+  const isNearPassing = distToPassing < 36;
+
+  let studentBadgeY = Math.max(10, yStudent - 24);
+  if (isNearMedians) {
+    studentBadgeY = 48; // Elevate/stack to Tier 3 when score fits at or around medians
+  } else if (isNearPassing) {
+    studentBadgeY = 54;
+  }
 
   return (
     <div className="space-y-6">
@@ -314,7 +328,7 @@ export function CompetitivenessCalculator({
 
                 <div className="w-full overflow-x-auto">
                   <svg
-                    viewBox="0 0 520 160"
+                    viewBox="0 0 600 170"
                     className="w-full h-auto select-none"
                     aria-label="Step 2 CK Score Bell Curve"
                   >
@@ -339,7 +353,7 @@ export function CompetitivenessCalculator({
                     />
 
                     {/* Clean Subtle Axis Scale Markers */}
-                    {[200, 240, 280].map((tick) => {
+                    {[200, 220, 240, 260, 280].map((tick) => {
                       const tx = scoreToX(tick);
                       return (
                         <g key={tick}>
@@ -365,7 +379,7 @@ export function CompetitivenessCalculator({
                     <g>
                       <line
                         x1={xPassing}
-                        y1={65}
+                        y1={50}
                         x2={xPassing}
                         y2={baselineY}
                         stroke="#f43f5e"
@@ -374,16 +388,16 @@ export function CompetitivenessCalculator({
                       />
                       <circle cx={xPassing} cy={scoreToY(passingScore)} r="3.5" fill="#f43f5e" />
                       <rect
-                        x={xPassing - 27}
-                        y={48}
-                        width="54"
-                        height="16"
+                        x={xPassing - 28}
+                        y={32}
+                        width="56"
+                        height="18"
                         rx="4"
                         fill="#fff1f2"
                         stroke="#fecdd3"
                         strokeWidth="1"
                       />
-                      <text x={xPassing} y={60} textAnchor="middle" className="text-[9px] font-bold fill-rose-700">
+                      <text x={xPassing} y={44} textAnchor="middle" className="text-[9px] font-bold fill-rose-700">
                         Pass 218
                       </text>
                     </g>
@@ -392,7 +406,7 @@ export function CompetitivenessCalculator({
                     <g>
                       <line
                         x1={xNational}
-                        y1={nationalBadgeY + 12}
+                        y1={nationalBadgeY + 18}
                         x2={xNational}
                         y2={baselineY}
                         stroke="#64748b"
@@ -401,16 +415,16 @@ export function CompetitivenessCalculator({
                       />
                       <circle cx={xNational} cy={scoreToY(nationalMedian)} r="3.5" fill="#64748b" />
                       <rect
-                        x={xNational - 31}
-                        y={nationalBadgeY - 4}
-                        width="62"
-                        height="16"
+                        x={xNational - 33}
+                        y={nationalBadgeY}
+                        width="66"
+                        height="18"
                         rx="4"
                         fill="#f8fafc"
                         stroke="#cbd5e1"
                         strokeWidth="1"
                       />
-                      <text x={xNational} y={nationalBadgeY + 8} textAnchor="middle" className="text-[9px] font-bold fill-slate-700">
+                      <text x={xNational} y={nationalBadgeY + 12} textAnchor="middle" className="text-[9px] font-bold fill-slate-700">
                         Median 250
                       </text>
                     </g>
@@ -420,7 +434,7 @@ export function CompetitivenessCalculator({
                       <g>
                         <line
                           x1={xSpecialty}
-                          y1={specialtyBadgeY + 12}
+                          y1={specialtyBadgeY + 18}
                           x2={xSpecialty}
                           y2={baselineY}
                           stroke="#2563eb"
@@ -429,16 +443,16 @@ export function CompetitivenessCalculator({
                         />
                         <circle cx={xSpecialty} cy={scoreToY(specialtyMedian)} r="3.5" fill="#2563eb" />
                         <rect
-                          x={xSpecialty - 32}
-                          y={specialtyBadgeY - 4}
-                          width="64"
-                          height="16"
+                          x={xSpecialty - 35}
+                          y={specialtyBadgeY}
+                          width="70"
+                          height="18"
                           rx="4"
                           fill="#eff6ff"
                           stroke="#bfdbfe"
                           strokeWidth="1"
                         />
-                        <text x={xSpecialty} y={specialtyBadgeY + 8} textAnchor="middle" className="text-[9px] font-bold fill-blue-700">
+                        <text x={xSpecialty} y={specialtyBadgeY + 12} textAnchor="middle" className="text-[9px] font-bold fill-blue-700">
                           Matched {specialtyMedian}
                         </text>
                       </g>
@@ -448,7 +462,7 @@ export function CompetitivenessCalculator({
                     <g>
                       <line
                         x1={xStudent}
-                        y1={yStudent}
+                        y1={Math.min(studentBadgeY + 18, yStudent)}
                         x2={xStudent}
                         y2={baselineY}
                         stroke="#047857"
@@ -456,14 +470,13 @@ export function CompetitivenessCalculator({
                       />
                       <circle cx={xStudent} cy={yStudent} r="4.5" fill="#047857" stroke="#ffffff" strokeWidth="2.5" />
                       {(() => {
-                        const badgeW = 62;
-                        const badgeX = Math.max(10, Math.min(520 - badgeW - 10, xStudent - badgeW / 2));
-                        const badgeY = Math.max(8, yStudent - 24);
+                        const badgeW = 66;
+                        const badgeX = Math.max(8, Math.min(600 - badgeW - 8, xStudent - badgeW / 2));
                         return (
                           <>
                             <rect
                               x={badgeX}
-                              y={badgeY}
+                              y={studentBadgeY}
                               width={badgeW}
                               height="18"
                               rx="4"
@@ -471,7 +484,7 @@ export function CompetitivenessCalculator({
                             />
                             <text
                               x={badgeX + badgeW / 2}
-                              y={badgeY + 12}
+                              y={studentBadgeY + 12}
                               textAnchor="middle"
                               className="text-[10px] font-black fill-white"
                             >
