@@ -369,9 +369,20 @@ export function StudentDashboardHome({
                     <span className="text-neutral-700 font-bold flex items-center gap-1 text-[10px] uppercase tracking-wider">
                       Tier Balance Distribution
                     </span>
-                    <span className="text-neutral-400 text-[10px]">
-                      ~25% Reach &bull; ~50% Target &bull; ~25% Safety
-                    </span>
+                    <div className="flex items-center gap-2.5 text-[11px] font-medium text-neutral-600">
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-rose-500 shrink-0" />
+                        <span>Reach</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                        <span>Target</span>
+                      </span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <span className="w-2 h-2 rounded-full bg-blue-500 shrink-0" />
+                        <span>Safety</span>
+                      </span>
+                    </div>
                   </div>
 
                   <div className="w-full bg-neutral-100 h-2.5 rounded-full overflow-hidden flex shadow-inner">
