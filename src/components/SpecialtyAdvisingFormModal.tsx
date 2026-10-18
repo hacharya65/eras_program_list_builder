@@ -89,7 +89,6 @@ export function SpecialtyAdvisingFormModal({
 ================================================
 Applicant: ${formData.studentName} (${formData.pronouns || 'N/A'})
 Medical School: ${formData.medicalSchool || 'Not specified'}
-Regional Campus: ${formData.regionalCampus}
 Specialty Applying: ${formData.applyingSpecialty}
 Date: ${formData.submissionDate}
 
@@ -306,7 +305,7 @@ CLINICAL STATEMENT & GOALS:
                   <span className="text-xs text-slate-500">Date: {formData.submissionDate}</span>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-xs">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 text-xs">
                   <div>
                     <label className="font-semibold text-slate-700 block mb-1">Student Name</label>
                     <input
@@ -333,23 +332,6 @@ CLINICAL STATEMENT & GOALS:
                       placeholder="e.g. He/Him/His, She/Her/Hers"
                       className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-900 focus:ring-2 focus:ring-[#7EAE9B] focus:outline-none"
                     />
-                  </div>
-                  <div>
-                    <label className="font-semibold text-slate-700 block mb-1">Regional Campus</label>
-                    <select
-                      value={formData.regionalCampus}
-                      onChange={(e) => setFormData({ ...formData, regionalCampus: e.target.value })}
-                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-900 font-medium focus:ring-2 focus:ring-[#7EAE9B] focus:outline-none"
-                    >
-                      <option value="Northeast">Northeast</option>
-                      <option value="Central">Central</option>
-                      <option value="South">South</option>
-                      <option value="West">West</option>
-                      <option value="Guthrie">Guthrie</option>
-                      <option value="AtlantiCare">AtlantiCare</option>
-                      <option value="Main Campus">Main Campus</option>
-                      <option value="Other">Other Campus</option>
-                    </select>
                   </div>
                 </div>
               </div>
@@ -1099,7 +1081,6 @@ CLINICAL STATEMENT & GOALS:
                   <div><strong>MEDICAL SCHOOL:</strong> {formData.medicalSchool || '—'}</div>
                   <div><strong>PRONOUNS:</strong> {formData.pronouns || '—'}</div>
                   <div><strong>DATE:</strong> {formData.submissionDate}</div>
-                  <div><strong>REGIONAL CAMPUS:</strong> {formData.regionalCampus}</div>
                 </div>
 
                 <div className="space-y-3 font-sans text-[11px]">
