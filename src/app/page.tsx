@@ -7,6 +7,7 @@ import { DevPersonaSwitcher } from '@/components/DevPersonaSwitcher';
 import { StudentPortal } from '@/components/StudentPortal';
 import { StudentAuthModal } from '@/components/StudentAuthModal';
 import { ThalamusAuthExperience } from '@/components/ThalamusAuthExperience';
+import { FloatingJournalWidget } from '@/components/FloatingJournalWidget';
 import { BrowserStoragePortfolioAdapter } from '@/domain/student-portfolio';
 import {
   StudentAccount,
@@ -141,6 +142,19 @@ export default function HomePage() {
         onAuthenticated={(acc) => {
           handleAuthenticated(acc);
           setIsAuthModalOpen(false);
+        }}
+      />
+
+      {/* Persistent Floating Reflective Journal Widget (Available Across Entire Platform) */}
+      <FloatingJournalWidget
+        studentId={studentContext.student.id}
+        onNavigateToFullPage={() => {
+          if (typeof window !== 'undefined') {
+            const url = new URL(window.location.href);
+            url.searchParams.set('view', 'journal');
+            window.history.pushState({ view: 'journal' }, '', url.toString());
+            window.dispatchEvent(new CustomEvent('navigate_to_journal'));
+          }
         }}
       />
 

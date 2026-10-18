@@ -28,6 +28,7 @@ export interface ExperienceJournalEntry {
   category: JournalCategory;
   date: string; // YYYY-MM-DD
   setting: string;
+  rotation?: string; // Free text rotation (e.g. Inpatient Cardiology, MICU, Ambulatory Peds)
   notableObservation: string; // Raw clinical narrative / patient dynamics
   keyTakeaway: string; // What was learned / specialty motivation
   isKeyMemory: boolean;

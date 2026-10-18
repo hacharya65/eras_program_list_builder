@@ -9,6 +9,7 @@ import { PlatformWalkthroughModal } from '@/components/PlatformWalkthroughModal'
 import { FaqAndGuideView } from '@/components/FaqAndGuideView';
 import { DevPersonaSwitcher } from '@/components/DevPersonaSwitcher';
 import { StudentDashboardHome } from '@/components/StudentDashboardHome';
+import { FloatingJournalWidget } from '@/components/FloatingJournalWidget';
 import { INITIAL_MOCK_INTAKE } from '@/domain/advising-intake-models';
 import { StudentDashboardContext } from '@/domain/types';
 
@@ -242,15 +243,20 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
       expect(markup).toContain('Tier Balance Distribution');
       expect(markup).toContain('Preference Signals Allocation');
 
-      // Verify Column 2: Letters of Recommendation
+      // Verify Column 2: Letters of Recommendation expanded layout
       expect(markup).toContain('Letters of Recommendation');
       expect(markup).toContain('Add Writer');
+      expect(markup).toContain('Audit Program Letter Gaps');
 
-      // Verify Column 3: Compact Reflective Journal
-      expect(markup).toContain('Journal');
-      expect(markup).not.toContain('Encounter &amp; takeaway scratchpad');
-      expect(markup).toContain('Private scratchpad');
-      expect(markup).toContain('3 saved');
+      // Verify journal scratchpad was removed from dashboard to eliminate vertical stretching
+      expect(markup).not.toContain('Private scratchpad');
+
+      // Verify FloatingJournalWidget renders persistent trigger button across the application
+      const floatingWidgetMarkup = renderToStaticMarkup(
+        <FloatingJournalWidget studentId={demoStudentId} />
+      );
+      expect(floatingWidgetMarkup).toContain('Journal');
+      expect(floatingWidgetMarkup).toContain('Open Clinical Journal');
     });
 
     it('renders a fresh non-demo student account with 0 saved journal entries and empty letter writers on dashboard home', () => {
@@ -302,13 +308,18 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
         />
       );
 
-      // Verify fresh slate: 0 saved journal entries, NOT 3 saved
-      expect(markup).toContain('0 saved');
-      expect(markup).not.toContain('3 saved');
-
       // Verify letters of rec: 0 of 0 submitted and empty state prompt
       expect(markup).toContain('0 of 0 submitted');
       expect(markup).toContain('No letter writers added yet');
+
+      // Verify fresh slate in journal storage and FloatingJournalWidget
+      const freshEntries = loadExperienceJournalEntries(newStudentId);
+      expect(freshEntries).toHaveLength(0);
+
+      const floatingWidgetMarkup = renderToStaticMarkup(
+        <FloatingJournalWidget studentId={newStudentId} />
+      );
+      expect(floatingWidgetMarkup).toContain('Journal');
     });
   });
 });

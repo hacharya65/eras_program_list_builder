@@ -3,6 +3,7 @@ import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
 import { JournalRepositoryView } from '@/components/JournalRepositoryView';
 import { JournalEntriesDrawer } from '@/components/JournalEntriesDrawer';
+import { FloatingJournalWidget } from '@/components/FloatingJournalWidget';
 import { UserProfile } from '@/domain/types';
 
 describe('Journal Viewing Capabilities (Full Workspace & Slide-over Drawer)', () => {
@@ -33,6 +34,18 @@ describe('Journal Viewing Capabilities (Full Workspace & Slide-over Drawer)', ()
     } else {
       localStorage.clear();
     }
+  });
+
+  describe('FloatingJournalWidget (App-Wide Floating Trigger & Entry Drawer)', () => {
+    it('renders persistent floating action button with journal label and badge', () => {
+      const markup = renderToStaticMarkup(
+        <FloatingJournalWidget studentId={mockStudent.id} />
+      );
+
+      expect(markup).toContain('Journal');
+      expect(markup).toContain('Open Clinical Journal');
+      expect(markup).toContain('fixed bottom-6 right-6 z-40');
+    });
   });
 
   describe('JournalRepositoryView (Full Page under Application Materials)', () => {
