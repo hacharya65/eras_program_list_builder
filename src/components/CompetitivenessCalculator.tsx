@@ -251,12 +251,12 @@ export function CompetitivenessCalculator({
       </div>
 
       {/* Main Grid: Summary on Left, Metrics Table on Right */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
         {/* Left Column: Competitiveness Tier Summary & Bell Curve (6 cols) */}
-        <div className="lg:col-span-6 space-y-6">
+        <div className="lg:col-span-6 flex flex-col">
           {assessment && (
             <div
-              className={`p-6 rounded-xl border shadow-sm space-y-5 ${
+              className={`p-6 rounded-xl border shadow-sm space-y-4 h-full flex flex-col justify-between ${
                 assessment.overallTier === 'above_average'
                   ? 'bg-emerald-50/70 border-emerald-200 text-emerald-950'
                   : assessment.overallTier === 'average'
@@ -264,43 +264,25 @@ export function CompetitivenessCalculator({
                   : 'bg-amber-50/70 border-amber-200 text-amber-950'
               }`}
             >
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
-                      assessment.overallTier === 'above_average'
-                        ? 'bg-emerald-600 text-white'
-                        : assessment.overallTier === 'average'
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-amber-600 text-white'
-                    }`}
-                  >
-                    {assessment.overallTier === 'above_average'
-                      ? 'ABOVE AVERAGE APPLICANT TIER'
+              <div className="flex items-center gap-2 flex-wrap">
+                <span
+                  className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${
+                    assessment.overallTier === 'above_average'
+                      ? 'bg-emerald-600 text-white'
                       : assessment.overallTier === 'average'
-                      ? 'AVERAGE APPLICANT TIER'
-                      : 'BELOW AVERAGE APPLICANT TIER'}
-                  </span>
-                  <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/90 border border-slate-200 text-slate-800">
-                    {assessment.specialty}
-                  </span>
-                </div>
-
-                <div className="bg-white/90 backdrop-blur-sm px-3.5 py-1.5 rounded-lg border border-slate-200 text-right sm:text-center shrink-0">
-                  <div className="text-[10px] uppercase tracking-wider text-slate-500 font-semibold">
-                    Step 2 CK Delta
-                  </div>
-                  <div
-                    className={`text-xl font-black ${
-                      assessment.step2Delta >= 0 ? 'text-emerald-600' : 'text-rose-600'
-                    }`}
-                  >
-                    {assessment.step2Delta >= 0 ? `+${assessment.step2Delta}` : assessment.step2Delta}
-                  </div>
-                  <div className="text-[9px] text-slate-500">
-                    vs {benchmark?.step2Ck.matched} median
-                  </div>
-                </div>
+                      ? 'bg-blue-600 text-white'
+                      : 'bg-amber-600 text-white'
+                  }`}
+                >
+                  {assessment.overallTier === 'above_average'
+                    ? 'ABOVE AVERAGE APPLICANT TIER'
+                    : assessment.overallTier === 'average'
+                    ? 'AVERAGE APPLICANT TIER'
+                    : 'BELOW AVERAGE APPLICANT TIER'}
+                </span>
+                <span className="px-2.5 py-1 rounded-full text-xs font-semibold bg-white/90 border border-slate-200 text-slate-800">
+                  {assessment.specialty}
+                </span>
               </div>
 
               <div>
@@ -419,9 +401,9 @@ export function CompetitivenessCalculator({
                       />
                       <circle cx={xNational} cy={scoreToY(nationalMedian)} r="3.5" fill="#64748b" />
                       <rect
-                        x={xNational - 27}
+                        x={xNational - 31}
                         y={nationalBadgeY - 4}
-                        width="54"
+                        width="62"
                         height="16"
                         rx="4"
                         fill="#f8fafc"
@@ -429,7 +411,7 @@ export function CompetitivenessCalculator({
                         strokeWidth="1"
                       />
                       <text x={xNational} y={nationalBadgeY + 8} textAnchor="middle" className="text-[9px] font-bold fill-slate-700">
-                        Nat'l 250
+                        Median 250
                       </text>
                     </g>
 
@@ -516,7 +498,7 @@ export function CompetitivenessCalculator({
                   <div className="bg-white rounded-lg border border-slate-200 p-2.5 shadow-2xs flex flex-col justify-between">
                     <div className="text-[10px] font-bold uppercase tracking-wider text-slate-600 flex items-center justify-center gap-1">
                       <span className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block shrink-0" />
-                      <span>Nat'l Median</span>
+                      <span>Median</span>
                     </div>
                     <div className="text-base font-black text-slate-900 font-mono my-0.5">{nationalMedian}</div>
                     <div className="text-[10px] text-slate-400">All Matched Seniors</div>
@@ -565,14 +547,15 @@ export function CompetitivenessCalculator({
         </div>
 
         {/* Right Column: Multimodal Analysis & 6-Dimension Comparison Table (6 cols) */}
-        <div className="lg:col-span-6 space-y-6">
+        <div className="lg:col-span-6 flex flex-col">
           {assessment && (
-            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-              <div className="p-4 border-b border-slate-100 bg-slate-50">
-                <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
-                  Your Metrics vs National Cohort for {specialty}
-                </h4>
-              </div>
+            <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden h-full flex flex-col justify-between">
+              <div>
+                <div className="p-4 border-b border-slate-100 bg-slate-50">
+                  <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider">
+                    Your Metrics vs National Cohort for {specialty}
+                  </h4>
+                </div>
                 <div className="divide-y divide-slate-100">
                   {assessment.dimensionBreakdowns.map((dim, idx) => (
                     <div key={idx} className="p-4 flex items-center justify-between text-xs">
@@ -609,22 +592,23 @@ export function CompetitivenessCalculator({
                     </div>
                   ))}
                 </div>
-
-                {/* Residency Explorer Cross-Reference Link */}
-                <div className="p-3.5 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
-                  <span className="text-slate-500">
-                    Cross-reference with interview conversion rates:
-                  </span>
-                  <a
-                    href={generateResidencyExplorerLink(assessment.specialty)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 font-semibold text-emerald-700 hover:text-emerald-900"
-                  >
-                    Open Residency Explorer Yield Table <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
               </div>
+
+              {/* Residency Explorer Cross-Reference Link */}
+              <div className="p-3.5 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                <span className="text-slate-500">
+                  Cross-reference with interview conversion rates:
+                </span>
+                <a
+                  href={generateResidencyExplorerLink(assessment.specialty)}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="inline-flex items-center gap-1.5 font-semibold text-emerald-700 hover:text-emerald-900"
+                >
+                  Open Residency Explorer Yield Table <ExternalLink className="w-3.5 h-3.5" />
+                </a>
+              </div>
+            </div>
           )}
         </div>
       </div>
