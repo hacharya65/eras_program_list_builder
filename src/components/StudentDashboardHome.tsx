@@ -57,7 +57,6 @@ import {
   Info,
   X,
   Edit2,
-  Calendar,
   Send,
   Star,
   Pencil,
@@ -281,36 +280,8 @@ export function StudentDashboardHome({
   const silverUsed = savedPrograms.filter((p) => p.signal === 'silver').length;
 
   return (
-    <div className="space-y-5">
-      {/* 1. Abbreviated ERAS 2027 Key Deadlines Strip (High up near top, right below middle nav) */}
-      <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-2xs px-4 sm:px-5 py-2.5 flex flex-wrap items-center justify-between gap-3 text-xs">
-        <div className="flex items-center gap-2 text-neutral-900 font-bold shrink-0">
-          <Calendar className="w-4 h-4 text-[#1F3A30]" />
-          <span>ERAS 2027 Season Milestones:</span>
-        </div>
-
-        <div className="flex items-center gap-3 sm:gap-6 flex-wrap text-[11px]">
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span className="text-neutral-500">ERAS Tokens:</span>
-            <span className="font-semibold text-emerald-800 bg-emerald-50 px-1.5 py-0.2 rounded">Active (Open)</span>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-amber-500"></span>
-            <span className="text-neutral-500">Submission Target:</span>
-            <strong className="text-neutral-900">Sep 24, 2026</strong>
-          </div>
-
-          <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-purple-500"></span>
-            <span className="text-neutral-500">Match Day:</span>
-            <strong className="text-neutral-900">Mar 19, 2027</strong>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. Balanced Two-Column Strategic Command Grid: School List & Letters of Recommendation */}
+    <div className="space-y-4">
+      {/* 1. Balanced Two-Column Strategic Command Grid: School List & Letters of Recommendation */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 items-stretch">
         {/* ==================== COLUMN 1: SCHOOL LIST & SIGNALING STRATEGY ==================== */}
         <div className="flex flex-col">
