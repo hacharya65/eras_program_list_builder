@@ -315,26 +315,16 @@ export function StudentDashboardHome({
 
             return (
               <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-4 sm:p-5 space-y-4">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-neutral-100">
-                  <div>
-                    <div className="flex items-center gap-2">
-                      <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
-                        <Compass className="w-4 h-4 text-[#1F3A30]" />
-                        <span>School List Building &amp; Signaling Strategy</span>
-                      </h2>
-                    </div>
-                    <p className="text-[11px] text-neutral-500 mt-0.5">
-                      Live distribution across Reach, Target &amp; Safety tiers with ERAS preference signaling allocation for <strong>{targetSpecialty}</strong>
-                    </p>
+                <div className="pb-3 border-b border-neutral-100">
+                  <div className="flex items-center gap-2">
+                    <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
+                      <Compass className="w-4 h-4 text-[#1F3A30]" />
+                      <span>School List Building &amp; Signaling Strategy</span>
+                    </h2>
                   </div>
-
-                  <button
-                    onClick={() => onNavigate('school_list')}
-                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#1F3A30] hover:bg-[#152B23] text-white flex items-center gap-1 shadow-2xs transition-all cursor-pointer self-start sm:self-auto shrink-0"
-                  >
-                    <span>Full School List Matrix</span>
-                    <ChevronRight className="w-3.5 h-3.5" />
-                  </button>
+                  <p className="text-[11px] text-neutral-500 mt-0.5">
+                    Live distribution across Reach, Target &amp; Safety tiers with ERAS preference signaling allocation for <strong>{targetSpecialty}</strong>
+                  </p>
                 </div>
 
                 {/* Metrics Grid */}
@@ -480,16 +470,17 @@ export function StudentDashboardHome({
                   </div>
                 )}
 
-                {/* Quick Link to Matrix */}
-                <div className="pt-1.5 border-t border-neutral-100 flex items-center justify-between text-[11px]">
-                  <span className="text-neutral-500 truncate max-w-[240px]">
+                {/* Bottom Action Footer */}
+                <div className="pt-2.5 border-t border-neutral-100 flex items-center justify-between gap-2 text-[11px]">
+                  <span className="text-neutral-500 truncate">
                     2,500+ ACGME programs with Step ranges
                   </span>
                   <button
                     onClick={() => onNavigate('school_list')}
-                    className="font-bold text-[#1F3A30] hover:underline flex items-center gap-1 cursor-pointer shrink-0"
+                    className="px-3 py-1.5 rounded-xl text-xs font-bold bg-[#1F3A30] hover:bg-[#152B23] text-white flex items-center gap-1 shadow-2xs transition-all cursor-pointer shrink-0"
                   >
-                    <span>Open School List Matrix &rarr;</span>
+                    <span>Full School List Matrix</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
                   </button>
                 </div>
               </div>
@@ -500,23 +491,14 @@ export function StudentDashboardHome({
         {/* ==================== COLUMN 2: LETTERS OF RECOMMENDATION (Col 6 to 9) ==================== */}
         <div className="md:col-span-1 lg:col-span-4">
           <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-xs p-4 sm:p-5 space-y-3.5">
-            <div className="flex items-center justify-between pb-3 border-b border-neutral-100">
-              <div>
-                <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
-                  <MailCheck className="w-4 h-4 text-[#1F3A30]" />
-                  <span>Letters of Recommendation</span>
-                </h2>
-                <div className="text-[11px] text-neutral-500 mt-0.5" suppressHydrationWarning>
-                  {writers.filter((w) => w.status === 'submitted').length} of {writers.length} submitted
-                </div>
+            <div className="pb-3 border-b border-neutral-100">
+              <h2 className="text-base font-bold text-neutral-900 flex items-center gap-2">
+                <MailCheck className="w-4 h-4 text-[#1F3A30]" />
+                <span>Letters of Recommendation</span>
+              </h2>
+              <div className="text-[11px] text-neutral-500 mt-0.5" suppressHydrationWarning>
+                {writers.filter((w) => w.status === 'submitted').length} of {writers.length} submitted
               </div>
-              <button
-                onClick={handleOpenAddWriter}
-                className="px-2.5 py-1.5 bg-[#1F3A30] hover:bg-[#162D25] text-white rounded-xl text-xs font-semibold flex items-center gap-1 shadow-2xs transition-colors cursor-pointer shrink-0"
-              >
-                <Plus className="w-3.5 h-3.5" />
-                <span>Add Writer</span>
-              </button>
             </div>
 
             {/* Advising Tip Box */}
@@ -531,7 +513,7 @@ export function StudentDashboardHome({
             <div className="space-y-2 max-h-[220px] overflow-y-auto pr-1 scrollbar-thin">
               {writers.length === 0 ? (
                 <div className="py-6 text-center text-xs text-neutral-400">
-                  No letter writers added yet. Click &quot;Add Writer&quot; above.
+                  No letter writers added yet. Click &quot;Add Writer&quot; below.
                 </div>
               ) : (
                 writers.map((w) => (
@@ -587,13 +569,21 @@ export function StudentDashboardHome({
               )}
             </div>
 
-            <div className="pt-2 border-t border-neutral-100 text-center">
+            {/* Bottom Action Footer */}
+            <div className="pt-2.5 border-t border-neutral-100 flex items-center justify-between gap-2">
               <button
                 onClick={() => onNavigate('letters')}
-                className="text-[11px] text-[#1F3A30] hover:text-[#142720] font-bold hover:underline flex items-center justify-center gap-1 mx-auto cursor-pointer"
+                className="text-[11px] text-[#1F3A30] hover:text-[#142720] font-bold hover:underline flex items-center gap-1 cursor-pointer truncate"
               >
-                <span>Audit Program Letter Gaps &amp; Requirements</span>
-                <ChevronRight className="w-3 h-3" />
+                <span>Audit Program Letter Gaps</span>
+                <ChevronRight className="w-3 h-3 shrink-0" />
+              </button>
+              <button
+                onClick={handleOpenAddWriter}
+                className="px-3 py-1.5 bg-[#1F3A30] hover:bg-[#162D25] text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow-2xs transition-colors cursor-pointer shrink-0"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                <span>Add Writer</span>
               </button>
             </div>
           </div>
@@ -657,11 +647,11 @@ export function StudentDashboardHome({
                 />
               </div>
 
-              <div className="flex items-center gap-1.5 pt-0.5">
+              <div>
                 <select
                   value={journalCategory}
                   onChange={(e) => setJournalCategory(e.target.value as any)}
-                  className="flex-1 min-w-0 px-2 py-1.5 text-[10px] font-semibold border border-neutral-300 rounded-lg bg-neutral-50 text-neutral-800 focus:outline-none focus:ring-2 focus:ring-[#7EAE9B] cursor-pointer truncate"
+                  className="w-full px-2.5 py-1.5 text-xs font-medium border border-neutral-300 rounded-xl bg-neutral-50 text-neutral-800 focus:outline-none focus:ring-2 focus:ring-[#7EAE9B] cursor-pointer"
                 >
                   <option value="Clinical Encounter">Clinical Encounter</option>
                   <option value="Patient Advocacy">Patient Advocacy</option>
@@ -670,6 +660,22 @@ export function StudentDashboardHome({
                   <option value="Leadership Moment">Leadership Moment</option>
                   <option value="Personal Reflection">Personal Reflection</option>
                 </select>
+              </div>
+
+              {/* Bottom Action Footer */}
+              <div className="pt-2.5 border-t border-neutral-100 flex items-center justify-between gap-2 text-[10px]">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-neutral-400">Private scratchpad</span>
+                  <span className="text-neutral-300">&bull;</span>
+                  <button
+                    type="button"
+                    onClick={() => setIsJournalDrawerOpen(true)}
+                    className="font-bold text-[#1F3A30] hover:underline flex items-center gap-0.5 cursor-pointer"
+                  >
+                    <span>Browse All ({journalEntries.length})</span>
+                    <ChevronRight className="w-3 h-3" />
+                  </button>
+                </div>
 
                 <button
                   type="submit"
@@ -680,20 +686,6 @@ export function StudentDashboardHome({
                 </button>
               </div>
             </form>
-
-            <div className="pt-2 border-t border-neutral-100 flex items-center justify-between text-[10px]">
-              <span className="text-neutral-400">
-                Private scratchpad
-              </span>
-              <button
-                type="button"
-                onClick={() => setIsJournalDrawerOpen(true)}
-                className="font-bold text-[#1F3A30] hover:underline flex items-center gap-0.5 cursor-pointer"
-              >
-                <span>Browse All ({journalEntries.length})</span>
-                <ChevronRight className="w-3 h-3" />
-              </button>
-            </div>
           </div>
         </div>
       </div>
