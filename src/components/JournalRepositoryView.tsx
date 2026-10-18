@@ -455,7 +455,7 @@ export function JournalRepositoryView({
             Advising Tip: Using Your Journal for ERAS 2027 Applications
           </h4>
           <p className="text-xs text-neutral-600 leading-relaxed">
-            Your journal is an isolated clinical repository that preserves unedited, vivid patient interactions and procedural observations. When you're ready to draft your official application materials, copy these notes into your{' '}
+            Your journal is an isolated clinical repository that preserves unedited, vivid patient interactions and procedural observations. When you're ready to draft your official application materials, draw upon these notes to track meaningful experiences and spark ideas as you craft personalized entries for your{' '}
             <button
               onClick={onNavigateToExperiences}
               className="text-[#1F3A30] font-bold hover:underline inline-flex items-center gap-0.5 cursor-pointer"
@@ -469,7 +469,7 @@ export function JournalRepositoryView({
             >
               Personal Statement
             </button>{' '}
-            to demonstrate authentic clinical maturation.
+            section on ERAS.
           </p>
         </div>
       </div>
