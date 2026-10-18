@@ -188,9 +188,9 @@ export function CompetitivenessCalculator({
   const minScore = 190;
   const maxScore = 290;
   const plotLeft = 35;
-  const plotWidth = 430;
-  const baselineY = 120;
-  const peakHeight = 85;
+  const plotWidth = 450;
+  const baselineY = 130;
+  const peakHeight = 78;
 
   const scoreToX = (score: number) => {
     const clamped = Math.max(minScore, Math.min(maxScore, score));
@@ -217,6 +217,11 @@ export function CompetitivenessCalculator({
   const xSpecialty = scoreToX(specialtyMedian);
   const xStudent = scoreToX(studentScore);
   const yStudent = scoreToY(studentScore);
+
+  // Staggered Y offsets to guarantee collision-free annotations
+  const isMediansClose = Math.abs(specialtyMedian - nationalMedian) < 10;
+  const nationalBadgeY = 14;
+  const specialtyBadgeY = isMediansClose ? 32 : 14;
 
   return (
     <div className="space-y-6">
@@ -312,28 +317,28 @@ export function CompetitivenessCalculator({
               </div>
 
               {/* Step 2 CK Bell Curve Visualizer */}
-              <div className="bg-white/80 rounded-xl border border-slate-200/80 p-4 space-y-3 shadow-2xs">
-                <div className="flex items-center justify-between">
+              <div className="bg-white/90 rounded-xl border border-slate-200/90 p-4 space-y-4 shadow-2xs">
+                <div className="flex items-center justify-between border-b border-slate-100 pb-2.5">
                   <div>
-                    <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-1.5">
+                    <h4 className="text-xs font-bold text-slate-900 uppercase tracking-wider flex items-center gap-1.5">
                       <TrendingUp className="w-3.5 h-3.5 text-emerald-600" />
                       USMLE Step 2 CK Distribution
                     </h4>
                     <p className="text-[11px] text-slate-500 mt-0.5">
-                      Cohort bell curve with passing score, national median, specialty median, and your score
+                      National matched cohort benchmarks vs your official score
                     </p>
                   </div>
                 </div>
 
                 <div className="w-full overflow-x-auto">
                   <svg
-                    viewBox="0 0 500 155"
+                    viewBox="0 0 520 160"
                     className="w-full h-auto select-none"
                     aria-label="Step 2 CK Score Bell Curve"
                   >
                     <defs>
                       <linearGradient id="curveGradient" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.25" />
+                        <stop offset="0%" stopColor="#10b981" stopOpacity="0.22" />
                         <stop offset="100%" stopColor="#10b981" stopOpacity="0.02" />
                       </linearGradient>
                     </defs>
@@ -341,22 +346,22 @@ export function CompetitivenessCalculator({
                     {/* Shaded Area Under Curve */}
                     <path d={areaPathD} fill="url(#curveGradient)" />
 
-                    {/* Baseline */}
+                    {/* Baseline Axis */}
                     <line
                       x1={plotLeft}
                       y1={baselineY}
                       x2={plotLeft + plotWidth}
                       y2={baselineY}
-                      stroke="#cbd5e1"
+                      stroke="#e2e8f0"
                       strokeWidth="1.5"
                     />
 
-                    {/* Baseline Tick Marks */}
-                    {[200, 220, 240, 260, 280].map((tick) => {
+                    {/* Clean Subtle Axis Scale Markers */}
+                    {[200, 240, 280].map((tick) => {
                       const tx = scoreToX(tick);
                       return (
                         <g key={tick}>
-                          <line x1={tx} y1={baselineY} x2={tx} y2={baselineY + 4} stroke="#94a3b8" strokeWidth="1" />
+                          <line x1={tx} y1={baselineY} x2={tx} y2={baselineY + 4} stroke="#cbd5e1" strokeWidth="1" />
                           <text x={tx} y={baselineY + 14} textAnchor="middle" className="text-[9px] fill-slate-400 font-mono">
                             {tick}
                           </text>
@@ -378,7 +383,7 @@ export function CompetitivenessCalculator({
                     <g>
                       <line
                         x1={xPassing}
-                        y1={55}
+                        y1={65}
                         x2={xPassing}
                         y2={baselineY}
                         stroke="#f43f5e"
@@ -387,17 +392,17 @@ export function CompetitivenessCalculator({
                       />
                       <circle cx={xPassing} cy={scoreToY(passingScore)} r="3.5" fill="#f43f5e" />
                       <rect
-                        x={xPassing - 34}
-                        y={38}
-                        width="68"
-                        height="15"
-                        rx="3"
+                        x={xPassing - 27}
+                        y={48}
+                        width="54"
+                        height="16"
+                        rx="4"
                         fill="#fff1f2"
                         stroke="#fecdd3"
                         strokeWidth="1"
                       />
-                      <text x={xPassing} y={49} textAnchor="middle" className="text-[9px] font-bold fill-rose-700">
-                        Pass: {passingScore}
+                      <text x={xPassing} y={60} textAnchor="middle" className="text-[9px] font-bold fill-rose-700">
+                        Pass 218
                       </text>
                     </g>
 
@@ -405,7 +410,7 @@ export function CompetitivenessCalculator({
                     <g>
                       <line
                         x1={xNational}
-                        y1={28}
+                        y1={nationalBadgeY + 12}
                         x2={xNational}
                         y2={baselineY}
                         stroke="#64748b"
@@ -414,17 +419,17 @@ export function CompetitivenessCalculator({
                       />
                       <circle cx={xNational} cy={scoreToY(nationalMedian)} r="3.5" fill="#64748b" />
                       <rect
-                        x={xNational - 36}
-                        y={12}
-                        width="72"
-                        height="15"
-                        rx="3"
-                        fill="#f1f5f9"
+                        x={xNational - 27}
+                        y={nationalBadgeY - 4}
+                        width="54"
+                        height="16"
+                        rx="4"
+                        fill="#f8fafc"
                         stroke="#cbd5e1"
                         strokeWidth="1"
                       />
-                      <text x={xNational} y={23} textAnchor="middle" className="text-[9px] font-bold fill-slate-700">
-                        Median: {nationalMedian}
+                      <text x={xNational} y={nationalBadgeY + 8} textAnchor="middle" className="text-[9px] font-bold fill-slate-700">
+                        Nat'l 250
                       </text>
                     </g>
 
@@ -433,7 +438,7 @@ export function CompetitivenessCalculator({
                       <g>
                         <line
                           x1={xSpecialty}
-                          y1={42}
+                          y1={specialtyBadgeY + 12}
                           x2={xSpecialty}
                           y2={baselineY}
                           stroke="#2563eb"
@@ -442,17 +447,17 @@ export function CompetitivenessCalculator({
                         />
                         <circle cx={xSpecialty} cy={scoreToY(specialtyMedian)} r="3.5" fill="#2563eb" />
                         <rect
-                          x={xSpecialty - 40}
-                          y={26}
-                          width="80"
-                          height="15"
-                          rx="3"
+                          x={xSpecialty - 32}
+                          y={specialtyBadgeY - 4}
+                          width="64"
+                          height="16"
+                          rx="4"
                           fill="#eff6ff"
                           stroke="#bfdbfe"
                           strokeWidth="1"
                         />
-                        <text x={xSpecialty} y={37} textAnchor="middle" className="text-[9px] font-bold fill-blue-700">
-                          {specialty}: {specialtyMedian}
+                        <text x={xSpecialty} y={specialtyBadgeY + 8} textAnchor="middle" className="text-[9px] font-bold fill-blue-700">
+                          Matched {specialtyMedian}
                         </text>
                       </g>
                     )}
@@ -467,24 +472,24 @@ export function CompetitivenessCalculator({
                         stroke="#047857"
                         strokeWidth="2.5"
                       />
-                      <circle cx={xStudent} cy={yStudent} r="5" fill="#047857" stroke="#ffffff" strokeWidth="2" />
+                      <circle cx={xStudent} cy={yStudent} r="4.5" fill="#047857" stroke="#ffffff" strokeWidth="2.5" />
                       {(() => {
-                        const boxW = 74;
-                        const boxX = Math.max(4, Math.min(500 - boxW - 4, xStudent - boxW / 2));
-                        const boxY = Math.max(4, yStudent - 24);
+                        const badgeW = 62;
+                        const badgeX = Math.max(10, Math.min(520 - badgeW - 10, xStudent - badgeW / 2));
+                        const badgeY = Math.max(8, yStudent - 24);
                         return (
                           <>
                             <rect
-                              x={boxX}
-                              y={boxY}
-                              width={boxW}
-                              height="17"
+                              x={badgeX}
+                              y={badgeY}
+                              width={badgeW}
+                              height="18"
                               rx="4"
                               fill="#047857"
                             />
                             <text
-                              x={boxX + boxW / 2}
-                              y={boxY + 12}
+                              x={badgeX + badgeW / 2}
+                              y={badgeY + 12}
                               textAnchor="middle"
                               className="text-[10px] font-black fill-white"
                             >
@@ -497,25 +502,46 @@ export function CompetitivenessCalculator({
                   </svg>
                 </div>
 
-                {/* 4-Item Legend / Key Pills */}
+                {/* 4-Item Legend / Key Cards */}
                 <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1 text-center">
-                  <div className="bg-white rounded-lg border border-rose-200 p-2 shadow-2xs">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-rose-600">Passing Score</div>
-                    <div className="text-sm font-black text-slate-900 font-mono mt-0.5">{passingScore}</div>
-                  </div>
-                  <div className="bg-white rounded-lg border border-slate-200 p-2 shadow-2xs">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-500">Nat'l Median</div>
-                    <div className="text-sm font-black text-slate-900 font-mono mt-0.5">{nationalMedian}</div>
-                  </div>
-                  <div className="bg-white rounded-lg border border-blue-200 p-2 shadow-2xs">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-blue-600 truncate" title={`${specialty} Median`}>
-                      {specialty} Median
+                  <div className="bg-white rounded-lg border border-rose-200 p-2.5 shadow-2xs flex flex-col justify-between">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-rose-600 flex items-center justify-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-rose-500 inline-block shrink-0" />
+                      <span>Passing Score</span>
                     </div>
-                    <div className="text-sm font-black text-blue-900 font-mono mt-0.5">{specialtyMedian}</div>
+                    <div className="text-base font-black text-slate-900 font-mono my-0.5">{passingScore}</div>
+                    <div className="text-[10px] text-slate-400">Minimum Standard</div>
                   </div>
-                  <div className="bg-emerald-50 rounded-lg border border-emerald-300 p-2 shadow-2xs">
-                    <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-700">Your Score</div>
-                    <div className="text-sm font-black text-emerald-800 font-mono mt-0.5">{studentScore}</div>
+
+                  <div className="bg-white rounded-lg border border-slate-200 p-2.5 shadow-2xs flex flex-col justify-between">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-slate-600 flex items-center justify-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-slate-400 inline-block shrink-0" />
+                      <span>Nat'l Median</span>
+                    </div>
+                    <div className="text-base font-black text-slate-900 font-mono my-0.5">{nationalMedian}</div>
+                    <div className="text-[10px] text-slate-400">All Matched Seniors</div>
+                  </div>
+
+                  <div className="bg-white rounded-lg border border-blue-200 p-2.5 shadow-2xs flex flex-col justify-between">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-blue-600 flex items-center justify-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-blue-500 inline-block shrink-0" />
+                      <span>Specialty Median</span>
+                    </div>
+                    <div className="text-base font-black text-blue-900 font-mono my-0.5">{specialtyMedian}</div>
+                    <div className="text-[10px] text-blue-600 font-semibold truncate" title={specialty}>
+                      {specialty}
+                    </div>
+                  </div>
+
+                  <div className="bg-emerald-50/80 rounded-lg border border-emerald-300 p-2.5 shadow-2xs flex flex-col justify-between">
+                    <div className="text-[10px] font-bold uppercase tracking-wider text-emerald-700 flex items-center justify-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block shrink-0" />
+                      <span>Your Score</span>
+                    </div>
+                    <div className="text-base font-black text-emerald-800 font-mono my-0.5">{studentScore}</div>
+                    <div className="text-[10px] font-bold text-emerald-700">
+                      {studentScore >= specialtyMedian ? `+${studentScore - specialtyMedian} vs specialty` : `${studentScore - specialtyMedian} vs specialty`}
+                    </div>
                   </div>
                 </div>
               </div>
