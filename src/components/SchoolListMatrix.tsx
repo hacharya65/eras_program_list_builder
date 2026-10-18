@@ -183,8 +183,30 @@ export function SchoolListMatrix({
 
   // Filtering & Search states
   const [searchQuery, setSearchQuery] = useState('');
+  const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState(false);
+  const searchContainerRef = React.useRef<HTMLDivElement>(null);
   const [regionFilter, setRegionFilter] = useState('All');
   const [tierFilter, setTierFilter] = useState('All');
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setIsSearchDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const searchAddResults = useMemo(() => {
+    const q = searchQuery.trim();
+    if (!q) return [];
+    return searchResidencyPrograms({
+      search: q,
+      specialty: selectedSpecialty,
+      limit: 10,
+    });
+  }, [searchQuery, selectedSpecialty]);
 
   // Direct Column Sorting State (1 click asc, 2 click desc, 3 click reset to default A->Z)
   type SortColumn = 'program' | 'region' | 'signal' | 'tier';
@@ -372,15 +394,6 @@ export function SchoolListMatrix({
       .filter((item) => {
         if (regionFilter !== 'All' && item.region !== regionFilter) return false;
         if (tierFilter !== 'All' && item.tier !== tierFilter) return false;
-        if (searchQuery.trim()) {
-          const q = searchQuery.toLowerCase();
-          const displayName = formatProgramDisplayName(item);
-          const matchName = item.programName.toLowerCase().includes(q) || displayName.toLowerCase().includes(q);
-          const matchCity = item.city?.toLowerCase().includes(q);
-          const matchState = item.state?.toLowerCase().includes(q);
-          const matchDir = item.programDirector?.toLowerCase().includes(q);
-          if (!matchName && !matchCity && !matchState && !matchDir) return false;
-        }
         return true;
       })
       .sort((a, b) => {
@@ -433,7 +446,7 @@ export function SchoolListMatrix({
 
         return a.programName.localeCompare(b.programName);
       });
-  }, [items, regionFilter, tierFilter, searchQuery, sortColumn, sortDirection]);
+  }, [items, regionFilter, tierFilter, sortColumn, sortDirection]);
 
   // Database search results for modal
   const dbResults = useMemo(() => {
@@ -484,6 +497,12 @@ export function SchoolListMatrix({
               </span>
             )}
           </div>
+
+          {/* Applicant Step 2 CK Badge */}
+          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-300 rounded-lg px-2.5 py-1.5 text-xs shadow-xs">
+            <span className="text-slate-600 font-bold whitespace-nowrap">Applicant Step 2 CK:</span>
+            <span className="font-mono font-bold text-slate-900">{applicantStep2Ck}</span>
+          </div>
         </div>
       </div>
 
@@ -491,15 +510,175 @@ export function SchoolListMatrix({
       <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-3">
         <div className="flex-1 flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
           {/* Search Box */}
-          <div className="relative flex-1">
+          <div className="relative flex-1" ref={searchContainerRef}>
             <Search className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
               value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              placeholder="Search by program name, city, state, or director..."
-              className="w-full pl-9 pr-3 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              onChange={(e) => {
+                setSearchQuery(e.target.value);
+                setIsSearchDropdownOpen(true);
+              }}
+              onFocus={() => {
+                if (searchQuery.trim()) {
+                  setIsSearchDropdownOpen(true);
+                }
+              }}
+              onKeyDown={(e) => {
+                if (e.key === 'Escape') {
+                  setIsSearchDropdownOpen(false);
+                } else if (e.key === 'Enter') {
+                  if (searchAddResults.length > 0) {
+                    setDbSearchQuery(searchQuery);
+                    setShowBrowseModal(true);
+                    setIsSearchDropdownOpen(false);
+                  }
+                }
+              }}
+              placeholder="Search 2,500+ ACGME programs to add (e.g. Mayo, Johns Hopkins, Harvard)..."
+              className="w-full pl-9 pr-8 py-1.5 text-xs rounded-lg border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
             />
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={() => {
+                  setSearchQuery('');
+                  setIsSearchDropdownOpen(false);
+                }}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 cursor-pointer"
+                title="Clear search"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            )}
+
+            {/* Live Autocomplete Dropdown for Searching & Adding Programs */}
+            {isSearchDropdownOpen && searchQuery.trim().length > 0 && (
+              <div className="absolute left-0 right-0 top-full mt-1.5 bg-white rounded-xl border border-slate-200 shadow-xl z-50 overflow-hidden text-xs animate-in fade-in slide-in-from-top-1 duration-150">
+                <div className="p-2.5 bg-slate-50/80 border-b border-slate-100 flex items-center justify-between">
+                  <span className="text-[11px] font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+                    <Building className="w-3.5 h-3.5 text-sky-600" />
+                    ACGME {selectedSpecialty} Programs ({searchAddResults.length} matches)
+                  </span>
+                  <span className="text-[10px] text-slate-400">Click &ldquo;+ Add to List&rdquo; to add</span>
+                </div>
+
+                <div className="max-h-72 overflow-y-auto divide-y divide-slate-100">
+                  {searchAddResults.length === 0 ? (
+                    <div className="p-4 text-center text-slate-500">
+                      <p>No ACGME programs found matching &ldquo;{searchQuery}&rdquo; in {selectedSpecialty}.</p>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setDbSearchQuery(searchQuery);
+                          setShowBrowseModal(true);
+                          setIsSearchDropdownOpen(false);
+                        }}
+                        className="mt-2 text-sky-600 hover:text-sky-700 font-semibold inline-flex items-center gap-1 cursor-pointer"
+                      >
+                        Browse all {selectedSpecialty} programs &rarr;
+                      </button>
+                    </div>
+                  ) : (
+                    searchAddResults.map((prog) => {
+                      const displayName = formatProgramDisplayName(prog);
+                      const isAdded = items.some(
+                        (i) =>
+                          (i.programId && (i.programId === prog.id || i.programId === prog.programNumber)) ||
+                          (i.programNumber && (i.programNumber === prog.id || i.programNumber === prog.programNumber)) ||
+                          (i.programName.toLowerCase() === displayName.toLowerCase() &&
+                            i.city?.toLowerCase() === prog.city?.toLowerCase() &&
+                            i.state?.toLowerCase() === prog.state?.toLowerCase())
+                      );
+                      return (
+                        <div
+                          key={prog.id}
+                          className="p-2.5 hover:bg-sky-50/50 transition-colors flex items-center justify-between gap-3"
+                        >
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="text-xs font-bold text-slate-900 truncate">{displayName}</span>
+                              <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 border border-slate-200">
+                                #{prog.programNumber || prog.id}
+                              </span>
+                              <span className="text-[10px] px-1.5 py-0.5 rounded bg-sky-50 text-sky-700 font-medium border border-sky-200">
+                                {prog.region}
+                              </span>
+                            </div>
+                            <div className="text-[11px] text-slate-500 flex items-center gap-3 mt-0.5">
+                              <span className="flex items-center gap-0.5">
+                                <MapPin className="w-3 h-3 text-slate-400 shrink-0" />
+                                {prog.city}, {prog.state}
+                              </span>
+                              {prog.step2ScoreRange && (
+                                <span className="font-mono text-[10px] text-emerald-700 font-medium bg-emerald-50 px-1 rounded border border-emerald-200">
+                                  Step 2 CK: {prog.step2ScoreRange}
+                                </span>
+                              )}
+                              {prog.programDirector && (
+                                <span className="text-[10px] text-slate-400 truncate hidden sm:inline">
+                                  PD: {prog.programDirector.replace('\n', ' ')}
+                                </span>
+                              )}
+                            </div>
+                          </div>
+
+                          <button
+                            type="button"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (!isAdded) {
+                                handleAddFromDatabase(prog);
+                              }
+                            }}
+                            disabled={isAdded}
+                            className={`px-3 py-1 rounded-lg text-xs font-semibold shrink-0 transition-colors flex items-center gap-1 ${
+                              isAdded
+                                ? 'bg-slate-100 text-slate-400 border border-slate-200 cursor-not-allowed'
+                                : 'bg-sky-600 hover:bg-sky-700 text-white shadow-2xs cursor-pointer'
+                            }`}
+                          >
+                            {isAdded ? (
+                              <>
+                                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                                <span>In List</span>
+                              </>
+                            ) : (
+                              <>
+                                <Plus className="w-3.5 h-3.5" />
+                                <span>+ Add to List</span>
+                              </>
+                            )}
+                          </button>
+                        </div>
+                      );
+                    })
+                  )}
+                </div>
+
+                <div className="p-2 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setDbSearchQuery(searchQuery);
+                      setShowBrowseModal(true);
+                      setIsSearchDropdownOpen(false);
+                    }}
+                    className="text-sky-600 hover:text-sky-700 font-semibold text-[11px] flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>Open Full ACGME Directory</span>
+                    <ExternalLink className="w-3 h-3" />
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setIsSearchDropdownOpen(false)}
+                    className="text-slate-400 hover:text-slate-600 text-[11px] cursor-pointer"
+                  >
+                    Close (Esc)
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Browse & Add Programs Button positioned directly beside search bar */}
@@ -545,9 +724,10 @@ export function SchoolListMatrix({
         </div>
       </div>
 
-      {/* Pinned Visual Key, Signal Allocation & Real-Time Tier Balance Summary Bar */}
-      <div className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 shadow-xs flex flex-wrap items-center justify-between gap-3">
-        <div className="flex flex-wrap items-center gap-3">
+      {/* Visual Keys & Metrics: Tier Balance (Left) & Signals / Quota (Right) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-3">
+        {/* Bar 1: Dedicated for quantifying the number in each tier */}
+        <div className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 shadow-xs flex items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
               <SlidersHorizontal className="w-4 h-4 text-sky-600" />
@@ -569,12 +749,25 @@ export function SchoolListMatrix({
             </div>
           </div>
 
-          <div className="hidden sm:block h-5 w-px bg-slate-200" />
+          <button
+            type="button"
+            onClick={() => setShowTieringInfoModal(true)}
+            className="text-slate-400 hover:text-sky-600 transition-colors p-1 rounded-md hover:bg-slate-50 cursor-pointer"
+            title="Learn how Automated Tiering works"
+          >
+            <Info className="w-4 h-4" />
+          </button>
+        </div>
 
-          {/* Gold and Silver Signal Badges */}
-          <div className="flex items-center gap-1.5">
+        {/* Bar 2: Dedicated for tracking signals and quota of signals */}
+        <div className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 shadow-xs flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2">
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+              <Award className="w-4 h-4 text-amber-500" />
+              Signals:
+            </span>
             {rule.signalType === 'tiered' ? (
-              <>
+              <div className="flex items-center gap-1.5">
                 <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs">
                   <Award className="w-3.5 h-3.5 text-amber-500" />
                   <span>Gold: <strong className="font-mono text-amber-950">{signalStatus.goldUsed}/{rule.goldSignals}</strong> <span className="text-[10px] text-amber-700 font-normal">({signalStatus.goldRemaining} left)</span></span>
@@ -583,34 +776,36 @@ export function SchoolListMatrix({
                   <Award className="w-3.5 h-3.5 text-slate-400" />
                   <span>Silver: <strong className="font-mono text-slate-900">{signalStatus.silverUsed}/{rule.silverSignals}</strong> <span className="text-[10px] text-slate-600 font-normal">({signalStatus.silverRemaining} left)</span></span>
                 </div>
-              </>
+              </div>
             ) : rule.signalType === 'single_tier' ? (
               <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-50 text-sky-800 border border-sky-200 shadow-2xs">
                 <Award className="w-3.5 h-3.5 text-sky-600" />
                 <span>Signals: <strong className="font-mono text-sky-950">{signalStatus.silverUsed}/{rule.totalSignals}</strong> <span className="text-[10px] text-sky-700 font-normal">({signalStatus.silverRemaining} left)</span></span>
               </div>
-            ) : null}
+            ) : (
+              <span className="text-xs text-slate-500 italic">No signals</span>
+            )}
           </div>
-        </div>
 
-        {/* Signaling Quota Compliance Indicator */}
-        <div className="flex items-center">
-          {signalStatus.valid ? (
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold shadow-2xs">
-              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-              <span>Signaling Quota Compliant</span>
-              {signalStatus.totalRemaining > 0 && (
-                <span className="text-[10px] text-emerald-700 font-normal">
-                  ({signalStatus.totalRemaining} unassigned)
-                </span>
-              )}
-            </div>
-          ) : (
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs font-semibold shadow-2xs">
-              <AlertTriangle className="w-3.5 h-3.5 text-red-600 shrink-0" />
-              <span>Quota Limit Exceeded</span>
-            </div>
-          )}
+          {/* Signaling Quota Compliance Indicator */}
+          <div className="flex items-center shrink-0">
+            {signalStatus.valid ? (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold shadow-2xs">
+                <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+                <span>Signaling Quota Compliant</span>
+                {signalStatus.totalRemaining > 0 && (
+                  <span className="text-[10px] text-emerald-700 font-normal hidden xl:inline">
+                    ({signalStatus.totalRemaining} left)
+                  </span>
+                )}
+              </div>
+            ) : (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs font-semibold shadow-2xs">
+                <AlertTriangle className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                <span>Quota Limit Exceeded</span>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
