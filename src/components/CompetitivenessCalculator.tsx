@@ -12,12 +12,10 @@ import {
 import {
   CANONICAL_SPECIALTIES,
   getStoredApplicantStep2Ck,
-  setStoredApplicantStep2Ck,
   APPLICANT_PROFILE_STORAGE_KEY,
 } from '@/domain/school-list-models';
 import {
   loadStudentAdvisingIntake,
-  saveStudentAdvisingIntake,
 } from '@/domain/advising-intake-models';
 import { CURRENT_STUDENT_ID_KEY } from '@/domain/student-registry';
 import {
@@ -42,6 +40,7 @@ interface CompetitivenessCalculatorProps {
   studentId?: string;
   initialAoaMember?: boolean;
   onBack: () => void;
+  onNavigateToIntake?: () => void;
 }
 
 export function CompetitivenessCalculator({
@@ -49,8 +48,17 @@ export function CompetitivenessCalculator({
   studentId,
   initialAoaMember,
   onBack,
+  onNavigateToIntake,
 }: CompetitivenessCalculatorProps) {
   const [specialty, setSpecialty] = useState(initialSpecialty);
+
+  const handleNavigateToIntake = () => {
+    if (onNavigateToIntake) {
+      onNavigateToIntake();
+    } else if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('navigate_to_intake'));
+    }
+  };
 
   // Sync state whenever initialSpecialty updates from parent
   React.useEffect(() => {
@@ -149,38 +157,6 @@ export function CompetitivenessCalculator({
     };
   }, [studentId]);
 
-  const handleStep2Change = (newVal: number) => {
-    setStep2CkState(newVal);
-    setStoredApplicantStep2Ck(newVal);
-  };
-
-  const handleAoaChange = (checked: boolean) => {
-    setIsAoaMember(checked);
-    if (typeof localStorage !== 'undefined') {
-      try {
-        const profileRaw = localStorage.getItem(APPLICANT_PROFILE_STORAGE_KEY);
-        const profileData = profileRaw ? JSON.parse(profileRaw) : {};
-        localStorage.setItem(
-          APPLICANT_PROFILE_STORAGE_KEY,
-          JSON.stringify({ ...profileData, isAoaMember: checked })
-        );
-      } catch {}
-    }
-    const sid = studentId || (typeof localStorage !== 'undefined' ? localStorage.getItem(CURRENT_STUDENT_ID_KEY) : null);
-    if (sid) {
-      const intake = loadStudentAdvisingIntake(sid);
-      if (intake) {
-        saveStudentAdvisingIntake({
-          ...intake,
-          isAoaMember: checked,
-        });
-      }
-    }
-    if (typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('applicant_aoa_updated', { detail: checked }));
-    }
-  };
-
   const profile: StudentMetricProfile = {
     step2Ck: Number(step2Ck) || 0,
     researchExperiences: Number(researchExperiences) || 0,
@@ -239,134 +215,141 @@ export function CompetitivenessCalculator({
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Metrics Input Form (5 cols) */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-5">
+          <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-4">
             <div className="border-b border-slate-100 pb-3">
-              <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Sparkles className="w-4 h-4 text-emerald-600" />
-                Your Academic & Portfolio Metrics
-              </h2>
+              <div className="flex items-center justify-between gap-2">
+                <h2 className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <Sparkles className="w-4 h-4 text-emerald-600" />
+                  Your Academic &amp; Portfolio Metrics
+                </h2>
+                <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-slate-100 text-slate-600 border border-slate-200">
+                  Read-Only Record
+                </span>
+              </div>
               <p className="text-xs text-slate-500 mt-0.5">
-                Metrics entered here are benchmarked against official matched cohort medians.
+                Centralized student records benchmarked against official matched cohort medians.
               </p>
             </div>
 
-            {/* USMLE Step 2 CK */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="text-xs font-semibold text-slate-700">USMLE Step 2 CK Score</label>
-                <span className="text-xs font-bold text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded border border-emerald-200">
-                  {step2Ck}
-                </span>
-              </div>
-              <input
-                type="range"
-                min="200"
-                max="285"
-                step="1"
-                value={step2Ck}
-                onChange={(e) => handleStep2Change(Number(e.target.value))}
-                className="w-full accent-emerald-600 cursor-pointer"
-              />
-              <div className="flex justify-between text-[10px] text-slate-400">
-                <span>Passing (214)</span>
-                <span>Specialty Matched Median: {benchmark?.step2Ck.matched ?? 245}</span>
-                <span>Max (285)</span>
+            {/* Advisory Alert with Hyperlink to Intake Form */}
+            <div className="bg-sky-50 border border-sky-200 rounded-xl p-3.5 flex items-start gap-3 text-xs text-sky-950">
+              <Info className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
+              <div className="space-y-1">
+                <p className="leading-relaxed">
+                  Metrics cannot be modified here to protect data integrity with your official student advising records. To update your Step scores, research counts, or portfolio activities, please{' '}
+                  <button
+                    type="button"
+                    onClick={handleNavigateToIntake}
+                    className="font-bold underline text-sky-700 hover:text-sky-900 cursor-pointer inline-flex items-center gap-0.5 transition-colors"
+                  >
+                    <span>edit your Intake Packet</span>
+                    <ExternalLink className="w-3 h-3 inline" />
+                  </button>
+                  .
+                </p>
               </div>
             </div>
 
-            {/* Research Experiences */}
+            {/* USMLE Step 2 CK */}
+            <div className="space-y-1.5 bg-slate-50 border border-slate-200 rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-semibold text-slate-800">USMLE Step 2 CK Score</span>
+                  <p className="text-[10px] text-slate-500">Official applicant baseline score</p>
+                </div>
+                <span className="text-sm font-mono font-bold text-emerald-700 bg-white px-2.5 py-1 rounded-md border border-emerald-200 shadow-2xs">
+                  {step2Ck}
+                </span>
+              </div>
+              <div className="pt-1">
+                <div className="w-full bg-slate-200 h-2 rounded-full overflow-hidden relative">
+                  <div
+                    className="bg-emerald-600 h-full rounded-full"
+                    style={{
+                      width: `${Math.min(Math.max(((step2Ck - 200) / (285 - 200)) * 100, 5), 100)}%`,
+                    }}
+                  />
+                </div>
+                <div className="flex justify-between text-[10px] text-slate-400 mt-1">
+                  <span>Passing (214)</span>
+                  <span className="font-medium text-slate-600">Specialty Matched Median: {benchmark?.step2Ck.matched ?? 245}</span>
+                  <span>Max (285)</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Research Experiences & Publications */}
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-medium text-slate-700 block mb-1">
-                  Research Experiences
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="30"
-                  value={researchExperiences}
-                  onChange={(e) => setResearchExperiences(Number(e.target.value))}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 font-semibold focus:ring-1 focus:ring-emerald-500"
-                />
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                <span className="text-xs font-medium text-slate-600 block">Research Experiences</span>
+                <div className="text-base font-bold text-slate-900 font-mono mt-0.5">
+                  {researchExperiences}
+                </div>
+                <span className="text-[10px] text-slate-400">
+                  Specialty Median: {benchmark?.researchExperiences.matched ?? 4}
+                </span>
               </div>
 
-              <div>
-                <label className="text-xs font-medium text-slate-700 block mb-1">
-                  Publications
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="50"
-                  value={publications}
-                  onChange={(e) => setPublications(Number(e.target.value))}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 font-semibold focus:ring-1 focus:ring-emerald-500"
-                />
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                <span className="text-xs font-medium text-slate-600 block">Publications</span>
+                <div className="text-base font-bold text-slate-900 font-mono mt-0.5">
+                  {publications}
+                </div>
+                <span className="text-[10px] text-slate-400">Peer-reviewed manuscripts</span>
               </div>
             </div>
 
             {/* Abstracts & Presentations */}
             <div className="grid grid-cols-2 gap-3">
-              <div>
-                <label className="text-xs font-medium text-slate-700 block mb-1">
-                  Abstracts
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="50"
-                  value={abstracts}
-                  onChange={(e) => setAbstracts(Number(e.target.value))}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 font-semibold focus:ring-1 focus:ring-emerald-500"
-                />
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                <span className="text-xs font-medium text-slate-600 block">Abstracts</span>
+                <div className="text-base font-bold text-slate-900 font-mono mt-0.5">
+                  {abstracts}
+                </div>
+                <span className="text-[10px] text-slate-400">Accepted abstracts</span>
               </div>
 
-              <div>
-                <label className="text-xs font-medium text-slate-700 block mb-1">
-                  Presentations / Posters
-                </label>
-                <input
-                  type="number"
-                  min="0"
-                  max="50"
-                  value={presentations}
-                  onChange={(e) => setPresentations(Number(e.target.value))}
-                  className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 font-semibold focus:ring-1 focus:ring-emerald-500"
-                />
+              <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+                <span className="text-xs font-medium text-slate-600 block">Presentations / Posters</span>
+                <div className="text-base font-bold text-slate-900 font-mono mt-0.5">
+                  {presentations}
+                </div>
+                <span className="text-[10px] text-slate-400">Oral &amp; poster presentations</span>
               </div>
             </div>
 
             {/* Volunteer Experiences */}
-            <div>
-              <label className="text-xs font-medium text-slate-700 block mb-1">
-                Volunteer Experiences
-              </label>
-              <input
-                type="number"
-                min="0"
-                max="30"
-                value={volunteerExperiences}
-                onChange={(e) => setVolunteerExperiences(Number(e.target.value))}
-                className="w-full bg-slate-50 border border-slate-300 rounded-lg px-3 py-1.5 text-xs text-slate-800 font-semibold focus:ring-1 focus:ring-emerald-500"
-              />
+            <div className="bg-slate-50 border border-slate-200 rounded-lg p-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <span className="text-xs font-medium text-slate-600 block">Volunteer Experiences</span>
+                  <span className="text-[10px] text-slate-400">Community service &amp; outreach</span>
+                </div>
+                <div className="text-base font-bold text-slate-900 font-mono">
+                  {volunteerExperiences}
+                </div>
+              </div>
             </div>
 
             {/* Honor Societies */}
-            <div className="pt-2 border-t border-slate-100">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isAoaMember}
-                  onChange={(e) => handleAoaChange(e.target.checked)}
-                  className="rounded text-emerald-600 focus:ring-emerald-500 h-4 w-4 cursor-pointer"
-                />
-                <span className="text-xs font-semibold text-slate-800">
-                  Inducted into Alpha Omega Alpha (AOA) Honor Society
+            <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-3">
+              <div>
+                <span className="text-xs font-semibold text-slate-800 block">
+                  Alpha Omega Alpha (AOA) Honor Society
                 </span>
-              </label>
-              <p className="text-[11px] text-slate-500 ml-6 mt-0.5">
-                {benchmark ? `${benchmark.aoaPercentage.matched}% of matched seniors hold AOA in this specialty` : ''}
-              </p>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  {benchmark ? `${benchmark.aoaPercentage.matched}% of matched seniors hold AOA in this specialty` : ''}
+                </p>
+              </div>
+              <span
+                className={`px-2.5 py-1 rounded-full text-xs font-bold border shrink-0 ${
+                  isAoaMember
+                    ? 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                    : 'bg-slate-100 text-slate-600 border-slate-200'
+                }`}
+              >
+                {isAoaMember ? 'Inducted (Member)' : 'Not Inducted'}
+              </span>
             </div>
           </div>
 

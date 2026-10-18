@@ -447,6 +447,7 @@ export function StudentPortal({
           studentId={activeStudentId}
           initialAoaMember={advisingIntake.isAoaMember}
           onBack={() => updateView('overview')}
+          onNavigateToIntake={() => updateView('intake')}
         />
       );
     }
