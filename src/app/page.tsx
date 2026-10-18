@@ -144,21 +144,12 @@ export default function HomePage() {
         }}
       />
 
-      {/* Institutional Footer */}
-      <footer className="border-t border-neutral-200/80 bg-white py-5 text-center text-xs text-neutral-500">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <span className="font-bold text-[#1F3A30] text-sm">Ethmoid Match Strategy</span>
-            {currentSchool && (
-              <>
-                <span className="text-neutral-300">&bull;</span>
-                <span className="font-medium text-neutral-700">{currentSchool}</span>
-              </>
-            )}
-          </div>
-          <span className="text-neutral-400 text-[11px]">
-            Grounded in 2026/2027 AAMC ERAS &amp; NRMP Match Specifications &bull; Student Decision Support &bull; Multi-Student Cohort
-          </span>
+      {/* Centered Professional Disclaimer Footer */}
+      <footer className="border-t border-neutral-200/80 bg-white py-4 text-center">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-[11px] text-neutral-400 leading-relaxed font-normal">
+            Data reflects the 2026 ACGME Accredited Program Database and population-level outcome statistics published by the NRMP. Designed as an independent decision-support tool for residency application strategy and signaling.
+          </p>
         </div>
       </footer>
     </div>
