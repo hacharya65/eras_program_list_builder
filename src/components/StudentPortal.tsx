@@ -7,7 +7,6 @@ import { SpecialtyAdvisingFormModal } from './SpecialtyAdvisingFormModal';
 import { LetterOfRecommendationTracker } from './LetterOfRecommendationTracker';
 import { SpecialtySwitchingSafetyModal } from './SpecialtySwitchingSafetyModal';
 import { StudentDashboardHome } from './StudentDashboardHome';
-import { ProfileManagementView } from './ProfileManagementView';
 import { JournalRepositoryView } from './JournalRepositoryView';
 import { StudentAuthModal } from './StudentAuthModal';
 import { PlatformWalkthroughModal } from './PlatformWalkthroughModal';
@@ -194,7 +193,7 @@ export function StudentPortal({
   // Listen to custom navigation events from top nav or external components
   useEffect(() => {
     const handleNavDashboard = () => updateView('overview');
-    const handleNavProfile = () => updateView('profile');
+    const handleNavProfile = () => updateView('overview');
     const handleNavIntake = () => updateView('intake');
     const handleNavFaq = () => updateView('faq');
     const handleNavLetters = () => updateView('letters');
@@ -472,21 +471,6 @@ export function StudentPortal({
       );
     }
 
-    if (activeView === 'profile') {
-      const assignedAdvisor = assignedAdvisors && assignedAdvisors.length > 0 ? assignedAdvisors[0] : undefined;
-      return (
-        <ProfileManagementView
-          student={currentActiveStudent}
-          targetSpecialty={targetSpecialty}
-          onSpecialtyChange={handleSpecialtyChange}
-          advisingIntake={advisingIntake}
-          onOpenIntake={() => updateView('intake')}
-          onBack={() => updateView('overview')}
-          assignedAdvisor={assignedAdvisor}
-        />
-      );
-    }
-
     if (activeView === 'faq') {
       return (
         <FaqAndGuideView
@@ -506,7 +490,7 @@ export function StudentPortal({
         onSpecialtyChange={handleSpecialtyChange}
         advisingIntake={advisingIntake}
         onOpenIntake={() => updateView('intake')}
-        onOpenProfile={() => updateView('profile')}
+        onOpenProfile={() => updateView('overview')}
         assignedAdvisors={assignedAdvisors}
         schoolListStats={schoolListStats}
         onNavigate={(view) => updateView(view)}

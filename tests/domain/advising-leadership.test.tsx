@@ -51,9 +51,11 @@ describe('Advising Contacts Removal & Independent Student Experience', () => {
     expect(markup).not.toContain('aria-label="Advising and Leadership"');
     expect(markup).not.toContain('<span>Advising and Leadership</span>');
 
-    // FAQ and profile management should be preserved
+    // FAQ and intake packet should be preserved; profile summary removed
     expect(markup).toContain('Frequently Asked Questions &amp; Guide');
-    expect(markup).toContain('Profile Summary');
+    expect(markup).toContain('Intake Packet');
+    expect(markup).not.toContain('Profile Summary');
+    expect(markup).not.toContain('Profile Management &amp; Scores');
   });
 
   it('verifies that StudentDashboardHome does not contain an advising contacts card', () => {
