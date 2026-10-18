@@ -82,7 +82,7 @@ describe('ThalamusAuthExperience & Student Portal Auth Flow', () => {
     // The text input value is empty (value="")
     expect(markup).toContain('value=""');
     // Popular schools are available to select but none are active
-    expect(markup).toContain('Penn State College of Medicine');
+    expect(markup).toContain('Pennsylvania State University College of Medicine');
   });
 
   it('renders Question 7 with label "What are your Core Clinical Clerkship grades?" and dynamic add/remove controls starting with 7 clerkships', () => {

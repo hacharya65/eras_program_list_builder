@@ -23,6 +23,8 @@ import {
   APPLICANT_PROFILE_STORAGE_KEY,
   CANONICAL_SPECIALTIES,
 } from '@/domain/school-list-models';
+import { MedicalSchoolCombobox } from './MedicalSchoolCombobox';
+import { isValidMedicalSchool } from '@/domain/medical-schools-database';
 import {
   GraduationCap,
   Sparkles,
@@ -158,8 +160,8 @@ export function StudentAuthModal({
       setFormError('Please enter a valid email address.');
       return;
     }
-    if (!medicalSchool.trim()) {
-      setFormError('Please specify the medical school you attend.');
+    if (!medicalSchool.trim() || !isValidMedicalSchool(medicalSchool)) {
+      setFormError('Please select your accredited medical school directly from the dropdown list.');
       return;
     }
 
@@ -419,13 +421,11 @@ export function StudentAuthModal({
                     <label className="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
                       Medical School You Attend *
                     </label>
-                    <input
-                      type="text"
-                      required
-                      placeholder="e.g. Geisinger Commonwealth, Penn State, Temple, Tufts..."
+                    <MedicalSchoolCombobox
                       value={medicalSchool}
-                      onChange={(e) => setMedicalSchool(e.target.value)}
-                      className="w-full px-3.5 py-2 text-xs border border-neutral-300 rounded-xl bg-white focus:outline-none focus:ring-2 focus:ring-[#7EAE9B]"
+                      onChange={(sch) => setMedicalSchool(sch)}
+                      placeholder="Search or select from 255 accredited medical schools..."
+                      required
                     />
                   </div>
 

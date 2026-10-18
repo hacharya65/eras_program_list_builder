@@ -37,6 +37,8 @@ import {
   DEFAULT_CLERKSHIP_GRADES,
 } from '@/domain/advising-intake-models';
 import { CANONICAL_SPECIALTIES } from '@/domain/school-list-models';
+import { MedicalSchoolCombobox } from './MedicalSchoolCombobox';
+import { isValidMedicalSchool } from '@/domain/medical-schools-database';
 
 interface SpecialtyAdvisingFormModalProps {
   isOpen: boolean;
@@ -316,12 +318,10 @@ CLINICAL STATEMENT & GOALS:
                   </div>
                   <div>
                     <label className="font-semibold text-slate-700 block mb-1">Medical School Attended</label>
-                    <input
-                      type="text"
+                    <MedicalSchoolCombobox
                       value={formData.medicalSchool || ''}
-                      onChange={(e) => setFormData({ ...formData, medicalSchool: e.target.value })}
-                      placeholder="e.g. Johns Hopkins, Penn State, UCLA"
-                      className="w-full bg-white border border-slate-300 rounded-lg px-3 py-1.5 text-slate-900 font-medium focus:ring-2 focus:ring-[#7EAE9B] focus:outline-none"
+                      onChange={(sch) => setFormData({ ...formData, medicalSchool: sch })}
+                      placeholder="Search or select from 255 accredited medical schools..."
                     />
                   </div>
                   <div>

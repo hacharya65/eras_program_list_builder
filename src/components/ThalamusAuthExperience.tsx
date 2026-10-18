@@ -22,6 +22,8 @@ import {
   INITIAL_MOCK_INTAKE,
 } from '@/domain/advising-intake-models';
 import { CANONICAL_SPECIALTIES } from '@/domain/school-list-models';
+import { MedicalSchoolCombobox } from './MedicalSchoolCombobox';
+import { isValidMedicalSchool } from '@/domain/medical-schools-database';
 import {
   Sparkles,
   ArrowRight,
@@ -57,12 +59,12 @@ const TOTAL_STEPS = 12;
 
 const POPULAR_SCHOOLS = [
   'Geisinger Commonwealth School of Medicine',
-  'Penn State College of Medicine',
-  'Johns Hopkins University SOM',
-  'Perelman School of Medicine (Penn)',
-  'Temple University Lewis Katz SOM',
+  'Pennsylvania State University College of Medicine',
+  'Johns Hopkins University School of Medicine',
+  'Perelman School of Medicine at the University of Pennsylvania',
+  'Lewis Katz School of Medicine at Temple University',
   'Tufts University School of Medicine',
-  'UCLA David Geffen School of Medicine',
+  'University of California Los Angeles David Geffen School of Medicine',
   'University of Michigan Medical School',
 ];
 
@@ -195,8 +197,8 @@ export function ThalamusAuthExperience({
   // Step Navigation in Guided Intake
   const goToNextStep = () => {
     if (currentStep === 1) {
-      if (!medicalSchool.trim()) {
-        setMedicalSchoolError('Please enter or select the medical school you attend.');
+      if (!medicalSchool.trim() || !isValidMedicalSchool(medicalSchool)) {
+        setMedicalSchoolError('Please select your medical school directly from the accredited database dropdown.');
         return;
       }
       setMedicalSchoolError(null);
@@ -398,38 +400,23 @@ export function ThalamusAuthExperience({
 
             <div>
               <label className="block text-xs font-semibold text-neutral-700 mb-1.5">
-                Medical School Name
+                Medical School Name (Accredited Database)
               </label>
-              <input
-                type="text"
-                autoFocus
+              <MedicalSchoolCombobox
                 value={medicalSchool}
-                onChange={(e) => {
-                  setMedicalSchool(e.target.value);
+                onChange={(sch) => {
+                  setMedicalSchool(sch);
                   setMedicalSchoolError(null);
                 }}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter') {
-                    e.preventDefault();
-                    goToNextStep();
-                  }
-                }}
-                placeholder="e.g. Penn State College of Medicine, Johns Hopkins, UCLA..."
-                className={`w-full px-4 py-3 text-sm border rounded-xl bg-white shadow-2xs focus:outline-none focus:ring-2 focus:ring-[#1F3A30] transition-all ${
-                  medicalSchoolError ? 'border-rose-400 ring-1 ring-rose-300' : 'border-neutral-300'
-                }`}
+                error={medicalSchoolError}
+                placeholder="Type to search or select from all 255 accredited medical schools..."
+                autoFocus
               />
-              {medicalSchoolError && (
-                <p className="text-xs text-rose-600 mt-1 flex items-center gap-1 font-medium">
-                  <AlertCircle className="w-3.5 h-3.5" />
-                  {medicalSchoolError}
-                </p>
-              )}
             </div>
 
             <div>
               <span className="text-[11px] font-medium text-neutral-500 block mb-2">
-                Or select from common schools:
+                Or quick-select common schools:
               </span>
               <div className="flex flex-wrap gap-1.5">
                 {POPULAR_SCHOOLS.map((sch) => (
@@ -442,7 +429,7 @@ export function ThalamusAuthExperience({
                     }}
                     className={`text-xs px-3 py-1.5 rounded-lg border transition-all text-left cursor-pointer ${
                       medicalSchool === sch
-                        ? 'bg-[#1F3A30] text-white border-[#1F3A30] font-semibold'
+                        ? 'bg-[#1F3A30] text-white border-[#1F3A30] font-semibold shadow-2xs'
                         : 'bg-neutral-50 hover:bg-neutral-100 text-neutral-700 border-neutral-200'
                     }`}
                   >
