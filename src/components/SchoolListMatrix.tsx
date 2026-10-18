@@ -63,10 +63,12 @@ import {
   ProgramLetterRequirement,
   LetterWriterRequest,
 } from '@/domain/lor-models';
+import { getStudentAccount, getCurrentStudentId } from '@/domain/student-registry';
 
 interface SchoolListMatrixProps {
   specialty?: string;
   studentId?: string;
+  studentName?: string;
   onBack: () => void;
   onNavigateToLetters?: () => void;
 }
@@ -78,9 +80,18 @@ const STORAGE_KEY = 'eras_school_list_matrix';
 export function SchoolListMatrix({
   specialty = 'Internal Medicine',
   studentId,
+  studentName,
   onBack,
   onNavigateToLetters,
 }: SchoolListMatrixProps) {
+  const resolvedFullName =
+    studentName?.trim() ||
+    (typeof window !== 'undefined'
+      ? getStudentAccount(studentId || getCurrentStudentId())?.name
+      : '') ||
+    'Applicant';
+  const firstName = resolvedFullName.trim().split(' ')[0] || 'Applicant';
+
   const [selectedSpecialty, setSelectedSpecialty] = useState(specialty);
 
   // Applicant baseline Step 2 CK score (Ticket Candidate 8)
@@ -454,14 +465,11 @@ export function SchoolListMatrix({
           </button>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-lg font-bold text-slate-900">Strategic School List Matrix</h1>
+              <h1 className="text-lg font-bold text-slate-900">{firstName}&apos;s Residency Program List</h1>
               <span className="px-2 py-0.5 text-xs font-semibold rounded bg-sky-100 text-sky-800">
                 {items.length} Programs Tracked
               </span>
             </div>
-            <p className="text-xs text-slate-500">
-              Universal ACGME Database &bull; Dynamic Signaling Optimization &bull; Reach / Target / Safety Matrix
-            </p>
           </div>
         </div>
 
@@ -476,164 +484,6 @@ export function SchoolListMatrix({
               </span>
             )}
           </div>
-        </div>
-      </div>
-
-      {/* Specialty Signaling Quotas & Balance Scorecard */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        {rule.signalType === 'single_tier' ? (
-          <>
-            {/* Single-Tier Program Signals Card */}
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-sky-800 uppercase tracking-wider flex items-center gap-1">
-                  <Award className="w-4 h-4 text-sky-600" />
-                  Program Signals
-                </span>
-                <span className="text-xs font-mono font-bold text-sky-900 bg-sky-50 px-2 py-0.5 rounded border border-sky-200">
-                  {signalStatus.silverUsed} / {rule.totalSignals} Used
-                </span>
-              </div>
-              <div className="text-xl font-bold text-slate-900 mt-1">
-                {signalStatus.silverRemaining} Remaining
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
-                <div
-                  className={`h-full rounded-full ${signalStatus.silverUsed > rule.totalSignals ? 'bg-red-500' : 'bg-sky-600'
-                    }`}
-                  style={{ width: `${Math.min((signalStatus.silverUsed / (rule.totalSignals || 1)) * 100, 100)}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Explanation Requirement Card */}
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
-                  <Info className="w-4 h-4 text-slate-500" />
-                  Signal Notes
-                </span>
-                <span className={`text-[10px] font-bold px-2 py-0.5 rounded border ${rule.explanationRequired
-                    ? 'bg-amber-100 text-amber-900 border-amber-300'
-                    : 'bg-slate-100 text-slate-700 border-slate-200'
-                  }`}>
-                  {rule.explanationRequired ? 'Required (Notes)' : 'Not Required'}
-                </span>
-              </div>
-              <div className="text-sm font-semibold text-slate-900 mt-1">
-                {rule.explanationRequired ? 'Signal Notes Required' : 'Standard Submission'}
-              </div>
-              <p className="text-[11px] text-slate-500 mt-1 truncate">
-                {rule.explanationRequired
-                  ? 'Each signal includes program-specific notes and rationale.'
-                  : 'Tokens submitted directly without essay justifications.'}
-              </p>
-            </div>
-          </>
-        ) : (
-          <>
-            {/* Gold Signals Card */}
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-amber-800 uppercase tracking-wider flex items-center gap-1">
-                  <Award className="w-4 h-4 text-amber-500" />
-                  Gold Signals
-                </span>
-                <span className="text-xs font-mono font-bold text-amber-900 bg-amber-50 px-2 py-0.5 rounded border border-amber-200">
-                  {signalStatus.goldUsed} / {rule.goldSignals} Used
-                </span>
-              </div>
-              <div className="text-xl font-bold text-slate-900 mt-1">
-                {signalStatus.goldRemaining} Remaining
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
-                <div
-                  className={`h-full rounded-full ${signalStatus.goldUsed > rule.goldSignals ? 'bg-red-500' : 'bg-amber-500'
-                    }`}
-                  style={{ width: `${Math.min((signalStatus.goldUsed / (rule.goldSignals || 1)) * 100, 100)}%` }}
-                />
-              </div>
-            </div>
-
-            {/* Silver Signals Card */}
-            <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
-                  <Award className="w-4 h-4 text-slate-400" />
-                  Silver Signals
-                </span>
-                <span className="text-xs font-mono font-bold text-slate-800 bg-slate-100 px-2 py-0.5 rounded border border-slate-200">
-                  {signalStatus.silverUsed} / {rule.silverSignals} Used
-                </span>
-              </div>
-              <div className="text-xl font-bold text-slate-900 mt-1">
-                {signalStatus.silverRemaining} Remaining
-              </div>
-              <div className="w-full bg-slate-100 rounded-full h-1.5 mt-2 overflow-hidden">
-                <div
-                  className={`h-full rounded-full ${signalStatus.silverUsed > rule.silverSignals ? 'bg-red-500' : 'bg-slate-400'
-                    }`}
-                  style={{ width: `${Math.min((signalStatus.silverUsed / (rule.silverSignals || 1)) * 100, 100)}%` }}
-                />
-              </div>
-            </div>
-          </>
-        )}
-
-        {/* Tier Distribution Card */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm space-y-1">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1">
-              <SlidersHorizontal className="w-4 h-4 text-sky-600" />
-              Tier Balance
-            </span>
-            <span className="text-xs text-slate-500">{items.length} Total</span>
-          </div>
-          <div className="flex items-center gap-2 pt-1">
-            <span className="px-2 py-0.5 rounded text-xs font-bold bg-purple-100 text-purple-800">
-              {reachCount} Reach
-            </span>
-            <span className="px-2 py-0.5 rounded text-xs font-bold bg-sky-100 text-sky-800">
-              {targetCount} Target
-            </span>
-            <span className="px-2 py-0.5 rounded text-xs font-bold bg-emerald-100 text-emerald-800">
-              {safetyCount} Safety
-            </span>
-          </div>
-          <p className="text-[11px] text-slate-500 mt-1">
-            Recommended ratio: ~25% Reach, ~50% Target, ~25% Safety
-          </p>
-        </div>
-
-        {/* Quota Compliance Alert Card */}
-        <div
-          className={`p-4 rounded-xl border shadow-sm flex items-center gap-3 ${signalStatus.valid
-              ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900'
-              : 'bg-red-50 border-red-200 text-red-900'
-            }`}
-        >
-          {signalStatus.valid ? (
-            <>
-              <CheckCircle2 className="w-6 h-6 text-emerald-600 shrink-0" />
-              <div>
-                <div className="text-xs font-bold">Signaling Quota Compliant</div>
-                <div className="text-[11px] text-emerald-700">
-                  {signalStatus.totalRemaining} tokens unassigned in {selectedSpecialty}.
-                  {rule.explanationRequired && ' (signal notes required)'}
-                </div>
-              </div>
-            </>
-          ) : (
-            <>
-              <AlertTriangle className="w-6 h-6 text-red-600 shrink-0" />
-              <div>
-                <div className="text-xs font-bold">Quota Limit Exceeded!</div>
-                <div className="text-[11px] text-red-700">
-                  {signalStatus.errors[0]}
-                </div>
-              </div>
-            </>
-          )}
         </div>
       </div>
 
@@ -695,45 +545,72 @@ export function SchoolListMatrix({
         </div>
       </div>
 
-      {/* Pinned Visual Key & Real-Time Tier Balance Summary Bar (Item 14) */}
-      <div className="bg-white border border-slate-200 rounded-xl px-4 py-3 shadow-xs flex flex-wrap items-center justify-between gap-3">
-        <div className="flex items-center gap-2">
-          <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
-            <SlidersHorizontal className="w-4 h-4 text-sky-600" />
-            Tier Balance Key:
-          </span>
+      {/* Pinned Visual Key, Signal Allocation & Real-Time Tier Balance Summary Bar */}
+      <div className="bg-white border border-slate-200 rounded-xl px-4 py-2.5 shadow-xs flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-wrap items-center gap-3">
           <div className="flex items-center gap-2">
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-50 text-purple-800 border border-purple-200 shadow-2xs">
-              <Compass className="w-3.5 h-3.5 text-purple-600" />
-              <span>Reach: <strong className="font-mono text-purple-900">{reachCount}</strong></span>
+            <span className="text-xs font-bold text-slate-700 uppercase tracking-wider flex items-center gap-1.5">
+              <SlidersHorizontal className="w-4 h-4 text-sky-600" />
+              Tier Balance Key:
+            </span>
+            <div className="flex items-center gap-1.5">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-50 text-purple-800 border border-purple-200 shadow-2xs">
+                <Compass className="w-3.5 h-3.5 text-purple-600" />
+                <span>Reach: <strong className="font-mono text-purple-900">{reachCount}</strong></span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-50 text-sky-800 border border-sky-200 shadow-2xs">
+                <Target className="w-3.5 h-3.5 text-sky-600" />
+                <span>Target: <strong className="font-mono text-sky-900">{targetCount}</strong></span>
+              </div>
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
+                <Shield className="w-3.5 h-3.5 text-emerald-600" />
+                <span>Safety: <strong className="font-mono text-emerald-900">{safetyCount}</strong></span>
+              </div>
             </div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-50 text-sky-800 border border-sky-200 shadow-2xs">
-              <Target className="w-3.5 h-3.5 text-sky-600" />
-              <span>Target: <strong className="font-mono text-sky-900">{targetCount}</strong></span>
-            </div>
-            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs">
-              <Shield className="w-3.5 h-3.5 text-emerald-600" />
-              <span>Safety: <strong className="font-mono text-emerald-900">{safetyCount}</strong></span>
-            </div>
+          </div>
+
+          <div className="hidden sm:block h-5 w-px bg-slate-200" />
+
+          {/* Gold and Silver Signal Badges */}
+          <div className="flex items-center gap-1.5">
+            {rule.signalType === 'tiered' ? (
+              <>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-900 border border-amber-200 shadow-2xs">
+                  <Award className="w-3.5 h-3.5 text-amber-500" />
+                  <span>Gold: <strong className="font-mono text-amber-950">{signalStatus.goldUsed}/{rule.goldSignals}</strong> <span className="text-[10px] text-amber-700 font-normal">({signalStatus.goldRemaining} left)</span></span>
+                </div>
+                <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-slate-100 text-slate-800 border border-slate-300 shadow-2xs">
+                  <Award className="w-3.5 h-3.5 text-slate-400" />
+                  <span>Silver: <strong className="font-mono text-slate-900">{signalStatus.silverUsed}/{rule.silverSignals}</strong> <span className="text-[10px] text-slate-600 font-normal">({signalStatus.silverRemaining} left)</span></span>
+                </div>
+              </>
+            ) : rule.signalType === 'single_tier' ? (
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold bg-sky-50 text-sky-800 border border-sky-200 shadow-2xs">
+                <Award className="w-3.5 h-3.5 text-sky-600" />
+                <span>Signals: <strong className="font-mono text-sky-950">{signalStatus.silverUsed}/{rule.totalSignals}</strong> <span className="text-[10px] text-sky-700 font-normal">({signalStatus.silverRemaining} left)</span></span>
+              </div>
+            ) : null}
           </div>
         </div>
 
-        {/* Real-time Applicant Baseline Score and Dynamic Tiering Indicator */}
-        <div className="flex items-center gap-3 text-xs">
-          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 px-3 py-1 rounded-lg">
-            <span className="text-slate-500 font-medium">Applicant Step 2 CK:</span>
-            <span className="font-mono font-bold text-slate-900 text-sm">{applicantStep2Ck}</span>
-            <span className="text-[10px] text-slate-400 font-semibold uppercase tracking-wider">(Baseline)</span>
-          </div>
-          <button
-            type="button"
-            onClick={() => setShowTieringInfoModal(true)}
-            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-sky-50 hover:bg-sky-100 border border-sky-200 text-sky-800 text-[11px] font-semibold transition-colors cursor-pointer"
-            title="Click to learn how the Automated Tiering System works"
-          >
-            <span>Automated Tiering System</span>
-            <Info className="w-3.5 h-3.5 text-sky-600" />
-          </button>
+        {/* Signaling Quota Compliance Indicator */}
+        <div className="flex items-center">
+          {signalStatus.valid ? (
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold shadow-2xs">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+              <span>Signaling Quota Compliant</span>
+              {signalStatus.totalRemaining > 0 && (
+                <span className="text-[10px] text-emerald-700 font-normal">
+                  ({signalStatus.totalRemaining} unassigned)
+                </span>
+              )}
+            </div>
+          ) : (
+            <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-red-50 border border-red-200 text-red-800 text-xs font-semibold shadow-2xs">
+              <AlertTriangle className="w-3.5 h-3.5 text-red-600 shrink-0" />
+              <span>Quota Limit Exceeded</span>
+            </div>
+          )}
         </div>
       </div>
 

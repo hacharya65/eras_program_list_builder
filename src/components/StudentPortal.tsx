@@ -433,6 +433,7 @@ export function StudentPortal({
         <SchoolListMatrix
           specialty={targetSpecialty}
           studentId={activeStudentId}
+          studentName={currentActiveStudent.name}
           onBack={() => updateView('overview')}
           onNavigateToLetters={() => updateView('letters')}
         />
