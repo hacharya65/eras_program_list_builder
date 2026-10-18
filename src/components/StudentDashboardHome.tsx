@@ -333,9 +333,6 @@ export function StudentDashboardHome({
                   <div className="p-2.5 sm:p-3 bg-neutral-50 rounded-xl border border-neutral-200/80">
                     <div className="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Total</div>
                     <div className="text-xl font-black text-neutral-900 mt-0.5">{totalPrograms}</div>
-                    <div className="text-[9px] text-neutral-500 mt-0.5 font-medium truncate">
-                      {totalPrograms >= 25 ? 'Broad list' : totalPrograms >= 15 ? 'Target cohort' : 'Early building'}
-                    </div>
                   </div>
 
                   {/* Reach */}
@@ -345,7 +342,6 @@ export function StudentDashboardHome({
                       <span className="font-bold">{reachPct}%</span>
                     </div>
                     <div className="text-xl font-black text-rose-950 mt-0.5">{reachCount}</div>
-                    <div className="text-[9px] text-rose-700 mt-0.5 font-medium truncate">Stretch reach</div>
                   </div>
 
                   {/* Target */}
@@ -355,7 +351,6 @@ export function StudentDashboardHome({
                       <span className="font-bold">{targetPct}%</span>
                     </div>
                     <div className="text-xl font-black text-emerald-950 mt-0.5">{targetCount}</div>
-                    <div className="text-[9px] text-emerald-700 mt-0.5 font-medium truncate">Core align</div>
                   </div>
 
                   {/* Safety */}
@@ -365,7 +360,6 @@ export function StudentDashboardHome({
                       <span className="font-bold">{safetyPct}%</span>
                     </div>
                     <div className="text-xl font-black text-blue-950 mt-0.5">{safetyCount}</div>
-                    <div className="text-[9px] text-blue-700 mt-0.5 font-medium truncate">High match</div>
                   </div>
                 </div>
 
