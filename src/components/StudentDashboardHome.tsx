@@ -303,12 +303,6 @@ export function StudentDashboardHome({
           </div>
 
           <div className="flex items-center gap-1.5">
-            <span className="w-2 h-2 rounded-full bg-blue-500"></span>
-            <span className="text-neutral-500">MSPE Release:</span>
-            <strong className="text-neutral-900">Oct 1, 2026</strong>
-          </div>
-
-          <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-purple-500"></span>
             <span className="text-neutral-500">Match Day:</span>
             <strong className="text-neutral-900">Mar 19, 2027</strong>
@@ -334,7 +328,7 @@ export function StudentDashboardHome({
                 <div className="pb-2.5 border-b border-neutral-100 flex items-center justify-between">
                   <h2 className="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
                     <Compass className="w-4 h-4 text-[#1F3A30]" />
-                    <span>School List Building &amp; Signaling Strategy</span>
+                    <span>Program List Summary</span>
                   </h2>
                   <span className="text-[10px] font-semibold text-neutral-500 bg-neutral-100 px-2.5 py-0.5 rounded-md">
                     {targetSpecialty}
@@ -592,7 +586,7 @@ export function StudentDashboardHome({
             </div>
             <div>
               <h2 className="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
-                <span>Reflective Journal &amp; Clinical Scratchpad</span>
+                <span>Quick Journal Entry</span>
               </h2>
             </div>
           </div>

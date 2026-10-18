@@ -237,8 +237,8 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
         />
       );
 
-      // Verify Column 1: School List Building & Signaling Strategy is present and unburied
-      expect(markup).toContain('School List Building &amp; Signaling Strategy');
+      // Verify Column 1: Program List Summary is present and unburied
+      expect(markup).toContain('Program List Summary');
       expect(markup).not.toContain('Added');
       expect(markup).toContain('Tier Balance Distribution');
       expect(markup).toContain('Preference Signals Allocation');
@@ -252,7 +252,7 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
       expect(markup).not.toContain('Live distribution across Reach, Target &amp; Safety');
 
       // Verify bottom Journal card fits seamlessly without scrolling
-      expect(markup).toContain('Reflective Journal &amp; Clinical Scratchpad');
+      expect(markup).toContain('Quick Journal Entry');
       expect(markup).toContain('Save Entry');
 
       // Verify FloatingJournalWidget renders persistent trigger button across the application

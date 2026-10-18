@@ -6,11 +6,8 @@ import {
   Download,
   ShieldAlert,
   ArrowRight,
-  UserCheck,
-  CheckCircle2,
   X
 } from 'lucide-react';
-import { getDefaultAdvisorForSpecialty } from '@/domain/advising-intake-models';
 import { SchoolListItem } from '@/domain/school-list-models';
 
 interface SpecialtySwitchingSafetyModalProps {
@@ -31,8 +28,6 @@ export function SpecialtySwitchingSafetyModal({
   onConfirmSwitch,
 }: SpecialtySwitchingSafetyModalProps) {
   if (!isOpen) return null;
-
-  const newAdvisorName = getDefaultAdvisorForSpecialty(newSpecialty);
 
   const handleDownloadCsv = () => {
     if (savedPrograms.length === 0) return;
@@ -97,16 +92,8 @@ export function SpecialtySwitchingSafetyModal({
           </div>
           <ul className="space-y-1.5 pl-5 list-disc text-amber-950">
             <li>
-              <strong>School List Matrix Cleared:</strong> Your {savedPrograms.length} shortlisted {currentSpecialty}{' '}
+              <strong>School List Cleared:</strong> Your {savedPrograms.length} shortlisted {currentSpecialty}{' '}
               program(s) will be cleared. Please export a CSV backup below!
-            </li>
-            <li>
-              <strong>Assigned Advisor Hand-off:</strong> Your default specialty advisor will update to{' '}
-              <strong>{newAdvisorName}</strong>.
-            </li>
-            <li>
-              <strong>Writing Drafts Preserved:</strong> Your Personal Statement drafts, snapshots, and comments are
-              safely kept in audit history.
             </li>
           </ul>
         </div>
