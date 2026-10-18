@@ -148,7 +148,7 @@ export default function HomePage() {
       <footer className="border-t border-neutral-200/80 bg-white py-4 text-center">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <p className="text-[11px] text-neutral-400 leading-relaxed font-normal">
-            Data reflects the 2026 ACGME Accredited Program Database and population-level outcome statistics published by the NRMP. Designed as an independent decision-support tool for residency application strategy and signaling.
+            Program directories and benchmark analytics reflect the 2026 ACGME Accredited Database and population-level match outcome statistics published by the NRMP. Intended as an independent decision-support tool for strategic school list curation, competitiveness assessment, and residency signaling.
           </p>
         </div>
       </footer>
