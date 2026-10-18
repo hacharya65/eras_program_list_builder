@@ -607,6 +607,50 @@ describe('Ticket 07: Strategic School List Matrix & Dynamic Specialty Signaling'
       // Verify census division and tier selects contain pr-8
       expect(html).toContain('pl-2.5 pr-8 py-1.5');
     });
+
+    it('verifies globals.css blurs header and sticky bars when modals are open', async () => {
+      const fs = await import('fs');
+      const path = await import('path');
+
+      const globalsCss = fs.readFileSync(path.resolve(process.cwd(), 'src/app/globals.css'), 'utf-8');
+      expect(globalsCss).toContain('body:has([data-modal="true"]) header');
+      expect(globalsCss).toContain('body:has(.modal-backdrop) header');
+      expect(globalsCss).toContain('body:has(.fixed.inset-0) header');
+      expect(globalsCss).toContain('body:has([data-modal="true"]) .sticky');
+      expect(globalsCss).toContain('filter: blur(8px) brightness(0.65) !important');
+      expect(globalsCss).toContain('pointer-events: none !important');
+    });
+
+    it('verifies LetterOfRecommendationTracker has Assign to Saved Programs with Select All and no Private Notes', async () => {
+      const React = (await import('react')).default;
+      const { renderToStaticMarkup } = await import('react-dom/server');
+      const { LetterOfRecommendationTracker } = await import('@/components/LetterOfRecommendationTracker');
+
+      const html = renderToStaticMarkup(
+        React.createElement(LetterOfRecommendationTracker, {
+          studentId: 'test-student-1',
+          specialty: 'Internal Medicine',
+        })
+      );
+
+      // Verify the component renders without errors
+      expect(html).toContain('Letter of Recommendation (LOR) Tracking &amp; Gaps');
+
+      // Check source file directly for modal markup changes
+      const fs = await import('fs');
+      const path = await import('path');
+      const lorSource = fs.readFileSync(
+        path.resolve(process.cwd(), 'src/components/LetterOfRecommendationTracker.tsx'),
+        'utf-8'
+      );
+
+      expect(lorSource).toContain('Assign to Saved Programs');
+      expect(lorSource).not.toContain('Assign to Shortlisted Programs');
+      expect(lorSource).toContain('Select All');
+      expect(lorSource).not.toContain('Private Notes');
+      expect(lorSource).toContain('data-modal="true"');
+      expect(lorSource).toContain('modal-backdrop');
+    });
   });
 });
 

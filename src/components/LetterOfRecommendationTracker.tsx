@@ -433,13 +433,21 @@ export function LetterOfRecommendationTracker({
 
       {/* Add / Edit Writer Modal */}
       {isAddWriterModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4">
-          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 space-y-4 border border-[#D6E5DF]">
+        <div
+          data-modal="true"
+          className="fixed inset-0 z-[100] flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4 modal-backdrop"
+        >
+          <div className="bg-white rounded-2xl shadow-xl max-w-lg w-full p-6 space-y-4 border border-[#D6E5DF] animate-scale-in">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <h3 className="font-bold text-slate-900 text-base">
                 {editingWriter ? 'Edit Letter Writer' : 'Add Letter Writer'}
               </h3>
-              <button onClick={() => setIsAddWriterModalOpen(false)} className="text-slate-400 hover:text-slate-700">
+              <button
+                type="button"
+                onClick={() => setIsAddWriterModalOpen(false)}
+                className="text-slate-400 hover:text-slate-700 p-1 rounded-lg hover:bg-slate-100 transition-colors cursor-pointer"
+                title="Close"
+              >
                 <X className="w-5 h-5" />
               </button>
             </div>
@@ -510,39 +518,58 @@ export function LetterOfRecommendationTracker({
               </div>
 
               <div>
-                <label className="font-semibold text-slate-700 block mb-1">Assign to Shortlisted Programs</label>
-                <div className="max-h-32 overflow-y-auto border border-slate-200 rounded-lg p-2 space-y-1 bg-slate-50">
-                  {savedPrograms.map((prog) => {
-                    const isChecked = assignedPrograms.includes(prog.id);
-                    return (
-                      <label key={prog.id} className="flex items-center gap-2 text-[11px] cursor-pointer">
-                        <input
-                          type="checkbox"
-                          checked={isChecked}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setAssignedPrograms([...assignedPrograms, prog.id]);
-                            } else {
-                              setAssignedPrograms(assignedPrograms.filter((id) => id !== prog.id));
-                            }
-                          }}
-                        />
-                        <span className="truncate">{prog.programName}</span>
-                      </label>
-                    );
-                  })}
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="font-semibold text-slate-700">Assign to Saved Programs</label>
+                  {savedPrograms.length > 0 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        const allSelected = savedPrograms.every((p) => assignedPrograms.includes(p.id));
+                        if (allSelected) {
+                          setAssignedPrograms([]);
+                        } else {
+                          setAssignedPrograms(savedPrograms.map((p) => p.id));
+                        }
+                      }}
+                      className="text-[11px] font-bold text-emerald-800 hover:text-emerald-950 underline cursor-pointer"
+                    >
+                      {savedPrograms.every((p) => assignedPrograms.includes(p.id))
+                        ? 'Deselect All'
+                        : `Select All (${savedPrograms.length})`}
+                    </button>
+                  )}
                 </div>
-              </div>
-
-              <div>
-                <label className="font-semibold text-slate-700 block mb-1">Private Notes</label>
-                <textarea
-                  rows={2}
-                  value={notes}
-                  onChange={(e) => setNotes(e.target.value)}
-                  placeholder="Key clinical experiences to highlight, ask date, etc."
-                  className="w-full bg-white border border-slate-300 rounded-lg p-2 text-slate-900"
-                />
+                <div className="max-h-40 overflow-y-auto border border-slate-200 rounded-lg p-2 space-y-1 bg-slate-50">
+                  {savedPrograms.length === 0 ? (
+                    <div className="text-slate-400 text-[11px] py-2 text-center">
+                      No saved programs in your school list. Add programs in the Strategic School List Matrix.
+                    </div>
+                  ) : (
+                    savedPrograms.map((prog) => {
+                      const isChecked = assignedPrograms.includes(prog.id);
+                      return (
+                        <label
+                          key={prog.id}
+                          className="flex items-center gap-2 text-[11px] cursor-pointer hover:bg-slate-100/80 p-1 rounded transition-colors"
+                        >
+                          <input
+                            type="checkbox"
+                            checked={isChecked}
+                            onChange={(e) => {
+                              if (e.target.checked) {
+                                setAssignedPrograms([...assignedPrograms, prog.id]);
+                              } else {
+                                setAssignedPrograms(assignedPrograms.filter((id) => id !== prog.id));
+                              }
+                            }}
+                            className="rounded text-[#1F3A30] focus:ring-[#1F3A30]"
+                          />
+                          <span className="truncate text-slate-800 font-medium">{prog.programName}</span>
+                        </label>
+                      );
+                    })
+                  )}
+                </div>
               </div>
 
               <div className="pt-3 flex items-center justify-end gap-2 border-t border-slate-100">
