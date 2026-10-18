@@ -196,6 +196,8 @@ export function StudentPortal({
     const handleNavProfile = () => updateView('profile');
     const handleNavIntake = () => updateView('intake');
     const handleNavFaq = () => updateView('faq');
+    const handleNavLetters = () => updateView('letters');
+    const handleNavSchoolList = () => updateView('school_list');
     const handleOpenWalkthrough = () => setIsWalkthroughOpen(true);
     const handleOpenAuth = () => {
       if (onOpenAuthModal) {
@@ -211,6 +213,8 @@ export function StudentPortal({
     window.addEventListener('navigate_to_profile_management', handleNavProfile);
     window.addEventListener('navigate_to_intake', handleNavIntake);
     window.addEventListener('navigate_to_faq', handleNavFaq);
+    window.addEventListener('navigate_to_letters', handleNavLetters);
+    window.addEventListener('navigate_to_school_list', handleNavSchoolList);
     window.addEventListener('open_platform_walkthrough', handleOpenWalkthrough);
     window.addEventListener('open_student_auth_modal', handleOpenAuth);
 
@@ -221,6 +225,8 @@ export function StudentPortal({
       window.removeEventListener('navigate_to_profile_management', handleNavProfile);
       window.removeEventListener('navigate_to_intake', handleNavIntake);
       window.removeEventListener('navigate_to_faq', handleNavFaq);
+      window.removeEventListener('navigate_to_letters', handleNavLetters);
+      window.removeEventListener('navigate_to_school_list', handleNavSchoolList);
       window.removeEventListener('open_platform_walkthrough', handleOpenWalkthrough);
       window.removeEventListener('open_student_auth_modal', handleOpenAuth);
     };
@@ -299,11 +305,11 @@ export function StudentPortal({
         return 'dashboard';
       case 'school_list':
       case 'competitiveness':
+      case 'letters':
         return 'programs';
       case 'journal':
         return 'journal';
       case 'intake':
-      case 'letters':
         return 'documents';
       default:
         return 'dashboard';
@@ -342,6 +348,7 @@ export function StudentPortal({
       defaultView: 'school_list',
       subSections: [
         { id: 'school_list', label: 'Program List & Signals', icon: Compass },
+        { id: 'letters', label: 'Letters of Recommendation', icon: MailCheck },
         { id: 'competitiveness', label: 'Specialty Appraisal', icon: TrendingUp },
       ],
     },
@@ -354,7 +361,7 @@ export function StudentPortal({
     {
       id: 'documents',
       label: 'Documents & Packet',
-      icon: MailCheck,
+      icon: FileCheck,
       defaultView: 'intake',
       subSections: [
         {
@@ -363,7 +370,6 @@ export function StudentPortal({
           icon: FileCheck,
           badge: advisingIntake.isCompleted ? 'Complete' : 'In Progress',
         },
-        { id: 'letters', label: 'Letters of Recommendation', icon: MailCheck },
       ],
     },
   ];
@@ -422,6 +428,7 @@ export function StudentPortal({
           specialty={targetSpecialty}
           studentId={activeStudentId}
           onBack={() => updateView('overview')}
+          onNavigateToLetters={() => updateView('letters')}
         />
       );
     }

@@ -116,6 +116,7 @@ export function saveLetterWriterRequests(requests: LetterWriterRequest[], studen
     try {
       const key = getLorStorageKey(sid || undefined);
       localStorage.setItem(key, JSON.stringify(requests));
+      window.dispatchEvent(new CustomEvent('letter_writers_updated'));
     } catch (e) {
       console.error('Error saving letter writer requests:', e);
     }
@@ -140,6 +141,7 @@ export function saveProgramLetterRequirements(
   if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
     try {
       localStorage.setItem(PROGRAM_LOR_REQ_STORAGE_KEY, JSON.stringify(requirements));
+      window.dispatchEvent(new CustomEvent('program_lor_requirements_updated'));
     } catch (e) {
       console.error('Error saving program letter requirements:', e);
     }

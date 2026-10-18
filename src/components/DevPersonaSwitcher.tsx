@@ -137,7 +137,7 @@ export function DevPersonaSwitcher({
     <div className="sticky top-0 z-50 shadow-xs">
       {/* Main Institutional Navigation Header (Pure White #FFFFFF) with Classic Profile Tab */}
       <header className="bg-white border-b border-neutral-200/90">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
+        <div className="max-w-[1600px] mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-4">
           {/* Left: Ethmoid Logo & School Name */}
           <div className="flex items-center gap-3">
             <button

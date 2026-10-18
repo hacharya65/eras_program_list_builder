@@ -53,11 +53,20 @@ import {
   SlidersHorizontal,
   ChevronDown
 } from 'lucide-react';
+import {
+  loadProgramLetterRequirements,
+  saveProgramLetterRequirements,
+  loadLetterWriterRequests,
+  analyzeProgramLetterGaps,
+  ProgramLetterRequirement,
+  LetterWriterRequest,
+} from '@/domain/lor-models';
 
 interface SchoolListMatrixProps {
   specialty?: string;
   studentId?: string;
   onBack: () => void;
+  onNavigateToLetters?: () => void;
 }
 
 const DEFAULT_ITEMS: SchoolListItem[] = DEFAULT_INTERNAL_MEDICINE_SAMPLE_ITEMS;
@@ -68,6 +77,7 @@ export function SchoolListMatrix({
   specialty = 'Internal Medicine',
   studentId,
   onBack,
+  onNavigateToLetters,
 }: SchoolListMatrixProps) {
   const [selectedSpecialty, setSelectedSpecialty] = useState(specialty);
 
@@ -186,6 +196,60 @@ export function SchoolListMatrix({
 
   // Yield Rates & Strategy Information Modal State
   const [showStrategyInfoModal, setShowStrategyInfoModal] = useState(false);
+
+  // LOR Requirements Educational Modal State
+  const [showLorInfoModal, setShowLorInfoModal] = useState(false);
+
+  // LOR Requirements & Letter Writers State
+  const [lorRequirements, setLorRequirements] = useState<Record<string, ProgramLetterRequirement>>(() =>
+    loadProgramLetterRequirements()
+  );
+  const [letterWriters, setLetterWriters] = useState<LetterWriterRequest[]>(() =>
+    loadLetterWriterRequests(studentId)
+  );
+
+  useEffect(() => {
+    setLorRequirements(loadProgramLetterRequirements());
+    setLetterWriters(loadLetterWriterRequests(studentId));
+  }, [studentId]);
+
+  useEffect(() => {
+    const handleSync = () => {
+      setLorRequirements(loadProgramLetterRequirements());
+      setLetterWriters(loadLetterWriterRequests(studentId));
+    };
+    window.addEventListener('program_lor_requirements_updated', handleSync);
+    window.addEventListener('letter_writers_updated', handleSync);
+    return () => {
+      window.removeEventListener('program_lor_requirements_updated', handleSync);
+      window.removeEventListener('letter_writers_updated', handleSync);
+    };
+  }, [studentId]);
+
+  const handleUpdateLorRequired = (programId: string, count: number) => {
+    const updatedCount = Math.max(1, count);
+    const updated = {
+      ...lorRequirements,
+      [programId]: {
+        programId,
+        requiredLettersCount: updatedCount,
+        checkedDate: new Date().toLocaleDateString(),
+      },
+    };
+    setLorRequirements(updated);
+    saveProgramLetterRequirements(updated);
+  };
+
+  const handleGoToLetters = () => {
+    if (onNavigateToLetters) {
+      onNavigateToLetters();
+    } else if (typeof window !== 'undefined') {
+      const url = new URL(window.location.href);
+      url.searchParams.set('view', 'letters');
+      window.history.pushState({ view: 'letters' }, '', url.toString());
+      window.dispatchEvent(new CustomEvent('navigate_to_letters'));
+    }
+  };
 
   const signalStatus = validateSignalAllocation(selectedSpecialty, items);
   const rule = SPECIALTY_SIGNALING_RULES[selectedSpecialty] || SPECIALTY_SIGNALING_RULES['Internal Medicine'];
@@ -682,8 +746,8 @@ export function SchoolListMatrix({
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50/75 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
                 <th className="py-2.5 px-3 w-8 text-center">#</th>
-                <th className="py-2.5 px-3 w-[27%]">Program &amp; Metadata</th>
-                <th className="py-2.5 px-3 w-[24%]">
+                <th className="py-2.5 px-3 w-[22%]">Program &amp; Metadata</th>
+                <th className="py-2.5 px-3 w-[19%]">
                   <div className="flex items-center justify-between">
                     <span>ERAS Signal</span>
                     {rule.explanationRequired && (
@@ -693,25 +757,59 @@ export function SchoolListMatrix({
                     )}
                   </div>
                 </th>
-                <th className="py-2.5 px-3 w-[16%]">
-                  <a
-                    href="https://www.residencyexplorer.org/?utm_source=gemini"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1 text-slate-700 hover:text-sky-700 font-bold hover:underline"
-                    title="Lookup Middle 80% Range on Residency Explorer"
-                  >
-                    <span>Step 2 CK &amp; Tier</span>
-                    <ExternalLink className="w-3 h-3 text-sky-600" />
-                  </a>
-                </th>
-                <th className="py-2.5 px-3 w-[27%]">
+                <th className="py-2.5 px-3 w-[14%]">
                   <div className="flex items-center gap-1.5">
-                    <span>Yield Rates &amp; Strategy</span>
+                    <a
+                      href="https://www.residencyexplorer.org/?utm_source=gemini"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-slate-700 hover:text-sky-700 font-bold hover:underline"
+                      title="Lookup Middle 80% Range on Residency Explorer"
+                    >
+                      <span>Step 2 CK &amp; Tier</span>
+                      <ExternalLink className="w-3 h-3 text-sky-600" />
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => setShowTieringInfoModal(true)}
+                      className="text-slate-400 hover:text-sky-600 p-0.5 rounded-full hover:bg-slate-200/60 transition-colors cursor-pointer"
+                      title="How 80% Range Decides Target, Safety, & Reach Tiering"
+                      aria-label="How 80% Range Decides Target, Safety, & Reach Tiering"
+                    >
+                      <Info className="w-3.5 h-3.5 text-sky-600" />
+                    </button>
+                  </div>
+                </th>
+                <th className="py-2.5 px-3 w-[14%]">
+                  <div className="flex items-center gap-1.5">
+                    <span>Letters of Rec</span>
+                    <button
+                      type="button"
+                      onClick={() => setShowLorInfoModal(true)}
+                      className="text-slate-400 hover:text-sky-600 p-0.5 rounded-full hover:bg-slate-200/60 transition-colors cursor-pointer"
+                      title="Program LOR Requirements Guidance"
+                      aria-label="Program LOR Requirements Guidance"
+                    >
+                      <Info className="w-3.5 h-3.5 text-sky-600" />
+                    </button>
+                  </div>
+                </th>
+                <th className="py-2.5 px-3 w-[25%]">
+                  <div className="flex items-center gap-1.5">
+                    <a
+                      href="https://www.residencyexplorer.org/?utm_source=gemini"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-1 text-slate-700 hover:text-sky-700 font-bold hover:underline"
+                      title="Lookup Interview Yield Rates on Residency Explorer"
+                    >
+                      <span>Yield Rates &amp; Strategy</span>
+                      <ExternalLink className="w-3 h-3 text-sky-600" />
+                    </a>
                     <button
                       type="button"
                       onClick={() => setShowStrategyInfoModal(true)}
-                      className="text-slate-400 hover:text-sky-600 p-0.5 rounded-full hover:bg-slate-200/60 transition-colors"
+                      className="text-slate-400 hover:text-sky-600 p-0.5 rounded-full hover:bg-slate-200/60 transition-colors cursor-pointer"
                       title="How Signaling Recommendations are Calculated"
                       aria-label="How Signaling Recommendations are Calculated"
                     >
@@ -725,7 +823,7 @@ export function SchoolListMatrix({
             <tbody className="divide-y divide-slate-100">
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="py-12 text-center text-slate-400 text-sm">
+                  <td colSpan={7} className="py-12 text-center text-slate-400 text-sm">
                     No residency programs match your search/filter criteria.
                   </td>
                 </tr>
@@ -967,6 +1065,74 @@ export function SchoolListMatrix({
                                 <ExternalLink className="w-2.5 h-2.5" />
                               </a>
                             )}
+                          </div>
+                        </div>
+                      </td>
+
+                      {/* Letters of Recommendation Column */}
+                      <td className="py-2.5 px-3 align-top">
+                        <div className="space-y-1.5">
+                          {/* Input for Required Letters */}
+                          <div className="flex items-center gap-1.5 bg-white p-1 rounded-lg border border-slate-200 shadow-2xs w-fit">
+                            <span className="text-[10px] text-slate-500 font-semibold uppercase tracking-wider pl-0.5">
+                              Req:
+                            </span>
+                            <input
+                              type="number"
+                              min={1}
+                              max={6}
+                              value={lorRequirements[item.id]?.requiredLettersCount ?? 3}
+                              onChange={(e) => {
+                                const val = parseInt(e.target.value, 10);
+                                if (!isNaN(val)) {
+                                  handleUpdateLorRequired(item.id, val);
+                                }
+                              }}
+                              className="w-10 px-1 py-0.5 text-xs text-center font-mono font-bold rounded border border-slate-200 focus:outline-none focus:ring-1 focus:ring-sky-500 bg-slate-50/50"
+                              title="Enter required letters count based on program website (default: 3)"
+                            />
+                            <span className="text-[10px] text-slate-400 pr-1">letters</span>
+                          </div>
+
+                          {/* Gap Status Badge */}
+                          <div>
+                            {(() => {
+                              const lorGap = analyzeProgramLetterGaps(item.id, letterWriters, lorRequirements);
+                              if (lorGap.isSatisfied) {
+                                return (
+                                  <span
+                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200 shadow-2xs"
+                                    title={`${lorGap.assignedCount} of ${lorGap.requiredCount} letters assigned (${lorGap.submittedCount} submitted)`}
+                                  >
+                                    <CheckCircle2 className="w-3 h-3 text-emerald-600 shrink-0" />
+                                    <span>{lorGap.assignedCount}/{lorGap.requiredCount} Assigned</span>
+                                  </span>
+                                );
+                              } else {
+                                return (
+                                  <span
+                                    className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-200 shadow-2xs"
+                                    title={`Shortage: Need ${lorGap.gapCount} more letter writer assigned (${lorGap.assignedCount}/${lorGap.requiredCount})`}
+                                  >
+                                    <AlertTriangle className="w-3 h-3 text-amber-600 shrink-0" />
+                                    <span>{lorGap.gapCount} Needed ({lorGap.assignedCount}/{lorGap.requiredCount})</span>
+                                  </span>
+                                );
+                              }
+                            })()}
+                          </div>
+
+                          {/* Link to LOR Tracking page */}
+                          <div>
+                            <button
+                              type="button"
+                              onClick={handleGoToLetters}
+                              className="text-[10px] text-sky-700 hover:text-sky-900 font-semibold hover:underline inline-flex items-center gap-0.5 cursor-pointer"
+                              title="Assign writers and view gaps in Letter of Recommendation Tracker"
+                            >
+                              <span>LOR Tracker</span>
+                              <ExternalLink className="w-2.5 h-2.5" />
+                            </button>
                           </div>
                         </div>
                       </td>
@@ -1497,6 +1663,80 @@ export function SchoolListMatrix({
           </div>
         </div>
       )}
+
+      {/* LOR Requirements Educational Modal */}
+      {showLorInfoModal && (
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 space-y-4 animate-scale-in">
+            <div className="flex items-start justify-between pb-3 border-b border-slate-100">
+              <div className="flex items-center gap-2.5">
+                <div className="w-8 h-8 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center font-bold">
+                  <Mail className="w-4 h-4 text-sky-700" />
+                </div>
+                <div>
+                  <h3 className="text-base font-bold text-slate-900">Program Letter of Recommendation Requirements</h3>
+                  <p className="text-xs text-slate-500">Program-Specific Verification Guide</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowLorInfoModal(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
+                title="Close"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="text-xs text-slate-700 leading-relaxed space-y-3">
+              <p>
+                Each residency program independently determines the composition and quantity of <strong>Letters of Recommendation (LOR)</strong> needed for their application review.
+              </p>
+
+              <div className="p-3.5 rounded-xl bg-amber-50/80 border border-amber-200 space-y-2">
+                <div className="flex items-center gap-2 font-bold text-amber-900">
+                  <AlertTriangle className="w-4 h-4 text-amber-600 shrink-0" />
+                  <span>Visit Program Specific Pages for the Coming Cycle</span>
+                </div>
+                <p className="text-amber-950 text-[11px] leading-relaxed">
+                  Always visit each program's official residency website or departmental admissions portal to confirm their current requirements (e.g., standard 3 vs 4 letters, mandatory Specialty Chair SLOE, or sub-internship attending letters) for the 2026–2027 application cycle.
+                </p>
+              </div>
+
+              <div className="p-3.5 rounded-xl bg-emerald-50/80 border border-emerald-200 space-y-1.5">
+                <div className="flex items-center gap-2 font-bold text-emerald-900">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <span>Real-Time LOR Synchronization</span>
+                </div>
+                <p className="text-emerald-950 text-[11px] leading-relaxed">
+                  The requirement you input here is automatically synchronized with your <strong>Letter of Recommendation (LOR) Tracking &amp; Gaps</strong> workspace (now located in <strong>Programs &amp; Strategy</strong>). If you have fewer letters assigned than required, the system will highlight the shortage in amber.
+                </p>
+              </div>
+            </div>
+
+            <div className="pt-2 flex justify-between items-center">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowLorInfoModal(false);
+                  handleGoToLetters();
+                }}
+                className="text-xs text-sky-700 hover:text-sky-900 font-bold hover:underline inline-flex items-center gap-1 cursor-pointer"
+              >
+                <span>Open LOR Tracker</span>
+                <ExternalLink className="w-3 h-3" />
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowLorInfoModal(false)}
+                className="px-4 py-2 bg-[#1F3A30] hover:bg-[#142720] text-white rounded-xl text-xs font-bold transition-colors shadow-2xs cursor-pointer"
+              >
+                Got It
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Yield Rates & Strategy Educational Modal */}
       {showStrategyInfoModal && (
         <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">

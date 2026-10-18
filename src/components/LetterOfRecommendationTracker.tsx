@@ -64,13 +64,28 @@ export function LetterOfRecommendationTracker({
   // Sync writers and programs when specialty or studentId changes
   useEffect(() => {
     setWriters(loadLetterWriterRequests(studentId));
+    setRequirements(loadProgramLetterRequirements());
+  }, [studentId, specialty]);
+
+  // Real-time synchronization when requirements or writers update across tabs or matrix
+  useEffect(() => {
+    const handleSync = () => {
+      setRequirements(loadProgramLetterRequirements());
+      setWriters(loadLetterWriterRequests(studentId));
+    };
+    window.addEventListener('program_lor_requirements_updated', handleSync);
+    window.addEventListener('letter_writers_updated', handleSync);
+    return () => {
+      window.removeEventListener('program_lor_requirements_updated', handleSync);
+      window.removeEventListener('letter_writers_updated', handleSync);
+    };
   }, [studentId]);
 
   // Load programs from school list
   useEffect(() => {
     const progs = loadItemsForSpecialty(specialty, undefined, studentId);
     setSavedPrograms(progs);
-  }, [specialty]);
+  }, [specialty, studentId]);
 
   const handleOpenAddWriter = () => {
     setEditingWriter(null);
