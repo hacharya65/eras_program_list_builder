@@ -330,7 +330,7 @@ export function StudentDashboardHome({
             const safetyPct = totalPrograms > 0 ? Math.round((safetyCount / totalPrograms) * 100) : 0;
 
             return (
-              <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-2xs p-4 sm:p-5 flex flex-col justify-between flex-1 space-y-3.5">
+              <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-2xs p-4 sm:p-5 flex flex-col justify-between flex-1 min-h-[350px] space-y-3.5">
                 <div className="pb-2.5 border-b border-neutral-100 flex items-center justify-between">
                   <h2 className="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
                     <Compass className="w-4 h-4 text-[#1F3A30]" />
@@ -479,7 +479,7 @@ export function StudentDashboardHome({
 
         {/* ==================== COLUMN 2: LETTERS OF RECOMMENDATION ==================== */}
         <div className="flex flex-col">
-          <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-2xs p-4 sm:p-5 flex flex-col justify-between flex-1 space-y-3.5">
+          <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-2xs p-4 sm:p-5 flex flex-col justify-between flex-1 min-h-[350px] space-y-3.5">
             <div className="pb-2.5 border-b border-neutral-100 flex items-center justify-between">
               <div className="flex items-center gap-1.5">
                 <h2 className="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
@@ -516,13 +516,13 @@ export function StudentDashboardHome({
             </div>
 
             {/* Writer List: Fits at least 6 writers in a clean 2-column grid without scrolling */}
-            <div className="flex-1 min-h-[195px] flex flex-col justify-start">
+            <div className="flex-1 min-h-[240px] flex flex-col justify-start">
               {writers.length === 0 ? (
-                <div className="h-full min-h-[195px] flex items-center justify-center text-center text-xs text-neutral-400">
+                <div className="h-full min-h-[240px] flex items-center justify-center text-center text-xs text-neutral-400">
                   No letter writers added yet. Click &quot;Add Writer&quot; above.
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 max-h-[225px] overflow-y-auto pr-0.5 scrollbar-thin">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 min-h-[235px] max-h-[270px] overflow-y-auto pr-0.5 scrollbar-thin">
                   {writers.map((w) => (
                     <div
                       key={w.id}

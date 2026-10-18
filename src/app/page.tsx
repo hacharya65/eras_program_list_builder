@@ -126,7 +126,7 @@ export default function HomePage() {
       />
 
       {/* Main Container */}
-      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
+      <main className="flex-1 max-w-[1600px] w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
         <StudentPortal
           context={studentContext}
           currentStudentAccount={currentAccount}
@@ -159,10 +159,10 @@ export default function HomePage() {
       />
 
       {/* Centered Professional Disclaimer Footer */}
-      <footer className="border-t border-neutral-200/80 bg-white py-4 text-center">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-          <p className="text-[11px] text-neutral-400 leading-relaxed font-normal">
-            Disclaimer: Program directories and benchmark analytics reflect the 2026 ACGME Accredited Database and historical population-level match outcome statistics published by the NRMP. Intended as an independent decision-support tool for strategic school list curation and residency signaling.
+      <footer className="border-t border-neutral-200/80 bg-white py-2 text-center">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <p className="text-[10px] text-neutral-400 font-normal leading-tight">
+            Disclaimer: Independent decision-support tool utilizing ACGME accredited directories and historical NRMP match benchmarks for strategic list curation and residency signaling.
           </p>
         </div>
       </footer>
