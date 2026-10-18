@@ -16,6 +16,11 @@ import {
   APPLICANT_PROFILE_STORAGE_KEY,
 } from '@/domain/school-list-models';
 import {
+  loadStudentAdvisingIntake,
+  saveStudentAdvisingIntake,
+} from '@/domain/advising-intake-models';
+import { CURRENT_STUDENT_ID_KEY } from '@/domain/student-registry';
+import {
   BarChart3,
   TrendingUp,
   Award,
@@ -34,11 +39,15 @@ import {
 
 interface CompetitivenessCalculatorProps {
   initialSpecialty?: string;
+  studentId?: string;
+  initialAoaMember?: boolean;
   onBack: () => void;
 }
 
 export function CompetitivenessCalculator({
   initialSpecialty = 'Internal Medicine',
+  studentId,
+  initialAoaMember,
   onBack,
 }: CompetitivenessCalculatorProps) {
   const [specialty, setSpecialty] = useState(initialSpecialty);
@@ -50,18 +59,126 @@ export function CompetitivenessCalculator({
     }
   }, [initialSpecialty]);
 
+  // Resolve initial student metrics from intake or stored profile
+  const resolveInitialMetrics = () => {
+    let aoa = false;
+    let step2 = getStoredApplicantStep2Ck() || 250;
+    let research = 4;
+    let abs = 2;
+    let pres = 4;
+    let pubs = 2;
+    let vol = 5;
+
+    const sid = studentId || (typeof localStorage !== 'undefined' ? localStorage.getItem(CURRENT_STUDENT_ID_KEY) : null);
+    if (sid) {
+      const intake = loadStudentAdvisingIntake(sid);
+      if (intake) {
+        if (intake.isAoaMember !== undefined) aoa = Boolean(intake.isAoaMember);
+        if (intake.step2Score) step2 = intake.step2Score;
+        if (intake.researchExperiences !== undefined) research = intake.researchExperiences;
+        if (intake.abstracts !== undefined) abs = intake.abstracts;
+        if (intake.presentations !== undefined) pres = intake.presentations;
+        if (intake.publications !== undefined) pubs = intake.publications;
+        if (intake.volunteerExperiences !== undefined) vol = intake.volunteerExperiences;
+      }
+    }
+
+    if (initialAoaMember !== undefined) {
+      aoa = Boolean(initialAoaMember);
+    } else if (typeof localStorage !== 'undefined') {
+      try {
+        const profileRaw = localStorage.getItem(APPLICANT_PROFILE_STORAGE_KEY);
+        if (profileRaw) {
+          const parsed = JSON.parse(profileRaw);
+          if (parsed.isAoaMember !== undefined) aoa = Boolean(parsed.isAoaMember);
+          if (parsed.publications !== undefined && parsed.publications !== null) pubs = Number(parsed.publications);
+          if (parsed.researchExperiences !== undefined && parsed.researchExperiences !== null) research = Number(parsed.researchExperiences);
+          if (parsed.abstracts !== undefined && parsed.abstracts !== null) abs = Number(parsed.abstracts);
+          if (parsed.presentations !== undefined && parsed.presentations !== null) pres = Number(parsed.presentations);
+          if (parsed.volunteerExperiences !== undefined && parsed.volunteerExperiences !== null) vol = Number(parsed.volunteerExperiences);
+        }
+      } catch {}
+    }
+
+    return { aoa, step2, research, abs, pres, pubs, vol };
+  };
+
+  const initialMetrics = React.useMemo(() => resolveInitialMetrics(), [studentId, initialAoaMember]);
+
   // Student metrics state
-  const [step2Ck, setStep2CkState] = useState<number>(() => getStoredApplicantStep2Ck());
-  const [researchExperiences, setResearchExperiences] = useState<number>(4);
-  const [abstracts, setAbstracts] = useState<number>(2);
-  const [presentations, setPresentations] = useState<number>(4);
-  const [publications, setPublications] = useState<number>(2);
-  const [volunteerExperiences, setVolunteerExperiences] = useState<number>(5);
-  const [isAoaMember, setIsAoaMember] = useState<boolean>(false);
+  const [step2Ck, setStep2CkState] = useState<number>(() => initialMetrics.step2);
+  const [researchExperiences, setResearchExperiences] = useState<number>(() => initialMetrics.research);
+  const [abstracts, setAbstracts] = useState<number>(() => initialMetrics.abs);
+  const [presentations, setPresentations] = useState<number>(() => initialMetrics.pres);
+  const [publications, setPublications] = useState<number>(() => initialMetrics.pubs);
+  const [volunteerExperiences, setVolunteerExperiences] = useState<number>(() => initialMetrics.vol);
+  const [isAoaMember, setIsAoaMember] = useState<boolean>(() => initialMetrics.aoa);
+
+  // Synchronize state if props update
+  React.useEffect(() => {
+    if (initialAoaMember !== undefined) {
+      setIsAoaMember(Boolean(initialAoaMember));
+    }
+  }, [initialAoaMember]);
+
+  // Real-time synchronization when AOA or intake is updated across the platform
+  React.useEffect(() => {
+    const handleAoaSync = (e: any) => {
+      if (e.detail !== undefined) {
+        setIsAoaMember(Boolean(e.detail));
+      }
+    };
+    const handleIntakeSync = (e: any) => {
+      if (e.detail) {
+        const intake = e.detail;
+        if (intake.isAoaMember !== undefined) setIsAoaMember(Boolean(intake.isAoaMember));
+        if (intake.step2Score) setStep2CkState(intake.step2Score);
+        if (intake.researchExperiences !== undefined) setResearchExperiences(intake.researchExperiences);
+        if (intake.abstracts !== undefined) setAbstracts(intake.abstracts);
+        if (intake.presentations !== undefined) setPresentations(intake.presentations);
+        if (intake.publications !== undefined) setPublications(intake.publications);
+        if (intake.volunteerExperiences !== undefined) setVolunteerExperiences(intake.volunteerExperiences);
+      }
+    };
+
+    window.addEventListener('applicant_aoa_updated', handleAoaSync);
+    window.addEventListener('student_intake_saved', handleIntakeSync);
+    return () => {
+      window.removeEventListener('applicant_aoa_updated', handleAoaSync);
+      window.removeEventListener('student_intake_saved', handleIntakeSync);
+    };
+  }, [studentId]);
 
   const handleStep2Change = (newVal: number) => {
     setStep2CkState(newVal);
     setStoredApplicantStep2Ck(newVal);
+  };
+
+  const handleAoaChange = (checked: boolean) => {
+    setIsAoaMember(checked);
+    if (typeof localStorage !== 'undefined') {
+      try {
+        const profileRaw = localStorage.getItem(APPLICANT_PROFILE_STORAGE_KEY);
+        const profileData = profileRaw ? JSON.parse(profileRaw) : {};
+        localStorage.setItem(
+          APPLICANT_PROFILE_STORAGE_KEY,
+          JSON.stringify({ ...profileData, isAoaMember: checked })
+        );
+      } catch {}
+    }
+    const sid = studentId || (typeof localStorage !== 'undefined' ? localStorage.getItem(CURRENT_STUDENT_ID_KEY) : null);
+    if (sid) {
+      const intake = loadStudentAdvisingIntake(sid);
+      if (intake) {
+        saveStudentAdvisingIntake({
+          ...intake,
+          isAoaMember: checked,
+        });
+      }
+    }
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('applicant_aoa_updated', { detail: checked }));
+    }
   };
 
   const profile: StudentMetricProfile = {
@@ -240,8 +357,8 @@ export function CompetitivenessCalculator({
                 <input
                   type="checkbox"
                   checked={isAoaMember}
-                  onChange={(e) => setIsAoaMember(e.target.checked)}
-                  className="rounded text-emerald-600 focus:ring-emerald-500 h-4 w-4"
+                  onChange={(e) => handleAoaChange(e.target.checked)}
+                  className="rounded text-emerald-600 focus:ring-emerald-500 h-4 w-4 cursor-pointer"
                 />
                 <span className="text-xs font-semibold text-slate-800">
                   Inducted into Alpha Omega Alpha (AOA) Honor Society
@@ -253,16 +370,23 @@ export function CompetitivenessCalculator({
             </div>
           </div>
 
-          {/* Source Document Citation Card */}
-          <div className="bg-slate-50 rounded-xl border border-slate-200 p-4 text-xs text-slate-600 space-y-2">
-            <div className="font-semibold text-slate-800 flex items-center gap-1.5">
-              <FileCheck className="w-4 h-4 text-slate-600" />
-              Dataset Provenance
+          {/* Unified Dataset Provenance & Ethical Guardrail Disclaimer */}
+          <div className="bg-[#F4F8F6] rounded-xl border border-[#D6E5DF] p-4 text-xs text-slate-600 space-y-2.5">
+            <div className="font-bold text-[#1F3A30] flex items-center gap-1.5">
+              <FileCheck className="w-4 h-4 text-[#4E8773]" />
+              <span>Dataset Provenance &amp; Ethical Guardrails</span>
             </div>
-            <p className="text-[11px] leading-relaxed">
-              Derived from <strong className="text-slate-800">NRMP Charting Outcomes 2026: Summary Statistics</strong> (Page {benchmark?.page || 1}).
-              Based on {benchmark?.sampleSize.matched?.toLocaleString() || '1,000+'} matched U.S. MD seniors.
+            <p className="text-[11px] leading-relaxed text-slate-700">
+              Derived from <strong className="text-slate-900">NRMP Charting Outcomes™ 2026: Summary Statistics</strong> (Page {benchmark?.page || 1}), based on {benchmark?.sampleSize.matched?.toLocaleString() || '1,000+'} matched U.S. MD seniors.
             </p>
+            <div className="border-t border-[#D6E5DF]/70 pt-2 space-y-1 text-[10px]">
+              <p className="text-slate-600 leading-relaxed">
+                <strong>Citation:</strong> National Resident Matching Program. 2026. <em>Characteristics of Applicants Who Matched to Their Preferred Specialty, U.S. MD Seniors</em> (Main Residency Match, 2026 Appointment Year).
+              </p>
+              <p className="italic text-slate-500 leading-relaxed">
+                Disclaimer: Historical reference medians represent retrospective population benchmarks from matched U.S. seniors and do not imply an admission guarantee, individual program cutoff, or predicted Match outcome for the 2027 cycle.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -331,32 +455,6 @@ export function CompetitivenessCalculator({
                 </div>
               </div>
 
-              {/* Strategic Signaling Advisory Recommendation */}
-              <div className="bg-white rounded-xl border border-slate-200 p-5 shadow-sm space-y-2">
-                <div className="flex items-center gap-2">
-                  <Award className="w-5 h-5 text-indigo-600" />
-                  <h4 className="text-sm font-bold text-slate-900">
-                    Faculty Signaling Strategy Recommendation
-                  </h4>
-                </div>
-                <p className="text-xs text-slate-700 leading-relaxed">
-                  {assessment.recommendedSignalingStrategy}
-                </p>
-                <div className="pt-3 border-t border-slate-100 flex items-center justify-between">
-                  <span className="text-xs text-slate-500">
-                    Cross-reference with interview conversion rates:
-                  </span>
-                  <a
-                    href={generateResidencyExplorerLink(assessment.specialty)}
-                    target="_blank"
-                    rel="noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-indigo-600 hover:text-indigo-800"
-                  >
-                    Open Residency Explorer Yield Table <ExternalLink className="w-3.5 h-3.5" />
-                  </a>
-                </div>
-              </div>
-
               {/* 6-Dimension Comparison Table */}
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="p-4 border-b border-slate-100 bg-slate-50">
@@ -400,20 +498,21 @@ export function CompetitivenessCalculator({
                     </div>
                   ))}
                 </div>
-              </div>
 
-              {/* Provenance Attribution & Ethical Guardrail Disclaimer */}
-              <div className="bg-[#F4F8F6] rounded-xl border border-[#D6E5DF] p-4 text-xs text-slate-600 space-y-1.5">
-                <div className="font-bold text-[#1F3A30] flex items-center gap-1.5">
-                  <Info className="w-4 h-4 text-[#4E8773]" />
-                  <span>Provenance &amp; Ethical Guardrails</span>
+                {/* Residency Explorer Cross-Reference Link */}
+                <div className="p-3.5 bg-slate-50 border-t border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-2 text-xs">
+                  <span className="text-slate-500">
+                    Cross-reference with interview conversion rates:
+                  </span>
+                  <a
+                    href={generateResidencyExplorerLink(assessment.specialty)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="inline-flex items-center gap-1.5 font-semibold text-emerald-700 hover:text-emerald-900"
+                  >
+                    Open Residency Explorer Yield Table <ExternalLink className="w-3.5 h-3.5" />
+                  </a>
                 </div>
-                <p className="text-[11px] leading-relaxed">
-                  <strong>Citation:</strong> National Resident Matching Program. 2026. <em>Charting Outcomes™: Characteristics of Applicants Who Matched to Their Preferred Specialty, U.S. MD Seniors</em>, (Main Residency Match, 2026 Appointment Year).
-                </p>
-                <p className="text-[11px] text-slate-500 italic">
-                  Note: Historical reference values represent population associations from matched U.S. MD seniors and do not imply an admission probability, individual program requirement, or predicted Match outcome for the 2027 cycle.
-                </p>
               </div>
             </>
           )}

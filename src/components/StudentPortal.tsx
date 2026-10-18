@@ -437,6 +437,8 @@ export function StudentPortal({
       return (
         <CompetitivenessCalculator
           initialSpecialty={targetSpecialty}
+          studentId={activeStudentId}
+          initialAoaMember={advisingIntake.isAoaMember}
           onBack={() => updateView('overview')}
         />
       );

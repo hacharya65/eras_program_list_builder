@@ -330,7 +330,7 @@ export function saveStudentAdvisingIntake(intake: SpecialtyAdvisingIntake): void
         JSON.stringify(intake)
       );
 
-      // 3. Synchronize auto-computed clerkship honors count into ApplicantProfile
+      // 3. Synchronize auto-computed clerkship honors count and metrics into ApplicantProfile
       const computedHonors = calculateClerkshipHonorsCount(intake.clerkshipGrades);
       const existingProfileRaw = localStorage.getItem(APPLICANT_PROFILE_STORAGE_KEY);
       const existingProfile = existingProfileRaw ? JSON.parse(existingProfileRaw) : {};
@@ -341,8 +341,18 @@ export function saveStudentAdvisingIntake(intake: SpecialtyAdvisingIntake): void
           step2Ck: intake.step2Status === 'score_available' ? intake.step2Score : existingProfile.step2Ck,
           clerkshipHonors: computedHonors,
           step1Result: intake.hasStepFailures ? 'Fail / Retaken' : 'Pass',
+          isAoaMember: Boolean(intake.isAoaMember),
+          publications: intake.publications !== undefined ? intake.publications : existingProfile.publications,
+          researchExperiences: intake.researchExperiences !== undefined ? intake.researchExperiences : existingProfile.researchExperiences,
+          abstracts: intake.abstracts !== undefined ? intake.abstracts : existingProfile.abstracts,
+          presentations: intake.presentations !== undefined ? intake.presentations : existingProfile.presentations,
+          volunteerExperiences: intake.volunteerExperiences !== undefined ? intake.volunteerExperiences : existingProfile.volunteerExperiences,
         })
       );
+      if (typeof window !== 'undefined') {
+        window.dispatchEvent(new CustomEvent('applicant_aoa_updated', { detail: Boolean(intake.isAoaMember) }));
+        window.dispatchEvent(new CustomEvent('student_intake_saved', { detail: intake }));
+      }
     } catch (e) {
       console.error('Error saving advising intake:', e);
     }
