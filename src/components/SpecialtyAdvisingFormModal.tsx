@@ -1034,52 +1034,7 @@ CLINICAL STATEMENT & GOALS:
                 </div>
               </div>
 
-              {/* Advisor Notes Section (visible in Advisor Mode or if notes exist) */}
-              {(isAdvisorReviewMode || formData.advisorEndorsementNotes) && (
-                <div className="bg-[#EAF2EE] rounded-xl border border-[#7EAE9B] p-5 shadow-xs space-y-3">
-                  <h3 className="text-sm font-bold text-[#1F3A30] flex items-center gap-2">
-                    <Stethoscope className="w-4 h-4 text-[#4E8773]" />
-                    Faculty Advising Guidance Notes & Endorsement
-                  </h3>
-                  {isAdvisorReviewMode ? (
-                    <div>
-                      <textarea
-                        rows={3}
-                        value={formData.advisorEndorsementNotes || ''}
-                        onChange={(e) => setFormData({ ...formData, advisorEndorsementNotes: e.target.value })}
-                        placeholder="Record private faculty guidance, school list recommendations, or MSPE talking points..."
-                        className="w-full bg-white border border-[#7EAE9B] rounded-lg p-2.5 text-xs text-[#1F3A30]"
-                      />
-                      <div className="mt-2 flex items-center justify-between">
-                        <span className="text-xs text-slate-600">
-                          Reviewed on:{' '}
-                          {formData.advisorReviewedAt
-                            ? new Date(formData.advisorReviewedAt).toLocaleDateString()
-                            : 'Pending'}
-                        </span>
-                        <button
-                          type="button"
-                          onClick={handleAdvisorEndorse}
-                          className="px-3 py-1.5 bg-[#1F3A30] hover:bg-[#142720] text-white font-bold rounded-lg text-xs transition-colors flex items-center gap-1.5"
-                        >
-                          <CheckCircle2 className="w-3.5 h-3.5 text-[#7EAE9B]" />
-                          Endorse Advising Intake
-                        </button>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="bg-white/80 p-3 rounded-lg border border-[#7EAE9B]/40 text-xs text-[#1F3A30]">
-                      <p className="italic">"{formData.advisorEndorsementNotes}"</p>
-                      <div className="mt-2 text-[11px] text-slate-500 font-medium">
-                        — {formData.advisorReviewerName || 'Faculty Advisor'} &bull;{' '}
-                        {formData.advisorReviewedAt
-                          ? new Date(formData.advisorReviewedAt).toLocaleDateString()
-                          : 'Reviewed'}
-                      </div>
-                    </div>
-                  )}
-                </div>
-              )}
+
 
               {/* Bottom CV reminder notice */}
               <div className="p-3 bg-slate-100 rounded-lg text-center text-xs text-slate-600 italic">

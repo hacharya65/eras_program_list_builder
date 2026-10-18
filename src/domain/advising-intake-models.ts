@@ -267,10 +267,6 @@ export const INITIAL_MOCK_INTAKE: SpecialtyAdvisingIntake = {
   myErasCensusDivisions: ['Middle Atlantic', 'New England'],
   isCompleted: true,
   completedAt: new Date().toISOString(),
-  advisorReviewerName: 'Dr. Marcus Chen',
-  advisorReviewedAt: '2026-09-25T14:30:00.000Z',
-  advisorEndorsementNotes:
-    'Strong academic foundation. Excellent core clerkship transcript with 6 Honors. Recommended targeting top university programs with high fellowship placement.',
 };
 
 const inMemoryIntakeMap = new Map<string, SpecialtyAdvisingIntake>();
