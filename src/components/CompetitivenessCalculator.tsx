@@ -227,22 +227,20 @@ export function CompetitivenessCalculator({
             </div>
 
             {/* Advisory Alert with Hyperlink to Intake Form */}
-            <div className="bg-sky-50 border border-sky-200 rounded-xl p-3.5 flex items-start gap-3 text-xs text-sky-950">
-              <Info className="w-4 h-4 text-sky-600 shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <p className="leading-relaxed">
-                  Metrics cannot be modified here to protect data integrity with your official student advising records. To update your Step scores, research counts, or portfolio activities, please{' '}
-                  <button
-                    type="button"
-                    onClick={handleNavigateToIntake}
-                    className="font-bold underline text-sky-700 hover:text-sky-900 cursor-pointer inline-flex items-center gap-0.5 transition-colors"
-                  >
-                    <span>edit your Intake Packet</span>
-                    <ExternalLink className="w-3 h-3 inline" />
-                  </button>
-                  .
-                </p>
-              </div>
+            <div className="bg-sky-50 border border-sky-200 rounded-xl p-3 flex items-center gap-2.5 text-xs text-sky-950">
+              <Info className="w-4 h-4 text-sky-600 shrink-0" />
+              <p className="leading-relaxed">
+                To update your Step scores, research counts, or portfolio activities, please{' '}
+                <button
+                  type="button"
+                  onClick={handleNavigateToIntake}
+                  className="font-bold underline text-sky-700 hover:text-sky-900 cursor-pointer inline-flex items-center gap-0.5 transition-colors"
+                >
+                  <span>edit your Intake Packet</span>
+                  <ExternalLink className="w-3 h-3 inline" />
+                </button>
+                .
+              </p>
             </div>
 
             {/* USMLE Step 2 CK */}
