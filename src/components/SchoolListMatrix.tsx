@@ -44,6 +44,8 @@ import {
   Search,
   Filter,
   ArrowUpDown,
+  ArrowUp,
+  ArrowDown,
   Info,
   HelpCircle,
   X,
@@ -172,8 +174,26 @@ export function SchoolListMatrix({
   const [searchQuery, setSearchQuery] = useState('');
   const [regionFilter, setRegionFilter] = useState('All');
   const [tierFilter, setTierFilter] = useState('All');
-  const [sortField, setSortField] = useState<'name' | 'tier' | 'region' | 'signal'>('tier');
-  const [sortAsc, setSortAsc] = useState(true);
+
+  // Direct Column Sorting State (1 click asc, 2 click desc, 3 click reset to default A->Z)
+  type SortColumn = 'program' | 'region' | 'signal' | 'tier';
+  type SortDirection = 'asc' | 'desc';
+  const [sortColumn, setSortColumn] = useState<SortColumn | null>(null);
+  const [sortDirection, setSortDirection] = useState<SortDirection | null>(null);
+
+  const handleColumnSort = (col: SortColumn) => {
+    if (sortColumn === col) {
+      if (sortDirection === 'asc') {
+        setSortDirection('desc');
+      } else if (sortDirection === 'desc') {
+        setSortColumn(null);
+        setSortDirection(null);
+      }
+    } else {
+      setSortColumn(col);
+      setSortDirection('asc');
+    }
+  };
 
   // Database Ingestion / Browse Modal
   const [showBrowseModal, setShowBrowseModal] = useState(false);
@@ -350,24 +370,56 @@ export function SchoolListMatrix({
         return true;
       })
       .sort((a, b) => {
-        let valA = '';
-        let valB = '';
-        if (sortField === 'name') {
-          valA = a.programName;
-          valB = b.programName;
-        } else if (sortField === 'tier') {
-          const tierWeight: Record<ProgramTier, number> = { reach: 1, target: 2, safety: 3 };
-          return sortAsc ? tierWeight[a.tier] - tierWeight[b.tier] : tierWeight[b.tier] - tierWeight[a.tier];
-        } else if (sortField === 'region') {
-          valA = a.region || '';
-          valB = b.region || '';
-        } else if (sortField === 'signal') {
-          const signalWeight: Record<SignalType, number> = { gold: 1, silver: 2, none: 3 };
-          return sortAsc ? signalWeight[a.signal] - signalWeight[b.signal] : signalWeight[b.signal] - signalWeight[a.signal];
+        // Default sort (when no column is actively sorted, or on 3rd click reset): alphabetical order of programs A -> Z
+        if (!sortColumn || !sortDirection) {
+          return a.programName.localeCompare(b.programName);
         }
-        return sortAsc ? valA.localeCompare(valB) : valB.localeCompare(valA);
+
+        if (sortColumn === 'program') {
+          const comp = a.programName.localeCompare(b.programName);
+          return sortDirection === 'asc' ? comp : -comp;
+        }
+
+        if (sortColumn === 'region') {
+          const regA = a.region || '';
+          const regB = b.region || '';
+          const comp = regA.localeCompare(regB);
+          if (comp !== 0) {
+            return sortDirection === 'asc' ? comp : -comp;
+          }
+          return a.programName.localeCompare(b.programName);
+        }
+
+        if (sortColumn === 'tier') {
+          // Tier prescribed tag hierarchy: Reach (3) > Target (2) > Safety (1)
+          const tierRank: Record<ProgramTier, number> = { reach: 3, target: 2, safety: 1 };
+          const rankA = tierRank[a.tier] || 0;
+          const rankB = tierRank[b.tier] || 0;
+          if (rankA !== rankB) {
+            // asc: safety (1) -> target (2) -> reach (3)
+            // desc: reach (3) -> target (2) -> safety (1)
+            return sortDirection === 'asc' ? rankA - rankB : rankB - rankA;
+          }
+          return a.programName.localeCompare(b.programName);
+        }
+
+        if (sortColumn === 'signal') {
+          // ERAS signal: gold (3) > silver (2) > none (1)
+          // In 1-tier, signal (silver/gold = 2/3) > no signal (none = 1)
+          const signalRank: Record<SignalType, number> = { gold: 3, silver: 2, none: 1 };
+          const rankA = signalRank[a.signal] || 0;
+          const rankB = signalRank[b.signal] || 0;
+          if (rankA !== rankB) {
+            // asc: none (1) -> silver (2) -> gold (3)
+            // desc: gold (3) -> silver (2) -> none (1)
+            return sortDirection === 'asc' ? rankA - rankB : rankB - rankA;
+          }
+          return a.programName.localeCompare(b.programName);
+        }
+
+        return a.programName.localeCompare(b.programName);
       });
-  }, [items, regionFilter, tierFilter, searchQuery, sortField, sortAsc]);
+  }, [items, regionFilter, tierFilter, searchQuery, sortColumn, sortDirection]);
 
   // Database search results for modal
   const dbResults = useMemo(() => {
@@ -638,63 +690,6 @@ export function SchoolListMatrix({
             </select>
           </div>
         </div>
-
-        {/* Sort Controls */}
-        <div className="flex items-center gap-1.5 text-xs">
-          <span className="text-slate-500 font-semibold">Sort:</span>
-          <button
-            onClick={() => {
-              if (sortField === 'tier') setSortAsc(!sortAsc);
-              else {
-                setSortField('tier');
-                setSortAsc(true);
-              }
-            }}
-            className={`px-2.5 py-1 rounded border text-xs font-semibold ${sortField === 'tier' ? 'bg-sky-50 border-sky-400 text-sky-800' : 'bg-slate-50 border-slate-200 text-slate-600'
-              }`}
-          >
-            Tier {sortField === 'tier' ? (sortAsc ? '↑' : '↓') : ''}
-          </button>
-          <button
-            onClick={() => {
-              if (sortField === 'name') setSortAsc(!sortAsc);
-              else {
-                setSortField('name');
-                setSortAsc(true);
-              }
-            }}
-            className={`px-2.5 py-1 rounded border text-xs font-semibold ${sortField === 'name' ? 'bg-sky-50 border-sky-400 text-sky-800' : 'bg-slate-50 border-slate-200 text-slate-600'
-              }`}
-          >
-            Name {sortField === 'name' ? (sortAsc ? '↑' : '↓') : ''}
-          </button>
-          <button
-            onClick={() => {
-              if (sortField === 'region') setSortAsc(!sortAsc);
-              else {
-                setSortField('region');
-                setSortAsc(true);
-              }
-            }}
-            className={`px-2.5 py-1 rounded border text-xs font-semibold ${sortField === 'region' ? 'bg-sky-50 border-sky-400 text-sky-800' : 'bg-slate-50 border-slate-200 text-slate-600'
-              }`}
-          >
-            Region {sortField === 'region' ? (sortAsc ? '↑' : '↓') : ''}
-          </button>
-          <button
-            onClick={() => {
-              if (sortField === 'signal') setSortAsc(!sortAsc);
-              else {
-                setSortField('signal');
-                setSortAsc(true);
-              }
-            }}
-            className={`px-2.5 py-1 rounded border text-xs font-semibold ${sortField === 'signal' ? 'bg-sky-50 border-sky-400 text-sky-800' : 'bg-slate-50 border-slate-200 text-slate-600'
-              }`}
-          >
-            Signal {sortField === 'signal' ? (sortAsc ? '↑' : '↓') : ''}
-          </button>
-        </div>
       </div>
 
       {/* Pinned Visual Key & Real-Time Tier Balance Summary Bar (Item 14) */}
@@ -746,10 +741,60 @@ export function SchoolListMatrix({
             <thead>
               <tr className="border-b border-slate-200 bg-slate-50/75 text-slate-600 font-bold uppercase tracking-wider text-[11px]">
                 <th className="py-2.5 px-3 w-8 text-center">#</th>
-                <th className="py-2.5 px-3 w-[22%]">Program &amp; Metadata</th>
-                <th className="py-2.5 px-3 w-[19%]">
-                  <div className="flex items-center justify-between">
-                    <span>ERAS Signal</span>
+                <th
+                  onClick={() => handleColumnSort('program')}
+                  className="py-2.5 px-3 w-[22%] cursor-pointer select-none group hover:bg-slate-100/80 transition-colors"
+                  title="Click to sort by Program Name (Ascending, Descending, Reset to A-Z)"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Program &amp; Metadata</span>
+                    {sortColumn === 'program' ? (
+                      sortDirection === 'asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-sky-700 shrink-0" />
+                      ) : (
+                        <ArrowDown className="w-3.5 h-3.5 text-sky-700 shrink-0" />
+                      )
+                    ) : (
+                      <ArrowUpDown className="w-3 h-3 text-slate-400 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
+                    )}
+                  </div>
+                </th>
+                <th
+                  onClick={() => handleColumnSort('region')}
+                  className="py-2.5 px-3 w-[11%] cursor-pointer select-none group hover:bg-slate-100/80 transition-colors"
+                  title="Click to sort by Region (Ascending, Descending, Reset to A-Z)"
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Region</span>
+                    {sortColumn === 'region' ? (
+                      sortDirection === 'asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-sky-700 shrink-0" />
+                      ) : (
+                        <ArrowDown className="w-3.5 h-3.5 text-sky-700 shrink-0" />
+                      )
+                    ) : (
+                      <ArrowUpDown className="w-3 h-3 text-slate-400 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
+                    )}
+                  </div>
+                </th>
+                <th
+                  onClick={() => handleColumnSort('signal')}
+                  className="py-2.5 px-3 w-[17%] cursor-pointer select-none group hover:bg-slate-100/80 transition-colors"
+                  title="Click to sort by ERAS Signal (Ascending: None -> Silver -> Gold, Descending: Gold -> Silver -> None, Reset to A-Z)"
+                >
+                  <div className="flex items-center justify-between gap-1.5">
+                    <div className="flex items-center gap-1.5">
+                      <span>ERAS Signal</span>
+                      {sortColumn === 'signal' ? (
+                        sortDirection === 'asc' ? (
+                          <ArrowUp className="w-3.5 h-3.5 text-sky-700 shrink-0" />
+                        ) : (
+                          <ArrowDown className="w-3.5 h-3.5 text-sky-700 shrink-0" />
+                        )
+                      ) : (
+                        <ArrowUpDown className="w-3 h-3 text-slate-400 opacity-40 group-hover:opacity-100 transition-opacity shrink-0" />
+                      )}
+                    </div>
                     {rule.explanationRequired && (
                       <span className="text-[10px] lowercase font-normal text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-200">
                         {rule.explanationMaxChars || 300} char rationale
@@ -757,12 +802,17 @@ export function SchoolListMatrix({
                     )}
                   </div>
                 </th>
-                <th className="py-2.5 px-3 w-[14%]">
+                <th
+                  onClick={() => handleColumnSort('tier')}
+                  className="py-2.5 px-3 w-[13%] cursor-pointer select-none group hover:bg-slate-100/80 transition-colors"
+                  title="Click to sort by Step 2 CK Tier (Ascending: Safety -> Target -> Reach, Descending: Reach -> Target -> Safety, Reset to A-Z)"
+                >
                   <div className="flex items-center gap-1.5">
                     <a
                       href="https://www.residencyexplorer.org/?utm_source=gemini"
                       target="_blank"
                       rel="noopener noreferrer"
+                      onClick={(e) => e.stopPropagation()}
                       className="inline-flex items-center gap-1 text-slate-700 hover:text-sky-700 font-bold hover:underline"
                       title="Lookup Middle 80% Range on Residency Explorer"
                     >
@@ -771,16 +821,28 @@ export function SchoolListMatrix({
                     </a>
                     <button
                       type="button"
-                      onClick={() => setShowTieringInfoModal(true)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setShowTieringInfoModal(true);
+                      }}
                       className="text-slate-400 hover:text-sky-600 p-0.5 rounded-full hover:bg-slate-200/60 transition-colors cursor-pointer"
                       title="How 80% Range Decides Target, Safety, & Reach Tiering"
                       aria-label="How 80% Range Decides Target, Safety, & Reach Tiering"
                     >
                       <Info className="w-3.5 h-3.5 text-sky-600" />
                     </button>
+                    {sortColumn === 'tier' ? (
+                      sortDirection === 'asc' ? (
+                        <ArrowUp className="w-3.5 h-3.5 text-sky-700 shrink-0 ml-auto" />
+                      ) : (
+                        <ArrowDown className="w-3.5 h-3.5 text-sky-700 shrink-0 ml-auto" />
+                      )
+                    ) : (
+                      <ArrowUpDown className="w-3 h-3 text-slate-400 opacity-40 group-hover:opacity-100 transition-opacity shrink-0 ml-auto" />
+                    )}
                   </div>
                 </th>
-                <th className="py-2.5 px-3 w-[14%]">
+                <th className="py-2.5 px-3 w-[13%]">
                   <div className="flex items-center gap-1.5">
                     <span>Letters of Rec</span>
                     <button
@@ -794,7 +856,7 @@ export function SchoolListMatrix({
                     </button>
                   </div>
                 </th>
-                <th className="py-2.5 px-3 w-[25%]">
+                <th className="py-2.5 px-3 w-[20%]">
                   <div className="flex items-center gap-1.5">
                     <a
                       href="https://www.residencyexplorer.org/?utm_source=gemini"
@@ -817,13 +879,13 @@ export function SchoolListMatrix({
                     </button>
                   </div>
                 </th>
-                <th className="py-2.5 px-2 text-right w-[6%]">Actions</th>
+                <th className="py-2.5 px-2 text-right w-[4%]">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredItems.length === 0 ? (
                 <tr>
-                  <td colSpan={7} className="py-12 text-center text-slate-400 text-sm">
+                  <td colSpan={8} className="py-12 text-center text-slate-400 text-sm">
                     No residency programs match your search/filter criteria.
                   </td>
                 </tr>
@@ -866,19 +928,19 @@ export function SchoolListMatrix({
                               {item.city && item.state ? `${item.city}, ${item.state}` : (item.city || item.state || 'Location Unknown')}
                             </span>
                           </div>
-                          <div className="flex items-center gap-1.5 pt-0.5">
-                            {item.region && (
-                              <span className="px-1.5 py-0.2 rounded bg-sky-50 text-sky-800 font-bold text-[9px] border border-sky-200">
-                                {item.region}
-                              </span>
-                            )}
-                            {item.programDirector && (
-                              <span className="truncate max-w-[180px] text-[10px] text-slate-500">
-                                PD: {item.programDirector.replace('\n', ' ')}
-                              </span>
-                            )}
-                          </div>
+                          {item.programDirector && (
+                            <div className="truncate max-w-[260px] text-[10px] text-slate-500 pt-0.5">
+                              PD: {item.programDirector.replace('\n', ' ')}
+                            </div>
+                          )}
                         </div>
+                      </td>
+
+                      {/* Region */}
+                      <td className="py-2.5 px-3 align-top">
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-[11px] font-semibold bg-sky-50 text-sky-800 border border-sky-200">
+                          {item.region || 'National'}
+                        </span>
                       </td>
 
                       {/* Signal Button Toggles + Integrated Explanation */}

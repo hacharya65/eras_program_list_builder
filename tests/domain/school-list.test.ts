@@ -371,6 +371,142 @@ describe('Ticket 07: Strategic School List Matrix & Dynamic Specialty Signaling'
       });
     });
   });
+
+  describe('Direct Clickable Column Header Sorting & Region Column', () => {
+    it('verifies sort hierarchy: ERAS Signal (gold > silver > none) and Step 2 CK Tier (reach > target > safety)', () => {
+      const items: SchoolListItem[] = [
+        {
+          id: '1',
+          programId: 'p1',
+          programName: 'Alpha Health',
+          specialty: 'Internal Medicine',
+          tier: 'safety',
+          signal: 'none',
+          track: 'categorical',
+          region: 'Pacific',
+        },
+        {
+          id: '2',
+          programId: 'p2',
+          programName: 'Beta Health',
+          specialty: 'Internal Medicine',
+          tier: 'reach',
+          signal: 'silver',
+          track: 'categorical',
+          region: 'New England',
+        },
+        {
+          id: '3',
+          programId: 'p3',
+          programName: 'Gamma Health',
+          specialty: 'Internal Medicine',
+          tier: 'target',
+          signal: 'gold',
+          track: 'categorical',
+          region: 'South Atlantic',
+        },
+      ];
+
+      // Signal Ascending: none (1) -> silver (2) -> gold (3)
+      const signalRank = { gold: 3, silver: 2, none: 1 };
+      const sortedSignalAsc = [...items].sort((a, b) => signalRank[a.signal] - signalRank[b.signal]);
+      expect(sortedSignalAsc.map((i) => i.signal)).toEqual(['none', 'silver', 'gold']);
+
+      // Signal Descending: gold (3) -> silver (2) -> none (1)
+      const sortedSignalDesc = [...items].sort((a, b) => signalRank[b.signal] - signalRank[a.signal]);
+      expect(sortedSignalDesc.map((i) => i.signal)).toEqual(['gold', 'silver', 'none']);
+
+      // Tier Ascending: safety (1) -> target (2) -> reach (3)
+      const tierRank = { reach: 3, target: 2, safety: 1 };
+      const sortedTierAsc = [...items].sort((a, b) => tierRank[a.tier] - tierRank[b.tier]);
+      expect(sortedTierAsc.map((i) => i.tier)).toEqual(['safety', 'target', 'reach']);
+
+      // Tier Descending: reach (3) -> target (2) -> safety (1)
+      const sortedTierDesc = [...items].sort((a, b) => tierRank[b.tier] - tierRank[a.tier]);
+      expect(sortedTierDesc.map((i) => i.tier)).toEqual(['reach', 'target', 'safety']);
+
+      // Region Alphabetical Ascending: New England -> Pacific -> South Atlantic
+      const sortedRegionAsc = [...items].sort((a, b) => (a.region || '').localeCompare(b.region || ''));
+      expect(sortedRegionAsc.map((i) => i.region)).toEqual(['New England', 'Pacific', 'South Atlantic']);
+
+      // Default Program Name Ascending: Alpha Health -> Beta Health -> Gamma Health
+      const sortedNameAsc = [...items].sort((a, b) => a.programName.localeCompare(b.programName));
+      expect(sortedNameAsc.map((i) => i.programName)).toEqual(['Alpha Health', 'Beta Health', 'Gamma Health']);
+    });
+
+    it('verifies 3-click cycle state transitions (asc -> desc -> null/default)', () => {
+      type SortColumn = 'program' | 'region' | 'signal' | 'tier';
+      type SortDirection = 'asc' | 'desc';
+
+      let sortCol: SortColumn | null = null;
+      let sortDir: SortDirection | null = null;
+
+      const clickColumn = (col: SortColumn) => {
+        if (sortCol === col) {
+          if (sortDir === 'asc') {
+            sortDir = 'desc';
+          } else if (sortDir === 'desc') {
+            sortCol = null;
+            sortDir = null;
+          }
+        } else {
+          sortCol = col;
+          sortDir = 'asc';
+        }
+      };
+
+      // 1st click on 'tier' -> asc
+      clickColumn('tier');
+      expect(sortCol).toBe('tier');
+      expect(sortDir).toBe('asc');
+
+      // 2nd click on 'tier' -> desc
+      clickColumn('tier');
+      expect(sortCol).toBe('tier');
+      expect(sortDir).toBe('desc');
+
+      // 3rd click on 'tier' -> resets to null (default A->Z)
+      clickColumn('tier');
+      expect(sortCol).toBeNull();
+      expect(sortDir).toBeNull();
+
+      // Switching column starts at asc
+      clickColumn('region');
+      expect(sortCol).toBe('region');
+      expect(sortDir).toBe('asc');
+    });
+
+    it('renders SchoolListMatrix with Region column and without old sort toolbar', async () => {
+      const React = (await import('react')).default;
+      const { renderToStaticMarkup } = await import('react-dom/server');
+      const { SchoolListMatrix } = await import('@/components/SchoolListMatrix');
+
+      const html = renderToStaticMarkup(
+        React.createElement(SchoolListMatrix, {
+          onBack: () => {},
+        })
+      );
+
+      // Verify old sort controls toolbar is gone
+      expect(html).not.toContain('<span class="text-slate-500 font-semibold">Sort:</span>');
+      expect(html).not.toContain('Tier ↑');
+
+      // Verify Region column header exists right after Program & Metadata
+      expect(html).toContain('Program &amp; Metadata');
+      expect(html).toContain('Region');
+
+      // Verify sortable header titles / indicators exist
+      expect(html).toContain('Click to sort by Program Name');
+      expect(html).toContain('Click to sort by Region');
+      expect(html).toContain('Click to sort by ERAS Signal');
+      expect(html).toContain('Click to sort by Step 2 CK Tier');
+
+      // Verify non-sortable columns do NOT have sort click titles
+      expect(html).not.toContain('Click to sort by Letters');
+      expect(html).not.toContain('Click to sort by Yield');
+    });
+  });
 });
+
 
 
