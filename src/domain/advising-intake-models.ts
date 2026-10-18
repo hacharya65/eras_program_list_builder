@@ -11,7 +11,7 @@ import {
   setStoredTargetSpecialty,
   APPLICANT_PROFILE_STORAGE_KEY,
 } from './school-list-models';
-import { getStudentAccount, updateStudentAccount } from './student-registry';
+import { getStudentAccount, updateStudentAccount, isDemoStudentId, DEMO_STUDENT_ACCOUNT } from './student-registry';
 
 export type ClerkshipGrade = 'Honors' | 'High Pass' | 'Pass' | 'Fail' | 'In Progress';
 
@@ -236,7 +236,7 @@ export const INITIAL_MOCK_INTAKE: SpecialtyAdvisingIntake = {
     'I enjoy the breadth of internal medicine, the ability to manage complex patients in the inpatient setting, continuity in outpatient clinic, and the potential to subspecialize in pulmonary/critical care. I also enjoy bedside clinical teaching and medical student mentorship.',
   hasStepFailures: false,
   step2Status: 'score_available',
-  step2Score: 267,
+  step2Score: 252,
   completedResearchYear: false,
   clerkshipGrades: DEFAULT_CLERKSHIP_GRADES,
   hasAcademicFailuresOrRepeats: false,
@@ -289,6 +289,16 @@ export function loadStudentAdvisingIntake(studentId: string = 'usr-student-1'): 
           try {
             localStorage.setItem(`${SPECIALTY_INTAKE_STORAGE_PREFIX}${studentId}`, JSON.stringify(parsed));
           } catch {}
+        }
+
+        // Self-heal: Ensure demo student account reflects latest demo Step 2 score
+        if (isDemoStudentId(studentId)) {
+          if (parsed.step2Score !== DEMO_STUDENT_ACCOUNT.step2Ck) {
+            parsed.step2Score = DEMO_STUDENT_ACCOUNT.step2Ck;
+            try {
+              localStorage.setItem(`${SPECIALTY_INTAKE_STORAGE_PREFIX}${studentId}`, JSON.stringify(parsed));
+            } catch {}
+          }
         }
 
         // Intake is authoritative for the student's declared specialty

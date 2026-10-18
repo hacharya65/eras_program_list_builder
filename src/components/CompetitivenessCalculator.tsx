@@ -149,11 +149,26 @@ export function CompetitivenessCalculator({
       }
     };
 
+    const handleStep2Sync = (e: any) => {
+      if (typeof e.detail === 'number') {
+        setStep2CkState(e.detail);
+      }
+    };
+    const handleAccountSync = (e: any) => {
+      if (e.detail?.account?.step2Ck) {
+        setStep2CkState(e.detail.account.step2Ck);
+      }
+    };
+
     window.addEventListener('applicant_aoa_updated', handleAoaSync);
     window.addEventListener('student_intake_saved', handleIntakeSync);
+    window.addEventListener('applicant_step2_ck_updated', handleStep2Sync);
+    window.addEventListener('student_account_updated', handleAccountSync);
     return () => {
       window.removeEventListener('applicant_aoa_updated', handleAoaSync);
       window.removeEventListener('student_intake_saved', handleIntakeSync);
+      window.removeEventListener('applicant_step2_ck_updated', handleStep2Sync);
+      window.removeEventListener('student_account_updated', handleAccountSync);
     };
   }, [studentId]);
 

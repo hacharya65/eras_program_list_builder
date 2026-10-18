@@ -172,4 +172,39 @@ describe('Student Data & Specialty Persistence Integrity', () => {
     expect(loadedPrograms.length).toBe(1);
     expect(loadedPrograms[0].programName).toBe('Johns Hopkins Hospital Program');
   });
+
+  it('guarantees the sample demo profile (Alex Rivera) has Step 2 CK = 252 across registry and intake', () => {
+    // Corrupted or older demo student cache in localStorage
+    localStorage.setItem(
+      STUDENT_REGISTRY_KEY,
+      JSON.stringify([
+        {
+          id: 'stu-alex-rivera',
+          name: 'Alex Rivera',
+          email: 'alex.rivera@demo.edu',
+          specialty: 'Internal Medicine',
+          step2Ck: 254, // older cached score
+          isDemo: true,
+        },
+      ])
+    );
+    localStorage.setItem(
+      `${SPECIALTY_INTAKE_STORAGE_PREFIX}stu-alex-rivera`,
+      JSON.stringify({
+        studentId: 'stu-alex-rivera',
+        studentName: 'Alex Rivera',
+        applyingSpecialty: 'Internal Medicine',
+        step2Status: 'score_available',
+        step2Score: 267, // older cached score
+      })
+    );
+
+    const registry = loadStudentRegistry();
+    const demoStudent = registry.find((s) => s.id === 'stu-alex-rivera');
+    expect(demoStudent).toBeDefined();
+    expect(demoStudent!.step2Ck).toBe(252);
+
+    const demoIntake = loadStudentAdvisingIntake('stu-alex-rivera');
+    expect(demoIntake.step2Score).toBe(252);
+  });
 });

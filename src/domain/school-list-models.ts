@@ -493,7 +493,7 @@ export function parseScoreRange(rangeStr?: string): { min?: number; max?: number
   return {};
 }
 
-export const DEFAULT_APPLICANT_STEP2_CK = 254;
+export const DEFAULT_APPLICANT_STEP2_CK = 252;
 export const APPLICANT_STEP2_CK_STORAGE_KEY = 'eras_applicant_step2_ck';
 export const APPLICANT_PROFILE_STORAGE_KEY = 'eras_applicant_profile';
 
@@ -501,6 +501,9 @@ let inMemoryStep2Ck = DEFAULT_APPLICANT_STEP2_CK;
 
 export function getStoredApplicantStep2Ck(studentId?: string): number {
   const sid = studentId || (typeof localStorage !== 'undefined' ? localStorage.getItem(CURRENT_STUDENT_ID_KEY) : null);
+  if (sid && isDemoStudentId(sid)) {
+    return DEFAULT_APPLICANT_STEP2_CK;
+  }
   if (typeof localStorage !== 'undefined') {
     try {
       if (sid && !isDemoStudentId(sid)) {

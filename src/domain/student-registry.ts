@@ -28,7 +28,7 @@ export const DEMO_STUDENT_ACCOUNT: StudentAccount = {
   email: 'alex.rivera@demo.edu',
   medicalSchool: 'Geisinger Commonwealth School of Medicine',
   specialty: 'Internal Medicine',
-  step2Ck: 254,
+  step2Ck: 252,
   pronouns: 'she/her/hers',
   gradYear: 2027,
   createdAt: '2026-08-01T10:00:00Z',
@@ -115,6 +115,12 @@ export function loadStudentRegistry(): StudentAccount[] {
             if (unscopedData && unscopedData !== '[]') {
               localStorage.setItem(scopedKey, unscopedData);
             }
+          }
+        }
+        if (isDemoStudentId(s.id)) {
+          if (s.step2Ck !== DEMO_STUDENT_ACCOUNT.step2Ck) {
+            s.step2Ck = DEMO_STUDENT_ACCOUNT.step2Ck;
+            needsSave = true;
           }
         }
         return s;
