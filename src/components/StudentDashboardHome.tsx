@@ -481,39 +481,34 @@ export function StudentDashboardHome({
         <div className="flex flex-col">
           <div className="bg-white rounded-2xl border border-neutral-200/90 shadow-2xs p-4 sm:p-5 flex flex-col justify-between flex-1 space-y-3.5">
             <div className="pb-2.5 border-b border-neutral-100 flex items-center justify-between">
-              <div>
-                <div className="flex items-center gap-1.5">
-                  <h2 className="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
-                    <MailCheck className="w-4 h-4 text-[#1F3A30]" />
-                    <span>Letters of Recommendation</span>
-                  </h2>
+              <div className="flex items-center gap-1.5">
+                <h2 className="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
+                  <MailCheck className="w-4 h-4 text-[#1F3A30]" />
+                  <span>Letters of Recommendation</span>
+                </h2>
 
-                  {/* Integrated (i) icon next to title: hover tooltip only */}
-                  <div className="relative group inline-flex items-center">
-                    <span
-                      aria-label="Letters of Recommendation Guidelines"
-                      className="text-neutral-400 hover:text-[#1F3A30] transition-colors p-0.5 rounded cursor-help inline-flex items-center"
-                    >
-                      <Info className="w-3.5 h-3.5 text-neutral-400 hover:text-[#1F3A30]" />
-                    </span>
+                {/* Integrated (i) icon next to title: hover tooltip only */}
+                <div className="relative group inline-flex items-center">
+                  <span
+                    aria-label="Letters of Recommendation Guidelines"
+                    className="text-neutral-400 hover:text-[#1F3A30] transition-colors p-0.5 rounded cursor-help inline-flex items-center"
+                  >
+                    <Info className="w-3.5 h-3.5 text-neutral-400 hover:text-[#1F3A30]" />
+                  </span>
 
-                    {/* Tooltip on hover */}
-                    <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 hidden group-hover:block z-30 pointer-events-none w-72 animate-fade-in">
-                      <div className="bg-neutral-900 text-white text-[11px] rounded-xl px-3 py-2 shadow-xl border border-neutral-700 leading-snug">
-                        <span className="font-bold text-amber-300">Rule of Thumb:</span> Target 3–4 letters by July 15. Ensure &ge;1 Sub-I attending letter in {targetSpecialty}.
-                      </div>
-                      <div className="w-2 h-2 bg-neutral-900 rotate-45 mx-auto -mt-1"></div>
+                  {/* Tooltip on hover */}
+                  <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-1.5 hidden group-hover:block z-30 pointer-events-none w-72 animate-fade-in">
+                    <div className="bg-neutral-900 text-white text-[11px] rounded-xl px-3 py-2 shadow-xl border border-neutral-700 leading-snug">
+                      <span className="font-bold text-amber-300">Rule of Thumb:</span> Target 3–4 letters by July 15. Ensure &ge;1 Sub-I attending letter in {targetSpecialty}.
                     </div>
+                    <div className="w-2 h-2 bg-neutral-900 rotate-45 mx-auto -mt-1"></div>
                   </div>
-                </div>
-                <div className="text-[10px] text-neutral-500 mt-0.5" suppressHydrationWarning>
-                  {writers.filter((w) => w.status === 'submitted').length} of {writers.length} submitted
                 </div>
               </div>
 
               <button
                 onClick={handleOpenAddWriter}
-                className="px-3 py-1.5 bg-[#1F3A30] hover:bg-[#162D25] text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow-2xs transition-colors cursor-pointer shrink-0"
+                className="px-2.5 py-1 bg-[#1F3A30] hover:bg-[#162D25] text-white rounded-xl text-xs font-bold flex items-center gap-1 shadow-2xs transition-colors cursor-pointer shrink-0"
               >
                 <Plus className="w-3.5 h-3.5" />
                 <span>Add Writer</span>

@@ -312,8 +312,8 @@ describe('Fresh Account Isolation, Walkthrough Modal & FAQ Tab', () => {
         />
       );
 
-      // Verify letters of rec: 0 of 0 submitted and empty state prompt
-      expect(markup).toContain('0 of 0 submitted');
+      // Verify letters of rec empty state prompt
+      expect(markup).toContain('Letters of Recommendation');
       expect(markup).toContain('No letter writers added yet');
 
       // Verify fresh slate in journal storage and FloatingJournalWidget
