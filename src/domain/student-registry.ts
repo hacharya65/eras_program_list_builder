@@ -38,6 +38,34 @@ export const DEMO_STUDENT_ACCOUNT: StudentAccount = {
   isDemo: true,
 };
 
+export const SEED_STUDENT_ACCOUNTS: StudentAccount[] = [
+  DEMO_STUDENT_ACCOUNT,
+  {
+    id: 'stu-hacharya',
+    name: 'Hari Acharya',
+    email: 'hacharya@som.geisinger.edu',
+    medicalSchool: 'Geisinger Commonwealth School of Medicine',
+    specialty: 'Internal Medicine',
+    step2Ck: 252,
+    pronouns: 'he/him/his',
+    gradYear: 2027,
+    createdAt: '2026-08-01T10:00:00Z',
+    lastActiveAt: '2026-09-01T12:00:00Z',
+  },
+  {
+    id: 'stu-james-gilmore-gmail',
+    name: 'James Gilmore',
+    email: 'jgilmore@gmail.com',
+    medicalSchool: 'Geisinger Commonwealth School of Medicine',
+    specialty: 'Anesthesiology',
+    step2Ck: 250,
+    pronouns: 'he/him/his',
+    gradYear: 2027,
+    createdAt: '2026-08-01T10:00:00Z',
+    lastActiveAt: '2026-09-01T12:00:00Z',
+  },
+];
+
 export const INITIAL_DEFAULT_STUDENT: StudentAccount = DEMO_STUDENT_ACCOUNT;
 
 export function isDemoStudentId(id?: string | null): boolean {
@@ -128,17 +156,25 @@ export function loadStudentRegistry(): StudentAccount[] {
         return s;
       });
 
-      // Ensure demo account is present
-      const hasDemo = repaired.some((s) => s.id === DEMO_STUDENT_ACCOUNT.id);
-      const finalList = hasDemo ? repaired : [DEMO_STUDENT_ACCOUNT, ...repaired];
-      if (needsSave || !hasDemo) {
-        localStorage.setItem(STUDENT_REGISTRY_KEY, JSON.stringify(finalList));
+      // Ensure all seed accounts are present
+      let list = [...repaired];
+      for (const seed of SEED_STUDENT_ACCOUNTS) {
+        const found = list.some(
+          (s) => s.id === seed.id || (s.email && s.email.toLowerCase() === seed.email.toLowerCase())
+        );
+        if (!found) {
+          list.push(seed);
+          needsSave = true;
+        }
       }
-      return finalList;
+      if (needsSave) {
+        localStorage.setItem(STUDENT_REGISTRY_KEY, JSON.stringify(list));
+      }
+      return list;
     }
-    return [DEMO_STUDENT_ACCOUNT];
+    return [...SEED_STUDENT_ACCOUNTS];
   } catch {
-    return [DEMO_STUDENT_ACCOUNT];
+    return [...SEED_STUDENT_ACCOUNTS];
   }
 }
 
