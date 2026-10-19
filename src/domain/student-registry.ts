@@ -3,7 +3,7 @@
  * Supports managing and persisting profiles for 200+ students.
  */
 
-import { syncStudentAccountToCloud } from '../lib/supabase';
+import { syncStudentAccountToCloud, registerSupabaseAuthUser } from '../lib/supabase';
 
 export interface StudentAccount {
   id: string;
@@ -256,6 +256,13 @@ export function createStudentAccount(data: {
   setCurrentStudentId(id);
   setAuthenticatedSession(true);
   syncStudentAccountToCloud(newAccount);
+  registerSupabaseAuthUser({
+    email: cleanEmail,
+    password: data.password,
+    name: data.name.trim(),
+    specialty: data.specialty,
+    medicalSchool: data.medicalSchool,
+  });
   return newAccount;
 }
 

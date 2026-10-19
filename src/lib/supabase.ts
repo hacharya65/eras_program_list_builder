@@ -26,6 +26,34 @@ export function getSupabase(): SupabaseClient {
 }
 
 /**
+ * Register User in Supabase Auth (auth.users) so they appear in Supabase Authentication Dashboard
+ */
+export async function registerSupabaseAuthUser(data: {
+  email: string;
+  password?: string;
+  name: string;
+  specialty?: string;
+  medicalSchool?: string;
+}): Promise<void> {
+  try {
+    const supabase = getSupabase();
+    await supabase.auth.signUp({
+      email: data.email,
+      password: data.password || 'TemporaryPassword123!',
+      options: {
+        data: {
+          name: data.name,
+          specialty: data.specialty || 'Internal Medicine',
+          medicalSchool: data.medicalSchool || 'School of Medicine',
+        },
+      },
+    });
+  } catch (err) {
+    console.warn('[Supabase Auth] Failed to register auth user:', err);
+  }
+}
+
+/**
  * Cloud Synchronization Adapter for Student Accounts
  */
 export async function syncStudentAccountToCloud(account: {
