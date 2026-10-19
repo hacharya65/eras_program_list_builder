@@ -3,6 +3,8 @@
  * Supports managing and persisting profiles for 200+ students.
  */
 
+import { syncStudentAccountToCloud } from '../lib/supabase';
+
 export interface StudentAccount {
   id: string;
   name: string;
@@ -231,6 +233,7 @@ export function createStudentAccount(data: {
     saveStudentRegistry(updatedList);
     setCurrentStudentId(existing.id);
     setAuthenticatedSession(true);
+    syncStudentAccountToCloud(updatedAccount);
     return updatedAccount;
   }
 
@@ -252,6 +255,7 @@ export function createStudentAccount(data: {
   saveStudentRegistry(updatedRegistry);
   setCurrentStudentId(id);
   setAuthenticatedSession(true);
+  syncStudentAccountToCloud(newAccount);
   return newAccount;
 }
 
@@ -265,6 +269,7 @@ export function updateStudentAccount(id: string, updates: Partial<StudentAccount
   if (!existing) {
     if (isDemoStudentId(id)) {
       Object.assign(DEMO_STUDENT_ACCOUNT, updates);
+      syncStudentAccountToCloud(DEMO_STUDENT_ACCOUNT);
       if (typeof window !== 'undefined') {
         window.dispatchEvent(new CustomEvent('student_account_updated', { detail: { account: DEMO_STUDENT_ACCOUNT } }));
       }
@@ -284,6 +289,7 @@ export function updateStudentAccount(id: string, updates: Partial<StudentAccount
   if (isDemoStudentId(effectiveId) || isDemoStudentId(id)) {
     Object.assign(DEMO_STUDENT_ACCOUNT, updates);
   }
+  syncStudentAccountToCloud(updatedAccount);
   if (typeof window !== 'undefined') {
     window.dispatchEvent(new CustomEvent('student_account_updated', { detail: { account: updatedAccount } }));
   }

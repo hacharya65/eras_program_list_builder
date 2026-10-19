@@ -12,6 +12,7 @@ import {
   APPLICANT_PROFILE_STORAGE_KEY,
 } from './school-list-models';
 import { getStudentAccount, updateStudentAccount, isDemoStudentId, DEMO_STUDENT_ACCOUNT } from './student-registry';
+import { syncIntakeToCloud } from '../lib/supabase';
 
 export type ClerkshipGrade = 'Honors' | 'High Pass' | 'Pass' | 'Fail' | 'In Progress';
 
@@ -389,6 +390,7 @@ export function saveStudentAdvisingIntake(intake: SpecialtyAdvisingIntake): void
         window.dispatchEvent(new CustomEvent('applicant_aoa_updated', { detail: Boolean(intake.isAoaMember) }));
         window.dispatchEvent(new CustomEvent('student_intake_saved', { detail: intake }));
       }
+      syncIntakeToCloud(intake.studentId, intake);
     } catch (e) {
       console.error('Error saving advising intake:', e);
     }

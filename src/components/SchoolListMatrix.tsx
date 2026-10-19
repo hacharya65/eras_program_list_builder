@@ -18,6 +18,7 @@ import {
   DEFAULT_INTERNAL_MEDICINE_SAMPLE_ITEMS,
 } from '@/domain/school-list-models';
 import { isDemoStudentId } from '@/domain/student-registry';
+import { syncSchoolListToCloud } from '@/lib/supabase';
 import {
   computeSignalingRecommendation,
   SignalingRecommendation,
@@ -171,6 +172,7 @@ export function SchoolListMatrix({
       if (selectedSpecialty === 'Internal Medicine' && isDemoStudentId(studentId)) {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(items));
       }
+      syncSchoolListToCloud(studentId || 'stu-alex-rivera', selectedSpecialty, items);
     }
   }, [items, selectedSpecialty, studentId]);
 
