@@ -11,6 +11,7 @@ import { JournalRepositoryView } from './JournalRepositoryView';
 import { StudentAuthModal } from './StudentAuthModal';
 import { PlatformWalkthroughModal } from './PlatformWalkthroughModal';
 import { FaqAndGuideView } from './FaqAndGuideView';
+import { SimplifiedProgramListRoster } from './SimplifiedProgramListRoster';
 import {
   StudentAccount,
   getCurrentStudentId,
@@ -63,6 +64,7 @@ export function StudentPortal({
     | 'overview'
     | 'profile'
     | 'intake'
+    | 'program_roster'
     | 'journal'
     | 'school_list'
     | 'competitiveness'
@@ -148,6 +150,7 @@ export function StudentPortal({
           'overview',
           'profile',
           'intake',
+          'program_roster',
           'journal',
           'school_list',
           'competitiveness',
@@ -175,6 +178,7 @@ export function StudentPortal({
             'overview',
             'profile',
             'intake',
+            'program_roster',
             'journal',
             'school_list',
             'competitiveness',
@@ -199,6 +203,7 @@ export function StudentPortal({
     const handleNavFaq = () => updateView('faq');
     const handleNavLetters = () => updateView('letters');
     const handleNavSchoolList = () => updateView('school_list');
+    const handleNavProgramRoster = () => updateView('program_roster');
     const handleOpenWalkthrough = () => setIsWalkthroughOpen(true);
     const handleOpenAuth = () => {
       if (onOpenAuthModal) {
@@ -216,6 +221,7 @@ export function StudentPortal({
     window.addEventListener('navigate_to_faq', handleNavFaq);
     window.addEventListener('navigate_to_letters', handleNavLetters);
     window.addEventListener('navigate_to_school_list', handleNavSchoolList);
+    window.addEventListener('navigate_to_program_roster', handleNavProgramRoster);
     window.addEventListener('open_platform_walkthrough', handleOpenWalkthrough);
     window.addEventListener('open_student_auth_modal', handleOpenAuth);
 
@@ -228,6 +234,7 @@ export function StudentPortal({
       window.removeEventListener('navigate_to_faq', handleNavFaq);
       window.removeEventListener('navigate_to_letters', handleNavLetters);
       window.removeEventListener('navigate_to_school_list', handleNavSchoolList);
+      window.removeEventListener('navigate_to_program_roster', handleNavProgramRoster);
       window.removeEventListener('open_platform_walkthrough', handleOpenWalkthrough);
       window.removeEventListener('open_student_auth_modal', handleOpenAuth);
     };
@@ -376,6 +383,11 @@ export function StudentPortal({
           icon: FileCheck,
           badge: advisingIntake.isCompleted ? 'Complete' : 'In Progress',
         },
+        {
+          id: 'program_roster',
+          label: 'Program List & Packet Roster',
+          icon: Compass,
+        },
       ],
     },
   ];
@@ -422,6 +434,19 @@ export function StudentPortal({
             }}
           />
         </div>
+      );
+    }
+
+    if (activeView === 'program_roster') {
+      return (
+        <SimplifiedProgramListRoster
+          studentId={activeStudentId}
+          studentName={currentActiveStudent.name}
+          medicalSchool={currentStudentAccount?.medicalSchool || advisingIntake.medicalSchool || 'Geisinger Commonwealth School of Medicine'}
+          specialty={targetSpecialty}
+          onBack={() => updateView('overview')}
+          onNavigateToSchoolList={() => updateView('school_list')}
+        />
       );
     }
 

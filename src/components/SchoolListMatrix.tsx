@@ -16,6 +16,7 @@ import {
   loadItemsForSpecialty,
   getStorageKeyForSpecialty,
   DEFAULT_INTERNAL_MEDICINE_SAMPLE_ITEMS,
+  exportSchoolListToCsv,
 } from '@/domain/school-list-models';
 import { isDemoStudentId } from '@/domain/student-registry';
 import { syncSchoolListToCloud } from '@/lib/supabase';
@@ -55,7 +56,8 @@ import {
   Mail,
   Phone,
   SlidersHorizontal,
-  ChevronDown
+  ChevronDown,
+  Download,
 } from 'lucide-react';
 import {
   loadProgramLetterRequirements,
@@ -506,6 +508,17 @@ export function SchoolListMatrix({
             <span className="text-slate-600 font-bold whitespace-nowrap">Applicant Step 2 CK:</span>
             <span className="font-mono font-bold text-slate-900">{applicantStep2Ck}</span>
           </div>
+
+          {/* Export to CSV Action */}
+          <button
+            type="button"
+            onClick={() => exportSchoolListToCsv(items, selectedSpecialty, studentName || firstName)}
+            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs transition-colors cursor-pointer"
+            title="Export full program list to CSV spreadsheet"
+          >
+            <Download className="w-3.5 h-3.5" />
+            <span>Export CSV</span>
+          </button>
         </div>
       </div>
 

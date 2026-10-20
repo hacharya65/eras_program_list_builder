@@ -369,6 +369,7 @@ export interface SchoolListItem {
   silverSignal?: number;
   goldSignal?: number;
   advisorNotes?: string;
+  notes?: string;
   doximityUrl?: string;
   residencyExplorerUrl?: string;
   level2CeRange?: string;
@@ -885,7 +886,7 @@ export function loadItemsForSpecialty(
     });
   };
 
-  if (typeof window !== 'undefined' && typeof localStorage !== 'undefined') {
+  if (typeof localStorage !== 'undefined') {
     const safe = normSpec.toLowerCase().replace(/[^a-z0-9]/g, '_');
     const specificKey = getStorageKeyForSpecialty(normSpec, sid || undefined);
     const cached = localStorage.getItem(specificKey);
@@ -959,4 +960,78 @@ export function loadItemsForSpecialty(
 
   return getSampleProgramsForSpecialty(normSpec, baseline);
 }
+
+/**
+ * Exports a student's school list to a standard CSV file with clean quotes and formatting.
+ */
+export function exportSchoolListToCsv(
+  items: SchoolListItem[],
+  specialty: string,
+  studentName?: string
+): void {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+
+  const headers = [
+    '#',
+    'Program Name',
+    'ACGME Code',
+    'Specialty',
+    'City',
+    'State',
+    'Census Division / Region',
+    'Selectivity Tier',
+    'Preference Signal',
+    'Step 2 CK Middle-80% Range',
+    'Application Track',
+    'Student Notes',
+  ];
+
+  const escapeCsv = (val: string | number | undefined | null): string => {
+    if (val === undefined || val === null) return '""';
+    const str = String(val).replace(/"/g, '""');
+    return `"${str}"`;
+  };
+
+  const rows = items.map((item, idx) => [
+    idx + 1,
+    escapeCsv(item.programName),
+    escapeCsv(item.programNumber || item.programId || 'N/A'),
+    escapeCsv(item.specialty || specialty),
+    escapeCsv(item.city || 'N/A'),
+    escapeCsv(item.state || 'N/A'),
+    escapeCsv(item.region || 'N/A'),
+    escapeCsv(item.tier ? item.tier.toUpperCase() : 'TARGET'),
+    escapeCsv(
+      item.signal === 'gold'
+        ? 'GOLD SIGNAL'
+        : item.signal === 'silver'
+        ? 'SILVER SIGNAL'
+        : 'NO SIGNAL'
+    ),
+    escapeCsv(
+      item.step2ScoreRange ||
+        (item.step2Min ? `${item.step2Min} - ${item.step2Max}` : 'N/A')
+    ),
+    escapeCsv(item.track || 'Categorical'),
+    escapeCsv(item.notes || item.signalExplanation || item.advisorNotes || ''),
+  ]);
+
+  const csvContent = [headers.join(','), ...rows.map((r) => r.join(','))].join('\r\n');
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  const sanitizedName = (studentName || 'Student').replace(/[^a-zA-Z0-9]/g, '_');
+  const sanitizedSpecialty = specialty.replace(/[^a-zA-Z0-9]/g, '_');
+  const dateStr = new Date().toISOString().slice(0, 10);
+  link.setAttribute('href', url);
+  link.setAttribute(
+    'download',
+    `ERAS_Program_List_${sanitizedSpecialty}_${sanitizedName}_${dateStr}.csv`
+  );
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 
