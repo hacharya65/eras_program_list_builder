@@ -142,10 +142,25 @@ describe('CSV Export & Simplified Program List Roster', () => {
       expect(html).toContain('Geisinger Commonwealth School of Medicine');
       expect(html).toContain('3 Programs Tracked');
 
-      // Check program rows
+      // Check well-defined table columns
+      expect(html).toContain('Program &amp; ACGME');
+      expect(html).toContain('Location');
+      expect(html).toContain('Region');
+      expect(html).toContain('Step 2 CK (80%)');
+      expect(html).toContain('Preference Signal');
+      expect(html).toContain('Selectivity Tier');
+
+      // Check program rows and separated location / region cells
       expect(html).toContain('Massachusetts General Hospital Program');
+      expect(html).toContain('Boston, MA');
+      expect(html).toContain('New England');
+
       expect(html).toContain('Geisinger Medical Center Program');
+      expect(html).toContain('Danville, PA');
+      expect(html).toContain('Middle Atlantic');
+
       expect(html).toContain('Penn State Milton S. Hershey Medical Center');
+      expect(html).toContain('Hershey, PA');
 
       // Check signals and tiers
       expect(html).toContain('Gold Signal');

@@ -81,7 +81,7 @@ export function SimplifiedProgramListRoster({
           body {
             background: #ffffff !important;
             color: #0f172a !important;
-            font-size: 11pt !important;
+            font-size: 10pt !important;
           }
           nav, header, aside, .no-print {
             display: none !important;
@@ -94,9 +94,27 @@ export function SimplifiedProgramListRoster({
             box-shadow: none !important;
             border: none !important;
           }
-          .print-row {
+          table {
+            width: 100% !important;
+            border-collapse: collapse !important;
+          }
+          thead {
+            display: table-header-group !important;
+          }
+          tr.print-row {
             page-break-inside: avoid !important;
-            border-bottom: 1px solid #cbd5e1 !important;
+          }
+          th {
+            background-color: #f8fafc !important;
+            color: #1e293b !important;
+            border-bottom: 2px solid #cbd5e1 !important;
+            padding: 6pt 6pt !important;
+            font-size: 8.5pt !important;
+          }
+          td {
+            padding: 6pt 6pt !important;
+            border-bottom: 1px solid #e2e8f0 !important;
+            font-size: 8.5pt !important;
           }
           .print-badge {
             border: 1px solid #94a3b8 !important;
@@ -265,7 +283,7 @@ export function SimplifiedProgramListRoster({
           </div>
         </div>
 
-        {/* Simplified Program Rows */}
+        {/* Simplified Program Table with Well-Defined Vertically Aligned Columns */}
         {filteredItems.length === 0 ? (
           <div className="p-12 text-center text-slate-500 space-y-2">
             <Compass className="w-10 h-10 text-slate-300 mx-auto" />
@@ -273,112 +291,132 @@ export function SimplifiedProgramListRoster({
             <p className="text-xs text-slate-400">Try adjusting your tier or signal filter above.</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100">
-            {filteredItems.map((program, idx) => {
-              const tier = program.tier || 'target';
-              const signal = program.signal || 'none';
+          <div className="overflow-x-auto min-w-full">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr className="bg-slate-50/90 border-y border-slate-200 text-[11px] font-bold text-slate-600 uppercase tracking-wider">
+                  <th scope="col" className="py-3 px-3 w-10 text-center">#</th>
+                  <th scope="col" className="py-3 px-4 min-w-[220px]">Program &amp; ACGME</th>
+                  <th scope="col" className="py-3 px-3 min-w-[130px]">Location</th>
+                  <th scope="col" className="py-3 px-3 min-w-[130px]">Region</th>
+                  <th scope="col" className="py-3 px-3 min-w-[110px] text-center">Step 2 CK (80%)</th>
+                  <th scope="col" className="py-3 px-3 min-w-[120px] text-center">Preference Signal</th>
+                  <th scope="col" className="py-3 px-3 min-w-[110px] text-center">Selectivity Tier</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-100 text-xs">
+                {filteredItems.map((program, idx) => {
+                  const tier = program.tier || 'target';
+                  const signal = program.signal || 'none';
 
-              return (
-                <div
-                  key={program.id || idx}
-                  className="print-row p-4 sm:p-5 hover:bg-slate-50/80 transition-colors flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs"
-                >
-                  {/* Left Column: Number, Name, Hospital & Location */}
-                  <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
-                    <span className="shrink-0 w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-mono text-[11px] font-bold flex items-center justify-center mt-0.5">
-                      {idx + 1}
-                    </span>
-
-                    <div className="min-w-0 space-y-1">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <h3 className="text-sm sm:text-base font-bold text-slate-900 leading-snug">
-                          {program.programName}
-                        </h3>
-                        {program.track && (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
-                            {program.track}
-                          </span>
-                        )}
-                      </div>
-
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-slate-500 text-xs">
-                        {(program.city || program.state) && (
-                          <span className="flex items-center gap-1 font-medium">
-                            <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
-                            <span>
-                              {program.city ? `${program.city}, ` : ''}
-                              {program.state || ''}
-                            </span>
-                          </span>
-                        )}
-
-                        {(program.programNumber || program.programId) && (
-                          <span className="font-mono text-[11px] text-slate-400">
-                            ACGME: {program.programNumber || program.programId}
-                          </span>
-                        )}
-
-                        {program.region && (
-                          <span className="text-slate-400 hidden md:inline">
-                            • {program.region}
-                          </span>
-                        )}
-                      </div>
-
-                      {/* Optional Notes */}
-                      {(program.notes || program.signalExplanation || program.advisorNotes) && (
-                        <p className="text-[11px] text-slate-600 italic bg-amber-50/60 border border-amber-200/60 rounded px-2 py-1 mt-1">
-                          Strategy Note: {program.notes || program.signalExplanation || program.advisorNotes}
-                        </p>
-                      )}
-                    </div>
-                  </div>
-
-                  {/* Right Column: Badges for Tier, Signal, and Middle-80% Range */}
-                  <div className="flex flex-wrap items-center sm:justify-end gap-2.5 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-slate-100">
-                    {/* Middle-80% Step 2 CK Range Badge */}
-                    <div className="flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-[11px]">
-                      <span className="text-slate-400 font-medium">Mid-80%:</span>
-                      <span className="font-mono font-bold text-slate-700">
-                        {program.step2ScoreRange || (program.step2Min ? `${program.step2Min} - ${program.step2Max}` : 'N/A')}
-                      </span>
-                    </div>
-
-                    {/* Preference Signal Badge */}
-                    {signal === 'gold' && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300 shadow-2xs">
-                        <Sparkles className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
-                        <span>Gold Signal</span>
-                      </span>
-                    )}
-                    {signal === 'silver' && (
-                      <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-300">
-                        <span className="w-2 h-2 rounded-full bg-slate-400" />
-                        <span>Silver Signal</span>
-                      </span>
-                    )}
-                    {signal === 'none' && (
-                      <span className="text-[11px] text-slate-400 px-2 py-1">
-                        No Signal
-                      </span>
-                    )}
-
-                    {/* Selectivity Tier Badge */}
-                    <span
-                      className={`print-badge px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider ${
-                        tier === 'reach'
-                          ? 'bg-purple-50 text-purple-800 border border-purple-200'
-                          : tier === 'target'
-                          ? 'bg-sky-50 text-sky-800 border border-sky-200'
-                          : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
-                      }`}
+                  return (
+                    <tr
+                      key={program.id || idx}
+                      className="print-row hover:bg-slate-50/80 transition-colors"
                     >
-                      {tier}
-                    </span>
-                  </div>
-                </div>
-              );
-            })}
+                      {/* # Number */}
+                      <td className="py-3.5 px-3 text-center align-top">
+                        <span className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-slate-100 text-slate-600 font-mono text-[11px] font-bold">
+                          {idx + 1}
+                        </span>
+                      </td>
+
+                      {/* Program Name & ACGME */}
+                      <td className="py-3.5 px-4 align-top">
+                        <div className="space-y-1">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <h3 className="font-bold text-slate-900 text-sm leading-snug">
+                              {program.programName}
+                            </h3>
+                            {program.track && (
+                              <span className="px-2 py-0.5 rounded text-[10px] font-semibold bg-slate-100 text-slate-700">
+                                {program.track}
+                              </span>
+                            )}
+                          </div>
+                          {(program.programNumber || program.programId) && (
+                            <div className="font-mono text-[11px] text-slate-400">
+                              ACGME: {program.programNumber || program.programId}
+                            </div>
+                          )}
+                          {/* Optional Notes */}
+                          {(program.notes || program.signalExplanation || program.advisorNotes) && (
+                            <p className="text-[11px] text-slate-600 italic bg-amber-50/70 border border-amber-200/60 rounded px-2 py-1 mt-1 max-w-lg">
+                              Strategy Note: {program.notes || program.signalExplanation || program.advisorNotes}
+                            </p>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Location (City, State) */}
+                      <td className="py-3.5 px-3 align-top whitespace-nowrap">
+                        <div className="flex items-center gap-1.5 font-medium text-slate-700 text-xs">
+                          <MapPin className="w-3.5 h-3.5 text-slate-400 shrink-0" />
+                          <span>
+                            {program.city || program.state
+                              ? `${program.city ? `${program.city}, ` : ''}${program.state || ''}`
+                              : '—'}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Region */}
+                      <td className="py-3.5 px-3 align-top whitespace-nowrap">
+                        <span className="text-xs text-slate-600 font-medium">
+                          {program.region || '—'}
+                        </span>
+                      </td>
+
+                      {/* Middle-80% Step 2 CK Range */}
+                      <td className="py-3.5 px-3 align-top text-center whitespace-nowrap">
+                        <div className="inline-flex items-center gap-1 bg-slate-50 border border-slate-200 rounded-lg px-2.5 py-1 text-[11px]">
+                          <span className="font-mono font-bold text-slate-700">
+                            {program.step2ScoreRange ||
+                              (program.step2Min ? `${program.step2Min} - ${program.step2Max}` : 'N/A')}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* Preference Signal */}
+                      <td className="py-3.5 px-3 align-top text-center whitespace-nowrap">
+                        {signal === 'gold' && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-bold bg-amber-50 text-amber-900 border border-amber-300 shadow-2xs">
+                            <Sparkles className="w-3.5 h-3.5 text-amber-600 fill-amber-500" />
+                            <span>Gold Signal</span>
+                          </span>
+                        )}
+                        {signal === 'silver' && (
+                          <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-300">
+                            <span className="w-2 h-2 rounded-full bg-slate-400" />
+                            <span>Silver Signal</span>
+                          </span>
+                        )}
+                        {signal === 'none' && (
+                          <span className="text-[11px] text-slate-400 px-2 py-1">
+                            No Signal
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Selectivity Tier */}
+                      <td className="py-3.5 px-3 align-top text-center whitespace-nowrap">
+                        <span
+                          className={`print-badge px-3 py-1 rounded-lg text-xs font-bold uppercase tracking-wider ${
+                            tier === 'reach'
+                              ? 'bg-purple-50 text-purple-800 border border-purple-200'
+                              : tier === 'target'
+                              ? 'bg-sky-50 text-sky-800 border border-sky-200'
+                              : 'bg-emerald-50 text-emerald-800 border border-emerald-200'
+                          }`}
+                        >
+                          {tier}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           </div>
         )}
 
